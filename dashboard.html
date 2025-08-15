@@ -439,6 +439,189 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Section Profil */
+        .profile-section {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -2px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Carte de profil */
+        .profile-card {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-photo-container {
+            position: relative;
+            margin: 0 auto 15px;
+            width: 120px;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4a6cf7;
+        }
+
+        .profile-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #4a6cf7;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .profile-info h2 {
+            margin: 5px 0;
+            font-size: 1.5rem;
+        }
+
+        .profile-info p {
+            color: #666;
+            margin: 0;
+        }
+
+        /* Formulaire */
+        .edit-profile-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Upload photo */
+        .photo-upload-section {
+            margin: 25px 0;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .upload-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .upload-label {
+            flex: 1;
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .upload-label input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .file-info {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Résultats */
+        .update-result {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* Boutons */
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .profile-section {
+            animation: fadeIn 0.3s ease-out;
+        }
     </style>
 </head>
 
@@ -460,7 +643,7 @@
                 <li><a href="#" id="navCandidates"><i class="fas fa-user"></i> Candidats</a></li>
                 <li><a href="#" id="navStats"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
                 <h3>Administration</h3>
-                <li><a href="#" id="editProfile"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
+                <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
                 <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
             </ul>
         </aside>
@@ -561,30 +744,68 @@
             </section>
 
             <!-- PROFILE SECTION -->
-            <section id="profileSection" style="display:none; padding:20px;">
-                <h2><i class="fas fa-user-cog"></i> Modifier Profil</h2>
-                <div class="profile-card">
-                    <img id="currentPhoto" src="https://via.placeholder.com/150" alt="Photo de profil"
-                        style="width:120px;height:120px;border-radius:50%;margin-bottom:10px;">
-                    <h2 id="displayName">Nom Utilisateur</h2>
-                    <p id="displayEmail">email@exemple.com</p>
-                    <span id="displayRole">Administrateur</span>
-                </div>
-                <div class="edit-profile-form">
-                    <label>Nom:</label>
-                    <input type="text" id="inputNom">
-                    <label>Prénom:</label>
-                    <input type="text" id="inputPrenom">
-                    <label>Email:</label>
-                    <input type="email" id="inputEmail" disabled>
-
-                    <h3>Changer la photo de profil</h3>
-                    <input type="file" id="profilePhotoInput" accept="image/jpeg, image/png, image/webp">
-                    <button id="uploadProfilePhotoBtn">
-                        <i class="fas fa-upload"></i> Téléverser
+            <section id="profileSection" class="profile-section" style="display:none;">
+                <div class="profile-header">
+                    <h2><i class="fas fa-user-cog"></i> Gestion du Profil Administrateur</h2>
+                    <button id="closeProfileBtn" class="close-btn">
+                        <i class="fas fa-times"></i>
                     </button>
-                    <div id="updateResult"></div>
-                    <button id="saveProfileBtn">Enregistrer les modifications</button>
+                </div>
+
+                <div class="profile-content">
+                    <!-- Carte de profil -->
+                    <div class="profile-card">
+                        <div class="profile-photo-container">
+                            <img id="currentPhoto" src="https://via.placeholder.com/150" alt="Photo de profil"
+                                class="profile-photo">
+                            <div class="profile-badge" id="displayRole">ADMIN</div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="displayName">Nom Utilisateur</h2>
+                            <p id="displayEmail">email@exemple.com</p>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire d'édition -->
+                    <div class="edit-profile-form">
+                        <div class="form-group">
+                            <label for="inputNom"><i class="fas fa-user-tag"></i> Nom :</label>
+                            <input type="text" id="inputNom" placeholder="Votre nom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPrenom"><i class="fas fa-user"></i> Prénom :</label>
+                            <input type="text" id="inputPrenom" placeholder="Votre prénom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputEmail"><i class="fas fa-envelope"></i> Email :</label>
+                            <input type="email" id="inputEmail" disabled>
+                        </div>
+
+                        <div class="photo-upload-section">
+                            <h3><i class="fas fa-camera"></i> Photo de Profil</h3>
+                            <div class="upload-container">
+                                <label for="profilePhotoInput" class="upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choisir une image
+                                    <input type="file" id="profilePhotoInput"
+                                        accept="image/jpeg, image/png, image/webp">
+                                </label>
+                                <button id="uploadProfilePhotoBtn" class="upload-btn">
+                                    <i class="fas fa-upload"></i> Téléverser
+                                </button>
+                            </div>
+                            <p class="file-info">Format JPG/PNG - Max 2MB</p>
+                        </div>
+
+                        <div id="updateResult" class="update-result"></div>
+
+                        <div class="action-buttons">
+                            <button id="saveProfileBtn" class="save-btn">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -611,12 +832,47 @@
             }
 
             // ------------ NAVIGATION ------------
-            const dashboardSection = document.getElementById('dashboardSection');
-            const profileSection = document.getElementById('profileSection');
-            document.getElementById('editProfile').addEventListener('click', () => {
-                dashboardSection.style.display = 'none';
-                profileSection.style.display = 'block';
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialisation des éléments
+                const dashboardSection = document.getElementById('dashboardSection');
+                const profileSection = document.getElementById('profileSection');
+                const profileNavBtn = document.getElementById('profileNavBtn');
+
+                // Chargement initial des infos admin
                 loadAdminInfo();
+
+                // Gestionnaire d'événement pour le bouton de profil
+                profileNavBtn.addEventListener('click', () => {
+                    toggleProfileSection();
+                });
+
+                // Fonction de basculement de la section profil
+                function toggleProfileSection() {
+                    if (profileSection.style.display === 'none' || !profileSection.style.display) {
+                        // Afficher la section profil
+                        profileSection.style.display = 'block';
+                        dashboardSection.style.display = 'none';
+
+                        // Recharger les infos à chaque ouverture
+                        loadAdminInfo();
+                    } else {
+                        // Cacher la section profil
+                        profileSection.style.display = 'none';
+                        dashboardSection.style.display = 'block';
+                    }
+
+                    // Force le reflow pour s'assurer que le CSS s'applique
+                    void profileSection.offsetHeight;
+                }
+
+                // Optionnel : Bouton de fermeture dans la section profil
+                const closeProfileBtn = document.getElementById('closeProfileBtn');
+                if (closeProfileBtn) {
+                    closeProfileBtn.addEventListener('click', () => {
+                        profileSection.style.display = 'none';
+                        dashboardSection.style.display = 'block';
+                    });
+                }
             });
 
             // ------------ LOGOUT ------------
@@ -647,13 +903,60 @@
                 }
             }
 
-            // ------------ SAVE PROFILE ------------
+            // ------------ PROFILE MANAGEMENT ------------
+            document.addEventListener('DOMContentLoaded', async () => {
+                // Chargement initial des infos profil
+                await loadAdminInfo();
+
+                // Force l'application du CSS au chargement
+                setTimeout(() => {
+                    document.getElementById('profileSection').style.display = 'none';
+                    document.getElementById('profileSection').style.display = 'block';
+                }, 50);
+            });
+
+            // ------------ LOAD PROFILE INFO ------------
+            async function loadAdminInfo() {
+                try {
+                    const res = await fetch(`${API_BASE}/admin/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!res.ok) throw new Error('Erreur chargement profil');
+
+                    const admin = await res.json();
+
+                    // Mise à jour de l'UI
+                    document.getElementById('displayName').textContent = `${admin.nom} ${admin.prenom}`;
+                    document.getElementById('displayEmail').textContent = admin.email;
+                    document.getElementById('displayRole').textContent = admin.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur';
+
+                    document.getElementById('inputNom').value = admin.nom || '';
+                    document.getElementById('inputPrenom').value = admin.prenom || '';
+                    document.getElementById('inputEmail').value = admin.email;
+
+                    if (admin.photoUrl) {
+                        document.getElementById('currentPhoto').src = admin.photoUrl;
+                    }
+                } catch (err) {
+                    console.error('Erreur chargement info admin:', err);
+                }
+            }
+
+            // ------------ SAVE PROFILE (IMPROVED) ------------
             document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-                const nom = document.getElementById('inputNom').value;
-                const prenom = document.getElementById('inputPrenom').value;
+                const nom = document.getElementById('inputNom').value.trim();
+                const prenom = document.getElementById('inputPrenom').value.trim();
+                const updateResult = document.getElementById('updateResult');
+
+                if (!nom || !prenom) {
+                    updateResult.textContent = 'Nom et prénom sont obligatoires';
+                    updateResult.style.color = 'red';
+                    return;
+                }
 
                 try {
-                    const res = await fetch(`${API_BASE}/admin/update`, {
+                    const res = await fetch(`${API_BASE}${ADMIN_UPDATE_ENDPOINT}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -663,51 +966,84 @@
                     });
 
                     const data = await res.json();
-                    document.getElementById('updateResult').textContent = data.message || 'Profil mis à jour';
-                    loadAdminInfo();
+
+                    if (!res.ok) throw new Error(data.message || 'Erreur serveur');
+
+                    updateResult.textContent = 'Profil mis à jour avec succès';
+                    updateResult.style.color = 'green';
+
+                    // Mise à jour immédiate de l'affichage
+                    document.getElementById('displayName').textContent = `${nom} ${prenom}`;
+
+                    // Rechargement complet après 2s
+                    setTimeout(loadAdminInfo, 2000);
                 } catch (err) {
                     console.error('Erreur mise à jour profil:', err);
-                    document.getElementById('updateResult').textContent = 'Erreur lors de la mise à jour';
+                    updateResult.textContent = err.message || 'Erreur lors de la mise à jour';
+                    updateResult.style.color = 'red';
                 }
             });
 
-            // ------------ UPLOAD PHOTO ------------
-            const fileInput = document.getElementById('profilePhotoInput');
-
+            // ------------ UPLOAD PHOTO (IMPROVED) ------------
             document.getElementById('uploadProfilePhotoBtn').addEventListener('click', async () => {
+                const fileInput = document.getElementById('profilePhotoInput');
+                const updateResult = document.getElementById('updateResult');
+
                 if (!fileInput.files.length) {
-                    alert('Veuillez sélectionner une photo');
+                    updateResult.textContent = 'Veuillez sélectionner une photo';
+                    updateResult.style.color = 'red';
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                if (file.size > 2 * 1024 * 1024) { // 2MB max
+                    updateResult.textContent = 'La photo ne doit pas dépasser 2MB';
+                    updateResult.style.color = 'red';
                     return;
                 }
 
                 const formData = new FormData();
-                formData.append('photo', fileInput.files[0]);
+                formData.append('photo', file);
 
                 try {
+                    const uploadBtn = document.getElementById('uploadProfilePhotoBtn');
+                    uploadBtn.disabled = true;
+                    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
                     const res = await fetch(`${API_BASE}/upload/admin`, {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        },
+                        headers: { 'Authorization': `Bearer ${token}` },
                         body: formData
                     });
 
                     const data = await res.json();
+
                     if (!res.ok) throw new Error(data.message || 'Erreur upload');
 
-                    document.getElementById('updateResult').textContent = 'Photo mise à jour avec succès';
-                    document.getElementById('currentPhoto').src = data.url;
-                    document.getElementById('adminPhoto').src = data.url;
+                    updateResult.textContent = 'Photo mise à jour avec succès';
+                    updateResult.style.color = 'green';
+
+                    // Mise à jour immédiate de toutes les photos
+                    const newUrl = data.url + '?t=' + Date.now(); // Cache busting
+                    document.getElementById('currentPhoto').src = newUrl;
+                    const adminPhotos = document.querySelectorAll('.admin-photo');
+                    adminPhotos.forEach(img => img.src = newUrl);
+
                 } catch (err) {
                     console.error('Erreur upload photo:', err);
-                    document.getElementById('updateResult').textContent = err.message || 'Échec de l\'upload';
+                    updateResult.textContent = err.message || 'Échec de l\'upload';
+                    updateResult.style.color = 'red';
+                } finally {
+                    const uploadBtn = document.getElementById('uploadProfilePhotoBtn');
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Téléverser';
+                    fileInput.value = ''; // Reset le input file
                 }
             });
 
+
+
             // ------------ CODE GENERATION ------------
-
-
-
             document.getElementById('generateBtn').addEventListener('click', async () => {
                 const countInput = document.getElementById('codeCountInput');
                 const count = parseInt(countInput.value);
@@ -720,11 +1056,11 @@
 
                 // UI Loading state
                 const generateBtn = document.getElementById('generateBtn');
+                const originalBtnText = generateBtn.innerHTML;
                 generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
                 generateBtn.disabled = true;
 
                 try {
-                    // Envoi de la requête
                     const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
                         method: 'POST',
                         headers: {
@@ -734,60 +1070,88 @@
                         body: JSON.stringify({ quantity: count })
                     });
 
+                    const data = await response.json();
+
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Erreur serveur');
+                        throw new Error(data.message || 'Erreur lors de la génération');
                     }
 
-                    const { codes } = await response.json();
-                    displayGeneratedCodes(codes);
+                    displayGeneratedCodes(data.codes);
+
+                    // Affiche discrètement le batch ID si disponible
+                    if (data.batchId) {
+                        const batchInfo = document.createElement('div');
+                        batchInfo.className = 'batch-info';
+                        batchInfo.textContent = `Lot ${data.batchId} • ${data.count || data.codes.length} codes`;
+                        document.getElementById('resultsSection').prepend(batchInfo);
+                    }
 
                 } catch (error) {
                     console.error('Erreur génération codes:', error);
                     alert(`Erreur: ${error.message || 'Échec de la génération'}`);
                 } finally {
-                    // Reset UI
-                    generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Générer';
+                    generateBtn.innerHTML = originalBtnText;
                     generateBtn.disabled = false;
                 }
             });
 
-            // Affiche les codes générés
+            // Affiche les codes générés (version améliorée mais compatible)
             function displayGeneratedCodes(codes) {
                 const container = document.getElementById('codesContainer');
                 const resultsSection = document.getElementById('resultsSection');
 
-                // Efface les anciens codes
+                // Efface les anciens codes et les infos de batch
                 container.innerHTML = '';
+                const existingBatchInfo = document.querySelector('.batch-info');
+                if (existingBatchInfo) existingBatchInfo.remove();
 
-                // Ajoute chaque nouveau code
+                // Ajoute chaque nouveau code avec bouton de copie intégré
                 codes.forEach(code => {
                     const codeElement = document.createElement('div');
                     codeElement.className = 'code-item';
-                    codeElement.textContent = code;
+
+                    codeElement.innerHTML = `
+            <span>${code}</span>
+            <button class="copy-single-btn" data-code="${code}">
+                <i class="fas fa-copy"></i>
+            </button>
+        `;
+
                     container.appendChild(codeElement);
+                });
+
+                // Active les boutons de copie individuels
+                document.querySelectorAll('.copy-single-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const code = e.currentTarget.getAttribute('data-code');
+                        navigator.clipboard.writeText(code)
+                            .then(() => {
+                                e.currentTarget.innerHTML = '<i class="fas fa-check"></i>';
+                                setTimeout(() => {
+                                    e.currentTarget.innerHTML = '<i class="fas fa-copy"></i>';
+                                }, 2000);
+                            });
+                    });
                 });
 
                 // Affiche la section des résultats
                 resultsSection.style.display = 'block';
-
-                // Scroll vers les résultats
                 resultsSection.scrollIntoView({ behavior: 'smooth' });
             }
 
-            // Bouton Copier tous les codes
+            // Bouton Copier tous les codes (version optimisée)
             document.getElementById('copyAllBtn').addEventListener('click', () => {
-                const codes = Array.from(document.querySelectorAll('.code-item'))
+                const codes = Array.from(document.querySelectorAll('.code-item span'))
                     .map(el => el.textContent)
                     .join('\n');
 
                 navigator.clipboard.writeText(codes)
                     .then(() => {
-                        // Feedback visuel
                         const copyBtn = document.getElementById('copyAllBtn');
-                        copyBtn.textContent = 'Copié !';
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
                         setTimeout(() => {
-                            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copier tous';
+                            copyBtn.innerHTML = originalHtml;
                         }, 2000);
                     })
                     .catch(err => {
@@ -796,9 +1160,9 @@
                     });
             });
 
-            // Bouton Télécharger (optionnel)
+            // Bouton Télécharger (version compatible)
             document.getElementById('downloadBtn').addEventListener('click', () => {
-                const codes = Array.from(document.querySelectorAll('.code-item'))
+                const codes = Array.from(document.querySelectorAll('.code-item span'))
                     .map(el => el.textContent)
                     .join('\n');
 
@@ -812,6 +1176,22 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+            });
+
+            // Vérification du rôle admin au chargement
+            document.addEventListener('DOMContentLoaded', () => {
+                if (token) {
+                    fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                        .then(response => response.json())
+                        .then(user => {
+                            if (user.role !== 'ADMIN') {
+                                document.getElementById('generation-section').style.display = 'none';
+                            }
+                        })
+                        .catch(console.error);
+                }
             });
             // ------------ DASHBOARD DATA ------------
             async function loadStats() {
