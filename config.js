@@ -51,7 +51,7 @@ const CONFIG = {
                 LIST: '/api/activity'
             },
             CODES: {
-                GENERATE: '/api/code/generate'
+                GENERATE: '/api/codes/generate'
             }
         }
     },
