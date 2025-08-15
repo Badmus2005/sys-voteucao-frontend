@@ -6,7 +6,7 @@ const CONFIG = {
     // Configuration de l'API
     API: {
         // Utiliser l'URL du backend Railway en production
-        BASE_URL: 'mysql-production-f361.up.railway.app',
+        BASE_URL: 'https://sys-voteucao-backend-production-311c.up.railway.app',
         ENDPOINTS: {
             AUTH: {
                 LOGIN: '/api/userLogin',
