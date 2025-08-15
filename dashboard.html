@@ -371,69 +371,49 @@
         }
 
         /* Code Generation */
-        .code-generation-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow-sm);
-            margin-top: 30px;
+        .generation-section {
+            margin-bottom: 2rem;
         }
 
-        .generation-controls {
+        .input-group {
             display: flex;
             gap: 10px;
-            margin: 15px 0;
+            max-width: 500px;
         }
 
-        .code-input {
+        #codeCountInput {
             flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 4px;
         }
 
-        .generate-button {
-            background: var(--rouge-bordeaux);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: var(--transition);
+        .results-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 8px;
         }
 
-        .generate-button:hover {
-            background: var(--or);
-            color: var(--bleu-nuit);
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
         }
 
-        .codes-grid {
+        .codes-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 10px;
-            margin: 15px 0;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            background: rgba(122, 0, 38, 0.05);
-            border-radius: 5px;
+            margin-top: 1rem;
         }
 
         .code-item {
-            font-family: monospace;
-            padding: 8px;
+            padding: 8px 12px;
             background: white;
-            border-left: 3px solid var(--or);
-            border-radius: 3px;
-        }
-
-        .copy-button {
-            background: var(--bleu-nuit);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            font-family: monospace;
         }
 
         /* Responsive */
@@ -533,11 +513,7 @@
                             <h3>Ajouter Élection</h3>
                             <p>Créer une nouvelle élection</p>
                         </div>
-                        <div class="action-card" id="generateCode">
-                            <i class="fas fa-key"></i>
-                            <h3>Générer Codes</h3>
-                            <p>Créer des codes d'inscription 1ère année</p>
-                        </div>
+
                         <div class="action-card" id="importMatricules">
                             <i class="fas fa-file-import"></i>
                             <h3>Importer Matricules</h3>
@@ -547,24 +523,28 @@
                 </div>
 
                 <!-- Code Generation -->
-                <div class="code-generation-card">
-                    <h3><i class="fas fa-key"></i> Génération de Codes</h3>
-                    <div class="generation-controls">
-                        <input type="number" id="codeCountInput" min="1" max="100" placeholder="Nombre de codes"
-                            class="code-input">
-                        <button id="generateBtn" class="generate-button">
+                <div class="generation-section">
+                    <h2>Générer des codes</h2>
+                    <div class="input-group">
+                        <input type="number" id="codeCountInput" placeholder="Nombre de codes (1-100)" min="1"
+                            max="100">
+                        <button id="generateBtn" class="btn-primary">
                             <i class="fas fa-bolt"></i> Générer
                         </button>
                     </div>
+                </div>
 
-                    <!-- Results Section -->
-                    <div id="resultsSection" style="display:none;">
-                        <h4>Codes Générés :</h4>
-                        <div id="codesContainer" class="codes-grid"></div>
-                        <button id="copyAllBtn" class="copy-button">
-                            <i class="fas fa-copy"></i> Tout Copier
+                <div id="resultsSection" class="results-section" style="display:none;">
+                    <h3>Codes générés <span id="codesCount"></span></h3>
+                    <div class="actions">
+                        <button id="copyAllBtn" class="btn-secondary">
+                            <i class="fas fa-copy"></i> Copier tous
+                        </button>
+                        <button id="downloadBtn" class="btn-secondary">
+                            <i class="fas fa-download"></i> Télécharger
                         </button>
                     </div>
+                    <div id="codesContainer" class="codes-container"></div>
                 </div>
 
                 <!-- Users Section -->
@@ -725,21 +705,26 @@
             });
 
             // ------------ CODE GENERATION ------------
+
+
+
             document.getElementById('generateBtn').addEventListener('click', async () => {
                 const countInput = document.getElementById('codeCountInput');
                 const count = parseInt(countInput.value);
 
+                // Validation
                 if (!count || count < 1 || count > 100) {
                     alert('Veuillez entrer un nombre entre 1 et 100');
                     return;
                 }
 
-                // Show loading state
+                // UI Loading state
                 const generateBtn = document.getElementById('generateBtn');
                 generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
                 generateBtn.disabled = true;
 
                 try {
+                    // Envoi de la requête
                     const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
                         method: 'POST',
                         headers: {
@@ -750,7 +735,8 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(await response.text());
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Erreur serveur');
                     }
 
                     const { codes } = await response.json();
@@ -760,17 +746,21 @@
                     console.error('Erreur génération codes:', error);
                     alert(`Erreur: ${error.message || 'Échec de la génération'}`);
                 } finally {
-                    // Reset button
+                    // Reset UI
                     generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Générer';
                     generateBtn.disabled = false;
                 }
             });
 
+            // Affiche les codes générés
             function displayGeneratedCodes(codes) {
                 const container = document.getElementById('codesContainer');
                 const resultsSection = document.getElementById('resultsSection');
 
+                // Efface les anciens codes
                 container.innerHTML = '';
+
+                // Ajoute chaque nouveau code
                 codes.forEach(code => {
                     const codeElement = document.createElement('div');
                     codeElement.className = 'code-item';
@@ -778,20 +768,51 @@
                     container.appendChild(codeElement);
                 });
 
+                // Affiche la section des résultats
                 resultsSection.style.display = 'block';
+
+                // Scroll vers les résultats
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
             }
 
-            // Copy all codes button
+            // Bouton Copier tous les codes
             document.getElementById('copyAllBtn').addEventListener('click', () => {
                 const codes = Array.from(document.querySelectorAll('.code-item'))
                     .map(el => el.textContent)
                     .join('\n');
 
                 navigator.clipboard.writeText(codes)
-                    .then(() => alert('Tous les codes ont été copiés !'))
-                    .catch(err => console.error('Erreur copie:', err));
+                    .then(() => {
+                        // Feedback visuel
+                        const copyBtn = document.getElementById('copyAllBtn');
+                        copyBtn.textContent = 'Copié !';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copier tous';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Erreur copie:', err);
+                        alert('Erreur lors de la copie');
+                    });
             });
 
+            // Bouton Télécharger (optionnel)
+            document.getElementById('downloadBtn').addEventListener('click', () => {
+                const codes = Array.from(document.querySelectorAll('.code-item'))
+                    .map(el => el.textContent)
+                    .join('\n');
+
+                const blob = new Blob([codes], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `codes-ucao-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
             // ------------ DASHBOARD DATA ------------
             async function loadStats() {
                 try {
