@@ -807,18 +807,22 @@
         </div>
     </footer>
 
+    <!-- Configuration et scripts -->
+    <script src="config.js"></script>
     <script>
-        // Charger la config globale
-        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production-5398.up.railway.app';
-        // Code spécifique à la page d'accueil
-        document.addEventListener('DOMContentLoaded', function () {
+        // Attendre que la configuration soit chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            // Utiliser la configuration centralisée
+            const API_BASE = CONFIG.API.BASE_URL;
+            const ELECTION_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
+            
             // Charger les élections actives
             loadActiveElections();
         });
 
         async function loadActiveElections() {
             try {
-                const response = await fetch(`${API_BASE}/election`);
+                const response = await fetch(`${API_BASE}${ELECTION_LIST_ENDPOINT}`);
                 if (response.ok) {
                     const elections = await response.json();
                     displayElections(elections);

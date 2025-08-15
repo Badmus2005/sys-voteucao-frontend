@@ -610,15 +610,21 @@
         </main>
     </div>
 
+    <!-- Configuration et scripts -->
+    <script src="config.js"></script>
     <script>
-        // ------------ CONFIG ------------
-        const API_BASE = 'https://sys-voteucao-backend-production-5398.up.railway.app';
-        const FRONTEND_BASE = window.CONFIG?.FRONTEND?.BASE_URL || 'https://sys-voteucao-frontend.vercel.app';
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-            alert('Token absent ! Vérifiez la connexion.');
-            window.location.href = `${FRONTEND_BASE}/index.html`;
-        }
+        // Attendre que la configuration soit chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            // ------------ CONFIG ------------
+            const API_BASE = CONFIG.API.BASE_URL;
+            const FRONTEND_BASE = window.location.origin;
+            const token = localStorage.getItem('adminToken');
+            
+            if (!token) {
+                alert('Token absent ! Vérifiez la connexion.');
+                window.location.href = `${FRONTEND_BASE}/index.html`;
+                return;
+            }
 
         // ------------ NAVIGATION ------------
         const dashboardSection = document.getElementById('dashboardSection');

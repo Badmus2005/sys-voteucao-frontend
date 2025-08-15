@@ -570,6 +570,8 @@
         </div>
     </footer>
 
+    <!-- Configuration et scripts -->
+    <script src="config.js"></script>
     <script>
         // Tab Switching
         const tabs = document.querySelectorAll('.auth-tab');
@@ -585,9 +587,13 @@
             });
         });
 
-        // API Configuration
-        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production-5398.up.railway.app';
-        const FRONTEND_BASE = window.CONFIG?.FRONTEND?.BASE_URL || 'http://sys-voteucao-frontend.vercel.app';
+        // Attendre que la configuration soit chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            // Utiliser la configuration centralisée
+            const API_BASE = CONFIG.API.BASE_URL;
+            const FRONTEND_BASE = window.location.origin;
+            const ADMIN_LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_LOGIN;
+            const ADMIN_REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_REGISTER;
 
         // Login Form
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -616,7 +622,7 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE}/adminLogin`, {
+                const response = await fetch(`${API_BASE}${ADMIN_LOGIN_ENDPOINT}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
@@ -674,7 +680,7 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE}/adminRegister`, {
+                const response = await fetch(`${API_BASE}${ADMIN_REGISTER_ENDPOINT}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),

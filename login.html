@@ -99,20 +99,26 @@
         .btn-login {
             width: 100%;
             padding: 15px;
-            background-color: var(--or);
-            color: var(--bleu-nuit);
+            background: linear-gradient(135deg, var(--rouge-bordeaux), #a00030);
+            color: white;
             border: none;
             border-radius: 8px;
-            font-weight: bold;
             font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            margin-bottom: 20px;
         }
 
         .btn-login:hover {
-            background-color: var(--rouge-bordeaux);
-            color: white;
-            transform: translateY(-3px);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.3);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .login-footer {
@@ -124,76 +130,179 @@
             color: var(--rouge-bordeaux);
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.3s;
         }
 
-        @media (max-width: 768px) {
-            .login-container {
-                padding: 30px 20px;
-            }
+        .login-footer a:hover {
+            color: var(--or);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3c3;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--rouge-bordeaux);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body>
     <div class="login-container">
         <div class="login-header">
+            <h1>Connexion UCAO-UUC</h1>
             <img src="https://via.placeholder.com/80x80?text=UCAO-Logo" alt="Logo UCAO">
-            <h1>Connexion</h1>
         </div>
-        <form>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Connexion en cours...</p>
+        </div>
+
+        <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email ou Matricule</label>
-                <input type="text" id="email" placeholder="exemple@ucao-uuc.com" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
             </div>
+
             <div class="form-group">
                 <label for="password">Mot de passe</label>
-                <input type="password" id="password" placeholder="••••••••" required>
+                <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn-login">Se connecter</button>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                Se connecter
+            </button>
         </form>
+
         <div class="login-footer">
-            <p>Pas de compte ? <a href="userRegister.html">S'inscrire</a></p>
-            <p><a href="#">Mot de passe oublié ?</a></p>
+            <p>Pas encore de compte ? <a href="register.html">S'inscrire</a></p>
+            <p><a href="index.html">← Retour à l'accueil</a></p>
         </div>
     </div>
-</body>
-<script>
-    // Charger la config globale
-    const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production.up.railway.app';
-    document.querySelector('form').addEventListener('submit', async function (e) {
-        e.preventDefault();
 
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
+    <!-- Configuration et scripts -->
+    <script src="config.js"></script>
+    <script>
+        // Attendre que la configuration soit chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const loading = document.getElementById('loading');
+            const loginBtn = document.getElementById('loginBtn');
 
-        try {
-            const response = await fetch(`${API_BASE}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+            // Utiliser la configuration centralisée
+            const API_BASE = CONFIG.API.BASE_URL;
+            const LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.LOGIN;
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert('Erreur: ' + (errorData.message || 'Connexion impossible'));
-                return;
+            function showMessage(message, type) {
+                if (type === 'error') {
+                    errorMessage.textContent = message;
+                    errorMessage.style.display = 'block';
+                    successMessage.style.display = 'none';
+                } else {
+                    successMessage.textContent = message;
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                }
             }
 
-            const data = await response.json();
+            function showLoading(show) {
+                loading.style.display = show ? 'block' : 'none';
+                loginBtn.disabled = show;
+            }
 
-            // Supposons que le backend renvoie un token JWT
-            localStorage.setItem('token', data.token);
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            alert('Connexion réussie !');
-            // Rediriger vers la page des élections par ex.
-            window.location.href = 'election.html';
+                // Validation basique
+                if (!email || !password) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
+                    return;
+                }
 
-        } catch (err) {
-            alert('Erreur réseau ou serveur: ' + err.message);
-        }
-    });
-</script>
+                if (!UTILS.isValidEmail(email)) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
+                    return;
+                }
+
+                showLoading(true);
+                showMessage('', 'error');
+                showMessage('', 'success');
+
+                try {
+                    const response = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Stocker le token
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        
+                        showMessage(CONFIG.MESSAGES.SUCCESS.LOGIN, 'success');
+                        
+                        // Rediriger vers la page étudiant (login.html est exclusivement pour les étudiants)
+                        setTimeout(() => {
+                            window.location.href = 'user_index.html';
+                        }, 1500);
+                    } else {
+                        showMessage(data.message || CONFIG.MESSAGES.ERROR.LOGIN_FAILED, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur de connexion:', error);
+                    showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            });
+        });
+    </script>
+</body>
 
 </html>

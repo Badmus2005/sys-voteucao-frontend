@@ -310,92 +310,100 @@
         </div>
     </div>
 
+    <!-- Configuration et scripts -->
+    <script src="config.js"></script>
     <script>
-        // Charger la config globale
-        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production.up.railway.app';
-        // Récupérer l'ID de l'élection depuis l'URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const electionId = urlParams.get('electionId');
+        // Attendre que la configuration soit chargée
+        document.addEventListener('DOMContentLoaded', function() {
+            // Utiliser la configuration centralisée
+            const API_BASE = CONFIG.API.BASE_URL;
+            const VOTE_TOKEN_ENDPOINT = CONFIG.API.ENDPOINTS.VOTE.TOKEN;
+            const ELECTION_DETAILS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.DETAILS;
+            const VOTE_SUBMIT_ENDPOINT = CONFIG.API.ENDPOINTS.VOTE.SUBMIT;
 
-        // Éléments DOM
-        const alert = document.getElementById('alert');
-        const loading = document.getElementById('loading');
-        const electionContainer = document.getElementById('electionContainer');
-        const tokenSection = document.getElementById('tokenSection');
-        const voteToken = document.getElementById('voteToken');
-        const tokenExpiry = document.getElementById('tokenExpiry');
+            // Récupérer l'ID de l'élection depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const electionId = urlParams.get('electionId');
 
-        let currentVoteToken = null;
-        let selectedCandidateId = null;
+            // Éléments DOM
+            const alert = document.getElementById('alert');
+            const loading = document.getElementById('loading');
+            const electionContainer = document.getElementById('electionContainer');
+            const tokenSection = document.getElementById('tokenSection');
+            const voteToken = document.getElementById('voteToken');
+            const tokenExpiry = document.getElementById('tokenExpiry');
 
-        // Afficher une alerte
-        function showAlert(message, type = 'success') {
-            alert.textContent = message;
-            alert.className = `alert alert-${type}`;
-            alert.style.display = 'block';
+            let currentVoteToken = null;
+            let selectedCandidateId = null;
 
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 5000);
-        }
+            // Afficher une alerte
+            function showAlert(message, type = 'success') {
+                alert.textContent = message;
+                alert.className = `alert alert-${type}`;
+                alert.style.display = 'block';
 
-        // Charger l'élection et obtenir le jeton de vote
-        async function loadElectionAndToken() {
-            if (!electionId) {
-                showAlert('❌ Aucune élection spécifiée.', 'error');
-                return;
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, CONFIG.NOTIFICATIONS.AUTO_HIDE_DELAY);
             }
 
-            loading.style.display = 'block';
-            electionContainer.innerHTML = '';
-
-            try {
-                // Vérifier si l'utilisateur est connecté
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    showAlert('❌ Vous devez être connecté pour voter.', 'error');
-                    loading.style.display = 'none';
+            // Charger l'élection et obtenir le jeton de vote
+            async function loadElectionAndToken() {
+                if (!electionId) {
+                    showAlert(CONFIG.MESSAGES.ERROR.NOT_FOUND, 'error');
                     return;
                 }
 
-                // Obtenir le jeton de vote
-                const tokenResponse = await fetch(`${API_BASE}/vote/token/${electionId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
+                loading.style.display = 'block';
+                electionContainer.innerHTML = '';
+
+                try {
+                    // Vérifier si l'utilisateur est connecté
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        showAlert(CONFIG.MESSAGES.ERROR.UNAUTHORIZED, 'error');
+                        loading.style.display = 'none';
+                        return;
                     }
-                });
 
-                if (!tokenResponse.ok) {
-                    const error = await tokenResponse.json();
-                    showAlert(`❌ ${error.message}`, 'error');
+                    // Obtenir le jeton de vote
+                    const tokenResponse = await fetch(`${API_BASE}${VOTE_TOKEN_ENDPOINT(electionId)}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!tokenResponse.ok) {
+                        const error = await tokenResponse.json();
+                        showAlert(error.message || CONFIG.MESSAGES.ERROR.FORBIDDEN, 'error');
+                        loading.style.display = 'none';
+                        return;
+                    }
+
+                    const tokenData = await tokenResponse.json();
+                    currentVoteToken = tokenData.token;
+
+                    // Afficher le jeton
+                    voteToken.textContent = currentVoteToken;
+                    tokenExpiry.textContent = `Expire le: ${UTILS.formatDate(tokenData.expiresAt)}`;
+                    tokenSection.style.display = 'block';
+
+                    // Charger les détails de l'élection
+                    const electionResponse = await fetch(`${API_BASE}${ELECTION_DETAILS_ENDPOINT(electionId)}`);
+                    if (!electionResponse.ok) {
+                        throw new Error(CONFIG.MESSAGES.ERROR.NOT_FOUND);
+                    }
+
+                    const election = await electionResponse.json();
+                    displayElection(election);
+
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showAlert(CONFIG.MESSAGES.ERROR.SERVER_ERROR, 'error');
+                } finally {
                     loading.style.display = 'none';
-                    return;
                 }
-
-                const tokenData = await tokenResponse.json();
-                currentVoteToken = tokenData.token;
-
-                // Afficher le jeton
-                voteToken.textContent = currentVoteToken;
-                tokenExpiry.textContent = `Expire le: ${new Date(tokenData.expiresAt).toLocaleString('fr-FR')}`;
-                tokenSection.style.display = 'block';
-
-                // Charger les détails de l'élection
-                const electionResponse = await fetch(`${API_BASE}/election/${electionId}`);
-                if (!electionResponse.ok) {
-                    throw new Error('Erreur lors du chargement de l\'élection');
-                }
-
-                const election = await electionResponse.json();
-                displayElection(election);
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showAlert('❌ Erreur lors du chargement de l\'élection.', 'error');
-            } finally {
-                loading.style.display = 'none';
             }
-        }
 
         // Afficher l'élection
         function displayElection(election) {
