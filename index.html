@@ -588,134 +588,136 @@
         });
 
         // Attendre que la configuration soit chargée
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Utiliser la configuration centralisée
             const API_BASE = CONFIG.API.BASE_URL;
             const FRONTEND_BASE = window.location.origin;
             const ADMIN_LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_LOGIN;
             const ADMIN_REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_REGISTER;
 
-        // Login Form
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
 
-            const submitBtn = document.getElementById('loginBtn');
-            const btnText = document.getElementById('loginBtnText');
-            const loading = document.getElementById('loginLoading');
-            const messageDiv = document.getElementById('loginMessage');
-            const adminInfo = document.getElementById('adminInfo');
+            // Login Form
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            // Désactiver le bouton et afficher le loading
-            submitBtn.disabled = true;
-            btnText.style.display = 'none';
-            loading.style.display = 'inline';
+                const submitBtn = document.getElementById('loginBtn');
+                const btnText = document.getElementById('loginBtnText');
+                const loading = document.getElementById('loginLoading');
+                const messageDiv = document.getElementById('loginMessage');
+                const adminInfo = document.getElementById('adminInfo');
 
-            // Masquer les messages précédents
-            messageDiv.textContent = '';
-            messageDiv.className = '';
-            adminInfo.style.display = 'none';
+                // Désactiver le bouton et afficher le loading
+                submitBtn.disabled = true;
+                btnText.style.display = 'none';
+                loading.style.display = 'inline';
 
-            // Récupérer les données du formulaire
-            const formData = {
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value
-            };
+                // Masquer les messages précédents
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+                adminInfo.style.display = 'none';
 
-            try {
-                const response = await fetch(`${API_BASE}${ADMIN_LOGIN_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                    credentials: "include"
-                });
+                // Récupérer les données du formulaire
+                const formData = {
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                };
 
-                const data = await response.json();
+                try {
+                    const response = await fetch(`${API_BASE}${ADMIN_LOGIN_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData),
+                        credentials: "include"
+                    });
 
-                if (response.ok && data.token) {
-                    // Stocker le JWT
-                    localStorage.setItem('adminToken', data.token);
-                    localStorage.setItem('adminRole', 'ADMIN');
-                    // Afficher le message de bienvenue
-                    adminInfo.style.display = 'block';
-                    showMessage(messageDiv, 'Connexion réussie ! Bienvenue dans votre espace administrateur.', 'success');
+                    const data = await response.json();
 
-                    // Redirection vers dashboard en production
-                    setTimeout(() => {
-                        window.location.href = `${FRONTEND_BASE}/dashboard.html`;
-                    }, 2000);
-                } else {
-                    showMessage(messageDiv, data.message || 'Email ou mot de passe incorrect', 'error');
+                    if (response.ok && data.token) {
+                        // Stocker le JWT
+                        localStorage.setItem('adminToken', data.token);
+                        localStorage.setItem('adminRole', 'ADMIN');
+                        // Afficher le message de bienvenue
+                        adminInfo.style.display = 'block';
+                        showMessage(messageDiv, 'Connexion réussie ! Bienvenue dans votre espace administrateur.', 'success');
+
+                        // Redirection vers dashboard en production
+                        setTimeout(() => {
+                            window.location.href = `${FRONTEND_BASE}/dashboard.html`;
+                        }, 2000);
+                    } else {
+                        showMessage(messageDiv, data.message || 'Email ou mot de passe incorrect', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    loading.style.display = 'none';
                 }
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                btnText.style.display = 'inline';
-                loading.style.display = 'none';
+            });
+
+            // Register Form
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const submitBtn = document.getElementById('registerBtn');
+                const btnText = document.getElementById('registerBtnText');
+                const loading = document.getElementById('registerLoading');
+                const messageDiv = document.getElementById('registerMessage');
+
+                // Désactiver le bouton et afficher le loading
+                submitBtn.disabled = true;
+                btnText.style.display = 'none';
+                loading.style.display = 'inline';
+
+                // Récupérer les données du formulaire
+                const formData = {
+                    email: document.getElementById('registerEmail').value,
+                    password: document.getElementById('registerPassword').value,
+                    nom: document.getElementById('registerNom').value,
+                    prenom: document.getElementById('registerPrenom').value,
+                    poste: document.getElementById('registerPoste').value
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE}${ADMIN_REGISTER_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData),
+                        credentials: 'include'
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage(messageDiv, 'Compte administrateur créé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
+                        document.getElementById('registerForm').reset();
+                        // Switch to login tab
+                        tabs[0].click();
+                    } else {
+                        showMessage(messageDiv, data.message || 'Erreur lors de la création du compte', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    loading.style.display = 'none';
+                }
+            });
+
+            function showMessage(element, text, type) {
+                element.textContent = text;
+                element.className = `message ${type}`;
+
+                setTimeout(() => {
+                    element.textContent = '';
+                    element.className = 'message';
+                }, 5000);
             }
         });
-
-        // Register Form
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('registerBtn');
-            const btnText = document.getElementById('registerBtnText');
-            const loading = document.getElementById('registerLoading');
-            const messageDiv = document.getElementById('registerMessage');
-
-            // Désactiver le bouton et afficher le loading
-            submitBtn.disabled = true;
-            btnText.style.display = 'none';
-            loading.style.display = 'inline';
-
-            // Récupérer les données du formulaire
-            const formData = {
-                email: document.getElementById('registerEmail').value,
-                password: document.getElementById('registerPassword').value,
-                nom: document.getElementById('registerNom').value,
-                prenom: document.getElementById('registerPrenom').value,
-                poste: document.getElementById('registerPoste').value
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}${ADMIN_REGISTER_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(messageDiv, 'Compte administrateur créé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
-                    document.getElementById('registerForm').reset();
-                    // Switch to login tab
-                    tabs[0].click();
-                } else {
-                    showMessage(messageDiv, data.message || 'Erreur lors de la création du compte', 'error');
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                btnText.style.display = 'inline';
-                loading.style.display = 'none';
-            }
-        });
-
-        function showMessage(element, text, type) {
-            element.textContent = text;
-            element.className = `message ${type}`;
-
-            setTimeout(() => {
-                element.textContent = '';
-                element.className = 'message';
-            }, 5000);
-        }
     </script>
 </body>
 

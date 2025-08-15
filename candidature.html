@@ -316,139 +316,140 @@
     <script src="config.js"></script>
     <script>
         // Attendre que la configuration soit chargée
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Utiliser la configuration centralisée
             const API_BASE = CONFIG.API.BASE_URL;
             const CANDIDATE_CREATE_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATE.CREATE;
             const USERS_PROFILE_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.PROFILE;
             // Récupérer l'ID de l'élection depuis l'URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const electionId = urlParams.get('electionId');
+            const urlParams = new URLSearchParams(window.location.search);
+            const electionId = urlParams.get('electionId');
 
-        // Éléments DOM
-        const form = document.getElementById('candidatureForm');
-        const alert = document.getElementById('alert');
-        const loading = document.getElementById('loading');
-        const submitBtn = document.getElementById('submitBtn');
-        const electionDetails = document.getElementById('electionDetails');
+            // Éléments DOM
+            const form = document.getElementById('candidatureForm');
+            const alert = document.getElementById('alert');
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            const electionDetails = document.getElementById('electionDetails');
 
-        // Charger les informations de l'élection
-        async function loadElectionDetails() {
-            try {
-                const response = await fetch(`${API_BASE}/election/${electionId}`);
-                if (response.ok) {
-                    const election = await response.json();
-                    electionDetails.innerHTML = `
+            // Charger les informations de l'élection
+            async function loadElectionDetails() {
+                try {
+                    const response = await fetch(`${API_BASE}/election/${electionId}`);
+                    if (response.ok) {
+                        const election = await response.json();
+                        electionDetails.innerHTML = `
                         <strong>${election.titre}</strong><br>
                         <small>Type: ${election.type} | Date: ${new Date(election.dateDebut).toLocaleDateString('fr-FR')}</small>
                     `;
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement de l\'élection:', error);
-            }
-        }
-
-        // Afficher une alerte
-        function showAlert(message, type = 'success') {
-            alert.textContent = message;
-            alert.className = `alert alert-${type}`;
-            alert.style.display = 'block';
-
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 5000);
-        }
-
-        // Soumettre la candidature
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Validation côté client
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-
-            if (!data.nom || !data.prenom || !data.filiere || !data.annee ||
-                !data.email || !data.motivation || !data.programme) {
-                showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
-                return;
-            }
-
-            // Afficher le loading
-            loading.style.display = 'block';
-            submitBtn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}${CANDIDATE_CREATE_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({
-                        ...data,
-                        electionId: parseInt(electionId),
-                        annee: parseInt(data.annee)
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('✅ Votre candidature a été soumise avec succès !', 'success');
-                    form.reset();
-
-                    // Rediriger vers la page des élections après 2 secondes
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                } else {
-                    showAlert(`❌ Erreur: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Erreur lors de la soumission:', error);
-                showAlert('❌ Erreur de connexion. Veuillez réessayer.', 'error');
-            } finally {
-                loading.style.display = 'none';
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Charger les détails de l'élection au chargement de la page
-        if (electionId) {
-            loadElectionDetails();
-        } else {
-            showAlert('❌ Aucune élection spécifiée.', 'error');
-        }
-
-        // Pré-remplir les champs si l'utilisateur est connecté
-        async function prefillUserData() {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const response = await fetch(`${API_BASE}${USERS_PROFILE_ENDPOINT}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-
-                    if (response.ok) {
-                        const userData = await response.json();
-                        if (userData.etudiant) {
-                            document.getElementById('nom').value = userData.etudiant.nom;
-                            document.getElementById('prenom').value = userData.etudiant.prenom;
-                            document.getElementById('filiere').value = userData.etudiant.filiere;
-                            document.getElementById('annee').value = userData.etudiant.annee;
-                            document.getElementById('email').value = userData.email;
-                        }
                     }
                 } catch (error) {
-                    console.error('Erreur lors du pré-remplissage:', error);
+                    console.error('Erreur lors du chargement de l\'élection:', error);
                 }
             }
-        }
 
-        // Pré-remplir les données au chargement
-        prefillUserData();
+            // Afficher une alerte
+            function showAlert(message, type = 'success') {
+                alert.textContent = message;
+                alert.className = `alert alert-${type}`;
+                alert.style.display = 'block';
+
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            }
+
+            // Soumettre la candidature
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validation côté client
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+
+                if (!data.nom || !data.prenom || !data.filiere || !data.annee ||
+                    !data.email || !data.motivation || !data.programme) {
+                    showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+                    return;
+                }
+
+                // Afficher le loading
+                loading.style.display = 'block';
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch(`${API_BASE}${CANDIDATE_CREATE_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify({
+                            ...data,
+                            electionId: parseInt(electionId),
+                            annee: parseInt(data.annee)
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showAlert('✅ Votre candidature a été soumise avec succès !', 'success');
+                        form.reset();
+
+                        // Rediriger vers la page des élections après 2 secondes
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        showAlert(`❌ Erreur: ${result.message}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la soumission:', error);
+                    showAlert('❌ Erreur de connexion. Veuillez réessayer.', 'error');
+                } finally {
+                    loading.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Charger les détails de l'élection au chargement de la page
+            if (electionId) {
+                loadElectionDetails();
+            } else {
+                showAlert('❌ Aucune élection spécifiée.', 'error');
+            }
+
+            // Pré-remplir les champs si l'utilisateur est connecté
+            async function prefillUserData() {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    try {
+                        const response = await fetch(`${API_BASE}${USERS_PROFILE_ENDPOINT}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+
+                        if (response.ok) {
+                            const userData = await response.json();
+                            if (userData.etudiant) {
+                                document.getElementById('nom').value = userData.etudiant.nom;
+                                document.getElementById('prenom').value = userData.etudiant.prenom;
+                                document.getElementById('filiere').value = userData.etudiant.filiere;
+                                document.getElementById('annee').value = userData.etudiant.annee;
+                                document.getElementById('email').value = userData.email;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors du pré-remplissage:', error);
+                    }
+                }
+            }
+
+            // Pré-remplir les données au chargement
+            prefillUserData();
+        });
     </script>
 </body>
 
