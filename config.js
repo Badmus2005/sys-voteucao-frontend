@@ -36,11 +36,22 @@ const CONFIG = {
             },
             STATS: {
                 DASHBOARD: '/api/stats/dashboard',
-                ELECTION: (id) => `/api/stats/election/${id}`
+                ELECTION: (id) => `/api/stats/election/${id}`,
+                GENERAL: '/api/stats'
             },
             USERS: {
                 PROFILE: '/api/users/profile',
                 UPDATE: '/api/users/profile'
+            },
+            ADMIN: {
+                ME: '/api/admin/me',
+                UPDATE: '/api/admin/update'
+            },
+            ACTIVITY: {
+                LIST: '/api/activity'
+            },
+            CODES: {
+                GENERATE: '/api/codes/generate'
             }
         }
     },
