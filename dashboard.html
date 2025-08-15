@@ -614,210 +614,210 @@
     <script src="config.js"></script>
     <script>
         // Attendre que la configuration soit chargée
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // ------------ CONFIG ------------
             const API_BASE = CONFIG.API.BASE_URL;
             const FRONTEND_BASE = window.location.origin;
             const token = localStorage.getItem('adminToken');
-            
+
             if (!token) {
                 alert('Token absent ! Vérifiez la connexion.');
                 window.location.href = `${FRONTEND_BASE}/index.html`;
                 return;
             }
 
-        // ------------ NAVIGATION ------------
-        const dashboardSection = document.getElementById('dashboardSection');
-        const profileSection = document.getElementById('profileSection');
-        document.getElementById('editProfile').addEventListener('click', () => {
-            dashboardSection.style.display = 'none';
-            profileSection.style.display = 'block';
-            loadAdminInfo();
-        });
-
-        // ------------ LOGOUT ------------
-        document.getElementById('logout').addEventListener('click', () => {
-            localStorage.removeItem('adminToken');
-            window.location.href = `${FRONTEND_BASE}/index.html`;
-        });
-
-        // ------------ LOAD ADMIN INFO ------------
-        async function loadAdminInfo() {
-            try {
-                const res = await fetch(`${API_BASE}/admin/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-
-                document.getElementById('displayName').textContent = `${data.nom} ${data.prenom}`;
-                document.getElementById('displayEmail').textContent = data.email;
-                document.getElementById('displayRole').textContent = 'Administrateur';
-                document.getElementById('currentPhoto').src = data.photoUrl || 'https://via.placeholder.com/150';
-                document.getElementById('adminName').textContent = `${data.nom} ${data.prenom}`;
-                document.getElementById('adminPhoto').src = data.photoUrl || 'https://via.placeholder.com/150';
-                document.getElementById('inputNom').value = data.nom;
-                document.getElementById('inputPrenom').value = data.prenom;
-                document.getElementById('inputEmail').value = data.email;
-            } catch (err) {
-                console.error('Erreur chargement info admin:', err);
-            }
-        }
-
-        // ------------ SAVE PROFILE ------------
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const nom = document.getElementById('inputNom').value;
-            const prenom = document.getElementById('inputPrenom').value;
-
-            try {
-                const res = await fetch(`${API_BASE}/admin/update`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ nom, prenom })
-                });
-
-                const data = await res.json();
-                document.getElementById('updateResult').textContent = data.message || 'Profil mis à jour';
+            // ------------ NAVIGATION ------------
+            const dashboardSection = document.getElementById('dashboardSection');
+            const profileSection = document.getElementById('profileSection');
+            document.getElementById('editProfile').addEventListener('click', () => {
+                dashboardSection.style.display = 'none';
+                profileSection.style.display = 'block';
                 loadAdminInfo();
-            } catch (err) {
-                console.error('Erreur mise à jour profil:', err);
-                document.getElementById('updateResult').textContent = 'Erreur lors de la mise à jour';
-            }
-        });
-
-        // ------------ UPLOAD PHOTO ------------
-        const fileInput = document.getElementById('profilePhotoInput');
-
-        document.getElementById('uploadProfilePhotoBtn').addEventListener('click', async () => {
-            if (!fileInput.files.length) {
-                alert('Veuillez sélectionner une photo');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('photo', fileInput.files[0]);
-
-            try {
-                const res = await fetch(`${API_BASE}/upload/admin`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Erreur upload');
-
-                document.getElementById('updateResult').textContent = 'Photo mise à jour avec succès';
-                document.getElementById('currentPhoto').src = data.url;
-                document.getElementById('adminPhoto').src = data.url;
-            } catch (err) {
-                console.error('Erreur upload photo:', err);
-                document.getElementById('updateResult').textContent = err.message || 'Échec de l\'upload';
-            }
-        });
-
-        // ------------ CODE GENERATION ------------
-        document.getElementById('generateBtn').addEventListener('click', async () => {
-            const countInput = document.getElementById('codeCountInput');
-            const count = parseInt(countInput.value);
-
-            if (!count || count < 1 || count > 100) {
-                alert('Veuillez entrer un nombre entre 1 et 100');
-                return;
-            }
-
-            // Show loading state
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
-            generateBtn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_BASE}/codes/generate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ quantity: count })
-                });
-
-                if (!response.ok) {
-                    throw new Error(await response.text());
-                }
-
-                const { codes } = await response.json();
-                displayGeneratedCodes(codes);
-
-            } catch (error) {
-                console.error('Erreur génération codes:', error);
-                alert(`Erreur: ${error.message || 'Échec de la génération'}`);
-            } finally {
-                // Reset button
-                generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Générer';
-                generateBtn.disabled = false;
-            }
-        });
-
-        function displayGeneratedCodes(codes) {
-            const container = document.getElementById('codesContainer');
-            const resultsSection = document.getElementById('resultsSection');
-
-            container.innerHTML = '';
-            codes.forEach(code => {
-                const codeElement = document.createElement('div');
-                codeElement.className = 'code-item';
-                codeElement.textContent = code;
-                container.appendChild(codeElement);
             });
 
-            resultsSection.style.display = 'block';
-        }
+            // ------------ LOGOUT ------------
+            document.getElementById('logout').addEventListener('click', () => {
+                localStorage.removeItem('adminToken');
+                window.location.href = `${FRONTEND_BASE}/index.html`;
+            });
 
-        // Copy all codes button
-        document.getElementById('copyAllBtn').addEventListener('click', () => {
-            const codes = Array.from(document.querySelectorAll('.code-item'))
-                .map(el => el.textContent)
-                .join('\n');
+            // ------------ LOAD ADMIN INFO ------------
+            async function loadAdminInfo() {
+                try {
+                    const res = await fetch(`${API_BASE}/admin/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
 
-            navigator.clipboard.writeText(codes)
-                .then(() => alert('Tous les codes ont été copiés !'))
-                .catch(err => console.error('Erreur copie:', err));
-        });
-
-        // ------------ DASHBOARD DATA ------------
-        async function loadStats() {
-            try {
-                const res = await fetch(`${API_BASE}/stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-
-                document.getElementById('totalUsers').textContent = data.users?.total || 0;
-                document.getElementById('totalVotes').textContent = data.votes?.total || 0;
-                document.getElementById('usersProgress').style.width = (data.users?.percent || 0) + '%';
-                document.getElementById('votesProgress').style.width = (data.votes?.percent || 0) + '%';
-            } catch (err) {
-                console.error('Erreur chargement stats:', err);
+                    document.getElementById('displayName').textContent = `${data.nom} ${data.prenom}`;
+                    document.getElementById('displayEmail').textContent = data.email;
+                    document.getElementById('displayRole').textContent = 'Administrateur';
+                    document.getElementById('currentPhoto').src = data.photoUrl || 'https://via.placeholder.com/150';
+                    document.getElementById('adminName').textContent = `${data.nom} ${data.prenom}`;
+                    document.getElementById('adminPhoto').src = data.photoUrl || 'https://via.placeholder.com/150';
+                    document.getElementById('inputNom').value = data.nom;
+                    document.getElementById('inputPrenom').value = data.prenom;
+                    document.getElementById('inputEmail').value = data.email;
+                } catch (err) {
+                    console.error('Erreur chargement info admin:', err);
+                }
             }
-        }
 
-        async function loadActivity() {
-            try {
-                const res = await fetch(`${API_BASE}/activity`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const activities = await res.json();
-                const container = document.getElementById('activityList');
+            // ------------ SAVE PROFILE ------------
+            document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+                const nom = document.getElementById('inputNom').value;
+                const prenom = document.getElementById('inputPrenom').value;
+
+                try {
+                    const res = await fetch(`${API_BASE}/admin/update`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ nom, prenom })
+                    });
+
+                    const data = await res.json();
+                    document.getElementById('updateResult').textContent = data.message || 'Profil mis à jour';
+                    loadAdminInfo();
+                } catch (err) {
+                    console.error('Erreur mise à jour profil:', err);
+                    document.getElementById('updateResult').textContent = 'Erreur lors de la mise à jour';
+                }
+            });
+
+            // ------------ UPLOAD PHOTO ------------
+            const fileInput = document.getElementById('profilePhotoInput');
+
+            document.getElementById('uploadProfilePhotoBtn').addEventListener('click', async () => {
+                if (!fileInput.files.length) {
+                    alert('Veuillez sélectionner une photo');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('photo', fileInput.files[0]);
+
+                try {
+                    const res = await fetch(`${API_BASE}/upload/admin`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Erreur upload');
+
+                    document.getElementById('updateResult').textContent = 'Photo mise à jour avec succès';
+                    document.getElementById('currentPhoto').src = data.url;
+                    document.getElementById('adminPhoto').src = data.url;
+                } catch (err) {
+                    console.error('Erreur upload photo:', err);
+                    document.getElementById('updateResult').textContent = err.message || 'Échec de l\'upload';
+                }
+            });
+
+            // ------------ CODE GENERATION ------------
+            document.getElementById('generateBtn').addEventListener('click', async () => {
+                const countInput = document.getElementById('codeCountInput');
+                const count = parseInt(countInput.value);
+
+                if (!count || count < 1 || count > 100) {
+                    alert('Veuillez entrer un nombre entre 1 et 100');
+                    return;
+                }
+
+                // Show loading state
+                const generateBtn = document.getElementById('generateBtn');
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+                generateBtn.disabled = true;
+
+                try {
+                    const response = await fetch(`${API_BASE}/codes/generate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ quantity: count })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(await response.text());
+                    }
+
+                    const { codes } = await response.json();
+                    displayGeneratedCodes(codes);
+
+                } catch (error) {
+                    console.error('Erreur génération codes:', error);
+                    alert(`Erreur: ${error.message || 'Échec de la génération'}`);
+                } finally {
+                    // Reset button
+                    generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Générer';
+                    generateBtn.disabled = false;
+                }
+            });
+
+            function displayGeneratedCodes(codes) {
+                const container = document.getElementById('codesContainer');
+                const resultsSection = document.getElementById('resultsSection');
 
                 container.innerHTML = '';
-                activities.forEach(act => {
-                    const div = document.createElement('div');
-                    div.classList.add('activity-item');
-                    div.innerHTML = `
+                codes.forEach(code => {
+                    const codeElement = document.createElement('div');
+                    codeElement.className = 'code-item';
+                    codeElement.textContent = code;
+                    container.appendChild(codeElement);
+                });
+
+                resultsSection.style.display = 'block';
+            }
+
+            // Copy all codes button
+            document.getElementById('copyAllBtn').addEventListener('click', () => {
+                const codes = Array.from(document.querySelectorAll('.code-item'))
+                    .map(el => el.textContent)
+                    .join('\n');
+
+                navigator.clipboard.writeText(codes)
+                    .then(() => alert('Tous les codes ont été copiés !'))
+                    .catch(err => console.error('Erreur copie:', err));
+            });
+
+            // ------------ DASHBOARD DATA ------------
+            async function loadStats() {
+                try {
+                    const res = await fetch(`${API_BASE}/stats`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+
+                    document.getElementById('totalUsers').textContent = data.users?.total || 0;
+                    document.getElementById('totalVotes').textContent = data.votes?.total || 0;
+                    document.getElementById('usersProgress').style.width = (data.users?.percent || 0) + '%';
+                    document.getElementById('votesProgress').style.width = (data.votes?.percent || 0) + '%';
+                } catch (err) {
+                    console.error('Erreur chargement stats:', err);
+                }
+            }
+
+            async function loadActivity() {
+                try {
+                    const res = await fetch(`${API_BASE}/activity`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const activities = await res.json();
+                    const container = document.getElementById('activityList');
+
+                    container.innerHTML = '';
+                    activities.forEach(act => {
+                        const div = document.createElement('div');
+                        div.classList.add('activity-item');
+                        div.innerHTML = `
                         <div class="activity-icon"><i class="fas fa-check"></i></div>
                         <div class="activity-content">
                             <h4>${act.title}</h4>
@@ -825,17 +825,18 @@
                         </div>
                         <div class="activity-time">${act.time}</div>
                     `;
-                    container.appendChild(div);
-                });
-            } catch (err) {
-                console.error('Erreur chargement activités:', err);
+                        container.appendChild(div);
+                    });
+                } catch (err) {
+                    console.error('Erreur chargement activités:', err);
+                }
             }
-        }
 
-        // ------------ INITIAL LOAD ------------
-        loadAdminInfo();
-        loadStats();
-        loadActivity();
+            // ------------ INITIAL LOAD ------------
+            loadAdminInfo();
+            loadStats();
+            loadActivity();
+        });
     </script>
 </body>
 
