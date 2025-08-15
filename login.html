@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - UCAO-UUC</title>
+    <style>
+        :root {
+            --rouge-bordeaux: #800020;
+            --bleu-nuit: #1a2a4a;
+            --blanc-casse: #f8f4e9;
+            --or: #d4af37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: url('https://source.unsplash.com/random/1920x1080/?university') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--bleu-nuit);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            border-top: 5px solid var(--rouge-bordeaux);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: var(--bleu-nuit);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .login-header img {
+            width: 80px;
+            height: auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--bleu-nuit);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--or);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--or);
+            color: var(--bleu-nuit);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: var(--rouge-bordeaux);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-footer a {
+            color: var(--rouge-bordeaux);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="https://via.placeholder.com/80x80?text=UCAO-Logo" alt="Logo UCAO">
+            <h1>Connexion</h1>
+        </div>
+        <form>
+            <div class="form-group">
+                <label for="email">Email ou Matricule</label>
+                <input type="text" id="email" placeholder="exemple@ucao-uuc.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">Se connecter</button>
+        </form>
+        <div class="login-footer">
+            <p>Pas de compte ? <a href="userRegister.html">S'inscrire</a></p>
+            <p><a href="#">Mot de passe oublié ?</a></p>
+        </div>
+    </div>
+</body>
+<script>
+    // Charger la config globale
+    const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production.up.railway.app';
+    document.querySelector('form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert('Erreur: ' + (errorData.message || 'Connexion impossible'));
+                return;
+            }
+
+            const data = await response.json();
+
+            // Supposons que le backend renvoie un token JWT
+            localStorage.setItem('token', data.token);
+
+            alert('Connexion réussie !');
+            // Rediriger vers la page des élections par ex.
+            window.location.href = 'election.html';
+
+        } catch (err) {
+            alert('Erreur réseau ou serveur: ' + err.message);
+        }
+    });
+</script>
+
+</html>

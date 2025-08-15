@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déposer une Candidature - UCAO-UUC</title>
+    <style>
+        :root {
+            --rouge-bordeaux: #800020;
+            --bleu-nuit: #1a2a4a;
+            --blanc-casse: #f8f4e9;
+            --or: #d4af37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--bleu-nuit), #2a3a5a);
+            color: white;
+            padding: 25px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--bleu-nuit);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--or);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--rouge-bordeaux), #a00030);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .election-info {
+            background: linear-gradient(135deg, var(--or), #e6c200);
+            color: var(--bleu-nuit);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .election-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--rouge-bordeaux);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .requirements {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--or);
+        }
+
+        .requirements h4 {
+            color: var(--rouge-bordeaux);
+            margin-bottom: 15px;
+        }
+
+        .requirements ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .requirements li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .requirements li:before {
+            content: "✓";
+            color: var(--rouge-bordeaux);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ Déposer une Candidature</h1>
+            <p>UCAO-UUC - Système de Vote en Ligne</p>
+        </header>
+
+        <div class="form-container">
+            <div class="election-info">
+                <h3>📋 Informations sur l'Élection</h3>
+                <p id="electionDetails">Chargement...</p>
+            </div>
+
+            <div class="requirements">
+                <h4>📋 Conditions de Candidature</h4>
+                <ul>
+                    <li>Être étudiant régulièrement inscrit à l'UCAO-UUC</li>
+                    <li>Avoir une moyenne générale supérieure ou égale à 12/20</li>
+                    <li>Ne pas avoir de sanction disciplinaire en cours</li>
+                    <li>Être disponible pour assumer les responsabilités du poste</li>
+                    <li>Présenter un programme électoral clair et réalisable</li>
+                </ul>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <form id="candidatureForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nom">Nom de famille *</label>
+                        <input type="text" id="nom" name="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom *</label>
+                        <input type="text" id="prenom" name="prenom" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filiere">Filière *</label>
+                        <select id="filiere" name="filiere" required>
+                            <option value="">Sélectionner une filière</option>
+                            <option value="Informatique">Informatique</option>
+                            <option value="Gestion">Gestion</option>
+                            <option value="Droit">Droit</option>
+                            <option value="Médecine">Médecine</option>
+                            <option value="Ingénierie">Ingénierie</option>
+                            <option value="Sciences Sociales">Sciences Sociales</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="annee">Année d'étude *</label>
+                        <select id="annee" name="annee" required>
+                            <option value="">Sélectionner l'année</option>
+                            <option value="1">1ère année</option>
+                            <option value="2">2ème année</option>
+                            <option value="3">3ème année</option>
+                            <option value="4">4ème année</option>
+                            <option value="5">5ème année</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email universitaire *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone">Téléphone</label>
+                    <input type="tel" id="telephone" name="telephone" placeholder="+229 XX XX XX XX">
+                </div>
+
+                <div class="form-group">
+                    <label for="motivation">Lettre de motivation *</label>
+                    <textarea id="motivation" name="motivation" rows="6"
+                        placeholder="Expliquez vos motivations, votre expérience et vos projets pour ce poste..."
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="programme">Programme électoral *</label>
+                    <textarea id="programme" name="programme" rows="8"
+                        placeholder="Détaillez vos propositions et engagements pour améliorer la vie étudiante..."
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience">Expérience associative/leadership</label>
+                    <textarea id="experience" name="experience" rows="4"
+                        placeholder="Décrivez vos expériences en tant que responsable, délégué, ou membre d'association..."></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    📝 Soumettre ma Candidature
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Traitement de votre candidature...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Charger la config globale
+        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production.up.railway.app';
+        // Récupérer l'ID de l'élection depuis l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const electionId = urlParams.get('electionId');
+
+        // Éléments DOM
+        const form = document.getElementById('candidatureForm');
+        const alert = document.getElementById('alert');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submitBtn');
+        const electionDetails = document.getElementById('electionDetails');
+
+        // Charger les informations de l'élection
+        async function loadElectionDetails() {
+            try {
+                const response = await fetch(`${API_BASE}/election/${electionId}`);
+                if (response.ok) {
+                    const election = await response.json();
+                    electionDetails.innerHTML = `
+                        <strong>${election.titre}</strong><br>
+                        <small>Type: ${election.type} | Date: ${new Date(election.dateDebut).toLocaleDateString('fr-FR')}</small>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de l\'élection:', error);
+            }
+        }
+
+        // Afficher une alerte
+        function showAlert(message, type = 'success') {
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Soumettre la candidature
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validation côté client
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            if (!data.nom || !data.prenom || !data.filiere || !data.annee ||
+                !data.email || !data.motivation || !data.programme) {
+                showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+                return;
+            }
+
+            // Afficher le loading
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/candidats`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        ...data,
+                        electionId: parseInt(electionId),
+                        annee: parseInt(data.annee)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('✅ Votre candidature a été soumise avec succès !', 'success');
+                    form.reset();
+
+                    // Rediriger vers la page des élections après 2 secondes
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    showAlert(`❌ Erreur: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la soumission:', error);
+                showAlert('❌ Erreur de connexion. Veuillez réessayer.', 'error');
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Charger les détails de l'élection au chargement de la page
+        if (electionId) {
+            loadElectionDetails();
+        } else {
+            showAlert('❌ Aucune élection spécifiée.', 'error');
+        }
+
+        // Pré-remplir les champs si l'utilisateur est connecté
+        async function prefillUserData() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE}/user/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        if (userData.etudiant) {
+                            document.getElementById('nom').value = userData.etudiant.nom;
+                            document.getElementById('prenom').value = userData.etudiant.prenom;
+                            document.getElementById('filiere').value = userData.etudiant.filiere;
+                            document.getElementById('annee').value = userData.etudiant.annee;
+                            document.getElementById('email').value = userData.email;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du pré-remplissage:', error);
+                }
+            }
+        }
+
+        // Pré-remplir les données au chargement
+        prefillUserData();
+    </script>
+</body>
+
+</html>

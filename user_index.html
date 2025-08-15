@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCAO-UUC - Plateforme de Vote Électronique</title>
+    <style>
+        :root {
+            --rouge-bordeaux: #7a0026;
+            /* Rouge bordeaux plus profond */
+            --rouge-bordeaux-light: #a73354;
+            --bleu-nuit: #0f1a31;
+            /* Bleu nuit plus sombre */
+            --bleu-nuit-light: #1e2b4d;
+            --blanc-casse: #f8f4e9;
+            --or: #c9a227;
+            /* Or plus chaud */
+            --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
+            --shadow-md: 0 4px 12px rgba(15, 26, 49, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .university-header {
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--rouge-bordeaux);
+        }
+
+        .university-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .university-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .academic-nav {
+            background-color: var(--bleu-nuit);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .university-logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .university-logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .academic-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        .academic-links li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 0;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .academic-links li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--or);
+            transition: var(--transition);
+        }
+
+        .academic-links li a:hover::after {
+            width: 100%;
+        }
+
+        .academic-links li a:hover {
+            color: var(--or);
+        }
+
+        /* Hero Section */
+        .academic-hero {
+            background: linear-gradient(rgba(15, 26, 49, 0.9), rgba(15, 26, 49, 0.9)),
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 40px;
+        }
+
+        .academic-hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .academic-hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .academic-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background-color: var(--rouge-bordeaux);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--rouge-bordeaux-light);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: var(--bleu-nuit-light);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bleu-nuit);
+            transform: translateY(-3px);
+        }
+
+        /* Features */
+        .academic-features {
+            padding: 60px 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 50px;
+            color: var(--bleu-nuit);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--rouge-bordeaux), var(--or));
+            margin: 15px auto 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--blanc-casse);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-top: 4px solid var(--rouge-bordeaux);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            color: var(--or);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--bleu-nuit);
+        }
+
+        .feature-card p {
+            color: #555;
+            line-height: 1.7;
+        }
+
+        /* Elections */
+        .elections-section {
+            padding: 60px 0;
+            background-color: #f5f7fa;
+        }
+
+        .elections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .election-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--rouge-bordeaux);
+        }
+
+        .election-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .election-badge {
+            background-color: var(--rouge-bordeaux);
+            color: white;
+            padding: 5px 15px;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 0 0 4px 0;
+        }
+
+        .election-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bleu-nuit-light);
+        }
+
+        .election-content {
+            padding: 20px;
+        }
+
+        .election-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--bleu-nuit);
+        }
+
+        .election-content p {
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .election-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .election-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
+            color: white;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 25px;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .testimonial-author img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 2px solid var(--or);
+        }
+
+        .author-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* CTA */
+        .academic-cta {
+            padding: 80px 20px;
+            text-align: center;
+            background: linear-gradient(rgba(122, 0, 38, 0.9), rgba(122, 0, 38, 0.9)),
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .academic-cta h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .academic-cta p {
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .university-footer {
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--or);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--or);
+            padding-left: 5px;
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .contact-info i {
+            margin-right: 10px;
+            color: var(--or);
+            width: 20px;
+            text-align: center;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .academic-hero h2 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .academic-links {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .features-grid,
+            .elections-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .election-actions {
+                flex-direction: column;
+            }
+
+            .academic-hero {
+                padding: 60px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .university-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .academic-hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .feature-card,
+            .election-card {
+                padding: 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- University Header -->
+    <header class="university-header">
+        <div class="container">
+            <h1>Université Catholique de l'Afrique de l'Ouest</h1>
+            <p>Unité Universitaire de Cotonou</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="academic-nav">
+        <div class="container nav-container">
+            <a href="#" class="university-logo">
+                <img src="https://via.placeholder.com/40x40?text=UCAO" alt="Logo UCAO">
+                UCAO-Vote
+            </a>
+            <ul class="academic-links">
+                <li><a href="#features">Fonctionnalités</a></li>
+                <li><a href="#elections">Élections</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div>
+                <a href="userLogin.html" class="academic-btn btn-secondary">Connexion</a>
+                <a href="userRegister.html" class="academic-btn btn-primary">S'inscrire</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="academic-hero">
+        <div class="container">
+            <h2>Votre voix compte !</h2>
+            <p>Plateforme officielle de vote électronique de l'UCAO-UUC pour les élections universitaires.</p>
+            <div style="margin-top: 30px;">
+                <a href="userRegister.html" class="academic-btn btn-primary">S'inscrire pour voter</a>
+                <a href="#elections" class="academic-btn btn-secondary">Voir les élections</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="academic-features" id="features">
+        <div class="container">
+            <h2 class="section-title">Notre Plateforme de Vote</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Sécurité Académique</h3>
+                    <p>Système de vote certifié par l'administration universitaire garantissant l'anonymat et
+                        l'intégrité du scrutin.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Réservé aux Étudiants</h3>
+                    <p>Accès sécurisé avec vos identifiants universitaires pour une participation exclusive à la
+                        communauté UCAO.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Accessible sur Tous Supports</h3>
+                    <p>Votez depuis votre ordinateur, tablette ou smartphone où que vous soyez sur le campus.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Disponible 24h/24</h3>
+                    <p>La plateforme reste ouverte pendant toute la durée du scrutin pour s'adapter à votre emploi du
+                        temps.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Résultats Transparents</h3>
+                    <p>Publication immédiate des résultats après clôture, avec vérification possible par les
+                        représentants étudiants.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Conforme au Règlement</h3>
+                    <p>Respect strict des procédures électorales définies par le conseil universitaire et la charte
+                        étudiante.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Elections -->
+    <section class="elections-section" id="elections">
+        <div class="container">
+            <h2 class="section-title">Élections en Cours</h2>
+            <div class="elections-grid" id="elections-container">
+                <!-- Exemple d'élection (sera remplacé par les données réelles) -->
+                <div class="election-card">
+                    <div class="election-badge">Active</div>
+                    <div class="election-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                    </div>
+                    <div class="election-content">
+                        <h3>Élection des Délégués de Promotion</h3>
+                        <p>Élection des représentants étudiants pour chaque promotion de l'UCAO-UUC pour l'année
+                            académique 2023-2024.</p>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt"></i> Jusqu'au 15/12/2023</span>
+                            <span><i class="fas fa-users"></i> 25 candidats</span>
+                        </div>
+                        <div class="election-actions">
+                            <a href="vote.html" class="academic-btn btn-primary btn-small">Voter maintenant</a>
+                            <a href="candidates.html" class="academic-btn btn-secondary btn-small">Voir les
+                                candidats</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="election-card">
+                    <div class="election-badge">Active</div>
+                    <div class="election-image"
+                        style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+                    </div>
+                    <div class="election-content">
+                        <h3>Conseil de Discipline</h3>
+                        <p>Élection des représentants étudiants au conseil de discipline universitaire pour un mandat de
+                            2 ans.</p>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt"></i> Jusqu'au 10/12/2023</span>
+                            <span><i class="fas fa-users"></i> 12 candidats</span>
+                        </div>
+                        <div class="election-actions">
+                            <a href="vote.html" class="academic-btn btn-primary btn-small">Voter maintenant</a>
+                            <a href="candidates.html" class="academic-btn btn-secondary btn-small">Voir les
+                                candidats</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials-section" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">Témoignages</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Le système de vote électronique a grandement simplifié notre processus électoral. En tant que
+                        président de BDE, je peux confirmer la transparence et la sécurité du système."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Étudiant">
+                        <div class="author-info">
+                            <h4>Jean Mbarga</h4>
+                            <p>Président du BDE, Droit</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "J'ai pu voter en quelques minutes entre deux cours. L'interface est intuitive et le système m'a
+                        envoyé une confirmation de mon vote sans révéler mon choix."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Étudiante">
+                        <div class="author-info">
+                            <h4>Amina Diallo</h4>
+                            <p>Étudiante en Informatique</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "En tant que membre de la commission électorale, j'apprécie la traçabilité du système tout en
+                        préservant l'anonymat des votes. Un outil moderne pour notre université."
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Professeur">
+                        <div class="author-info">
+                            <h4>Dr. Paul Nkeng</h4>
+                            <p>Commission Électorale</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="academic-cta" id="cta">
+        <div class="container">
+            <h2>Prêt à exercer votre droit de vote ?</h2>
+            <p>Inscrivez-vous avec vos identifiants pour participer aux élections étudiantes.</p>
+            <a href="userRegister.html" class="academic-btn btn-primary" style="margin-top: 20px;">S'inscrire
+                Maintenant</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="university-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>UCAO-Vote</h3>
+                    <p>Plateforme officielle de vote électronique de l'Université Catholique de l'Afrique de l'Ouest,
+                        Unité Universitaire du Cameroun.</p>
+                    <div style="margin-top: 20px;">
+                        <div class="contact-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Saint Jean, Cotonou</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Liens Utiles</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://www.ucao-uuc.com">Site Officiel UCAO-UUC</a></li>
+                        <li><a href="#faq">FAQ sur le vote électronique</a></li>
+                        <li><a href="reglement.pdf">Règlement Électoral</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Assistance</h3>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support-vote@ucao-uuc.com">support-vote@ucao-uuc.com</a></li>
+                        <li><a href="tel:+237699999999">+237 699 999 999</a></li>
+                        <li><a href="help.html">Centre d'Aide</a></li>
+                        <li><a href="contact.html">Contact Administratif</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 UCAO-UUC - Tous droits réservés | Plateforme développée par le Département Informatique
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Charger la config globale
+        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production-5398.up.railway.app';
+        // Code spécifique à la page d'accueil
+        document.addEventListener('DOMContentLoaded', function () {
+            // Charger les élections actives
+            loadActiveElections();
+        });
+
+        async function loadActiveElections() {
+            try {
+                const response = await fetch(`${API_BASE}/election`);
+                if (response.ok) {
+                    const elections = await response.json();
+                    displayElections(elections);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des élections:', error);
+                // Afficher les élections exemple en cas d'erreur
+                document.getElementById('elections-container').innerHTML = `
+                    <div class="election-card">
+                        <div class="election-badge">Active</div>
+                        <div class="election-image" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+                        <div class="election-content">
+                            <h3>Élection des Délégués de Promotion</h3>
+                            <p>Élection des représentants étudiants pour chaque promotion de l'UCAO-UUC pour l'année académique 2023-2024.</p>
+                            <div class="election-meta">
+                                <span><i class="fas fa-calendar-alt"></i> Jusqu'au 15/12/2023</span>
+                                <span><i class="fas fa-users"></i> 25 candidats</span>
+                            </div>
+                            <div class="election-actions">
+                                <a href="vote.html" class="academic-btn btn-primary btn-small">Voter maintenant</a>
+                                <a href="candidates.html" class="academic-btn btn-secondary btn-small">Voir les candidats</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayElections(elections) {
+            const container = document.getElementById('elections-container');
+            if (!container) return;
+
+            if (!elections || elections.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <h3 style="color: var(--bleu-nuit); margin-bottom: 15px;">Aucune élection en cours</h3>
+                        <p>Les prochaines élections seront annoncées par voie officielle.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const electionsHTML = elections.map(election => `
+                <div class="election-card">
+                    <div class="election-badge">Active</div>
+                    <div class="election-image" style="background-image: url('${election.imageUrl || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'}');"></div>
+                    <div class="election-content">
+                        <h3>${election.titre}</h3>
+                        <p>${election.description || 'Élection organisée par l\'UCAO-UUC'}</p>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt"></i> Jusqu'au ${new Date(election.dateFin).toLocaleDateString('fr-FR')}</span>
+                            <span><i class="fas fa-users"></i> ${election._count?.candidates || 0} candidats</span>
+                        </div>
+                        <div class="election-actions">
+                            <a href="vote.html?electionId=${election.id}" class="academic-btn btn-primary btn-small">Voter maintenant</a>
+                            <a href="candidates.html?electionId=${election.id}" class="academic-btn btn-secondary btn-small">Voir les candidats</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = electionsHTML;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Résultats de l'élection - UCAO-UUC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #800020;
+      --secondary: #1a2a4a;
+      --accent: #d4af37;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f7f7f9;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--secondary), #2a3a5a);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    .meta {
+      color: #eee;
+      font-size: .9rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
+      margin-bottom: 16px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.2rem;
+      color: var(--secondary);
+    }
+
+    .bar {
+      height: 12px;
+      background: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .bar>div {
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent), #e6c200);
+      width: 0;
+      transition: width .6s ease;
+    }
+
+    .candidate {
+      margin: 12px 0;
+    }
+
+    .candidate .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: #666;
+      font-size: .9rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      background: var(--primary);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Résultats de l'élection</h1>
+      <div class="meta" id="electionMeta">Chargement...</div>
+    </header>
+    <div class="card">
+      <div class="row">
+        <div class="stat"><span class="muted">Total votes</span><strong id="statVotes">-</strong></div>
+        <div class="stat"><span class="muted">Taux participation</span><strong id="statParticipation">-</strong></div>
+        <div class="stat"><span class="muted">Jetons émis</span><strong id="statTokens">-</strong></div>
+      </div>
+    </div>
+    <div class="card" id="resultsContainer">Chargement des résultats...</div>
+    <div class="row">
+      <a href="election.html" class="btn">← Retour à mon espace</a>
+    </div>
+  </div>
+  <script>
+    // Charger la config globale
+    const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production.up.railway.app';
+    const urlParams = new URLSearchParams(window.location.search);
+    const electionId = urlParams.get('electionId');
+    if (!electionId) {
+      document.getElementById('resultsContainer').textContent = 'Aucune élection spécifiée';
+    } else {
+      loadResults();
+    }
+
+    async function loadResults() {
+      try {
+        const res = await fetch(`${API_BASE}/vote/results/${electionId}`);
+        if (!res.ok) throw new Error('Erreur lors du chargement');
+        const data = await res.json();
+
+        document.getElementById('electionMeta').textContent = `${data.election.titre} • ${data.election.type} • du ${new Date(data.election.dateDebut).toLocaleDateString('fr-FR')} au ${new Date(data.election.dateFin).toLocaleDateString('fr-FR')}`;
+        document.getElementById('statVotes').textContent = data.stats.totalVotes;
+        document.getElementById('statTokens').textContent = data.stats.totalTokens;
+        document.getElementById('statParticipation').textContent = `${data.stats.participationRate}%`;
+
+        const container = document.getElementById('resultsContainer');
+        if (!data.results.length) { container.textContent = 'Aucun candidat.'; return; }
+        container.innerHTML = data.results.map(r => renderCandidate(r, data.stats.totalVotes)).join('');
+        // déclencher animation barres
+        requestAnimationFrame(() => {
+          document.querySelectorAll('[data-width]').forEach(el => {
+            el.style.width = el.getAttribute('data-width');
+          });
+        });
+      } catch (e) {
+        document.getElementById('resultsContainer').textContent = 'Erreur de chargement des résultats';
+      }
+    }
+
+    function renderCandidate(r, totalVotes) {
+      const pct = r.percentage || '0%';
+      return `
+        <div class="candidate">
+          <div class="header">
+            <div>
+              ${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.prenom} ${r.nom}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;" />` : ''}
+              <strong>${r.prenom} ${r.nom}</strong> <span class="muted">(${r.filiere} • ${r.annee}ème)</span>
+            </div>
+            <div><strong>${r.votes}</strong> voix • <strong>${pct}</strong></div>
+          </div>
+          <div class="bar"><div data-width="${pct}"></div></div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+
+</html>

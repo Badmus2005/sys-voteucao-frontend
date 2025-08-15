@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Admin - UCAO-UUC</title>
+    <style>
+        :root {
+            --rouge-bordeaux: #7a0026;
+            --rouge-bordeaux-light: #a73354;
+            --bleu-nuit: #0f1a31;
+            --bleu-nuit-light: #1e2b4d;
+            --blanc-casse: #f8f4e9;
+            --or: #c9a227;
+            --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
+            --shadow-md: 0 4px 12px rgba(15, 26, 49, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .admin-header {
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--rouge-bordeaux);
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .admin-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+
+        .admin-main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 26, 49, 0.85);
+        }
+
+        .admin-container {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            flex: 1;
+            padding: 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .welcome-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--or);
+        }
+
+        .welcome-section p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .features-list {
+            margin-top: 30px;
+        }
+
+        .features-list li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list i {
+            color: var(--or);
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .auth-tabs {
+            display: flex;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: var(--bleu-nuit-light);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .auth-tab.active {
+            background: var(--rouge-bordeaux);
+            font-weight: 600;
+        }
+
+        .auth-tab:hover {
+            background: var(--rouge-bordeaux-light);
+        }
+
+        .auth-content {
+            padding: 30px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--bleu-nuit);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--rouge-bordeaux);
+            box-shadow: 0 0 0 2px rgba(122, 0, 38, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--rouge-bordeaux);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--rouge-bordeaux-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            background: var(--rouge-bordeaux);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .message.error {
+            background: #fde8e8;
+            color: var(--rouge-bordeaux);
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: #e6f7ee;
+            color: #1a5732;
+            border: 1px solid #c3e6cb;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: var(--rouge-bordeaux);
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .admin-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e6f7ee;
+            border-radius: 4px;
+            color: #1a5732;
+            display: none;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .admin-container {
+                flex-direction: column;
+            }
+
+            .welcome-section {
+                padding: 30px 20px;
+                text-align: center;
+            }
+
+            .auth-section {
+                width: 100%;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-content {
+                padding: 20px;
+            }
+
+            .admin-header h1 {
+                font-size: 1.6rem;
+            }
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 30px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-logo img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .footer-logo span {
+            font-weight: 600;
+            color: var(--or);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--or);
+            transform: translateX(5px);
+        }
+
+        .footer-links i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .footer-info p {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-info i {
+            width: 20px;
+            text-align: center;
+            color: var(--or);
+        }
+
+        .footer-bottom {
+            background: var(--bleu-nuit);
+            padding: 15px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--or);
+            color: var(--bleu-nuit);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <h1>Espace Administrateur UCAO-UUC</h1>
+        <p>Plateforme de gestion des élections universitaires</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="admin-container">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <h2>Bienvenue sur l'espace admin</h2>
+                <p>Gérez l'ensemble du processus électoral de l'université en toute sécurité et transparence.</p>
+
+                <ul class="features-list">
+                    <li><i class="fas fa-check-circle"></i> Créez et gérez les élections</li>
+                    <li><i class="fas fa-check-circle"></i> Supervisez le déroulement des votes</li>
+                    <li><i class="fas fa-check-circle"></i> Consultez les résultats en temps réel</li>
+                    <li><i class="fas fa-check-circle"></i> Gérez les comptes administrateurs</li>
+                    <li><i class="fas fa-check-circle"></i> Exportez les données électorales</li>
+                </ul>
+            </section>
+
+            <!-- Auth Section -->
+            <section class="auth-section">
+                <div class="auth-tabs">
+                    <div class="auth-tab active" data-tab="login">Connexion</div>
+                    <div class="auth-tab" data-tab="register">Inscription</div>
+                </div>
+
+                <div class="auth-content">
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form active">
+                        <div id="loginMessage" class="message"></div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+
+                        <button type="submit" class="btn" id="loginBtn">
+                            <span id="loginBtnText">Se connecter</span>
+                            <span id="loginLoading" class="loading">Connexion en cours...</span>
+                        </button>
+
+                        <div class="links">
+                            <a href="index.html">Retour à l'accueil</a>
+                        </div>
+
+                        <div id="adminInfo" class="admin-info" style="display: none;">
+                            <h3>✅ Connexion réussie !</h3>
+                        </div>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="auth-form">
+                        <div id="registerMessage" class="message"></div>
+
+                        <div class="form-group">
+                            <label for="registerEmail">Email *</label>
+                            <input type="email" id="registerEmail" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Mot de passe *</label>
+                            <input type="password" id="registerPassword" name="password" required minlength="6">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerNom">Nom *</label>
+                            <input type="text" id="registerNom" name="nom" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPrenom">Prénom *</label>
+                            <input type="text" id="registerPrenom" name="prenom" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPoste">Poste *</label>
+                            <select id="registerPoste" name="poste" required>
+                                <option value="">Sélectionnez un poste</option>
+                                <option value="Directeur">Responsable 1</option>
+                                <option value="Responsable IT">Responsable 2</option>
+                                <option value="Administrateur Système">Administrateur Système</option>
+                                <option value="Superviseur">Superviseur</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn" id="registerBtn">
+                            <span id="registerBtnText">Créer le compte admin</span>
+                            <span id="registerLoading" class="loading">Création en cours...</span>
+                        </button>
+
+                        <div class="links">
+                            <a href="https://sys-voteucao-frontend.vercel.app">← Retour à l'accueil</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="https://via.placeholder.com/40x40?text=UCAO" alt="Logo UCAO">
+                <span>Plateforme de Vote Admin</span>
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-shield-alt"></i> Politique de sécurité</a>
+                <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+            </div>
+            <div class="footer-info">
+                <p><i class="fas fa-map-marker-alt"></i> UCAO-UUC, Saint Jean, Cotonou</p>
+                <p><i class="fas fa-phone"></i> +237 XXX XXX XXX</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 UCAO-UUC - Tous droits réservés | Version 1.0.0</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Switching
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                forms.forEach(f => f.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + 'Form').classList.add('active');
+            });
+        });
+
+        // API Configuration
+        const API_BASE = window.CONFIG?.API?.BASE_URL || 'https://sys-voteucao-backend-production-5398.up.railway.app';
+        const FRONTEND_BASE = window.CONFIG?.FRONTEND?.BASE_URL || 'http://sys-voteucao-frontend.vercel.app';
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const loading = document.getElementById('loginLoading');
+            const messageDiv = document.getElementById('loginMessage');
+            const adminInfo = document.getElementById('adminInfo');
+
+            // Désactiver le bouton et afficher le loading
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            loading.style.display = 'inline';
+
+            // Masquer les messages précédents
+            messageDiv.textContent = '';
+            messageDiv.className = '';
+            adminInfo.style.display = 'none';
+
+            // Récupérer les données du formulaire
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/adminLogin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    credentials: "include"
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    // Stocker le JWT
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminRole', 'ADMIN');
+                    // Afficher le message de bienvenue
+                    adminInfo.style.display = 'block';
+                    showMessage(messageDiv, 'Connexion réussie ! Bienvenue dans votre espace administrateur.', 'success');
+
+                    // Redirection vers dashboard en production
+                    setTimeout(() => {
+                        window.location.href = `${FRONTEND_BASE}/dashboard.html`;
+                    }, 2000);
+                } else {
+                    showMessage(messageDiv, data.message || 'Email ou mot de passe incorrect', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        });
+
+        // Register Form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('registerBtn');
+            const btnText = document.getElementById('registerBtnText');
+            const loading = document.getElementById('registerLoading');
+            const messageDiv = document.getElementById('registerMessage');
+
+            // Désactiver le bouton et afficher le loading
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            loading.style.display = 'inline';
+
+            // Récupérer les données du formulaire
+            const formData = {
+                email: document.getElementById('registerEmail').value,
+                password: document.getElementById('registerPassword').value,
+                nom: document.getElementById('registerNom').value,
+                prenom: document.getElementById('registerPrenom').value,
+                poste: document.getElementById('registerPoste').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/adminRegister`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(messageDiv, 'Compte administrateur créé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
+                    document.getElementById('registerForm').reset();
+                    // Switch to login tab
+                    tabs[0].click();
+                } else {
+                    showMessage(messageDiv, data.message || 'Erreur lors de la création du compte', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        });
+
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+
+            setTimeout(() => {
+                element.textContent = '';
+                element.className = 'message';
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>
