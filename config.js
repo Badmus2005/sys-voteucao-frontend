@@ -52,6 +52,9 @@ const CONFIG = {
             },
             CODES: {
                 GENERATE: '/api/codes/generate'
+            },
+            UPLOAD: {
+                ADMIN: '/api/upload/admin'
             }
         }
     },
