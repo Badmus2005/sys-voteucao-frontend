@@ -47,10 +47,10 @@
             display: flex;
             min-height: 100vh;
         }
-       
+
         /* Sidebar */
         .sidebar {
-            width: 300px;
+            width: 310px;
             background: var(--bleu-nuit);
             color: white;
             padding: 25px 0;
@@ -750,7 +750,7 @@
                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzAwMCI+QWRtaW48L3RleHQ+PC9zdmc+'">
                 <h3 id="adminName">Admin UCAO</h3>
                 <p id="adminEmail">superadmin@ucao-uuc.com</p>
-                <span class="admin-badge" id="adminRole">Administrateur</span>
+                <span class="admin-badge" id="adminPoste">Administrateur</span>
             </div>
             <ul class="sidebar-menu">
                 <h3>Général</h3>
@@ -894,11 +894,6 @@
                     <div class="form-group">
                         <label for="inputEmail"><i class="fas fa-envelope"></i> Email</label>
                         <input type="email" id="inputEmail" placeholder="email@exemple.com" disabled>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputBio"><i class="fas fa-info-circle"></i> Bio</label>
-                        <textarea id="inputBio" placeholder="Décrivez-vous en quelques mots..." rows="3"></textarea>
                     </div>
 
                     <!-- Section Upload Photo -->
@@ -1066,13 +1061,13 @@
                 const elements = {
                     displayName: `${admin.nom || ''} ${admin.prenom || ''}`,
                     displayEmail: admin.email,
-                    displayRole: admin.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur',
+                    displayPoste: admin.poste,
                     inputNom: admin.nom || '',
                     inputPrenom: admin.prenom || '',
                     inputEmail: admin.email,
                     adminName: `${admin.nom || ''} ${admin.prenom || ''}`,
                     adminEmail: admin.email,
-                    adminRole: admin.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur'
+                    adminPoste: admin.poste
                 };
 
                 Object.entries(elements).forEach(([id, value]) => {
@@ -1092,6 +1087,7 @@
             safeAddListener('saveProfileBtn', 'click', async function () {
                 const nom = document.getElementById('inputNom')?.value.trim();
                 const prenom = document.getElementById('inputPrenom')?.value.trim();
+                const email = document.getElementById('inputEmail')?.value.trim();
 
                 if (!nom || !prenom) {
                     showToast('Nom et prénom sont obligatoires', 'error');
@@ -1106,7 +1102,7 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify({ nom, prenom })
+                        body: JSON.stringify({ nom, prenom, email })
                     });
 
                     if (!response.ok) {
@@ -1115,7 +1111,7 @@
                     }
 
                     showToast('Profil mis à jour avec succès', 'success');
-                    updateProfileUI({ nom, prenom });
+                    updateProfileUI({ nom, prenom, email });
                 } catch (error) {
                     console.error('Erreur:', error);
                     showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
