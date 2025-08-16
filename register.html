@@ -21,25 +21,56 @@
         }
 
         body {
-            background: url('https://source.unsplash.com/random/1920x1080/?campus') no-repeat center center fixed;
-            background-size: cover;
             color: var(--bleu-nuit);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            /* Changé pour permettre le défilement */
             padding: 20px;
+            position: relative;
+            background-color: var(--blanc-casse);
+            overflow-x: hidden;
+            /* Empêche le défilement horizontal */
+        }
+
+        /* Arrière-plan fixe avec superposition */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-color: rgba(248, 244, 233, 0.8);
+            /* Couche semi-transparente */
+        }
+
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15;
         }
 
         .register-container {
             width: 100%;
             max-width: 600px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 40px;
             border-top: 5px solid var(--rouge-bordeaux);
             animation: fadeIn 0.8s ease-out;
+            margin: 40px 0;
+            /* Espacement vertical */
         }
 
         @keyframes fadeIn {
@@ -60,9 +91,13 @@
         }
 
         .register-header h1 {
-            color: var(--bleu-nuit);
+            color: var(--rouge-bordeaux);
             font-size: 2rem;
             margin-bottom: 10px;
+        }
+
+        .register-header p {
+            color: var(--bleu-nuit);
         }
 
         .form-row {
@@ -95,6 +130,7 @@
             border-radius: 8px;
             font-size: 1rem;
             transition: all 0.3s;
+            background-color: white;
         }
 
         .form-group input:focus,
@@ -132,6 +168,7 @@
         .register-footer {
             text-align: center;
             margin-top: 20px;
+            color: var(--bleu-nuit);
         }
 
         .register-footer a {
@@ -182,19 +219,48 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .register-container {
+                padding: 25px;
+                margin: 20px 0;
+            }
+
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 20px;
+            }
+
+            .register-header h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Arrière-plan fixe -->
+    <div class="background-image" aria-hidden="true"></div>
+    <div class="background-overlay" aria-hidden="true"></div>
+
     <div class="register-container">
         <div class="register-header">
             <h1>Inscription UCAO-UUC</h1>
@@ -226,23 +292,34 @@
             </div>
 
             <div class="form-group">
-                <label for="matricule">Matricule</label>
-                <input type="text" id="matricule" name="matricule" required>
+                <label for="ecole">École/Faculté</label>
+                <select id="ecole" name="ecole" required>
+                    <option value="">Sélectionnez votre école/faculté</option>
+                </select>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="filiere">Filière</label>
-                    <select id="filiere" name="filiere" required>
-                        <option value="">Sélectionnez une filière</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="annee">Année</label>
-                    <select id="annee" name="annee" required>
-                        <option value="">Sélectionnez une année</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="filiere">Filière</label>
+                <select id="filiere" name="filiere" required>
+                    <option value="">Sélectionnez votre filière</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="annee">Année d'étude</label>
+                <select id="annee" name="annee" required>
+                    <option value="">Sélectionnez votre année</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="matriculeGroup" style="display:none;">
+                <label for="matricule">Matricule</label>
+                <input type="text" id="matricule" name="matricule">
+            </div>
+
+            <div class="form-group" id="codeGroup" style="display:none;">
+                <label for="code">Code d'inscription</label>
+                <input type="text" id="code" name="code">
             </div>
 
             <div class="form-row">
@@ -256,11 +333,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="code">Code d'inscription</label>
-                <input type="text" id="code" name="code" required>
-            </div>
-
             <button type="submit" class="btn-register" id="registerBtn">
                 S'inscrire
             </button>
@@ -272,25 +344,43 @@
         </div>
     </div>
 
-    <!-- Configuration et scripts -->
     <script src="config.js"></script>
-    <script>
-        // Attendre que la configuration soit chargée
-        document.addEventListener('DOMContentLoaded', function() {
+    <script>document.addEventListener('DOMContentLoaded', function () {
+            // Animation du slider d'arrière-plan
+            const backgroundImages = document.querySelectorAll('.background-slider img');
+            let currentImage = 0;
+
+            function changeBackground() {
+                backgroundImages[currentImage].classList.remove('active');
+                currentImage = (currentImage + 1) % backgroundImages.length;
+                backgroundImages[currentImage].classList.add('active');
+            }
+
+            setInterval(changeBackground, 5000);
+
+            // Références aux éléments du formulaire
             const registerForm = document.getElementById('registerForm');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
             const loading = document.getElementById('loading');
             const registerBtn = document.getElementById('registerBtn');
-
-            // Utiliser la configuration centralisée
-            const API_BASE = CONFIG.API.BASE_URL;
-            const REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.REGISTER;
-
-            // Remplir les options des filières et années
+            const ecoleSelect = document.getElementById('ecole');
             const filiereSelect = document.getElementById('filiere');
             const anneeSelect = document.getElementById('annee');
+            const matriculeGroup = document.getElementById('matriculeGroup');
+            const codeGroup = document.getElementById('codeGroup');
+            const matriculeInput = document.getElementById('matricule');
+            const codeInput = document.getElementById('code');
 
+            // Remplir les écoles
+            CONFIG.ACADEMIC.ECOLES.forEach(ecole => {
+                const option = document.createElement('option');
+                option.value = ecole;
+                option.textContent = ecole;
+                ecoleSelect.appendChild(option);
+            });
+
+            // Remplir les filières (toutes disponibles au départ)
             CONFIG.ACADEMIC.FILIERES.forEach(filiere => {
                 const option = document.createElement('option');
                 option.value = filiere;
@@ -298,11 +388,53 @@
                 filiereSelect.appendChild(option);
             });
 
+            // Remplir les années
             CONFIG.ACADEMIC.ANNEES.forEach(annee => {
                 const option = document.createElement('option');
                 option.value = annee;
-                option.textContent = `${annee}ème année`;
+
+                option.textContent = `$ {
+                            annee
+                        }
+    
+                        ère année`;
+
+                if (annee > 1) {
+                    option.textContent = `$ {
+                                annee
+                            }
+    
+                            ème année`;
+                }
+
                 anneeSelect.appendChild(option);
+            });
+
+            // Gérer le changement d'année
+            anneeSelect.addEventListener('change', function () {
+                if (this.value === "1") {
+                    // 1ère année
+                    codeGroup.style.display = 'block';
+                    matriculeGroup.style.display = 'none';
+                    codeInput.required = true;
+                    matriculeInput.required = false;
+                    codeInput.value = '';
+                }
+
+                else if (this.value && this.value !== "1") {
+                    // 2ème année et plus
+                    codeGroup.style.display = 'none';
+                    matriculeGroup.style.display = 'block';
+                    codeInput.required = false;
+                    matriculeInput.required = true;
+                    matriculeInput.value = '';
+                }
+
+                else {
+                    // Aucune sélection
+                    codeGroup.style.display = 'none';
+                    matriculeGroup.style.display = 'none';
+                }
             });
 
             function showMessage(message, type) {
@@ -310,7 +442,9 @@
                     errorMessage.textContent = message;
                     errorMessage.style.display = 'block';
                     successMessage.style.display = 'none';
-                } else {
+                }
+
+                else {
                     successMessage.textContent = message;
                     successMessage.style.display = 'block';
                     errorMessage.style.display = 'none';
@@ -326,15 +460,26 @@
                 const nom = document.getElementById('nom').value.trim();
                 const prenom = document.getElementById('prenom').value.trim();
                 const email = document.getElementById('email').value.trim();
-                const matricule = document.getElementById('matricule').value.trim();
+                const ecole = document.getElementById('ecole').value;
                 const filiere = document.getElementById('filiere').value;
                 const annee = document.getElementById('annee').value;
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
+                const matricule = document.getElementById('matricule').value.trim();
                 const code = document.getElementById('code').value.trim();
 
-                if (!nom || !prenom || !email || !matricule || !filiere || !annee || !password || !confirmPassword || !code) {
+                if (!nom || !prenom || !email || !ecole || !filiere || !annee || !password || !confirmPassword) {
                     showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
+                    return false;
+                }
+
+                if (annee === "1" && !code) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error');
+                    return false;
+                }
+
+                if (annee !== "1" && !matricule) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error');
                     return false;
                 }
 
@@ -356,9 +501,9 @@
                 return true;
             }
 
-            registerForm.addEventListener('submit', async function(e) {
+            registerForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
+
                 if (!validateForm()) {
                     return;
                 }
@@ -367,12 +512,15 @@
                     nom: document.getElementById('nom').value.trim(),
                     prenom: document.getElementById('prenom').value.trim(),
                     email: document.getElementById('email').value.trim(),
-                    matricule: document.getElementById('matricule').value.trim(),
+                    ecole: document.getElementById('ecole').value,
                     filiere: document.getElementById('filiere').value,
                     annee: parseInt(document.getElementById('annee').value),
                     password: document.getElementById('password').value,
-                    code: document.getElementById('code').value.trim()
-                };
+                    matricule: document.getElementById('matricule').value.trim() || null,
+                    code: document.getElementById('code').value.trim() || null
+                }
+
+                    ;
 
                 showLoading(true);
                 showMessage('', 'error');
@@ -391,18 +539,23 @@
 
                     if (response.ok) {
                         showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
-                        
-                        // Rediriger vers la page de connexion
+
                         setTimeout(() => {
                             window.location.href = 'login.html';
                         }, 2000);
-                    } else {
+                    }
+
+                    else {
                         showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
                     }
-                } catch (error) {
+                }
+
+                catch (error) {
                     console.error('Erreur d\'inscription:', error);
                     showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
-                } finally {
+                }
+
+                finally {
                     showLoading(false);
                 }
             });
