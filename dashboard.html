@@ -8,11 +8,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="./dashboard.css">
-   
+    <link rel="stylesheet" href="dashboard.css"/>
 </head>
 
 <body>
@@ -30,8 +28,7 @@
             </div>
             <ul class="sidebar-menu">
                 <h3>Général</h3>
-                <li class="active"><a href="#" id="navDashboard"><i class="fas fa-tachometer-alt"></i> Tableau de
-                        Bord</a></li>
+                <li class="active"><a href="#" id="navDashboard"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</a></li>
                 <li><a href="#" id="navUsers"><i class="fas fa-users"></i> Utilisateurs</a></li>
                 <li><a href="#" id="navCandidates"><i class="fas fa-user"></i> Candidats</a></li>
                 <li><a href="#" id="navStats"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
@@ -45,12 +42,141 @@
         <main class="main-content">
             <!-- DASHBOARD SECTION -->
             <section id="dashboardSection">
-                <!-- Contenu existant inchangé -->
+                <div class="admin-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord</h1>
+                    <div class="admin-actions">
+                        <a href="#" class="alert-btn" aria-label="Notifications"><i class="fas fa-bell"></i></a>
+                        <a href="#" aria-label="Messages"><i class="fas fa-envelope"></i></a>
+                        <a href="#" aria-label="Aide"><i class="fas fa-question-circle"></i></a>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="admin-stats">
+                    <div class="admin-card">
+                        <h3><i class="fas fa-user-check"></i> Utilisateurs Actifs</h3>
+                        <p id="totalUsers">0</p>
+                        <small>+0% ce mois</small>
+                        <div class="progress-bar">
+                            <div class="progress" id="usersProgress"></div>
+                        </div>
+                    </div>
+                    <div class="admin-card">
+                        <h3><i class="fas fa-vote-yea"></i> Votes Effectués</h3>
+                        <p id="totalVotes">0</p>
+                        <small>+0% aujourd'hui</small>
+                        <div class="progress-bar">
+                            <div class="progress" id="votesProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <h2><i class="fas fa-history"></i> Activité Récentes</h2>
+                    <div id="activityList"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-section">
+                    <h2 class="quick-actions-title"><i class="fas fa-bolt"></i> Actions Rapides</h2>
+                    <div class="quick-actions">
+                        <div class="action-card" id="addElection">
+                            <i class="fas fa-plus-circle"></i>
+                            <h3>Ajouter Élection</h3>
+                            <p>Créer une nouvelle élection</p>
+                        </div>
+                        <div class="action-card" id="importMatricules">
+                            <i class="fas fa-file-import"></i>
+                            <h3>Importer Matricules</h3>
+                            <p>Importer des matricules depuis un fichier</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Generation -->
+                <div class="generation-section" id="generation-section">
+                    <h2><i class="fas fa-key"></i> Générer des codes</h2>
+                    <div class="input-group">
+                        <input type="number" id="codeCountInput" placeholder="Nombre de codes (1-100)" min="1" max="100">
+                        <button id="generateBtn" class="btn-primary pulse-on-hover">
+                            <i class="fas fa-bolt"></i> Générer
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultsSection" class="generated-codes-section" style="display:none;">
+                    <h3 class="codes-title">Codes générés <span id="codesCount" class="codes-count"></span></h3>
+                    <div class="codes-actions">
+                        <button id="copyAllBtn" class="action-btn copy-btn">
+                            <i class="fas fa-copy"></i> Copier tous
+                        </button>
+                        <button id="downloadBtn" class="action-btn download-btn">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                    <div id="codesContainer" class="codes-grid"></div>
+                </div>
             </section>
 
             <!-- PROFILE SECTION -->
             <section id="profileSection" class="profile-section" style="display:none;">
-                <!-- Contenu existant inchangé -->
+                <div class="profile-header">
+                    <h2><i class="fas fa-user-cog"></i> Modifier Profil</h2>
+                    <button id="closeProfileBtn" class="close-btn" aria-label="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="profile-content">
+                    <div class="profile-card">
+                        <div class="profile-photo-container">
+                            <img id="currentPhoto" src="https://via.placeholder.com/150" alt="Photo de profil" class="profile-photo">
+                            <div class="profile-badge">ADMIN</div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="displayName">Nom Utilisateur</h2>
+                            <p id="displayEmail">email@exemple.com</p>
+                        </div>
+                    </div>
+
+                    <div class="edit-profile-form">
+                        <div class="form-group">
+                            <label for="inputNom"><i class="fas fa-user-tag"></i> Nom:</label>
+                            <input type="text" id="inputNom" placeholder="Votre nom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPrenom"><i class="fas fa-user"></i> Prénom:</label>
+                            <input type="text" id="inputPrenom" placeholder="Votre prénom">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputEmail"><i class="fas fa-envelope"></i> Email:</label>
+                            <input type="email" id="inputEmail" disabled>
+                        </div>
+
+                        <div class="photo-upload-section">
+                            <h3><i class="fas fa-camera"></i> Photo de Profil</h3>
+                            <div class="upload-container">
+                                <label for="profilePhotoInput" class="upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i> Choisir une image
+                                    <input type="file" id="profilePhotoInput" accept="image/jpeg, image/png, image/webp">
+                                </label>
+                                <button id="uploadProfilePhotoBtn" class="upload-btn">
+                                    <i class="fas fa-upload"></i> Téléverser
+                                </button>
+                            </div>
+                            <p class="file-info">Format JPG/PNG - Max 2MB</p>
+                        </div>
+
+                        <div id="updateResult" class="update-result"></div>
+
+                        <button id="saveProfileBtn" class="save-btn">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -66,7 +192,18 @@
     <!-- Configuration et scripts -->
     <script src="config.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async function () {
+        // Fonction utilitaire pour gérer les event listeners
+        function safeAddListener(id, event, handler) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, handler);
+                return true;
+            }
+            console.error(`Element #${id} not found`);
+            return false;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
             // ------------ CONFIG ------------
             const API_BASE = CONFIG.API.BASE_URL;
             const FRONTEND_BASE = window.location.origin;
@@ -87,6 +224,8 @@
             // ------------ UTILS ------------
             function showToast(message, type = 'info') {
                 const toast = document.getElementById('toast');
+                if (!toast) return;
+                
                 toast.textContent = message;
                 toast.className = `toast ${type}`;
                 toast.classList.add('show');
@@ -97,40 +236,39 @@
             }
 
             function showLoading() {
-                document.getElementById('loadingOverlay').classList.add('active');
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.add('active');
             }
 
             function hideLoading() {
-                document.getElementById('loadingOverlay').classList.remove('active');
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.remove('active');
             }
 
             // ------------ NAVIGATION ------------
             const dashboardSection = document.getElementById('dashboardSection');
             const profileSection = document.getElementById('profileSection');
-            const profileNavBtn = document.getElementById('profileNavBtn');
 
-            profileNavBtn.addEventListener('click', () => {
-                toggleProfileSection();
-            });
-
-            function toggleProfileSection() {
+            // Gestion du toggle du profil
+            safeAddListener('profileNavBtn', 'click', () => {
                 if (profileSection.style.display === 'none' || !profileSection.style.display) {
                     profileSection.style.display = 'block';
-                    dashboardSection.style.display = 'none';
+                    if (dashboardSection) dashboardSection.style.display = 'none';
                     loadAdminInfo();
                 } else {
                     profileSection.style.display = 'none';
-                    dashboardSection.style.display = 'block';
+                    if (dashboardSection) dashboardSection.style.display = 'block';
                 }
-            }
-
-            document.getElementById('closeProfileBtn').addEventListener('click', () => {
-                profileSection.style.display = 'none';
-                dashboardSection.style.display = 'block';
             });
 
-            // ------------ LOGOUT ------------
-            document.getElementById('logout').addEventListener('click', () => {
+            // Bouton de fermeture du profil
+            safeAddListener('closeProfileBtn', 'click', () => {
+                if (profileSection) profileSection.style.display = 'none';
+                if (dashboardSection) dashboardSection.style.display = 'block';
+            });
+
+            // Déconnexion
+            safeAddListener('logout', 'click', () => {
                 localStorage.removeItem('adminToken');
                 window.location.href = `${FRONTEND_BASE}/index.html`;
             });
@@ -146,8 +284,6 @@
                     if (!res.ok) throw new Error('Erreur chargement profil');
 
                     const admin = await res.json();
-
-                    // Mise à jour de l'UI
                     updateProfileUI(admin);
                 } catch (err) {
                     console.error('Erreur chargement info admin:', err);
@@ -176,16 +312,17 @@
                 });
 
                 if (admin.photoUrl) {
-                    document.getElementById('currentPhoto').src = admin.photoUrl + '?t=' + Date.now();
-                    document.getElementById('adminPhoto').src = admin.photoUrl + '?t=' + Date.now();
+                    const currentPhoto = document.getElementById('currentPhoto');
+                    const adminPhoto = document.getElementById('adminPhoto');
+                    if (currentPhoto) currentPhoto.src = admin.photoUrl + '?t=' + Date.now();
+                    if (adminPhoto) adminPhoto.src = admin.photoUrl + '?t=' + Date.now();
                 }
             }
 
-            // ------------ SAVE PROFILE ------------
-            document.getElementById('saveProfileBtn').addEventListener('click', async function () {
-                const nom = document.getElementById('inputNom').value.trim();
-                const prenom = document.getElementById('inputPrenom').value.trim();
-                const updateResult = document.getElementById('updateResult');
+            // Sauvegarde du profil
+            safeAddListener('saveProfileBtn', 'click', async function() {
+                const nom = document.getElementById('inputNom')?.value.trim();
+                const prenom = document.getElementById('inputPrenom')?.value.trim();
 
                 if (!nom || !prenom) {
                     showToast('Nom et prénom sont obligatoires', 'error');
@@ -218,12 +355,58 @@
                 }
             });
 
+            // Upload de photo
+            safeAddListener('uploadProfilePhotoBtn', 'click', async function() {
+                const fileInput = document.getElementById('profilePhotoInput');
+                if (!fileInput?.files?.length) {
+                    showToast('Veuillez sélectionner une photo', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('photo', fileInput.files[0]);
+
+                try {
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+                    const response = await fetch(`${API_BASE}/upload/admin`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erreur lors de l\'upload');
+                    }
+
+                    const data = await response.json();
+                    const currentPhoto = document.getElementById('currentPhoto');
+                    const adminPhoto = document.getElementById('adminPhoto');
+                    if (currentPhoto) currentPhoto.src = data.url + '?t=' + Date.now();
+                    if (adminPhoto) adminPhoto.src = data.url + '?t=' + Date.now();
+
+                    showToast('Photo mise à jour avec succès', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast(error.message || 'Erreur lors de l\'upload', 'error');
+                } finally {
+                    const btn = document.getElementById('uploadProfilePhotoBtn');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-upload"></i> Téléverser';
+                    }
+                }
+            });
+
             // ------------ CODE GENERATION ------------
-            document.getElementById('generateBtn').addEventListener('click', generateCodes);
+            safeAddListener('generateBtn', 'click', generateCodes);
 
             async function generateCodes() {
                 const countInput = document.getElementById('codeCountInput');
-                const count = parseInt(countInput.value);
+                const count = parseInt(countInput?.value);
 
                 if (!count || count < 1 || count > 100) {
                     showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
@@ -231,6 +414,8 @@
                 }
 
                 const generateBtn = document.getElementById('generateBtn');
+                if (!generateBtn) return;
+
                 const originalBtnText = generateBtn.innerHTML;
                 generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
                 generateBtn.disabled = true;
@@ -261,30 +446,26 @@
                 }
             }
 
-            // Affiche les codes générés 
             function displayGeneratedCodes(codes) {
                 const container = document.getElementById('codesContainer');
                 const resultsSection = document.getElementById('resultsSection');
+                if (!container || !resultsSection) return;
 
-                // Effacer le contenu précédent
                 container.innerHTML = '';
-
-                // Ajouter chaque code
                 codes.forEach(code => {
                     const codeElement = document.createElement('div');
                     codeElement.className = 'code-item';
                     codeElement.innerHTML = `
-            <span>${code}</span>
-            <button class="copy-single-btn" data-code="${code}">
-                <i class="fas fa-copy"></i>
-            </button>
-        `;
+                        <span>${code}</span>
+                        <button class="copy-single-btn" data-code="${code}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    `;
                     container.appendChild(codeElement);
                 });
 
-                // Activer les boutons de copie individuels
                 document.querySelectorAll('.copy-single-btn').forEach(btn => {
-                    btn.addEventListener('click', function () {
+                    btn.addEventListener('click', function() {
                         const code = this.getAttribute('data-code');
                         navigator.clipboard.writeText(code)
                             .then(() => {
@@ -296,18 +477,13 @@
                     });
                 });
 
-                // Afficher la section
                 resultsSection.style.display = 'block';
-
-                // Mettre à jour le compteur
-                document.getElementById('codesCount').textContent = `(${codes.length} codes)`;
-
-                // Animation d'apparition
+                const codesCount = document.getElementById('codesCount');
+                if (codesCount) codesCount.textContent = `(${codes.length} codes)`;
                 resultsSection.style.animation = 'fadeIn 0.3s ease-out';
             }
 
-            // Bouton Copier tous les codes (version optimisée)
-            document.getElementById('copyAllBtn').addEventListener('click', () => {
+            safeAddListener('copyAllBtn', 'click', () => {
                 const codes = Array.from(document.querySelectorAll('.code-item span'))
                     .map(el => el.textContent)
                     .join('\n');
@@ -315,6 +491,8 @@
                 navigator.clipboard.writeText(codes)
                     .then(() => {
                         const copyBtn = document.getElementById('copyAllBtn');
+                        if (!copyBtn) return;
+                        
                         const originalHtml = copyBtn.innerHTML;
                         copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
                         setTimeout(() => {
@@ -323,12 +501,11 @@
                     })
                     .catch(err => {
                         console.error('Erreur copie:', err);
-                        alert('Erreur lors de la copie');
+                        showToast('Erreur lors de la copie', 'error');
                     });
             });
 
-            // Bouton Télécharger (version compatible)
-            document.getElementById('downloadBtn').addEventListener('click', () => {
+            safeAddListener('downloadBtn', 'click', () => {
                 const codes = Array.from(document.querySelectorAll('.code-item span'))
                     .map(el => el.textContent)
                     .join('\n');
@@ -345,21 +522,23 @@
                 URL.revokeObjectURL(url);
             });
 
-            // Vérification du rôle admin au chargement
-            document.addEventListener('DOMContentLoaded', () => {
-                if (token) {
-                    fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
+            // Vérification du rôle admin
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
-                    })
-                        .then(response => response.json())
-                        .then(user => {
-                            if (user.role !== 'ADMIN') {
-                                document.getElementById('generation-section').style.display = 'none';
-                            }
-                        })
-                        .catch(console.error);
+                    });
+                    const user = await response.json();
+                    
+                    if (user.role !== 'ADMIN') {
+                        const genSection = document.getElementById('generation-section');
+                        if (genSection) genSection.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Erreur vérification rôle:', error);
                 }
-            });
+            }
+
             // ------------ DASHBOARD DATA ------------
             async function loadStats() {
                 try {
@@ -368,10 +547,15 @@
                     });
                     const data = await res.json();
 
-                    document.getElementById('totalUsers').textContent = data.users?.total || 0;
-                    document.getElementById('totalVotes').textContent = data.votes?.total || 0;
-                    document.getElementById('usersProgress').style.width = (data.users?.percent || 0) + '%';
-                    document.getElementById('votesProgress').style.width = (data.votes?.percent || 0) + '%';
+                    const totalUsers = document.getElementById('totalUsers');
+                    const totalVotes = document.getElementById('totalVotes');
+                    const usersProgress = document.getElementById('usersProgress');
+                    const votesProgress = document.getElementById('votesProgress');
+
+                    if (totalUsers) totalUsers.textContent = data.users?.total || 0;
+                    if (totalVotes) totalVotes.textContent = data.votes?.total || 0;
+                    if (usersProgress) usersProgress.style.width = (data.users?.percent || 0) + '%';
+                    if (votesProgress) votesProgress.style.width = (data.votes?.percent || 0) + '%';
                 } catch (err) {
                     console.error('Erreur chargement stats:', err);
                 }
@@ -384,19 +568,20 @@
                     });
                     const activities = await res.json();
                     const container = document.getElementById('activityList');
+                    if (!container) return;
 
                     container.innerHTML = '';
                     activities.forEach(act => {
                         const div = document.createElement('div');
                         div.classList.add('activity-item');
                         div.innerHTML = `
-                        <div class="activity-icon"><i class="fas fa-check"></i></div>
-                        <div class="activity-content">
-                            <h4>${act.title}</h4>
-                            <p>${act.content}</p>
-                        </div>
-                        <div class="activity-time">${act.time}</div>
-                    `;
+                            <div class="activity-icon"><i class="fas fa-check"></i></div>
+                            <div class="activity-content">
+                                <h4>${act.title}</h4>
+                                <p>${act.content}</p>
+                            </div>
+                            <div class="activity-time">${act.time}</div>
+                        `;
                         container.appendChild(div);
                     });
                 } catch (err) {
@@ -411,5 +596,4 @@
         });
     </script>
 </body>
-
 </html>
