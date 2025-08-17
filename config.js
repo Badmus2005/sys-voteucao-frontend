@@ -40,8 +40,12 @@ const CONFIG = {
                 GENERAL: '/api/stats'
             },
             USERS: {
+                FEED: '/api/users/feed',
+                ELECTION: '/api/users/elections',
                 PROFILE: '/api/users/profile',
-                UPDATE: '/api/users/profile'
+                AVATAR: '/api/users/avatar',
+                UPDATE: '/api/users/profile',
+                CHANGE_PASSWORD: '/api/users/change-password'
             },
             ADMIN: {
                 ME: '/api/admin/me',
