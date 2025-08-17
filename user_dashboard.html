@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,7 +116,8 @@
             transition: all 0.2s ease;
         }
 
-        .nav-item:hover, .nav-item.active {
+        .nav-item:hover,
+        .nav-item.active {
             background: var(--secondary-light);
             color: white;
         }
@@ -375,6 +377,7 @@
         .results-table td {
             padding: 12px;
             border-bottom: 1px solid #eee;
+            vertical-align: middle;
         }
 
         .results-table tr:nth-child(even) {
@@ -390,11 +393,92 @@
             font-weight: bold;
         }
 
+        .candidate-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            margin-right: 10px;
+        }
+
+        .candidate-info {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+
+        .notification.warning {
+            background: var(--warning);
+        }
+
+        .notification.info {
+            background: var(--secondary);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .stats-card {
                 grid-column: span 6;
             }
+
             .elections-card {
                 grid-column: span 12;
             }
@@ -404,10 +488,12 @@
             .app-container {
                 grid-template-columns: 1fr;
             }
+
             .app-sidebar {
                 position: static;
                 height: auto;
             }
+
             .hierarchy-nav {
                 flex-direction: column;
             }
@@ -419,10 +505,12 @@
                 align-items: flex-start;
                 gap: 1rem;
             }
+
             .quick-actions {
                 width: 100%;
                 justify-content: space-between;
             }
+
             .stats-card {
                 grid-column: span 12;
             }
@@ -432,11 +520,13 @@
             .app-main {
                 padding: 1.5rem;
             }
+
             .election-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
             }
+
             .election-meta {
                 flex-direction: column;
                 gap: 0.25rem;
@@ -444,20 +534,22 @@
         }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="app-sidebar">
             <div class="brand">
-                <div class="brand-logo">UÉ</div>
+                <div class="brand-logo">UE</div>
                 <h2>UCAO Élections</h2>
             </div>
 
             <div class="user-profile">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo de profil" class="avatar">
-                <h3 id="username">Jean Koffi</h3>
-                <p id="user-program">Master 2 Informatique</p>
-                <span class="user-role" id="user-role">Électeur</span>
+                <img id="user-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo de profil"
+                    class="avatar">
+                <h3 id="username">Chargement...</h3>
+                <p id="user-program">-</p>
+                <span class="user-role" id="user-role">-</span>
             </div>
 
             <nav class="nav-menu">
@@ -493,7 +585,7 @@
             <!-- Header -->
             <div class="header">
                 <div class="page-title">
-                    <h1 id="page-title">Mon Tableau de Bord</h1>
+                    <h1 id="page-title">Tableau de Bord</h1>
                     <p id="page-subtitle">Bienvenue sur votre espace électeur personnel</p>
                 </div>
                 <div class="quick-actions">
@@ -577,10 +669,9 @@
                         </h2>
 
                         <div class="election-list" id="current-elections">
-                            <!-- Contenu chargé dynamiquement -->
                             <div class="empty-state">
-                                <i class="fas fa-inbox" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
-                                <p>Aucune élection active pour le moment</p>
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                                <p>Chargement des élections...</p>
                             </div>
                         </div>
                     </div>
@@ -596,10 +687,11 @@
                                 <span>Résultats</span>
                             </div>
                         </div>
-                        
+
                         <div id="results-container">
                             <div class="empty-state" style="text-align: center; padding: 3rem;">
-                                <i class="fas fa-chart-pie" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                                <i class="fas fa-chart-pie"
+                                    style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
                                 <h3>Aucune donnée à afficher</h3>
                                 <p>Sélectionnez une école ou faculté pour voir les résultats</p>
                             </div>
@@ -615,6 +707,17 @@
         </main>
     </div>
 
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-message">Message de notification</span>
+    </div>
+
     <script src="config.js"></script>
     <script>
         // État de l'application
@@ -623,18 +726,24 @@
             currentElectionLevel: null,
             currentSchool: null,
             userData: null,
-            elections: []
+            elections: [],
+            candidates: {},
+            results: {}
         };
 
         // Initialisation de l'application
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
             const API_BASE = CONFIG.API.BASE_URL;
+            showLoading();
             await checkAuth();
             await loadUserData();
             await loadElections();
             setupEventListeners();
             updateUI();
+            hideLoading();
         });
+
+        // ==================== FONCTIONS PRINCIPALES ====================
 
         // Vérification de l'authentification
         async function checkAuth() {
@@ -642,40 +751,51 @@
                 window.location.href = 'login.html';
                 return;
             }
+
+            // Vérifier l'expiration du token
+            const token = localStorage.getItem('token');
+            const decoded = UTILS.decodeToken(token);
+
+            if (decoded && decoded.exp < Date.now() / 1000) {
+                showNotification('Votre session a expiré, veuillez vous reconnecter', 'error');
+                setTimeout(() => {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
         }
 
         // Chargement des données utilisateur
         async function loadUserData() {
             try {
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
 
-                if (!response.ok) throw new Error('Failed to load user data');
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                    }
+                    throw new Error('Failed to load user data');
+                }
 
                 APP_STATE.userData = await response.json();
                 updateUserProfile();
             } catch (error) {
                 console.error('Error loading user data:', error);
-                showError(CONFIG.MESSAGES.ERROR.NETWORK_ERROR);
+                showNotification(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
             }
-        }
-
-        // Mise à jour du profil utilisateur dans l'UI
-        function updateUserProfile() {
-            if (!APP_STATE.userData) return;
-
-            document.getElementById('username').textContent = APP_STATE.userData.fullName;
-            document.getElementById('user-program').textContent = APP_STATE.userData.program;
-            document.getElementById('user-role').textContent = APP_STATE.userData.role === 'student' ? 'Électeur' : 'Administrateur';
         }
 
         // Chargement des élections
         async function loadElections() {
             try {
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
+                showLoading();
+                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -683,125 +803,46 @@
 
                 if (!response.ok) throw new Error('Failed to load elections');
 
-                APP_STATE.elections = await response.json();
+                const data = await response.json();
+                APP_STATE.elections = data.elections || [];
+
+                // Charger les candidats pour chaque élection
+                await loadCandidatesForElections();
+
                 updateElectionsUI();
             } catch (error) {
                 console.error('Error loading elections:', error);
-                showError(CONFIG.MESSAGES.ERROR.NETWORK_ERROR);
+                showNotification(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
-        // Mise à jour de l'UI des élections
-        function updateElectionsUI() {
-            // Mettre à jour les compteurs
-            const activeElections = APP_STATE.elections.filter(e => e.status === CONFIG.ELECTION.STATUS.ACTIVE);
-            document.getElementById('active-elections-count').textContent = activeElections.length;
+        // Charger les candidats pour chaque élection
+        async function loadCandidatesForElections() {
+            try {
+                for (const election of APP_STATE.elections) {
+                    const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.CANDIDATE.LIST}?electionId=${election.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    });
 
-            // Afficher les élections en cours
-            const electionsContainer = document.getElementById('current-elections');
-            
-            if (activeElections.length === 0) {
-                electionsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-inbox" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
-                        <p>Aucune élection active pour le moment</p>
-                    </div>
-                `;
-                return;
-            }
-
-            electionsContainer.innerHTML = activeElections.map(election => `
-                <div class="election-item" data-election-id="${election.id}">
-                    <div class="election-info">
-                        <h3 class="election-title">${election.title}</h3>
-                        <div class="election-meta">
-                            <span><i class="fas fa-calendar-alt"></i> Clôture: ${UTILS.formatDate(election.endDate)}</span>
-                            <span><i class="fas fa-users"></i> ${election.candidatesCount} candidats</span>
-                            <span class="election-badge badge-active">Active</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary vote-btn" data-election-id="${election.id}">
-                        <i class="fas fa-pen"></i> Voter
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            // Navigation principale
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    switchView(section);
-                });
-            });
-
-            // Boutons de navigation hiérarchique
-            document.querySelectorAll('.hierarchy-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const school = this.dataset.school;
-                    loadSchoolResults(school);
-                });
-            });
-
-            // Bouton de rafraîchissement
-            document.getElementById('refresh-btn').addEventListener('click', async () => {
-                await loadElections();
-                showSuccess('Données actualisées');
-            });
-
-            // Bouton de déconnexion
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
-            });
-
-            // Liens textuels
-            document.querySelectorAll('.text-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    switchView(section);
-                });
-            });
-        }
-
-        // Changement de vue
-        function switchView(view) {
-            APP_STATE.currentView = view;
-            
-            // Masquer toutes les sections
-            document.querySelectorAll('#dynamic-content > div').forEach(section => {
-                section.style.display = 'none';
-            });
-
-            // Afficher la section demandée
-            document.getElementById(`${view}-section`).style.display = 'block';
-            document.getElementById('page-title').textContent = getViewTitle(view);
-            
-            // Gestion spéciale pour la vue résultats
-            if (view === 'results') {
-                document.getElementById('hierarchy-nav').style.display = 'flex';
-                document.getElementById('page-subtitle').textContent = 'Consultez les résultats par école/faculté';
-            } else {
-                document.getElementById('hierarchy-nav').style.display = 'none';
-                document.getElementById('page-subtitle').textContent = getViewSubtitle(view);
-            }
-
-            // Mettre à jour la navigation active
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.section === view) {
-                    item.classList.add('active');
+                    if (response.ok) {
+                        const data = await response.json();
+                        APP_STATE.candidates[election.id] = data.candidates || [];
+                    }
                 }
-            });
+            } catch (error) {
+                console.error('Error loading candidates:', error);
+            }
         }
 
-        // Chargement des résultats par école/faculté
+        // Charger les résultats pour une école/faculté
         async function loadSchoolResults(schoolCode) {
             try {
+                showLoading();
+
                 // Mettre à jour l'UI des boutons
                 document.querySelectorAll('.hierarchy-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -825,45 +866,62 @@
 
                 // Simuler un chargement
                 document.getElementById('results-container').innerHTML = `
-                    <div class="loading-state">
+                    <div style="text-align: center; padding: 2rem;">
                         <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
                         <p>Chargement des résultats...</p>
                     </div>
                 `;
 
-                // Simuler une requête API
-                setTimeout(() => {
-                    displaySchoolResults(school);
-                }, 1000);
+                // Récupérer les résultats depuis l'API
+                const response = await fetch(`${API_BASE}/api/results?school=${schoolCode}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
 
+                if (!response.ok) throw new Error('Failed to load results');
+
+                const results = await response.json();
+                APP_STATE.results[schoolCode] = results;
+
+                displaySchoolResults(school, results);
             } catch (error) {
                 console.error('Error loading school results:', error);
-                showError(CONFIG.MESSAGES.ERROR.NETWORK_ERROR);
+                showNotification(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+                document.getElementById('results-container').innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 3rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error); margin-bottom: 1rem;"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les résultats pour cette école/faculté</p>
+                    </div>
+                `;
+            } finally {
+                hideLoading();
             }
         }
 
-        // Affichage des résultats d'une école
-        function displaySchoolResults(school) {
+        // ==================== FONCTIONS D'AFFICHAGE ====================
+
+        // Afficher les résultats d'une école
+        function displaySchoolResults(school, results) {
             let resultsHTML = `<h2 style="margin-bottom: 1.5rem; color: var(--primary);">${school.nom}</h2>`;
 
             // Générer les résultats pour chaque filière
             school.filieres.forEach(filiere => {
-                // Simuler des données de résultats
-                const totalVoters = Math.floor(Math.random() * 50) + 20;
-                const candidates = [];
-                
-                for (let i = 1; i <= 5; i++) {
-                    const votes = Math.floor(Math.random() * totalVoters / 2);
-                    candidates.push({
-                        name: `Candidat ${i}`,
-                        votes: votes,
-                        percent: Math.round((votes / totalVoters) * 100),
-                        isWinner: i <= 2
-                    });
+                const filiereResults = results[filiere] || [];
+
+                if (filiereResults.length === 0) {
+                    resultsHTML += `
+                        <div class="filiere-results" style="margin-bottom: 2.5rem;">
+                            <h3 style="margin-bottom: 1rem; color: var(--secondary);">${filiere}</h3>
+                            <p style="color: var(--text-light); font-style: italic;">Aucun résultat disponible pour cette filière</p>
+                        </div>
+                    `;
+                    return;
                 }
 
-                // Trier par nombre de votes
-                candidates.sort((a, b) => b.votes - a.votes);
+                // Calculer le total des voix
+                const totalVotes = filiereResults.reduce((sum, candidate) => sum + candidate.votes, 0);
 
                 resultsHTML += `
                     <div class="filiere-results" style="margin-bottom: 2.5rem;">
@@ -879,19 +937,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${candidates.map((cand, idx) => `
+                                ${filiereResults.map((candidate, index) => `
                                     <tr>
-                                        <td>${idx + 1}</td>
-                                        <td>${cand.name}</td>
-                                        <td>${cand.votes}</td>
-                                        <td>${cand.percent}%</td>
-                                        <td>${cand.isWinner ? '<span class="winner-badge">Gagnant</span>' : ''}</td>
+                                        <td>${index + 1}</td>
+                                        <td>
+                                            <div class="candidate-info">
+                                                <img src="${candidate.photo || 'https://randomuser.me/api/portraits/lego/' + (index % 10) + '.jpg'}" 
+                                                     alt="Photo de ${candidate.name}" 
+                                                     class="candidate-photo">
+                                                <span>${candidate.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>${candidate.votes}</td>
+                                        <td>${UTILS.calculatePercentage(candidate.votes, totalVotes)}%</td>
+                                        <td>${index < 2 ? '<span class="winner-badge">Gagnant</span>' : ''}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
                         <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
-                            <i class="fas fa-users"></i> ${totalVoters} électeurs au total
+                            <i class="fas fa-users"></i> ${totalVotes} électeurs au total
                         </div>
                     </div>
                 `;
@@ -900,7 +965,173 @@
             document.getElementById('results-container').innerHTML = resultsHTML;
         }
 
-        // Fonctions utilitaires UI
+        // Mise à jour du profil utilisateur dans l'UI
+        function updateUserProfile() {
+            if (!APP_STATE.userData) return;
+
+            document.getElementById('username').textContent = APP_STATE.userData.fullName;
+            document.getElementById('user-program').textContent = APP_STATE.userData.program || '-';
+            document.getElementById('user-role').textContent = APP_STATE.userData.role === 'student' ? 'Électeur' : 'Administrateur';
+
+            // Mettre à jour la photo de profil si disponible
+            if (APP_STATE.userData.photo) {
+                document.getElementById('user-avatar').src = APP_STATE.userData.photo;
+            }
+        }
+
+        // Mise à jour de l'UI des élections
+        function updateElectionsUI() {
+            // Filtrer les élections actives
+            const activeElections = APP_STATE.elections.filter(
+                e => e.status === CONFIG.ELECTION.STATUS.ACTIVE &&
+                    (e.level === APP_STATE.currentElectionLevel || !APP_STATE.currentElectionLevel)
+            );
+
+            // Mettre à jour les compteurs
+            document.getElementById('active-elections-count').textContent = activeElections.length;
+
+            // Mettre à jour le nombre de votes effectués
+            const votesCount = APP_STATE.elections.reduce((sum, election) => sum + (election.hasVoted ? 1 : 0), 0);
+            document.getElementById('votes-count').textContent = votesCount;
+
+            // Trouver la prochaine élection
+            const now = new Date();
+            const upcomingElections = APP_STATE.elections
+                .filter(e => e.status === CONFIG.ELECTION.STATUS.UPCOMING && new Date(e.startDate) > now)
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+            if (upcomingElections.length > 0) {
+                const nextElection = upcomingElections[0];
+                const daysLeft = Math.ceil((new Date(nextElection.startDate) - now) / (1000 * 60 * 60 * 24));
+
+                document.getElementById('next-election').textContent = daysLeft;
+                document.getElementById('next-election-label').textContent = nextElection.title;
+            }
+
+            // Afficher les élections en cours
+            const electionsContainer = document.getElementById('current-elections');
+
+            if (activeElections.length === 0) {
+                electionsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                        <p>Aucune élection active pour le moment</p>
+                    </div>
+                `;
+                return;
+            }
+
+            electionsContainer.innerHTML = activeElections.map(election => {
+                const candidates = APP_STATE.candidates[election.id] || [];
+                return `
+                    <div class="election-item" data-election-id="${election.id}">
+                        <div class="election-info">
+                            <h3 class="election-title">${election.title}</h3>
+                            <div class="election-meta">
+                                <span><i class="fas fa-calendar-alt"></i> Clôture: ${UTILS.formatDate(election.endDate)}</span>
+                                <span><i class="fas fa-users"></i> ${candidates.length} candidats</span>
+                                <span class="election-badge badge-active">Active</span>
+                            </div>
+                        </div>
+                        ${election.hasVoted ?
+                        `<span class="election-badge" style="background: rgba(56, 161, 105, 0.2); color: var(--success);">
+                                <i class="fas fa-check"></i> Vous avez voté
+                            </span>` :
+                        `<button class="btn btn-primary vote-btn" data-election-id="${election.id}">
+                                <i class="fas fa-pen"></i> Voter
+                            </button>`
+                    }
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== GESTION DES ÉVÉNEMENTS ====================
+
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Navigation principale
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchView(section);
+                });
+            });
+
+            // Boutons de navigation hiérarchique
+            document.querySelectorAll('.hierarchy-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const school = this.dataset.school;
+                    loadSchoolResults(school);
+                });
+            });
+
+            // Bouton de rafraîchissement
+            document.getElementById('refresh-btn').addEventListener('click', async () => {
+                await loadElections();
+                showNotification('Données actualisées avec succès', 'success');
+            });
+
+            // Bouton de déconnexion
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            // Liens textuels
+            document.querySelectorAll('.text-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchView(section);
+                });
+            });
+
+            // Boutons de vote
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('vote-btn') || e.target.closest('.vote-btn')) {
+                    const btn = e.target.classList.contains('vote-btn') ? e.target : e.target.closest('.vote-btn');
+                    const electionId = btn.dataset.electionId;
+                    openVotingModal(electionId);
+                }
+            });
+        }
+
+        // ==================== FONCTIONS UTILITAIRES ====================
+
+        // Changement de vue
+        function switchView(view) {
+            APP_STATE.currentView = view;
+
+            // Masquer toutes les sections
+            document.querySelectorAll('#dynamic-content > div').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Afficher la section demandée
+            document.getElementById(`${view}-section`).style.display = 'block';
+            document.getElementById('page-title').textContent = getViewTitle(view);
+
+            // Gestion spéciale pour la vue résultats
+            if (view === 'results') {
+                document.getElementById('hierarchy-nav').style.display = 'flex';
+                document.getElementById('page-subtitle').textContent = 'Consultez les résultats par école/faculté';
+            } else {
+                document.getElementById('hierarchy-nav').style.display = 'none';
+                document.getElementById('page-subtitle').textContent = getViewSubtitle(view);
+            }
+
+            // Mettre à jour la navigation active
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === view) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Obtenir le titre d'une vue
         function getViewTitle(view) {
             const titles = {
                 'dashboard': 'Tableau de Bord',
@@ -912,6 +1143,7 @@
             return titles[view] || 'Tableau de Bord';
         }
 
+        // Obtenir le sous-titre d'une vue
         function getViewSubtitle(view) {
             const subtitles = {
                 'dashboard': 'Vue d\'ensemble de vos activités électorales',
@@ -922,17 +1154,42 @@
             return subtitles[view] || '';
         }
 
-        function showError(message) {
-            // Implémenter un système de notification
-            console.error('Error:', message);
-            alert(message); // Temporaire - à remplacer par un système de notification
+        // Afficher une notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationMsg = document.getElementById('notification-message');
+
+            notification.className = `notification ${type}`;
+            notificationMsg.textContent = message;
+
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
         }
 
-        function showSuccess(message) {
-            // Implémenter un système de notification
-            console.log('Success:', message);
-            alert(message); // Temporaire - à remplacer par un système de notification
+        // Afficher le loader
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
         }
+
+        // Cacher le loader
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // Ouvrir le modal de vote
+        function openVotingModal(electionId) {
+            // Implémentation simplifiée - à compléter avec un vrai modal
+            const election = APP_STATE.elections.find(e => e.id === electionId);
+            if (!election) return;
+
+            showNotification(`Redirection vers le vote pour: ${election.title}`, 'info');
+            // window.location.href = `vote.html?electionId=${electionId}`;
+        }
+
+        // ==================== INITIALISATION ====================
 
         // Mise à jour globale de l'UI
         function updateUI() {
@@ -941,4 +1198,5 @@
         }
     </script>
 </body>
+
 </html>
