@@ -772,84 +772,7 @@
             color: var(--secondary);
         }
 
-        @media (max-width: 768px) {
-            .profile-container {
-                grid-template-columns: 1fr;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-        }
-
-        .avatar-upload-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.5rem;
-            border-bottom-left-radius: 75px;
-            border-bottom-right-radius: 75px;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            margin-bottom: 0.25rem;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-bar::after {
-            content: '';
-            display: block;
-            height: 100%;
-            width: 0%;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
-        .avatar-preview {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .avatar-preview.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .avatar-preview img {
-            max-width: 80%;
-            max-height: 60vh;
-            border: 3px solid white;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .avatar-preview-actions {
-            display: flex;
-            gap: 1rem;
-        }
-
-        /* Styles pour le modal */
+        /* Modal styles */
         .modal {
             position: fixed;
             top: 0;
@@ -913,7 +836,7 @@
             padding: 1.5rem;
         }
 
-        /* Styles spécifiques au formulaire de mot de passe */
+        /* Password strength indicator */
         .password-toggle {
             position: absolute;
             right: 12px;
@@ -1139,167 +1062,164 @@
                     </div>
                 </div>
 
-                <!-- Autres sections (masquées par défaut) -->
+                <!-- Section Élections -->
                 <div id="elections-section" style="display: none;">
-                    <div id="elections-section" style="display: none;">
-                        <div class="card">
-                            <h2 class="section-title">
-                                <i class="fas fa-vote-yea"></i>
-                                Toutes mes élections
-                            </h2>
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-vote-yea"></i>
+                            Toutes mes élections
+                        </h2>
 
-                            <div class="election-filters">
-                                <div class="filter-group">
-                                    <label for="status-filter">Statut :</label>
-                                    <select id="status-filter" class="filter-select">
-                                        <option value="all">Toutes</option>
-                                        <option value="active">Actives</option>
-                                        <option value="upcoming">À venir</option>
-                                        <option value="ended">Terminées</option>
-                                    </select>
-                                </div>
-
-                                <div class="filter-group">
-                                    <label for="type-filter">Type :</label>
-                                    <select id="type-filter" class="filter-select">
-                                        <option value="all">Tous</option>
-                                        <option value="school">École</option>
-                                        <option value="faculty">Faculté</option>
-                                        <option value="university">Université</option>
-                                    </select>
-                                </div>
+                        <div class="election-filters">
+                            <div class="filter-group">
+                                <label for="status-filter">Statut :</label>
+                                <select id="status-filter" class="filter-select">
+                                    <option value="all">Toutes</option>
+                                    <option value="active">Actives</option>
+                                    <option value="upcoming">À venir</option>
+                                    <option value="ended">Terminées</option>
+                                </select>
                             </div>
 
-                            <div class="election-list" id="all-elections-list">
-                                <!-- Contenu généré dynamiquement -->
+                            <div class="filter-group">
+                                <label for="type-filter">Type :</label>
+                                <select id="type-filter" class="filter-select">
+                                    <option value="all">Tous</option>
+                                    <option value="school">École</option>
+                                    <option value="faculty">Faculté</option>
+                                    <option value="university">Université</option>
+                                </select>
                             </div>
+                        </div>
+
+                        <div class="election-list" id="all-elections-list">
+                            <!-- Contenu généré dynamiquement -->
                         </div>
                     </div>
                 </div>
+
+                <!-- Section Candidats -->
                 <div id="candidates-section" style="display: none;">
-                    <div id="candidates-section" style="display: none;">
-                        <div class="card">
-                            <h2 class="section-title">
-                                <i class="fas fa-users"></i>
-                                Candidats aux élections
-                            </h2>
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-users"></i>
+                            Candidats aux élections
+                        </h2>
 
-                            <div class="candidate-filters">
-                                <div class="filter-group">
-                                    <label for="election-filter">Élection :</label>
-                                    <select id="election-filter" class="filter-select">
-                                        <option value="all">Toutes les élections</option>
-                                        <!-- Options générées dynamiquement -->
-                                    </select>
-                                </div>
-
-                                <div class="filter-group">
-                                    <label for="program-filter">Filière :</label>
-                                    <select id="program-filter" class="filter-select">
-                                        <option value="all">Toutes les filières</option>
-                                        <!-- Options générées dynamiquement -->
-                                    </select>
-                                </div>
+                        <div class="election-filters">
+                            <div class="filter-group">
+                                <label for="election-filter">Élection :</label>
+                                <select id="election-filter" class="filter-select">
+                                    <option value="all">Toutes les élections</option>
+                                    <!-- Options générées dynamiquement -->
+                                </select>
                             </div>
 
-                            <div class="candidates-grid" id="candidates-list">
-                                <!-- Contenu généré dynamiquement -->
+                            <div class="filter-group">
+                                <label for="program-filter">Filière :</label>
+                                <select id="program-filter" class="filter-select">
+                                    <option value="all">Toutes les filières</option>
+                                    <!-- Options générées dynamiquement -->
+                                </select>
                             </div>
+                        </div>
+
+                        <div class="candidates-grid" id="candidates-list">
+                            <!-- Contenu généré dynamiquement -->
                         </div>
                     </div>
                 </div>
+
+                <!-- Section Profil -->
                 <div id="profile-section" style="display: none;">
-                    <div id="profile-section" style="display: none;">
-                        <div class="card">
-                            <h2 class="section-title">
-                                <i class="fas fa-user-cog"></i>
-                                Mon Profil
-                            </h2>
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-user-cog"></i>
+                            Mon Profil
+                        </h2>
 
-                            <div class="profile-container">
-                                <div class="profile-sidebar">
-                                    <!-- Remplacer la partie avatar existante par : -->
-                                    <div class="profile-avatar-container">
-                                        <img id="profile-avatar" src="https://randomuser.me/api/portraits/men/32.jpg"
-                                            alt="Photo de profil" class="profile-avatar">
-                                        <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                                        <button type="button" class="btn btn-outline avatar-upload-btn"
-                                            id="avatar-upload-trigger">
-                                            <i class="fas fa-camera"></i> Changer
-                                        </button>
-                                        <div class="avatar-upload-progress" id="avatar-upload-progress"
-                                            style="display: none;">
-                                            <div class="progress-bar"></div>
-                                            <span class="progress-text">Téléversement en cours...</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="profile-quick-info">
-                                        <h3 id="profile-name">-</h3>
-                                        <p id="profile-matricule">Matricule: -</p>
-                                        <p id="profile-program">Filière: -</p>
-                                        <p id="profile-year">Année: -</p>
+                        <div class="profile-container">
+                            <div class="profile-sidebar">
+                                <div class="profile-avatar-container">
+                                    <img id="profile-avatar" src="https://randomuser.me/api/portraits/men/32.jpg"
+                                        alt="Photo de profil" class="profile-avatar">
+                                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-outline avatar-upload-btn"
+                                        id="avatar-upload-trigger">
+                                        <i class="fas fa-camera"></i> Changer
+                                    </button>
+                                    <div class="avatar-upload-progress" id="avatar-upload-progress"
+                                        style="display: none;">
+                                        <div class="progress-bar"></div>
+                                        <span class="progress-text">Téléversement en cours...</span>
                                     </div>
                                 </div>
 
-                                <div class="profile-content">
-                                    <form id="profile-form">
+                                <div class="profile-quick-info">
+                                    <h3 id="profile-name">-</h3>
+                                    <p id="profile-matricule">Matricule: -</p>
+                                    <p id="profile-program">Filière: -</p>
+                                    <p id="profile-year">Année: -</p>
+                                </div>
+                            </div>
+
+                            <div class="profile-content">
+                                <form id="profile-form">
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
+
+                                    <div class="form-row">
                                         <div class="form-group">
-                                            <label for="email">Email</label>
-                                            <input type="email" id="email" name="email" required>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <div class="form-group">
-                                                <label for="lastname">Nom</label>
-                                                <input type="text" id="lastname" name="lastname" required>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="firstname">Prénom</label>
-                                                <input type="text" id="firstname" name="firstname" required>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <div class="form-group">
-                                                <label for="program">Filière</label>
-                                                <select id="program" name="program" required>
-                                                    <!-- Options générées dynamiquement -->
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="year">Année</label>
-                                                <select id="year" name="year" required>
-                                                    <option value="1">1ère année</option>
-                                                    <option value="2">2ème année</option>
-                                                    <option value="3">3ème année</option>
-                                                </select>
-                                            </div>
+                                            <label for="lastname">Nom</label>
+                                            <input type="text" id="lastname" name="lastname" required>
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="phone">Téléphone</label>
-                                            <input type="tel" id="phone" name="phone">
+                                            <label for="firstname">Prénom</label>
+                                            <input type="text" id="firstname" name="firstname" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="program">Filière</label>
+                                            <select id="program" name="program" required>
+                                                <!-- Options générées dynamiquement -->
+                                            </select>
                                         </div>
 
-                                        <div class="form-actions">
-                                            <button type="button" class="btn btn-outline" id="cancel-changes">
-                                                Annuler
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">
-                                                Enregistrer les modifications
-                                            </button>
+                                        <div class="form-group">
+                                            <label for="year">Année</label>
+                                            <select id="year" name="year" required>
+                                                <option value="1">1ère année</option>
+                                                <option value="2">2ème année</option>
+                                                <option value="3">3ème année</option>
+                                            </select>
                                         </div>
-                                    </form>
+                                    </div>
 
-                                    <div class="profile-security">
-                                        <h3><i class="fas fa-shield-alt"></i> Sécurité du compte</h3>
-                                        <button class="btn btn-outline" id="change-password-btn">
-                                            <i class="fas fa-key"></i> Changer le mot de passe
+                                    <div class="form-group">
+                                        <label for="phone">Téléphone</label>
+                                        <input type="tel" id="phone" name="phone">
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-outline" id="cancel-changes">
+                                            Annuler
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            Enregistrer les modifications
                                         </button>
                                     </div>
+                                </form>
+
+                                <div class="profile-security">
+                                    <h3><i class="fas fa-shield-alt"></i> Sécurité du compte</h3>
+                                    <button class="btn btn-outline" id="change-password-btn">
+                                        <i class="fas fa-key"></i> Changer le mot de passe
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1307,6 +1227,62 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Modal de changement de mot de passe -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Changer le mot de passe</h3>
+                <button class="modal-close" id="password-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Mot de passe actuel</label>
+                        <div style="position: relative;">
+                            <input type="password" id="current-password" name="current-password" required>
+                            <span class="password-toggle" data-target="current-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-password">Nouveau mot de passe</label>
+                        <div style="position: relative;">
+                            <input type="password" id="new-password" name="new-password" required>
+                            <span class="password-toggle" data-target="new-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="password-strength" id="password-strength">
+                            <span class="strength-text">Force du mot de passe</span>
+                            <div class="strength-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+                        <div style="position: relative;">
+                            <input type="password" id="confirm-password" name="confirm-password" required>
+                            <span class="password-toggle" data-target="confirm-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" id="cancel-password-change">
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Overlay de chargement -->
@@ -1320,9 +1296,92 @@
         <span id="notification-message">Message de notification</span>
     </div>
 
-    <script src="config.js"></script>
     <script>
-        const API_BASE = CONFIG.API.BASE_URL;
+        // Configuration de l'application
+        const CONFIG = {
+            API: {
+                BASE_URL: 'https://api.ucao-uuc.com/v1',
+                ENDPOINTS: {
+                    USERS: {
+                        PROFILE: '/users/profile',
+                        AVATAR: '/users/avatar',
+                        CHANGE_PASSWORD: '/users/password'
+                    },
+                    ELECTION: {
+                        LIST: '/elections',
+                        DETAILS: '/elections/'
+                    },
+                    CANDIDATE: {
+                        LIST: '/candidates'
+                    },
+                    RESULTS: {
+                        BY_SCHOOL: '/results/school/'
+                    }
+                }
+            },
+            ACADEMIC: {
+                PROGRAMS: [
+                    { code: 'info', name: 'Informatique' },
+                    { code: 'gestion', name: 'Gestion' },
+                    { code: 'compta', name: 'Comptabilité' },
+                    { code: 'marketing', name: 'Marketing' }
+                ],
+                ECOLES: {
+                    EGEI: {
+                        nom: "École de Gestion et d'Économie Informatique",
+                        filieres: ['Informatique', 'Gestion', 'Comptabilité', 'Marketing']
+                    },
+                    ESMEA: {
+                        nom: "École des Sciences et Métiers de l'Entreprise Africaine",
+                        filieres: ['Gestion', 'Marketing']
+                    },
+                    FSAE: {
+                        nom: "Faculté des Sciences Administratives et Économiques",
+                        filieres: ['Gestion', 'Comptabilité']
+                    },
+                    FDE: {
+                        nom: "Faculté de Droit et d'Économie",
+                        filieres: ['Droit', 'Économie']
+                    }
+                }
+            },
+            ELECTION: {
+                STATUS: {
+                    ACTIVE: 'active',
+                    UPCOMING: 'upcoming',
+                    ENDED: 'ended'
+                }
+            },
+            MESSAGES: {
+                ERROR: {
+                    NETWORK_ERROR: 'Erreur de connexion. Veuillez réessayer plus tard.'
+                }
+            }
+        };
+
+        // Utilitaires
+        const UTILS = {
+            isAuthenticated: () => {
+                return !!localStorage.getItem('token');
+            },
+            decodeToken: (token) => {
+                try {
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    return JSON.parse(atob(base64));
+                } catch (e) {
+                    return null;
+                }
+            },
+            formatDate: (dateString) => {
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('fr-FR', options);
+            },
+            calculatePercentage: (value, total) => {
+                return total > 0 ? Math.round((value / total) * 100) : 0;
+            }
+        };
+
         // État de l'application
         const APP_STATE = {
             currentView: 'dashboard',
@@ -1371,7 +1430,7 @@
         // Chargement des données utilisateur
         async function loadUserData() {
             try {
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -1397,7 +1456,7 @@
         async function loadElections() {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -1424,7 +1483,7 @@
         async function loadCandidatesForElections() {
             try {
                 for (const election of APP_STATE.elections) {
-                    const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.CANDIDATE.LIST}?electionId=${election.id}`, {
+                    const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.LIST}?electionId=${election.id}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
@@ -1475,7 +1534,7 @@
                 `;
 
                 // Récupérer les résultats depuis l'API
-                const response = await fetch(`${API_BASE}/api/results?school=${schoolCode}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.RESULTS.BY_SCHOOL}${schoolCode}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -1502,9 +1561,8 @@
             }
         }
 
-        // Nouvelle fonction à ajouter
+        // Afficher toutes les élections avec filtres
         function displayAllElections() {
-
             const container = document.getElementById('all-elections-list');
             const statusFilter = document.getElementById('status-filter').value;
             const typeFilter = document.getElementById('type-filter').value;
@@ -1523,55 +1581,55 @@
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>Aucune élection ne correspond à vos filtres</p>
-            </div>
-        `;
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Aucune élection ne correspond à vos filtres</p>
+                    </div>
+                `;
                 return;
             }
 
             container.innerHTML = filtered.map(election => `
-        <div class="election-item">
-            <div class="election-info">
-                <h3 class="election-title">${election.title}</h3>
-                <div class="election-meta">
-                    <span><i class="fas fa-calendar-alt"></i> 
-                        ${UTILS.formatDate(election.startDate)} - ${UTILS.formatDate(election.endDate)}
-                    </span>
-                    <span><i class="fas fa-users"></i> 
-                        ${APP_STATE.candidates[election.id]?.length || 0} candidats
-                    </span>
-                    <span class="election-badge ${getStatusBadgeClass(election.status)}">
-                        ${getStatusText(election.status)}
-                    </span>
+                <div class="election-item">
+                    <div class="election-info">
+                        <h3 class="election-title">${election.title}</h3>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt"></i> 
+                                ${UTILS.formatDate(election.startDate)} - ${UTILS.formatDate(election.endDate)}
+                            </span>
+                            <span><i class="fas fa-users"></i> 
+                                ${APP_STATE.candidates[election.id]?.length || 0} candidats
+                            </span>
+                            <span class="election-badge ${getStatusBadgeClass(election.status)}">
+                                ${getStatusText(election.status)}
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn ${election.status === 'active' ? 'btn-primary' : 'btn-outline'} details-btn" 
+                            data-election-id="${election.id}">
+                        <i class="fas fa-info-circle"></i> Détails
+                    </button>
+                    
+                    <div class="election-details" id="details-${election.id}">
+                        <h4>Description :</h4>
+                        <p>${election.description || 'Aucune description disponible'}</p>
+                        
+                        <h4>Règles :</h4>
+                        <ul>
+                            <li>Mode de scrutin : ${election.votingMode || 'Majoritaire'}</li>
+                            <li>Quorum : ${election.quorum || 'Non spécifié'}</li>
+                        </ul>
+                        
+                        ${election.status === 'ended' ? `
+                            <a href="#" class="btn btn-outline results-link" 
+                               data-election-id="${election.id}" 
+                               style="margin-top: 1rem;">
+                                <i class="fas fa-chart-bar"></i> Voir les résultats
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
-            </div>
-            <button class="btn ${election.status === 'active' ? 'btn-primary' : 'btn-outline'} details-btn" 
-                    data-election-id="${election.id}">
-                <i class="fas fa-info-circle"></i> Détails
-            </button>
-            
-            <div class="election-details" id="details-${election.id}">
-                <h4>Description :</h4>
-                <p>${election.description || 'Aucune description disponible'}</p>
-                
-                <h4>Règles :</h4>
-                <ul>
-                    <li>Mode de scrutin : ${election.votingMode || 'Majoritaire'}</li>
-                    <li>Quorum : ${election.quorum || 'Non spécifié'}</li>
-                </ul>
-                
-                ${election.status === 'ended' ? `
-                    <a href="#" class="btn btn-outline results-link" 
-                       data-election-id="${election.id}" 
-                       style="margin-top: 1rem;">
-                        <i class="fas fa-chart-bar"></i> Voir les résultats
-                    </a>
-                ` : ''}
-            </div>
-        </div>
-    `).join('');
+            `).join('');
 
             // Gestion des boutons détails
             document.querySelectorAll('.details-btn').forEach(btn => {
@@ -1590,7 +1648,7 @@
             document.getElementById('type-filter').addEventListener('change', displayAllElections);
         }
 
-        // Nouvelle fonction à ajouter
+        // Afficher les candidats avec filtres
         function displayCandidates() {
             const container = document.getElementById('candidates-list');
             const electionFilter = document.getElementById('election-filter');
@@ -1660,46 +1718,48 @@
 
             if (candidates.length === 0) {
                 container.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
-                <i class="fas fa-user-slash"></i>
-                <p>Aucun candidat ne correspond à vos critères</p>
-            </div>
-        `;
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-user-slash"></i>
+                        <p>Aucun candidat ne correspond à vos critères</p>
+                    </div>
+                `;
                 return;
             }
 
             container.innerHTML = candidates.map(candidate => `
-        <div class="candidate-card">
-            <div class="candidate-header">
-                <img src="${candidate.photo || 'https://randomuser.me/api/portraits/lego/1.jpg'}" 
-                     alt="${candidate.name}" 
-                     class="candidate-photo-lg">
-            </div>
-            <div class="candidate-body">
-                <h3 class="candidate-name">${candidate.name}</h3>
-                <p class="candidate-program">${candidate.program || 'Non spécifié'}</p>
-                
-                <div class="candidate-election">
-                    <i class="fas fa-vote-yea"></i> 
-                    ${getElectionTitle(candidate.electionId)}
+                <div class="candidate-card">
+                    <div class="candidate-header">
+                        <img src="${candidate.photo || 'https://randomuser.me/api/portraits/lego/1.jpg'}" 
+                             alt="${candidate.name}" 
+                             class="candidate-photo-lg">
+                    </div>
+                    <div class="candidate-body">
+                        <h3 class="candidate-name">${candidate.name}</h3>
+                        <p class="candidate-program">${candidate.program || 'Non spécifié'}</p>
+                        
+                        <div class="candidate-election">
+                            <i class="fas fa-vote-yea"></i> 
+                            ${getElectionTitle(candidate.electionId)}
+                        </div>
+                        
+                        <p class="candidate-bio">
+                            ${candidate.bio || 'Aucune biographie disponible'}
+                        </p>
+                        
+                        <a href="#" class="candidate-link" data-candidate-id="${candidate.id}">
+                            <i class="fas fa-eye"></i> Voir profil complet
+                        </a>
+                    </div>
                 </div>
-                
-                <p class="candidate-bio">
-                    ${candidate.bio || 'Aucune biographie disponible'}
-                </p>
-                
-                <a href="#" class="candidate-link" data-candidate-id="${candidate.id}">
-                    <i class="fas fa-eye"></i> Voir profil complet
-                </a>
-            </div>
-        </div>
-    `).join('');
+            `).join('');
         }
 
+        function getElectionTitle(electionId) {
+            const election = APP_STATE.elections.find(e => e.id === electionId);
+            return election ? election.title : 'Élection inconnue';
+        }
 
-
-
-        // Nouvelle fonction à ajouter
+        // Charger les données du profil
         function loadProfileData() {
             if (!APP_STATE.userData) return;
 
@@ -1741,6 +1801,7 @@
             // Photo de profil
             if (APP_STATE.userData.photo) {
                 document.getElementById('profile-avatar').src = APP_STATE.userData.photo;
+                document.getElementById('user-avatar').src = APP_STATE.userData.photo;
             }
 
             // Gestion du formulaire
@@ -1751,41 +1812,35 @@
                 document.getElementById('avatar-upload').click();
             });
 
-        }
+            // Gestion du téléversement de photo
+            document.getElementById('avatar-upload').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
 
-        // Dans loadProfileData(), ajouter :
-        document.getElementById('avatar-upload-trigger').addEventListener('click', () => {
-            document.getElementById('avatar-upload').click();
-        });
+                // Vérifier la taille du fichier (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    showNotification('La photo ne doit pas dépasser 2MB', 'error');
+                    return;
+                }
 
-        // Gestion du téléversement de photo
-        document.getElementById('avatar-upload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+                // Afficher la prévisualisation
+                const preview = createAvatarPreviewModal(file);
+                document.body.appendChild(preview);
 
-            // Vérifier la taille du fichier (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('La photo ne doit pas dépasser 2MB', 'error');
-                return;
-            }
+                // Attendre la confirmation de l'utilisateur
+                const confirmed = await new Promise(resolve => {
+                    preview.querySelector('.confirm-btn').addEventListener('click', () => resolve(true));
+                    preview.querySelector('.cancel-btn').addEventListener('click', () => resolve(false));
+                });
 
-            // Afficher la prévisualisation
-            const preview = createAvatarPreviewModal(file);
-            document.body.appendChild(preview);
+                document.body.removeChild(preview);
 
-            // Attendre la confirmation de l'utilisateur
-            const confirmed = await new Promise(resolve => {
-                preview.querySelector('.confirm-btn').addEventListener('click', () => resolve(true));
-                preview.querySelector('.cancel-btn').addEventListener('click', () => resolve(false));
+                if (!confirmed) return;
+
+                // Téléverser la photo
+                await uploadAvatar(file);
             });
-
-            document.body.removeChild(preview);
-
-            if (!confirmed) return;
-
-            // Téléverser la photo
-            await uploadAvatar(file);
-        });
+        }
 
         function createAvatarPreviewModal(file) {
             const preview = document.createElement('div');
@@ -1794,16 +1849,16 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 preview.innerHTML = `
-            <img src="${e.target.result}" alt="Prévisualisation">
-            <div class="avatar-preview-actions">
-                <button class="btn btn-outline cancel-btn">
-                    <i class="fas fa-times"></i> Annuler
-                </button>
-                <button class="btn btn-primary confirm-btn">
-                    <i class="fas fa-check"></i> Confirmer
-                </button>
-            </div>
-        `;
+                    <img src="${e.target.result}" alt="Prévisualisation">
+                    <div class="avatar-preview-actions">
+                        <button class="btn btn-outline cancel-btn">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button class="btn btn-primary confirm-btn">
+                            <i class="fas fa-check"></i> Confirmer
+                        </button>
+                    </div>
+                `;
             };
             reader.readAsDataURL(file);
 
@@ -1820,18 +1875,12 @@
                 const progressBar = progress.querySelector('.progress-bar');
                 progress.style.display = 'block';
 
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.AVATAR}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.AVATAR}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
-                    body: formData,
-                    onUploadProgress: (e) => {
-                        const percent = Math.round((e.loaded * 100) / e.total);
-                        progressBar.style.width = `${percent}%`;
-                        progress.querySelector('.progress-text').textContent =
-                            `Téléversement en cours... ${percent}%`;
-                    }
+                    body: formData
                 });
 
                 if (!response.ok) throw new Error('Upload failed');
@@ -1869,7 +1918,7 @@
             try {
                 showLoading();
 
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1897,12 +1946,6 @@
             loadProfileData();
             showNotification('Modifications annulées', 'info');
         }
-
-        function openPasswordModal() {
-            // Implémenter un modal pour changer le mot de passe
-            showNotification('Ouverture du formulaire de changement de mot de passe', 'info');
-        }
-
 
         // ==================== FONCTIONS D'AFFICHAGE ====================
 
@@ -2050,22 +2093,62 @@
             }).join('');
         }
 
-
         // ==================== GESTION DES ÉVÉNEMENTS ====================
-        // Gestion du modal de mot de passe
-        function openPasswordModal() {
-            const modal = document.getElementById('password-modal');
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.classList.add('active');
-            }, 10);
 
-            // Réinitialiser le formulaire
-            document.getElementById('password-form').reset();
-            updatePasswordStrength('');
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Navigation principale
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchView(section);
+                });
+            });
+
+            // Boutons de navigation hiérarchique
+            document.querySelectorAll('.hierarchy-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const school = this.dataset.school;
+                    loadSchoolResults(school);
+                });
+            });
+
+            // Bouton de rafraîchissement
+            document.getElementById('refresh-btn').addEventListener('click', async () => {
+                await loadElections();
+                showNotification('Données actualisées avec succès', 'success');
+            });
+
+            // Bouton de déconnexion
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            });
+
+            // Liens textuels
+            document.querySelectorAll('.text-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchView(section);
+                });
+            });
+
+            // Boutons de vote
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('vote-btn') || e.target.closest('.vote-btn')) {
+                    const btn = e.target.classList.contains('vote-btn') ? e.target : e.target.closest('.vote-btn');
+                    const electionId = btn.dataset.electionId;
+                    openVotingModal(electionId);
+                }
+            });
+
+            // Gestion du modal de mot de passe
+            setupPasswordModal();
         }
 
-        // Fermer le modal
+        // Gestion du modal de mot de passe
         function setupPasswordModal() {
             document.getElementById('password-modal-close').addEventListener('click', closePasswordModal);
             document.getElementById('cancel-password-change').addEventListener('click', closePasswordModal);
@@ -2091,6 +2174,18 @@
 
             // Soumission du formulaire
             document.getElementById('password-form').addEventListener('submit', changePassword);
+        }
+
+        function openPasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+
+            // Réinitialiser le formulaire
+            document.getElementById('password-form').reset();
+            updatePasswordStrength('');
         }
 
         function closePasswordModal() {
@@ -2155,7 +2250,7 @@
             try {
                 showLoading();
 
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.CHANGE_PASSWORD}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.CHANGE_PASSWORD}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2182,60 +2277,8 @@
             }
         }
 
-        // Initialiser le modal au chargement
-        document.addEventListener('DOMContentLoaded', setupPasswordModal);
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            // Navigation principale
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    switchView(section);
-                });
-            });
-
-            // Boutons de navigation hiérarchique
-            document.querySelectorAll('.hierarchy-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const school = this.dataset.school;
-                    loadSchoolResults(school);
-                });
-            });
-
-            // Bouton de rafraîchissement
-            document.getElementById('refresh-btn').addEventListener('click', async () => {
-                await loadElections();
-                showNotification('Données actualisées avec succès', 'success');
-            });
-
-            // Bouton de déconnexion
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
-            });
-
-            // Liens textuels
-            document.querySelectorAll('.text-link').forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    switchView(section);
-                });
-            });
-
-            // Boutons de vote
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('vote-btn') || e.target.closest('.vote-btn')) {
-                    const btn = e.target.classList.contains('vote-btn') ? e.target : e.target.closest('.vote-btn');
-                    const electionId = btn.dataset.electionId;
-                    openVotingModal(electionId);
-                }
-            });
-        }
-
         // ==================== FONCTIONS UTILITAIRES ====================
-        // Fonctions utilitaires
+
         function getStatusBadgeClass(status) {
             return {
                 'active': 'badge-active',
@@ -2251,6 +2294,7 @@
                 'ended': 'Terminée'
             }[status] || '';
         }
+
         // Changement de vue
         function switchView(view) {
             APP_STATE.currentView = view;
@@ -2273,16 +2317,15 @@
                 document.getElementById('page-subtitle').textContent = getViewSubtitle(view);
             }
 
+            // Charger les données spécifiques à la vue
             if (view === 'elections') {
                 displayAllElections();
-            }
-
-            if (view === 'candidates') {
+            } else if (view === 'candidates') {
                 displayCandidates();
-            }
-            if (view === 'profile') {
+            } else if (view === 'profile') {
                 loadProfileData();
             }
+
             // Mettre à jour la navigation active
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -2349,8 +2392,6 @@
             showNotification(`Redirection vers le vote pour: ${election.title}`, 'info');
             // window.location.href = `vote.html?electionId=${electionId}`;
         }
-
-        // ==================== INITIALISATION ====================
 
         // Mise à jour globale de l'UI
         function updateUI() {
