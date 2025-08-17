@@ -134,29 +134,46 @@ const CONFIG = {
         }
     },
 
-    // Configuration des filières et années
     ACADEMIC: {
-        FILIERES: [
-            'Informatique',
-            'Gestion',
-            'Droit',
-            'Médecine',
-            'Ingénierie',
-            'Sciences Sociales',
-            'Lettres et Langues',
-            'Sciences Économiques',
-            'Sciences Politiques',
-            'Architecture'
-        ],
-        ANNEES: [1, 2, 3, 4, 5],
-        ECOLES: [
-            'École des Sciences et Technologies',
-            'École de Gestion et de Commerce',
-            'Faculté de Droit',
-            'Faculté de Médecine',
-            'École d\'Ingénieurs',
-            'Faculté des Sciences Sociales'
-        ]
+        ECOLES: {
+            EGEI: {
+                nom: "EGEI",
+                filieres: [
+                    'Électronique',
+                    'Génie Télécoms et TIC',
+                    'Informatique Industrielle et Maintenance',
+                    'Electrotechnique']
+            },
+            ESMEA: {
+                nom: "ESMEA",
+                filieres: [
+                    'Assurances',
+                    'Banque et Finance d\'Entreprise',
+                    'Audit et Contrôle de Gestion',
+                    'Management des Ressources Humaines',
+                    'Action Commerciale et Force de Vente',
+                    'Communication et Action Publicitaire',
+                    'Commerce',
+                    'Informatique de Gestion',
+                    'Transport et Logistique']
+            },
+            FSAE: {
+                nom: "FSAE",
+                filieres: [
+                    'Gestion de l\'Environnement et Aménagement du Territoire',
+                    'Production et Gestion des Ressources Animales',
+                    'Sciences et Techniques de Production Végétale',
+                    'Stockage Conservation et Conditionnement des Produits Agricoles',
+                    'Gestion des Entreprises Rurales et Agricoles']
+            },
+            FDE: {
+                nom: "FDE",
+                filieres: [
+                    'Droit', 
+                    'Economie']
+            }
+        },
+        ANNEES: [1, 2, 3]
     },
 
     // Configuration des notifications

@@ -345,222 +345,206 @@
     </div>
 
     <script src="config.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', function () {
-            // Animation du slider d'arrière-plan
-            const backgroundImages = document.querySelectorAll('.background-slider img');
-            let currentImage = 0;
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configuration et initialisation
+        const API_BASE = CONFIG.API.BASE_URL;
+        const REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.REGISTER;
 
-            function changeBackground() {
-                backgroundImages[currentImage].classList.remove('active');
-                currentImage = (currentImage + 1) % backgroundImages.length;
-                backgroundImages[currentImage].classList.add('active');
+        // Éléments du DOM
+        const elements = {
+            form: document.getElementById('registerForm'),
+            error: document.getElementById('errorMessage'),
+            success: document.getElementById('successMessage'),
+            loading: document.getElementById('loading'),
+            button: document.getElementById('registerBtn'),
+            ecole: document.getElementById('ecole'),
+            filiere: document.getElementById('filiere'),
+            annee: document.getElementById('annee'),
+            matriculeGroup: document.getElementById('matriculeGroup'),
+            codeGroup: document.getElementById('codeGroup'),
+            matricule: document.getElementById('matricule'),
+            code: document.getElementById('code'),
+            backgroundImages: document.querySelectorAll('.background-slider img')
+        };
+
+        // Animation du slider
+        let currentImage = 0;
+        const changeBackground = () => {
+            elements.backgroundImages[currentImage].classList.remove('active');
+            currentImage = (currentImage + 1) % elements.backgroundImages.length;
+            elements.backgroundImages[currentImage].classList.add('active');
+        };
+        setInterval(changeBackground, 5000);
+
+        // Fonctions de remplissage des selects
+        const populateEcoles = () => {
+            Object.keys(CONFIG.ACADEMIC.ECOLES).forEach(ecoleKey => {
+                const ecole = CONFIG.ACADEMIC.ECOLES[ecoleKey];
+                elements.ecole.add(new Option(ecole.nom, ecoleKey));
+            });
+        };
+
+        const populateFilieres = (ecoleKey) => {
+            elements.filiere.innerHTML = '<option value="">Sélectionnez une filière</option>';
+            if (ecoleKey) {
+                CONFIG.ACADEMIC.ECOLES[ecoleKey].filieres.forEach(filiere => {
+                    elements.filiere.add(new Option(filiere, filiere));
+                });
             }
+        };
 
-            setInterval(changeBackground, 5000);
-
-            // Références aux éléments du formulaire
-            const registerForm = document.getElementById('registerForm');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            const loading = document.getElementById('loading');
-            const registerBtn = document.getElementById('registerBtn');
-            const ecoleSelect = document.getElementById('ecole');
-            const filiereSelect = document.getElementById('filiere');
-            const anneeSelect = document.getElementById('annee');
-            const matriculeGroup = document.getElementById('matriculeGroup');
-            const codeGroup = document.getElementById('codeGroup');
-            const matriculeInput = document.getElementById('matricule');
-            const codeInput = document.getElementById('code');
-
-            // Remplir les écoles
-            CONFIG.ACADEMIC.ECOLES.forEach(ecole => {
-                const option = document.createElement('option');
-                option.value = ecole;
-                option.textContent = ecole;
-                ecoleSelect.appendChild(option);
-            });
-
-            // Remplir les filières (toutes disponibles au départ)
-            CONFIG.ACADEMIC.FILIERES.forEach(filiere => {
-                const option = document.createElement('option');
-                option.value = filiere;
-                option.textContent = filiere;
-                filiereSelect.appendChild(option);
-            });
-
-            // Remplir les années
+        const populateAnnees = () => {
             CONFIG.ACADEMIC.ANNEES.forEach(annee => {
-                const option = document.createElement('option');
-                option.value = annee;
+                const suffix = annee === 1 ? 'ère' : 'ème';
+                elements.annee.add(new Option(`${annee}${suffix} année`, annee));
+            });
+        };
 
-                option.textContent = `$ {
-                            annee
-                        }
-    
-                        ère année`;
-
-                if (annee > 1) {
-                    option.textContent = `$ {
-                                annee
-                            }
-    
-                            ème année`;
-                }
-
-                anneeSelect.appendChild(option);
+        // Gestion des événements
+        const setupEventListeners = () => {
+            elements.ecole.addEventListener('change', () => {
+                populateFilieres(elements.ecole.value);
             });
 
-            // Gérer le changement d'année
-            anneeSelect.addEventListener('change', function () {
-                if (this.value === "1") {
-                    // 1ère année
-                    codeGroup.style.display = 'block';
-                    matriculeGroup.style.display = 'none';
-                    codeInput.required = true;
-                    matriculeInput.required = false;
-                    codeInput.value = '';
-                }
+            elements.annee.addEventListener('change', handleAnneeChange);
+            elements.form.addEventListener('submit', handleSubmit);
+        };
 
-                else if (this.value && this.value !== "1") {
-                    // 2ème année et plus
-                    codeGroup.style.display = 'none';
-                    matriculeGroup.style.display = 'block';
-                    codeInput.required = false;
-                    matriculeInput.required = true;
-                    matriculeInput.value = '';
-                }
+        const handleAnneeChange = () => {
+            const isFirstYear = elements.annee.value === "1";
 
-                else {
-                    // Aucune sélection
-                    codeGroup.style.display = 'none';
-                    matriculeGroup.style.display = 'none';
-                }
-            });
+            elements.codeGroup.style.display = isFirstYear ? 'block' : 'none';
+            elements.matriculeGroup.style.display = isFirstYear ? 'none' : 'block';
 
-            function showMessage(message, type) {
-                if (type === 'error') {
-                    errorMessage.textContent = message;
-                    errorMessage.style.display = 'block';
-                    successMessage.style.display = 'none';
-                }
+            elements.code.required = isFirstYear;
+            elements.matricule.required = !isFirstYear;
 
-                else {
-                    successMessage.textContent = message;
-                    successMessage.style.display = 'block';
-                    errorMessage.style.display = 'none';
-                }
+            elements.code.value = '';
+            elements.matricule.value = '';
+        };
+
+        // Gestion des messages
+        const showMessage = (message, type) => {
+            if (type === 'error') {
+                elements.error.textContent = message;
+                elements.error.style.display = 'block';
+                elements.success.style.display = 'none';
+            } else {
+                elements.success.textContent = message;
+                elements.success.style.display = 'block';
+                elements.error.style.display = 'none';
+            }
+        };
+
+        const showLoading = (show) => {
+            elements.loading.style.display = show ? 'block' : 'none';
+            elements.button.disabled = show;
+        };
+
+        // Validation
+        const validateForm = () => {
+            const fields = {
+                nom: document.getElementById('nom').value.trim(),
+                prenom: document.getElementById('prenom').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                ecole: elements.ecole.value,
+                filiere: elements.filiere.value,
+                annee: elements.annee.value,
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                matricule: elements.matricule.value.trim(),
+                code: elements.code.value.trim()
+            };
+
+            if (!Object.values(fields).slice(0, 7).every(Boolean)) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
+                return false;
             }
 
-            function showLoading(show) {
-                loading.style.display = show ? 'block' : 'none';
-                registerBtn.disabled = show;
+            if (fields.annee === "1" && !fields.code) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error');
+                return false;
             }
 
-            function validateForm() {
-                const nom = document.getElementById('nom').value.trim();
-                const prenom = document.getElementById('prenom').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const ecole = document.getElementById('ecole').value;
-                const filiere = document.getElementById('filiere').value;
-                const annee = document.getElementById('annee').value;
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                const matricule = document.getElementById('matricule').value.trim();
-                const code = document.getElementById('code').value.trim();
-
-                if (!nom || !prenom || !email || !ecole || !filiere || !annee || !password || !confirmPassword) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
-                    return false;
-                }
-
-                if (annee === "1" && !code) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error');
-                    return false;
-                }
-
-                if (annee !== "1" && !matricule) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error');
-                    return false;
-                }
-
-                if (!UTILS.isValidEmail(email)) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
-                    return false;
-                }
-
-                if (password.length < CONFIG.SECURITY.PASSWORD_MIN_LENGTH) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORD_TOO_SHORT, 'error');
-                    return false;
-                }
-
-                if (password !== confirmPassword) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORDS_DONT_MATCH, 'error');
-                    return false;
-                }
-
-                return true;
+            if (fields.annee !== "1" && !fields.matricule) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error');
+                return false;
             }
 
-            registerForm.addEventListener('submit', async function (e) {
-                e.preventDefault();
+            if (!UTILS.isValidEmail(fields.email)) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
+                return false;
+            }
 
-                if (!validateForm()) {
-                    return;
+            if (fields.password.length < CONFIG.SECURITY.PASSWORD_MIN_LENGTH) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORD_TOO_SHORT, 'error');
+                return false;
+            }
+
+            if (fields.password !== fields.confirmPassword) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORDS_DONT_MATCH, 'error');
+                return false;
+            }
+
+            return true;
+        };
+
+        // Soumission du formulaire
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const formData = {
+                nom: document.getElementById('nom').value.trim(),
+                prenom: document.getElementById('prenom').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                ecole: elements.ecole.value,
+                filiere: elements.filiere.value,
+                annee: parseInt(elements.annee.value),
+                password: document.getElementById('password').value,
+                matricule: elements.matricule.value.trim() || null,
+                code: elements.code.value.trim() || null
+            };
+
+            showLoading(true);
+            showMessage('', 'error');
+            showMessage('', 'success');
+
+            try {
+                const response = await fetch(`${API_BASE}${REGISTER_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                } else {
+                    showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
                 }
+            } catch (error) {
+                console.error('Erreur d\'inscription:', error);
+                showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+            } finally {
+                showLoading(false);
+            }
+        };
 
-                const formData = {
-                    nom: document.getElementById('nom').value.trim(),
-                    prenom: document.getElementById('prenom').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    ecole: document.getElementById('ecole').value,
-                    filiere: document.getElementById('filiere').value,
-                    annee: parseInt(document.getElementById('annee').value),
-                    password: document.getElementById('password').value,
-                    matricule: document.getElementById('matricule').value.trim() || null,
-                    code: document.getElementById('code').value.trim() || null
-                }
+        // Initialisation
+        const init = () => {
+            populateEcoles();
+            populateAnnees();
+            populateFilieres();
+            setupEventListeners();
+        };
 
-                    ;
-
-                showLoading(true);
-                showMessage('', 'error');
-                showMessage('', 'success');
-
-                try {
-                    const response = await fetch(`${API_BASE}${REGISTER_ENDPOINT}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
-
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
-                    }
-
-                    else {
-                        showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
-                    }
-                }
-
-                catch (error) {
-                    console.error('Erreur d\'inscription:', error);
-                    showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
-                }
-
-                finally {
-                    showLoading(false);
-                }
-            });
-        });
-    </script>
+        init();
+    });
+</script>
 </body>
 
 </html>
