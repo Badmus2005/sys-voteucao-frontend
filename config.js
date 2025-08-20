@@ -12,7 +12,10 @@ const CONFIG = {
                 LOGIN: '/api/userLogin',
                 REGISTER: '/api/userRegister',
                 ADMIN_LOGIN: '/api/adminLogin',
-                ADMIN_REGISTER: '/api/adminRegister'
+                ADMIN_REGISTER: '/api/adminRegister',
+                CHANGE_PASSWORD: '/api/userLogin/change-password',
+                FORGOT_PASSWORD: '/api/userLogin/forgot-password',
+                RESET_PASSWORD: '/api/userLogin/reset-password',
             },
             ELECTION: {
                 LIST: '/api/election',
@@ -173,7 +176,7 @@ const CONFIG = {
             FDE: {
                 nom: "FDE",
                 filieres: [
-                    'Droit', 
+                    'Droit',
                     'Economie']
             }
         },

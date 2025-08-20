@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - UCAO-UUC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --rouge-bordeaux: #800020;
@@ -21,14 +22,50 @@
         }
 
         body {
-            background: url('https://source.unsplash.com/random/1920x1080/?university') no-repeat center center fixed;
-            background-size: cover;
             color: var(--bleu-nuit);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .background-slider {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .background-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .background-slide.active {
+            opacity: 1;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
         }
 
         .login-container {
@@ -40,6 +77,8 @@
             padding: 40px;
             border-top: 5px solid var(--rouge-bordeaux);
             animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 1;
         }
 
         @keyframes fadeIn {
@@ -68,10 +107,12 @@
         .login-header img {
             width: 80px;
             height: auto;
+            border-radius: 50%;
         }
 
         .form-group {
             margin-bottom: 25px;
+            position: relative;
         }
 
         .form-group label {
@@ -94,6 +135,14 @@
             border-color: var(--or);
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
             outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            cursor: pointer;
+            color: var(--bleu-nuit);
         }
 
         .btn-login {
@@ -174,13 +223,117 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Modal de réinitialisation */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: var(--bleu-nuit);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--bleu-nuit);
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-cancel {
+            background: #ddd;
+            color: #333;
+        }
+
+        .btn-submit {
+            background: var(--rouge-bordeaux);
+            color: white;
         }
     </style>
 </head>
 
 <body>
+    <!-- Slider d'arrière-plan -->
+    <div class="background-slider">
+        <div class="background-slide active"
+            style="background-image: url('https://source.unsplash.com/random/1920x1080/?university,campus')"></div>
+        <div class="background-slide"
+            style="background-image: url('https://source.unsplash.com/random/1920x1080/?education,students')"></div>
+        <div class="background-overlay"></div>
+    </div>
+
     <div class="login-container">
         <div class="login-header">
             <h1>Connexion UCAO-UUC</h1>
@@ -203,6 +356,9 @@
             <div class="form-group">
                 <label for="password">Mot de passe</label>
                 <input type="password" id="password" name="password" required>
+                <span class="password-toggle" id="passwordToggle">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">
@@ -211,50 +367,219 @@
         </form>
 
         <div class="login-footer">
-            <p>Pas encore de compte ? <a href="register.html">S'inscrire</a></p>
-            <p><a href="index.html">← Retour à l'accueil</a></p>
+            <p>Mot de passe oublié ? <a href="#" id="forgot-password-link">Réinitialiser</a></p>
+            <p>Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
+            <p><a href="user_index.html">← Retour à l'accueil</a></p>
+        </div>
+    </div>
+
+    <!-- Modal de réinitialisation de mot de passe -->
+    <div class="modal" id="resetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Réinitialiser le mot de passe</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Entrez votre email pour recevoir les instructions de réinitialisation :</p>
+                <input type="email" id="resetEmail" placeholder="Votre email" required>
+                <div class="modal-actions">
+                    <button class="btn-modal btn-cancel" id="cancelReset">Annuler</button>
+                    <button class="btn-modal btn-submit" id="submitReset">Envoyer</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Configuration et scripts -->
     <script src="config.js"></script>
     <script>
-        // Attendre que la configuration soit chargée
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
+        // Fonctions utilitaires
+        const UTILS = {
+            isValidEmail: (email) => {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+        };
+
+        // Gestion du slider d'arrière-plan
+        function initBackgroundSlider() {
+            const slides = document.querySelectorAll('.background-slide');
+            let currentSlide = 0;
+
+            function nextSlide() {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
+
+            // Changer de slide toutes les 5 secondes
+            setInterval(nextSlide, 5000);
+        }
+
+        // Gestion de la visibilité du mot de passe
+        function initPasswordToggle() {
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+
+            passwordToggle.addEventListener('click', function () {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+        }
+
+        // Gestion du modal de réinitialisation
+        function initResetModal() {
+            const forgotLink = document.getElementById('forgot-password-link');
+            const resetModal = document.getElementById('resetModal');
+            const modalClose = document.getElementById('modalClose');
+            const cancelReset = document.getElementById('cancelReset');
+            const submitReset = document.getElementById('submitReset');
+            const resetEmail = document.getElementById('resetEmail');
+
+            function openModal() {
+                resetModal.classList.add('active');
+            }
+
+            function closeModal() {
+                resetModal.classList.remove('active');
+                resetEmail.value = '';
+            }
+
+            forgotLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal();
+            });
+
+            modalClose.addEventListener('click', closeModal);
+            cancelReset.addEventListener('click', closeModal);
+
+            submitReset.addEventListener('click', async function () {
+                const email = resetEmail.value.trim();
+
+                if (!email) {
+                    showMessage('Veuillez entrer votre email', 'error');
+                    return;
+                }
+
+                if (!UTILS.isValidEmail(email)) {
+                    showMessage('Veuillez entrer un email valide', 'error');
+                    return;
+                }
+                showModalLoading(true);
+                try {
+                    const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('Si cet email existe, un lien de réinitialisation a été envoyé', 'success');
+                        closeModal();
+                    } else {
+                        throw new Error(data.message || 'Erreur lors de l\'envoi');
+                    }
+
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showMessage('Erreur lors de l\'envoi des instructions', 'error');
+                } finally {
+                    showModalLoading(false);
+                }
+            });
+        }
+
+        // Fonctions d'affichage des messages
+        function showMessage(message, type) {
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
+
+            // Masquer tous les messages d'abord
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            if (type === 'error') {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            } else {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+            }
+
+            // Masquer après 5 secondes seulement pour les messages de succès/erreur
+            if (type === 'error' || type === 'success') {
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                    successMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+        function showLoading(show) {
             const loading = document.getElementById('loading');
             const loginBtn = document.getElementById('loginBtn');
 
-            // Utiliser la configuration centralisée
+            loading.style.display = show ? 'block' : 'none';
+            loginBtn.disabled = show;
+        }
+        function showModalLoading(show) {
+            const submitBtn = document.getElementById('submitReset');
+            submitBtn.disabled = show;
+            submitBtn.innerHTML = show ?
+                '<i class="fas fa-spinner fa-spin"></i> Envoi...' :
+                'Envoyer';
+        }
+        // Connexion utilisateur
+        async function handleLogin(email, password) {
             const API_BASE = CONFIG.API.BASE_URL;
             const LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.LOGIN;
 
-            function showMessage(message, type) {
-                if (type === 'error') {
-                    errorMessage.textContent = message;
-                    errorMessage.style.display = 'block';
-                    successMessage.style.display = 'none';
+            showLoading(true);
+            showMessage('', 'error');
+
+            try {
+                const response = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    showMessage(CONFIG.MESSAGES.SUCCESS.LOGIN, 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'user_dashboard.html';
+                    }, 1500);
                 } else {
-                    successMessage.textContent = message;
-                    successMessage.style.display = 'block';
-                    errorMessage.style.display = 'none';
+                    showMessage(data.message || CONFIG.MESSAGES.ERROR.LOGIN_FAILED, 'error');
                 }
+            } catch (error) {
+                console.error('Erreur de connexion:', error);
+                showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+            } finally {
+                showLoading(false);
             }
+        }
 
-            function showLoading(show) {
-                loading.style.display = show ? 'block' : 'none';
-                loginBtn.disabled = show;
-            }
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            initBackgroundSlider();
+            initPasswordToggle();
+            initResetModal();
 
-            loginForm.addEventListener('submit', async function(e) {
+            const loginForm = document.getElementById('loginForm');
+
+            loginForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
-                const email = document.getElementById('email').value;
+
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
 
-                // Validation basique
                 if (!email || !password) {
                     showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
                     return;
@@ -265,41 +590,7 @@
                     return;
                 }
 
-                showLoading(true);
-                showMessage('', 'error');
-                showMessage('', 'success');
-
-                try {
-                    const response = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, password })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        // Stocker le token
-                        localStorage.setItem('token', data.token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        
-                        showMessage(CONFIG.MESSAGES.SUCCESS.LOGIN, 'success');
-                        
-                        // Rediriger vers la page étudiant (login.html est exclusivement pour les étudiants)
-                        setTimeout(() => {
-                            window.location.href = 'user_dashboard.html';
-                        }, 1500);
-                    } else {
-                        showMessage(data.message || CONFIG.MESSAGES.ERROR.LOGIN_FAILED, 'error');
-                    }
-                } catch (error) {
-                    console.error('Erreur de connexion:', error);
-                    showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
-                } finally {
-                    showLoading(false);
-                }
+                await handleLogin(email, password);
             });
         });
     </script>
