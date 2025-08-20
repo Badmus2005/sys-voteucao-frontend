@@ -1,8 +1,9 @@
 // utils.js - Fonctions utilitaires pour l'application de vote
 
 // Configuration de l'API (importée depuis config.js)
-export const API_BASE = CONFIG.API.BASE_URL;
+
 export const CONFIG = window.CONFIG;
+export const API_BASE = CONFIG.API.BASE_URL;
 
 // Variables globales
 let loadingCount = 0;
