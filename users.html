@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Utilisateurs - Admin UCAO</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --rouge-bordeaux: #7a0026;
+            --rouge-bordeaux-light: #a73354;
+            --bleu-nuit: #0f1a31;
+            --bleu-nuit-light: #1e2b4d;
+            --or: #c9a227;
+            --blanc-casse: #f8f4e9;
+            --gris-clair: #e5e5e5;
+            --gris-moyen: #999999;
+            --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar (identique aux autres pages) */
+        .sidebar {
+            width: 310px;
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 25px 0;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 25px 25px;
+            border-bottom: 1px solid var(--bleu-nuit-light);
+        }
+
+        .sidebar-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--or);
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: linear-gradient(to right, var(--or), #e8c873);
+            color: var(--bleu-nuit);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 15px 0;
+        }
+
+        .sidebar-menu h3 {
+            color: var(--gris-clair);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin: 25px 0 15px 10px;
+        }
+
+        .sidebar-menu li {
+            list-style: none;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 12px;
+            color: var(--or);
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: var(--bleu-nuit-light);
+            color: white;
+        }
+
+        .sidebar-menu li.active a {
+            background: linear-gradient(to right, rgba(122, 0, 38, 0.3), transparent);
+            color: white;
+            border-left: 3px solid var(--or);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 280px;
+            background-color: #f9f9f9;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--gris-clair);
+        }
+
+        .admin-header h1 {
+            color: var(--bleu-nuit);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-header h1 i {
+            color: var(--rouge-bordeaux);
+            margin-right: 15px;
+        }
+
+        /* Filtres */
+        .filters {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--bleu-nuit);
+        }
+
+        .filter-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--gris-clair);
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-box {
+            display: flex;
+            margin-left: auto;
+        }
+
+        .search-box input {
+            padding: 10px 15px;
+            border: 1px solid var(--gris-clair);
+            border-radius: 6px 0 0 6px;
+            width: 250px;
+        }
+
+        .search-box button {
+            background: var(--rouge-bordeaux);
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            padding: 0 15px;
+            cursor: pointer;
+        }
+
+        /* Tableau des utilisateurs */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 25px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 120px 100px;
+            padding: 15px 20px;
+            background: var(--bleu-nuit);
+            color: white;
+            font-weight: 600;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 120px 100px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gris-clair);
+            align-items: center;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background: rgba(58, 160, 255, 0.15);
+            color: #3aa0ff;
+        }
+
+        .btn-edit:hover {
+            background: rgba(58, 160, 255, 0.25);
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background: rgba(220, 53, 69, 0.25);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--gris-clair);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination-btn.active {
+            background: var(--rouge-bordeaux);
+            color: white;
+            border-color: var(--rouge-bordeaux);
+        }
+
+        .pagination-btn:hover:not(.active) {
+            background: var(--gris-clair);
+        }
+
+        /* Toast and loading (identique aux autres pages) */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+
+        .toast.success {
+            background-color: #28a745;
+        }
+
+        .toast.error {
+            background-color: var(--rouge-bordeaux);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--or);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-box {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .table-header {
+                display: none;
+            }
+
+            .table-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 15px;
+                border-bottom: 1px solid var(--gris-clair);
+            }
+
+            .table-row>div {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .table-row>div::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--bleu-nuit);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img id="adminPhoto"
+                    src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                    alt="Photo Admin">
+                <h3 id="adminName">Admin UCAO</h3>
+                <p id="adminEmail">superadmin@ucao-uuc.com</p>
+                <span class="admin-badge" id="adminPoste">Administrateur</span>
+            </div>
+            <ul class="sidebar-menu">
+                <h3>Général</h3>
+                <li><a href="admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</a></li>
+                <li class="active"><a href="users.html"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="candidates.html"><i class="fas fa-user"></i> Candidats</a></li>
+                <li><a href="statistics.html"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
+                <h3>Administration</h3>
+                <li><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
+                <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
+                <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="admin-header">
+                <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
+                <div class="search-box">
+                    <input type="text" placeholder="Rechercher par matricule..." id="userSearch">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="statusFilter">Statut</label>
+                    <select id="statusFilter">
+                        <option value="all">Tous</option>
+                        <option value="active">Actifs</option>
+                        <option value="inactive">Inactifs</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <div>Matricule</div>
+                    <div>Nom</div>
+                    <div>Email</div>
+                    <div>Statut</div>
+                    <div>Actions</div>
+                </div>
+                <div id="usersList">
+                    <!-- Users will be loaded here dynamically -->
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Configuration API
+        const API_BASE = CONFIG.API.BASE_URL;
+        const USERS_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.LIST;
+        const USER_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.UPDATE_STATUS;
+        const USER_SEARCH_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.SEARCH;
+        const token = localStorage.getItem('adminToken');
+
+        // Vérification de l'authentification
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        // Éléments DOM
+        const usersList = document.getElementById('usersList');
+        const pagination = document.getElementById('pagination');
+        const toast = document.getElementById('toast');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Variables de pagination
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let totalUsers = 0;
+        let totalPages = 0;
+
+        // Fonctions utilitaires
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'flex';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // Charger les utilisateurs
+        async function loadUsers(page = 1) {
+            try {
+                showLoading();
+                currentPage = page;
+
+                const statusFilter = document.getElementById('statusFilter').value;
+                const searchTerm = document.getElementById('userSearch').value;
+
+                let url = `${API_BASE}${USERS_ENDPOINT}?page=${page}&limit=${usersPerPage}`;
+                const params = new URLSearchParams();
+
+                if (statusFilter !== 'all') params.append('status', statusFilter);
+                if (searchTerm) params.append('search', searchTerm);
+
+                if (params.toString()) url += `&${params.toString()}`;
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur lors du chargement des utilisateurs');
+
+                const data = await response.json();
+                totalUsers = data.total;
+                totalPages = Math.ceil(totalUsers / usersPerPage);
+
+                displayUsers(data.users);
+                setupPagination();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('Erreur de chargement des utilisateurs', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayUsers(users) {
+            usersList.innerHTML = '';
+
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="table-row">
+                        <div colspan="5" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-user-slash" style="font-size: 2rem; color: var(--gris-moyen); margin-bottom: 10px;"></i>
+                            <p>Aucun utilisateur trouvé</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+
+                row.innerHTML = `
+                    <div data-label="Matricule">${user.matricule}</div>
+                    <div data-label="Nom">${user.nom} ${user.prenom}</div>
+                    <div data-label="Email">${user.email}</div>
+                    <div data-label="Statut">
+                        <span class="status-badge ${user.actif ? 'status-active' : 'status-inactive'}">
+                            ${user.actif ? 'Actif' : 'Inactif'}
+                        </span>
+                    </div>
+                    <div data-label="Actions" class="action-buttons">
+                        <div class="btn-icon btn-edit toggle-status" data-id="${user.id}" data-status="${user.actif}">
+                            <i class="fas ${user.actif ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </div>
+                    </div>
+                `;
+
+                usersList.appendChild(row);
+            });
+
+            // Ajouter les écouteurs d'événements
+            document.querySelectorAll('.toggle-status').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.getAttribute('data-id');
+                    const currentStatus = e.currentTarget.getAttribute('data-status') === 'true';
+                    toggleUserStatus(userId, !currentStatus);
+                });
+            });
+        }
+
+        // Configurer la pagination
+        function setupPagination() {
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Bouton précédent
+            if (currentPage > 1) {
+                const prevBtn = document.createElement('div');
+                prevBtn.className = 'pagination-btn';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevBtn.addEventListener('click', () => loadUsers(currentPage - 1));
+                pagination.appendChild(prevBtn);
+            }
+
+            // Pages
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('div');
+                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => loadUsers(i));
+                pagination.appendChild(pageBtn);
+            }
+
+            // Bouton suivant
+            if (currentPage < totalPages) {
+                const nextBtn = document.createElement('div');
+                nextBtn.className = 'pagination-btn';
+                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextBtn.addEventListener('click', () => loadUsers(currentPage + 1));
+                pagination.appendChild(nextBtn);
+            }
+        }
+
+        // Changer le statut d'un utilisateur
+        async function toggleUserStatus(userId, newStatus) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}${USER_UPDATE_ENDPOINT.replace(':id', userId)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ actif: newStatus })
+                });
+
+                if (!response.ok) throw new Error('Erreur lors de la modification du statut');
+
+                showToast(`Utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`);
+                loadUsers(currentPage);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast(error.message || 'Erreur lors de la modification', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Recherche d'utilisateurs
+        async function searchUsers() {
+            currentPage = 1;
+            await loadUsers(1);
+        }
+
+        // Gestionnaires d'événements
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            currentPage = 1;
+            loadUsers(1);
+        });
+
+        document.getElementById('userSearch').addEventListener('input', debounce(searchUsers, 300));
+        document.querySelector('.search-box button').addEventListener('click', searchUsers);
+
+        // Déconnexion
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'index.html';
+        });
+
+        // Fonction debounce pour la recherche
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers(1);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Élections - Admin UCAO</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --rouge-bordeaux: #7a0026;
+            --rouge-bordeaux-light: #a73354;
+            --bleu-nuit: #0f1a31;
+            --bleu-nuit-light: #1e2b4d;
+            --or: #c9a227;
+            --blanc-casse: #f8f4e9;
+            --gris-clair: #e5e5e5;
+            --gris-moyen: #999999;
+            --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 310px;
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 25px 0;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+            z-index: 100;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 25px 25px;
+            border-bottom: 1px solid var(--bleu-nuit-light);
+        }
+
+        .sidebar-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--or);
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: linear-gradient(to right, var(--or), #e8c873);
+            color: var(--bleu-nuit);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .sidebar-menu {
+            padding: 20px 15px 0;
+        }
+
+        .sidebar-menu h3 {
+            color: var(--gris-clair);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin: 25px 0 15px 10px;
+        }
+
+        .sidebar-menu li {
+            list-style: none;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .sidebar-menu li a i {
+            margin-right: 12px;
+            color: var(--or);
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: var(--bleu-nuit-light);
+            color: white;
+        }
+
+        .sidebar-menu li.active a {
+            background: linear-gradient(to right, rgba(122, 0, 38, 0.3), transparent);
+            color: white;
+            border-left: 3px solid var(--or);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 280px;
+            background-color: #f9f9f9;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--gris-clair);
+        }
+
+        .admin-header h1 {
+            color: var(--bleu-nuit);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-header h1 i {
+            color: var(--rouge-bordeaux);
+            margin-right: 15px;
+        }
+
+        /* Table styles */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px 120px 100px;
+            padding: 15px 20px;
+            background: var(--bleu-nuit);
+            color: white;
+            font-weight: 600;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px 120px 100px;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gris-clair);
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .status-upcoming {
+            background: rgba(23, 162, 184, 0.15);
+            color: #17a2b8;
+        }
+
+        .status-completed {
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background: rgba(58, 160, 255, 0.15);
+            color: #3aa0ff;
+        }
+
+        .btn-delete {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gris-clair);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--gris-clair);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--bleu-nuit);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gris-clair);
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--rouge-bordeaux);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--gris-clair);
+            color: var(--bleu-nuit);
+        }
+
+        /* Toast and loading */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .toast.success {
+            background-color: #28a745;
+        }
+
+        .toast.error {
+            background-color: var(--rouge-bordeaux);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--or);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img id="adminPhoto"
+                    src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                    alt="Photo Admin">
+                <h3 id="adminName">Admin UCAO</h3>
+                <p id="adminEmail">superadmin@ucao-uuc.com</p>
+                <span class="admin-badge" id="adminPoste">Administrateur</span>
+            </div>
+            <ul class="sidebar-menu">
+                <h3>Général</h3>
+                <li><a href="admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="candidates.html"><i class="fas fa-user"></i> Candidats</a></li>
+                <li><a href="statistics.html"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
+                <h3>Administration</h3>
+                <li class="active"><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
+                <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
+                <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="admin-header">
+                <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
+                <button class="btn btn-primary" id="createElectionBtn">
+                    <i class="fas fa-plus"></i> Nouvelle Élection
+                </button>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <div>Nom de l'élection</div>
+                    <div>Date de début</div>
+                    <div>Date de fin</div>
+                    <div>Statut</div>
+                    <div>Actions</div>
+                </div>
+                <div id="electionsList">
+                    <!-- Les élections seront chargées ici dynamiquement -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de création d'élection -->
+    <div class="modal-overlay" id="electionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-vote-yea"></i> Nouvelle Élection</h2>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="electionForm">
+                    <div class="form-group">
+                        <label for="electionName">Nom de l'élection</label>
+                        <input type="text" id="electionName" placeholder="Ex: Élection BDE 2023" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Date de début</label>
+                        <input type="datetime-local" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Date de fin</label>
+                        <input type="datetime-local" id="endDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="electionDescription">Description</label>
+                        <textarea id="electionDescription" placeholder="Description de l'élection..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelElection">Annuler</button>
+                <button class="btn btn-primary" id="saveElection">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast" id="toast" style="display: none;"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // Configuration API
+        const API_BASE = CONFIG.API.BASE_URL;
+        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.LIST;
+        const ELECTION_CREATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.CREATE;
+        const ELECTION_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.UPDATE;
+        const ELECTION_DELETE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.DELETE;
+        const token = localStorage.getItem('adminToken');
+
+        // Vérification de l'authentification
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        // Éléments DOM
+        const electionsList = document.getElementById('electionsList');
+        const electionModal = document.getElementById('electionModal');
+        const electionForm = document.getElementById('electionForm');
+        const toast = document.getElementById('toast');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Fonctions utilitaires
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'flex';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // Charger les élections
+        async function loadElections() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur lors du chargement des élections');
+
+                const elections = await response.json();
+                displayElections(elections);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('Erreur de chargement des élections', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayElections(elections) {
+            electionsList.innerHTML = '';
+
+            if (elections.length === 0) {
+                electionsList.innerHTML = `
+                    <div class="table-row">
+                        <div colspan="5" style="text-align: center; padding: 30px;">
+                            Aucune élection trouvée
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            elections.forEach(election => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+
+                // Déterminer le statut
+                const now = new Date();
+                const startDate = new Date(election.startDate);
+                const endDate = new Date(election.endDate);
+
+                let statusClass = 'status-upcoming';
+                let statusText = 'À venir';
+
+                if (now >= startDate && now <= endDate) {
+                    statusClass = 'status-active';
+                    statusText = 'Active';
+                } else if (now > endDate) {
+                    statusClass = 'status-completed';
+                    statusText = 'Terminée';
+                }
+
+                row.innerHTML = `
+                    <div>${election.name}</div>
+                    <div>${formatDate(election.startDate)}</div>
+                    <div>${formatDate(election.endDate)}</div>
+                    <div><span class="status-badge ${statusClass}">${statusText}</span></div>
+                    <div class="action-buttons">
+                        <div class="btn-icon btn-edit" data-id="${election.id}">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="btn-icon btn-delete" data-id="${election.id}">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                `;
+
+                electionsList.appendChild(row);
+            });
+
+            // Ajouter les écouteurs d'événements pour les boutons
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const electionId = e.currentTarget.getAttribute('data-id');
+                    editElection(electionId);
+                });
+            });
+
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const electionId = e.currentTarget.getAttribute('data-id');
+                    deleteElection(electionId);
+                });
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Créer une élection
+        async function createElection(electionData) {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}${ELECTION_CREATE_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(electionData)
+                });
+
+                if (!response.ok) throw new Error('Erreur lors de la création');
+
+                const result = await response.json();
+                showToast('Élection créée avec succès');
+                loadElections();
+                return result;
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast(error.message || 'Erreur lors de la création', 'error');
+                throw error;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Éditer une élection
+        async function editElection(electionId) {
+            // Implémenter la logique d'édition
+            showToast('Fonctionnalité d\'édition à implémenter');
+        }
+
+        // Supprimer une élection
+        async function deleteElection(electionId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
+
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}${ELECTION_DELETE_ENDPOINT.replace(':id', electionId)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur lors de la suppression');
+
+                showToast('Élection supprimée avec succès');
+                loadElections();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast(error.message || 'Erreur lors de la suppression', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Gestionnaires d'événements
+        document.getElementById('createElectionBtn').addEventListener('click', () => {
+            electionModal.classList.add('active');
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            electionModal.classList.remove('active');
+        });
+
+        document.getElementById('cancelElection').addEventListener('click', () => {
+            electionModal.classList.remove('active');
+        });
+
+        document.getElementById('saveElection').addEventListener('click', async () => {
+            const electionData = {
+                name: document.getElementById('electionName').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                description: document.getElementById('electionDescription').value
+            };
+
+            try {
+                await createElection(electionData);
+                electionModal.classList.remove('active');
+                electionForm.reset();
+            } catch (error) {
+                // L'erreur est déjà gérée dans createElection
+            }
+        });
+
+        // Déconnexion
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'index.html';
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            loadElections();
+
+            // Vérifier le rôle administrateur
+            const adminRole = localStorage.getItem('adminRole');
+            if (adminRole !== 'superadmin') {
+                document.getElementById('createElectionBtn').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

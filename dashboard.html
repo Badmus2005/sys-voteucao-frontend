@@ -10,6 +10,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             /* Couleurs */
@@ -675,6 +677,168 @@
             box-shadow: var(--shadow-sm);
         }
 
+        /* Styles pour les notifications */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--rouge-bordeaux);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--gris-clair);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--gris-clair);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .notification-item.unread {
+            background-color: rgba(122, 0, 38, 0.05);
+        }
+
+        .notification-content {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--gris-moyen);
+        }
+
+        /* Styles pour les modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gris-clair);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--gris-clair);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Styles pour l'import de fichiers */
+        .file-drop-area {
+            border: 2px dashed var(--gris-clair);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .file-drop-area:hover {
+            border-color: var(--rouge-bordeaux);
+        }
+
+        .file-drop-area.active {
+            border-color: var(--rouge-bordeaux);
+            background-color: rgba(122, 0, 38, 0.05);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Styles pour les graphiques */
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-title {
+            color: var(--bleu-nuit);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-title i {
+            color: var(--rouge-bordeaux);
+            margin-right: 10px;
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
@@ -715,6 +879,11 @@
             #codeCountInput {
                 width: 100%;
             }
+
+            .notification-panel {
+                width: 300px;
+                right: 10px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -734,6 +903,180 @@
 
             .codes-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .notification-panel {
+                width: calc(100% - 20px);
+                right: 10px;
+                left: 10px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Styles pour les codes générés */
+        .codes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .code-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+
+        .code-item span {
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .copy-single-btn {
+            background: none;
+            border: none;
+            color: var(--rouge-bordeaux);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .copy-single-btn:hover {
+            background-color: rgba(122, 0, 38, 0.1);
+        }
+
+        .codes-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .codes-count {
+            margin-left: 10px;
+            background-color: var(--rouge-bordeaux);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .codes-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            background-color: var(--bleu-nuit);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background-color: var(--bleu-nuit-light);
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            color: white;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast i {
+            margin-right: 10px;
+        }
+
+        .toast.success {
+            background-color: #28a745;
+        }
+
+        .toast.error {
+            background-color: var(--rouge-bordeaux);
+        }
+
+        .toast.info {
+            background-color: var(--bleu-nuit);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--or);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
     </style>
@@ -773,7 +1116,10 @@
                 <div class="admin-header">
                     <h1><i class="fas fa-tachometer-alt"></i> Tableau de Bord</h1>
                     <div class="admin-actions">
-                        <a href="#" class="alert-btn" aria-label="Notifications"><i class="fas fa-bell"></i></a>
+                        <a href="#" class="alert-btn" aria-label="Notifications" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                        </a>
                         <a href="#" aria-label="Messages"><i class="fas fa-envelope"></i></a>
                         <a href="#" aria-label="Aide"><i class="fas fa-question-circle"></i></a>
                     </div>
@@ -797,6 +1143,28 @@
                             <div class="progress" id="votesProgress"></div>
                         </div>
                     </div>
+                    <div class="admin-card">
+                        <h3><i class="fas fa-user-tie"></i> Candidats</h3>
+                        <p id="totalCandidates">0</p>
+                        <small>Total candidats</small>
+                        <div class="progress-bar">
+                            <div class="progress" id="candidatesProgress"></div>
+                        </div>
+                    </div>
+                    <div class="admin-card">
+                        <h3><i class="fas fa-vote-yea"></i> Élections Actives</h3>
+                        <p id="activeElections">0</p>
+                        <small>En cours</small>
+                        <div class="progress-bar">
+                            <div class="progress" id="electionsProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="chart-container">
+                    <h2 class="chart-title"><i class="fas fa-chart-line"></i> Activité des votes (7 derniers jours)</h2>
+                    <canvas id="votesChart"></canvas>
                 </div>
 
                 <!-- Recent Activity -->
@@ -814,10 +1182,20 @@
                             <h3>Ajouter Élection</h3>
                             <p>Créer une nouvelle élection</p>
                         </div>
+                        <div class="action-card" id="addCandidate">
+                            <i class="fas fa-user-plus"></i>
+                            <h3>Ajouter Candidat</h3>
+                            <p>Ajouter un nouveau candidat</p>
+                        </div>
                         <div class="action-card" id="importMatricules">
                             <i class="fas fa-file-import"></i>
                             <h3>Importer Matricules</h3>
                             <p>Importer des matricules depuis un fichier</p>
+                        </div>
+                        <div class="action-card" id="viewReports">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>Voir Rapports</h3>
+                            <p>Générer des rapports détaillés</p>
                         </div>
                     </div>
                 </div>
@@ -923,6 +1301,55 @@
                 </form>
             </div>
         </section>
+
+        <!-- NOTIFICATION PANEL -->
+        <div class="notification-panel" id="notificationPanel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <button id="markAllReadBtn">Tout marquer comme lu</button>
+            </div>
+            <div id="notificationList"></div>
+        </div>
+
+        <!-- MODAL IMPORT MATRICULES -->
+        <div class="modal-overlay" id="importModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-file-import"></i> Importer des matricules</h3>
+                    <button class="close-btn" id="closeImportModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="file-drop-area" id="fileDropArea">
+                        <i class="fas fa-cloud-upload-alt"
+                            style="font-size: 2rem; margin-bottom: 15px; color: var(--gris-moyen);"></i>
+                        <p>Glissez-déposez votre fichier ici ou</p>
+                        <label for="fileInput" class="btn btn-primary" style="margin-top: 15px;">
+                            <i class="fas fa-folder-open"></i> Parcourir
+                        </label>
+                        <input type="file" id="fileInput" class="file-input" accept=".csv,.xlsx,.xls">
+                    </div>
+                    <div id="fileInfo" style="display: none; margin-top: 20px;">
+                        <p><strong>Fichier sélectionné:</strong> <span id="fileName"></span></p>
+                        <p><strong>Type:</strong> <span id="fileType"></span></p>
+                        <p><strong>Taille:</strong> <span id="fileSize"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancelImport">Annuler</button>
+                    <button class="btn btn-primary" id="confirmImport" disabled>Importer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
     </div>
 
     <!-- Menu Toggle Mobile -->
@@ -941,6 +1368,27 @@
             console.error(`Element #${id} not found`);
             return false;
         }
+
+        // Fonction pour créer des toasts
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Supprimer le toast après 5 secondes
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
         // Initialisation de l'interface
         document.addEventListener('DOMContentLoaded', async function () {
             // Gestion du menu mobile
@@ -989,7 +1437,6 @@
                 }
             });
 
-
             // ------------ CONFIG ------------
             const API_BASE = CONFIG.API.BASE_URL;
             const FRONTEND_BASE = window.location.origin;
@@ -999,6 +1446,13 @@
             const STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.GENERAL;
             const ACTIVITY_ENDPOINT = CONFIG.API.ENDPOINTS.ACTIVITY.LIST;
             const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
+            const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
+            const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
+            const IMPORT_MATRICULES_ENDPOINT = CONFIG.API.ENDPOINTS.IMPORT.MATRICULES;
+            const CANDIDATES_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATES.LIST;
+            const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.LIST;
+            const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
+
             const token = localStorage.getItem('adminToken');
 
             if (!token) {
@@ -1010,19 +1464,6 @@
             }
 
             // ------------ UTILS ------------
-            function showToast(message, type = 'info') {
-                const toast = document.getElementById('toast');
-                if (!toast) return;
-
-                toast.textContent = message;
-                toast.className = `toast ${type}`;
-                toast.classList.add('show');
-
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
-            }
-
             function showLoading() {
                 const loader = document.getElementById('loadingOverlay');
                 if (loader) loader.classList.add('active');
@@ -1031,6 +1472,15 @@
             function hideLoading() {
                 const loader = document.getElementById('loadingOverlay');
                 if (loader) loader.classList.remove('active');
+            }
+
+            // Formatage de la taille des fichiers
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
             // Déconnexion
@@ -1074,7 +1524,13 @@
 
                 Object.entries(elements).forEach(([id, value]) => {
                     const el = document.getElementById(id);
-                    if (el) el.textContent = value;
+                    if (el) {
+                        if (el.tagName === 'INPUT') {
+                            el.value = value;
+                        } else {
+                            el.textContent = value;
+                        }
+                    }
                 });
 
                 if (admin.photoUrl) {
@@ -1163,7 +1619,247 @@
                     const btn = document.getElementById('uploadProfilePhotoBtn');
                     if (btn) {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-upload"></i> Téléverser';
+                        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Téléverser';
+                    }
+                }
+            });
+
+            // ------------ NOTIFICATIONS ------------
+            safeAddListener('notificationBtn', 'click', function (e) {
+                e.preventDefault();
+                const panel = document.getElementById('notificationPanel');
+                panel.classList.toggle('active');
+
+                // Charger les notifications si le panel est ouvert
+                if (panel.classList.contains('active')) {
+                    loadNotifications();
+                }
+            });
+
+            async function loadNotifications() {
+                try {
+                    const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Erreur de chargement des notifications');
+
+                    const notifications = await response.json();
+                    displayNotifications(notifications);
+
+                    // Mettre à jour le badge
+                    const unreadCount = notifications.filter(n => !n.read).length;
+                    const badge = document.getElementById('notificationCount');
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de chargement des notifications', 'error');
+                }
+            }
+
+            function displayNotifications(notifications) {
+                const container = document.getElementById('notificationList');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--gris-moyen);">Aucune notification</p>';
+                    return;
+                }
+
+                notifications.forEach(notification => {
+                    const div = document.createElement('div');
+                    div.className = `notification-item ${notification.read ? '' : 'unread'}`;
+                    div.innerHTML = `
+                        <div class="notification-content">${notification.message}</div>
+                        <div class="notification-time">${new Date(notification.createdAt).toLocaleString()}</div>
+                    `;
+
+                    div.addEventListener('click', async () => {
+                        if (!notification.read) {
+                            await markAsRead(notification.id);
+                            div.classList.remove('unread');
+                            loadNotifications(); // Recharger pour mettre à jour le badge
+                        }
+                    });
+
+                    container.appendChild(div);
+                });
+            }
+
+            async function markAsRead(notificationId) {
+                try {
+                    await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+            }
+
+            safeAddListener('markAllReadBtn', 'click', async function () {
+                try {
+                    await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    loadNotifications(); // Recharger les notifications
+                    showToast('Toutes les notifications marquées comme lues', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast('Erreur lors du marquage des notifications', 'error');
+                }
+            });
+
+            // Fermer le panel de notifications en cliquant à l'extérieur
+            document.addEventListener('click', function (e) {
+                const panel = document.getElementById('notificationPanel');
+                const btn = document.getElementById('notificationBtn');
+
+                if (panel.classList.contains('active') &&
+                    !panel.contains(e.target) &&
+                    !btn.contains(e.target)) {
+                    panel.classList.remove('active');
+                }
+            });
+
+            // ------------ IMPORT MATRICULES ------------
+            safeAddListener('importMatricules', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.add('active');
+            });
+
+            safeAddListener('closeImportModal', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.remove('active');
+                resetImportForm();
+            });
+
+            safeAddListener('cancelImport', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.remove('active');
+                resetImportForm();
+            });
+
+            function resetImportForm() {
+                const fileInput = document.getElementById('fileInput');
+                const fileInfo = document.getElementById('fileInfo');
+                const confirmBtn = document.getElementById('confirmImport');
+
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                confirmBtn.disabled = true;
+            }
+
+            // Gestion du drag and drop
+            const fileDropArea = document.getElementById('fileDropArea');
+            const fileInput = document.getElementById('fileInput');
+
+            if (fileDropArea && fileInput) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight() {
+                    fileDropArea.classList.add('active');
+                }
+
+                function unhighlight() {
+                    fileDropArea.classList.remove('active');
+                }
+
+                fileDropArea.addEventListener('drop', handleDrop, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (files.length) {
+                        fileInput.files = files;
+                        handleFileSelection(files[0]);
+                    }
+                }
+
+                fileInput.addEventListener('change', function () {
+                    if (this.files.length) {
+                        handleFileSelection(this.files[0]);
+                    }
+                });
+            }
+
+            function handleFileSelection(file) {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                const fileType = document.getElementById('fileType');
+                const fileSize = document.getElementById('fileSize');
+                const confirmBtn = document.getElementById('confirmImport');
+
+                fileName.textContent = file.name;
+                fileType.textContent = file.type || 'Inconnu';
+                fileSize.textContent = formatFileSize(file.size);
+
+                fileInfo.style.display = 'block';
+                confirmBtn.disabled = false;
+            }
+
+            safeAddListener('confirmImport', 'click', async function () {
+                const file = document.getElementById('fileInput').files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    showLoading();
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Import...';
+
+                    const response = await fetch(`${API_BASE}${IMPORT_MATRICULES_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erreur lors de l\'import');
+                    }
+
+                    const data = await response.json();
+                    showToast(`${data.imported} matricules importés avec succès`, 'success');
+
+                    const modal = document.getElementById('importModal');
+                    modal.classList.remove('active');
+                    resetImportForm();
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast(error.message || 'Erreur lors de l\'import', 'error');
+                } finally {
+                    hideLoading();
+                    const btn = document.getElementById('confirmImport');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Importer';
                     }
                 }
             });
@@ -1316,13 +2012,21 @@
 
                     const totalUsers = document.getElementById('totalUsers');
                     const totalVotes = document.getElementById('totalVotes');
+                    const totalCandidates = document.getElementById('totalCandidates');
+                    const activeElections = document.getElementById('activeElections');
                     const usersProgress = document.getElementById('usersProgress');
                     const votesProgress = document.getElementById('votesProgress');
+                    const candidatesProgress = document.getElementById('candidatesProgress');
+                    const electionsProgress = document.getElementById('electionsProgress');
 
                     if (totalUsers) totalUsers.textContent = data.users?.total || 0;
                     if (totalVotes) totalVotes.textContent = data.votes?.total || 0;
+                    if (totalCandidates) totalCandidates.textContent = data.candidates?.total || 0;
+                    if (activeElections) activeElections.textContent = data.elections?.active || 0;
                     if (usersProgress) usersProgress.style.width = (data.users?.percent || 0) + '%';
                     if (votesProgress) votesProgress.style.width = (data.votes?.percent || 0) + '%';
+                    if (candidatesProgress) candidatesProgress.style.width = (data.candidates?.percent || 0) + '%';
+                    if (electionsProgress) electionsProgress.style.width = (data.elections?.percent || 0) + '%';
                 } catch (err) {
                     console.error('Erreur chargement stats:', err);
                 }
@@ -1356,10 +2060,53 @@
                 }
             }
 
+            async function loadVoteStats() {
+                try {
+                    const res = await fetch(`${API_BASE}${VOTE_STATS_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const stats = await res.json();
+
+                    // Créer le graphique des votes
+                    const ctx = document.getElementById('votesChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: stats.dates || [],
+                            datasets: [{
+                                label: 'Votes par jour',
+                                data: stats.values || [],
+                                borderColor: '#7a0026',
+                                backgroundColor: 'rgba(122, 0, 38, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('Erreur chargement stats votes:', err);
+                }
+            }
+
             // ------------ INITIAL LOAD ------------
             loadAdminInfo();
             loadStats();
             loadActivity();
+            loadVoteStats();
+            loadNotifications();
         });
     </script>
 </body>
