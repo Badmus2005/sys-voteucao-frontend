@@ -196,9 +196,118 @@ const CONFIG = {
     }
 };
 
+// Fonctions utilitaires
+const UTILS = {
+    /**
+     * Formate une date en français
+     */
+    formatDate: (date, options = {}) => {
+        const defaultOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+
+        return new Date(date).toLocaleDateString('fr-FR', {
+            ...defaultOptions,
+            ...options
+        });
+    },
+
+    /**
+     * Formate un nombre avec des séparateurs de milliers
+     */
+    formatNumber: (number) => {
+        return new Intl.NumberFormat('fr-FR').format(number);
+    },
+
+    /**
+     * Calcule le pourcentage
+     */
+    calculatePercentage: (value, total) => {
+        if (total === 0) return 0;
+        return ((value / total) * 100).toFixed(2);
+    },
+
+    /**
+     * Vérifie si l'utilisateur est connecté
+     */
+    isAuthenticated: () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const now = Date.now() / 1000;
+            return payload.exp > now;
+        } catch (error) {
+            return false;
+        }
+    },
+
+    /**
+     * Vérifie le rôle de l'utilisateur
+     */
+    getUserRole: () => {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.role;
+        } catch (error) {
+            return null;
+        }
+    },
+
+    /**
+     * Décode le token JWT
+     */
+    decodeToken: (token) => {
+        try {
+            return JSON.parse(atob(token.split('.')[1]));
+        } catch (error) {
+            return null;
+        }
+    },
+
+    /**
+     * Génère un ID unique
+     */
+    generateId: () => {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    },
+
+    /**
+     * Valide une adresse email
+     */
+    isValidEmail: (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    },
+
+    /**
+     * Débounce une fonction
+     */
+    debounce: (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+};
 
 // Exporter la configuration
 window.CONFIG = CONFIG;
+window.UTILS = UTILS;
+
 
 
 // Version du système
