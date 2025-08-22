@@ -135,6 +135,7 @@
             margin-left: 280px;
             background-color: #f9f9f9;
             min-height: 100vh;
+            transition: margin 0.3s ease;
         }
 
         .admin-header {
@@ -155,6 +156,23 @@
         .admin-header h1 i {
             color: var(--rouge-bordeaux);
             margin-right: 15px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .admin-actions a {
+            color: var(--bleu-nuit-light);
+            font-size: 1.2rem;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .admin-actions a:hover {
+            color: var(--rouge-bordeaux);
+            transform: translateY(-2px);
         }
 
         /* Table styles */
@@ -378,6 +396,25 @@
             }
         }
 
+        /* Menu toggle pour mobile */
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--rouge-bordeaux);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -391,6 +428,57 @@
                 margin-left: 0;
                 padding: 20px;
             }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .table-header div:nth-child(4),
+            .table-row div:nth-child(4) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .table-header div:nth-child(3),
+            .table-row div:nth-child(3) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+
+            .table-header div:nth-child(2),
+            .table-row div:nth-child(2) {
+                display: none;
+            }
+
+            .action-buttons {
+                justify-content: center;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
@@ -402,7 +490,8 @@
             <div class="sidebar-header">
                 <img id="adminPhoto"
                     src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
-                    alt="Photo Admin">
+                    alt="Photo Admin"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzAwMCI+QWRtaW48L3RleHQ+PC9zdmc+'">
                 <h3 id="adminName">Admin UCAO</h3>
                 <p id="adminEmail">superadmin@ucao-uuc.com</p>
                 <span class="admin-badge" id="adminPoste">Administrateur</span>
@@ -424,6 +513,18 @@
         <main class="main-content">
             <div class="admin-header">
                 <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
+                <div class="admin-actions">
+                    <a href="#" class="alert-btn" aria-label="Notifications" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                    <a href="#" aria-label="Messages"><i class="fas fa-envelope"></i></a>
+                    <a href="#" aria-label="Aide"><i class="fas fa-question-circle"></i></a>
+                </div>
+            </div>
+
+            <div class="admin-header">
+                <h2>Liste des élections</h2>
                 <button class="btn btn-primary" id="createElectionBtn">
                     <i class="fas fa-plus"></i> Nouvelle Élection
                 </button>
@@ -442,6 +543,11 @@
                 </div>
             </div>
         </main>
+
+        <!-- Menu Toggle Mobile -->
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
     </div>
 
     <!-- Modal de création d'élection -->
@@ -509,6 +615,8 @@
         const electionForm = document.getElementById('electionForm');
         const toast = document.getElementById('toast');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
 
         // Fonctions utilitaires
         function showToast(message, type = 'success') {
@@ -528,6 +636,44 @@
         function hideLoading() {
             loadingOverlay.classList.remove('active');
         }
+
+        // Gestion du menu mobile
+        function updateMenu() {
+            if (window.innerWidth <= 992) {
+                menuToggle.style.display = 'flex';
+                sidebar.classList.remove('active');
+            } else {
+                menuToggle.style.display = 'none';
+                sidebar.classList.add('active');
+            }
+        }
+
+        menuToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('active');
+        });
+
+        window.addEventListener('resize', updateMenu);
+        updateMenu();
+
+        // Gestion de la navigation
+        const currentPage = window.location.pathname.split('/').pop();
+        const menuItems = document.querySelectorAll('.sidebar-menu li a');
+
+        menuItems.forEach(item => {
+            if (item.getAttribute('href') === currentPage) {
+                item.parentElement.classList.add('active');
+            } else {
+                item.parentElement.classList.remove('active');
+            }
+        });
+
+        // Gestionnaire de déconnexion
+        document.getElementById('logout').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminRole');
+            window.location.href = 'index.html';
+        });
 
         // Charger les élections
         async function loadElections() {
@@ -558,7 +704,7 @@
                 electionsList.innerHTML = `
                     <div class="table-row">
                         <div colspan="5" style="text-align: center; padding: 30px;">
-                            Aucune élection trouvée
+                            Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
                         </div>
                     </div>
                 `;
@@ -624,7 +770,9 @@
             return date.toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
@@ -708,6 +856,12 @@
                 description: document.getElementById('electionDescription').value
             };
 
+            // Validation des dates
+            if (new Date(electionData.startDate) >= new Date(electionData.endDate)) {
+                showToast('La date de fin doit être postérieure à la date de début', 'error');
+                return;
+            }
+
             try {
                 await createElection(electionData);
                 electionModal.classList.remove('active');
@@ -715,12 +869,6 @@
             } catch (error) {
                 // L'erreur est déjà gérée dans createElection
             }
-        });
-
-        // Déconnexion
-        document.getElementById('logout').addEventListener('click', () => {
-            localStorage.removeItem('adminToken');
-            window.location.href = 'index.html';
         });
 
         // Initialisation

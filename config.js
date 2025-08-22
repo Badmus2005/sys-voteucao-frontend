@@ -22,7 +22,9 @@ const CONFIG = {
                 DETAILS: (id) => `/api/election/${id}`,
                 CREATE: '/api/election',
                 CLOSE: (id) => `/api/election/${id}/close`,
-                DELETE: (id) => `/api/election/${id}`
+                DELETE: (id) => `/api/election/${id}`,
+                BY_TYPE: (type) => `/api/election/by-type/${type}`,
+                STATS_BY_TYPE: (type) => `/api/election/stats/by-type/${type}`
             },
             VOTE: {
                 TOKEN: (electionId) => `/api/vote/token/${electionId}`,
