@@ -151,6 +151,7 @@
             font-size: 1.8rem;
             display: flex;
             align-items: center;
+            margin-bottom: 15px;
         }
 
         .admin-header h1 i {
@@ -271,7 +272,7 @@
             background: white;
             border-radius: 10px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: var(--shadow-md);
@@ -317,6 +318,20 @@
             border: 1px solid var(--gris-clair);
             border-radius: 6px;
             font-family: 'Poppins', sans-serif;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .conditional-fields {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            border-left: 3px solid var(--or);
         }
 
         .btn {
@@ -442,6 +457,10 @@
             .table-row div:nth-child(4) {
                 display: none;
             }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
@@ -564,20 +583,57 @@
             <div class="modal-body">
                 <form id="electionForm">
                     <div class="form-group">
-                        <label for="electionName">Nom de l'élection</label>
-                        <input type="text" id="electionName" placeholder="Ex: Élection BDE 2023" required>
+                        <label for="electionType">Type d'élection *</label>
+                        <select id="electionType" required>
+                            <option value="">Sélectionnez un type</option>
+                            <option value="SALLE">Élection de salle</option>
+                            <option value="ECOLE">Élection d'école</option>
+                            <option value="UNIVERSITE">Élection universitaire</option>
+                        </select>
                     </div>
+
                     <div class="form-group">
-                        <label for="startDate">Date de début</label>
-                        <input type="datetime-local" id="startDate" required>
+                        <label for="electionTitre">Titre de l'élection *</label>
+                        <input type="text" id="electionTitre" placeholder="Ex: Élection BDE 2023" required>
                     </div>
-                    <div class="form-group">
-                        <label for="endDate">Date de fin</label>
-                        <input type="datetime-local" id="endDate" required>
-                    </div>
+
                     <div class="form-group">
                         <label for="electionDescription">Description</label>
                         <textarea id="electionDescription" placeholder="Description de l'élection..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Date de début *</label>
+                            <input type="datetime-local" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">Date de fin *</label>
+                            <input type="datetime-local" id="endDate" required>
+                        </div>
+                    </div>
+
+                    <!-- Champs conditionnels selon le type d'élection -->
+                    <div id="conditionalFields" class="conditional-fields" style="display: none;">
+                        <div id="salleFields" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="filiere">Filière *</label>
+                                    <input type="text" id="filiere" placeholder="Ex: Informatique">
+                                </div>
+                                <div class="form-group">
+                                    <label for="annee">Année *</label>
+                                    <input type="number" id="annee" placeholder="Ex: 2" min="1" max="5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="ecoleFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="ecole">École *</label>
+                                <input type="text" id="ecole" placeholder="Ex: École d'Ingénierie">
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -595,9 +651,9 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
-
     <script src="config.js"></script>
     <script>
+
         // Configuration API
         const API_BASE = CONFIG.API.BASE_URL;
         const ELECTION_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
@@ -619,6 +675,29 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const menuToggle = document.querySelector('.menu-toggle');
         const sidebar = document.querySelector('.sidebar');
+        const electionType = document.getElementById('electionType');
+        const conditionalFields = document.getElementById('conditionalFields');
+        const salleFields = document.getElementById('salleFields');
+        const ecoleFields = document.getElementById('ecoleFields');
+
+        // Gestion des champs conditionnels selon le type d'élection
+        electionType.addEventListener('change', function () {
+            const type = this.value;
+            conditionalFields.style.display = 'block';
+            salleFields.style.display = 'none';
+            ecoleFields.style.display = 'none';
+
+            if (type === 'SALLE') {
+                salleFields.style.display = 'block';
+            } else if (type === 'ECOLE') {
+                ecoleFields.style.display = 'block';
+            } else if (type === 'UNIVERSITE') {
+                // Pas de champs supplémentaires pour l'université
+                conditionalFields.style.display = 'none';
+            } else {
+                conditionalFields.style.display = 'none';
+            }
+        });
 
         // Fonctions utilitaires
         function showToast(message, type = 'success') {
@@ -695,8 +774,26 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 showToast('Erreur de chargement des élections', 'error');
+                // Charger les élections depuis le stockage local en cas d'échec
+                loadElectionsFromLocalStorage();
             } finally {
                 hideLoading();
+            }
+        }
+
+        function loadElectionsFromLocalStorage() {
+            const localElections = JSON.parse(localStorage.getItem('elections')) || [];
+            if (localElections.length > 0) {
+                displayElections(localElections);
+                showToast('Mode hors ligne: données locales chargées', 'success');
+            } else {
+                electionsList.innerHTML = `
+                    <div class="table-row">
+                        <div colspan="5" style="text-align: center; padding: 30px;">
+                            Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -720,8 +817,8 @@
 
                 // Déterminer le statut
                 const now = new Date();
-                const startDate = new Date(election.startDate);
-                const endDate = new Date(election.endDate);
+                const startDate = new Date(election.dateDebut || election.startDate);
+                const endDate = new Date(election.dateFin || election.endDate);
 
                 let statusClass = 'status-upcoming';
                 let statusText = 'À venir';
@@ -735,9 +832,9 @@
                 }
 
                 row.innerHTML = `
-                    <div>${election.name}</div>
-                    <div>${formatDate(election.startDate)}</div>
-                    <div>${formatDate(election.endDate)}</div>
+                    <div>${election.titre || election.name}</div>
+                    <div>${formatDate(election.dateDebut || election.startDate)}</div>
+                    <div>${formatDate(election.dateFin || election.endDate)}</div>
                     <div><span class="status-badge ${statusClass}">${statusText}</span></div>
                     <div class="action-buttons">
                         <div class="btn-icon btn-edit" data-id="${election.id}">
@@ -783,7 +880,7 @@
         async function createElection(electionData) {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_CREATE_ENDPOINT}`, {
+                const response = await fetch(`${API_BASE}${ELECTION_ENDPOINT}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -792,25 +889,37 @@
                     body: JSON.stringify(electionData)
                 });
 
-                if (!response.ok) throw new Error('Erreur lors de la création');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la création');
+                }
 
                 const result = await response.json();
                 showToast('Élection créée avec succès');
                 loadElections();
                 return result;
             } catch (error) {
-                console.error('Erreur:', error);
-                showToast(error.message || 'Erreur lors de la création', 'error');
-                throw error;
+                console.error('Erreur API:', error);
+
+                // En cas d'échec de l'API, sauvegarder localement
+                const localElections = JSON.parse(localStorage.getItem('elections')) || [];
+                const newElection = {
+                    id: Date.now(),
+                    ...electionData,
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                };
+
+                localElections.push(newElection);
+                localStorage.setItem('elections', JSON.stringify(localElections));
+
+                showToast('Élection sauvegardée localement (mode hors ligne)', 'success');
+                loadElectionsFromLocalStorage();
+
+                return newElection;
             } finally {
                 hideLoading();
             }
-        }
-
-        // Éditer une élection
-        async function editElection(electionId) {
-            // Implémenter la logique d'édition
-            showToast('Fonctionnalité d\'édition à implémenter');
         }
 
         // Supprimer une élection
@@ -819,7 +928,7 @@
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_DELETE_ENDPOINT.replace(':id', electionId)}`, {
+                const response = await fetch(`${API_BASE}${ELECTION_ENDPOINT}/${electionId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -832,7 +941,14 @@
                 loadElections();
             } catch (error) {
                 console.error('Erreur:', error);
-                showToast(error.message || 'Erreur lors de la suppression', 'error');
+
+                // Supprimer localement en cas d'échec
+                const localElections = JSON.parse(localStorage.getItem('elections')) || [];
+                const updatedElections = localElections.filter(e => e.id != electionId);
+                localStorage.setItem('elections', JSON.stringify(updatedElections));
+
+                showToast('Élection supprimée localement (mode hors ligne)', 'success');
+                loadElectionsFromLocalStorage();
             } finally {
                 hideLoading();
             }
@@ -845,22 +961,59 @@
 
         document.getElementById('closeModal').addEventListener('click', () => {
             electionModal.classList.remove('active');
+            resetForm();
         });
 
         document.getElementById('cancelElection').addEventListener('click', () => {
             electionModal.classList.remove('active');
+            resetForm();
         });
+
+        function resetForm() {
+            electionForm.reset();
+            conditionalFields.style.display = 'none';
+        }
 
         document.getElementById('saveElection').addEventListener('click', async () => {
             const electionData = {
-                name: document.getElementById('electionName').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                description: document.getElementById('electionDescription').value
+                type: document.getElementById('electionType').value,
+                titre: document.getElementById('electionTitre').value,
+                description: document.getElementById('electionDescription').value,
+                dateDebut: document.getElementById('startDate').value,
+                dateFin: document.getElementById('endDate').value
             };
 
+            // Ajouter les champs conditionnels
+            if (electionData.type === 'SALLE') {
+                electionData.filiere = document.getElementById('filiere').value;
+                electionData.annee = parseInt(document.getElementById('annee').value);
+            } else if (electionData.type === 'ECOLE') {
+                electionData.ecole = document.getElementById('ecole').value;
+            }
+
+            // Validation des données
+            if (!electionData.type) {
+                showToast('Veuillez sélectionner un type d\'élection', 'error');
+                return;
+            }
+
+            if (!electionData.titre) {
+                showToast('Veuillez saisir un titre pour l\'élection', 'error');
+                return;
+            }
+
+            if (electionData.type === 'SALLE' && (!electionData.filiere || !electionData.annee)) {
+                showToast('Veuillez remplir tous les champs obligatoires pour une élection de salle', 'error');
+                return;
+            }
+
+            if (electionData.type === 'ECOLE' && !electionData.ecole) {
+                showToast('Veuillez saisir le nom de l\'école', 'error');
+                return;
+            }
+
             // Validation des dates
-            if (new Date(electionData.startDate) >= new Date(electionData.endDate)) {
+            if (new Date(electionData.dateDebut) >= new Date(electionData.dateFin)) {
                 showToast('La date de fin doit être postérieure à la date de début', 'error');
                 return;
             }
@@ -868,7 +1021,7 @@
             try {
                 await createElection(electionData);
                 electionModal.classList.remove('active');
-                electionForm.reset();
+                resetForm();
             } catch (error) {
                 // L'erreur est déjà gérée dans createElection
             }
@@ -880,8 +1033,9 @@
 
             // Vérifier le rôle administrateur
             const adminRole = localStorage.getItem('adminRole');
-            if (adminRole !== 'superadmin') {
+            if (adminRole !== 'ADMIN') {
                 document.getElementById('createElectionBtn').style.display = 'none';
+                showToast('Vous n\'avez pas les permissions pour créer des élections', 'error');
             }
         });
     </script>
