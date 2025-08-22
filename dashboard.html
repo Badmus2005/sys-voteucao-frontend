@@ -633,6 +633,65 @@
             }
         }
 
+        /* Styles pour les positions des toasts */
+        .toast-container {
+            position: fixed;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-container.top-right {
+            top: 20px;
+            right: 20px;
+        }
+
+        .toast-container.top-left {
+            top: 20px;
+            left: 20px;
+        }
+
+        .toast-container.bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .toast-container.bottom-left {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        .toast-container.top-center {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .toast-container.bottom-center {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Styles pour les types de toast */
+        .toast.success {
+            background-color: #28a745;
+        }
+
+        .toast.error {
+            background-color: var(--rouge-bordeaux);
+        }
+
+        .toast.warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .toast.info {
+            background-color: var(--bleu-nuit);
+        }
+
         /* Styles pour les codes générés */
         .codes-grid {
             display: grid;
@@ -1049,8 +1108,6 @@
             const STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.GENERAL;
             const ACTIVITY_ENDPOINT = CONFIG.API.ENDPOINTS.ACTIVITY.LIST;
             const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
-            const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
-            const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
             const IMPORT_MATRICULES_ENDPOINT = CONFIG.API.ENDPOINTS.IMPORT.MATRICULES;
             const CANDIDATES_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATES.LIST;
             const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.LIST;
@@ -1085,6 +1142,7 @@
                 const i = Math.floor(Math.log(bytes) / Math.log(k));
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
+
             // ------------ NOTIFICATIONS ------------
             safeAddListener('notificationBtn', 'click', function (e) {
                 e.preventDefault();
@@ -1117,7 +1175,7 @@
                     }
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showToast('Erreur de chargement des notifications', 'error');
+                    showToast('Erreur de chargement des notifications', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 }
             }
 
@@ -1136,9 +1194,9 @@
                     const div = document.createElement('div');
                     div.className = `notification-item ${notification.read ? '' : 'unread'}`;
                     div.innerHTML = `
-                        <div class="notification-content">${notification.message}</div>
-                        <div class="notification-time">${new Date(notification.createdAt).toLocaleString()}</div>
-                    `;
+            <div class="notification-content">${notification.message}</div>
+            <div class="notification-time">${new Date(notification.createdAt).toLocaleString()}</div>
+        `;
 
                     div.addEventListener('click', async () => {
                         if (!notification.read) {
@@ -1171,10 +1229,10 @@
                     });
 
                     loadNotifications(); // Recharger les notifications
-                    showToast('Toutes les notifications marquées comme lues', 'success');
+                    showToast('Toutes les notifications marquées comme lues', CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showToast('Erreur lors du marquage des notifications', 'error');
+                    showToast('Erreur lors du marquage des notifications', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 }
             });
 
@@ -1183,12 +1241,41 @@
                 const panel = document.getElementById('notificationPanel');
                 const btn = document.getElementById('notificationBtn');
 
-                if (panel.classList.contains('active') &&
+                if (panel && panel.classList.contains('active') &&
                     !panel.contains(e.target) &&
                     !btn.contains(e.target)) {
                     panel.classList.remove('active');
                 }
             });
+
+            // Fonction pour créer des toasts selon la configuration
+            function showToast(message, type = CONFIG.NOTIFICATIONS.TYPES.INFO) {
+                const toastContainer = document.getElementById('toastContainer');
+                if (!toastContainer) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+
+                // Icônes selon le type
+                let icon = 'info-circle';
+                if (type === CONFIG.NOTIFICATIONS.TYPES.SUCCESS) icon = 'check-circle';
+                if (type === CONFIG.NOTIFICATIONS.TYPES.ERROR) icon = 'exclamation-circle';
+                if (type === CONFIG.NOTIFICATIONS.TYPES.WARNING) icon = 'exclamation-triangle';
+
+                toast.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        ${message}
+    `;
+
+                // Positionnement
+                toastContainer.className = `toast-container ${CONFIG.NOTIFICATIONS.POSITION}`;
+                toastContainer.appendChild(toast);
+
+                // Supprimer le toast après le délai configuré
+                setTimeout(() => {
+                    toast.remove();
+                }, CONFIG.NOTIFICATIONS.AUTO_HIDE_DELAY);
+            }
 
             // ------------ PROFILE MANAGEMENT ------------
             async function loadAdminInfo() {
@@ -1204,7 +1291,7 @@
                     updateProfileUI(admin);
                 } catch (err) {
                     console.error('Erreur chargement info admin:', err);
-                    showToast('Erreur de chargement du profil', 'error');
+                    showToast('Erreur de chargement du profil', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 } finally {
                     hideLoading();
                 }
@@ -1269,11 +1356,11 @@
                         throw new Error(error.message || 'Erreur lors de la mise à jour');
                     }
 
-                    showToast('Profil mis à jour avec succès', 'success');
+                    showToast('Profil mis à jour avec succès', CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
                     updateProfileUI({ nom, prenom, email });
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
+                    showToast(error.message || 'Erreur lors de la sauvegarde', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 } finally {
                     hideLoading();
                 }
@@ -1312,10 +1399,10 @@
                     if (currentPhoto) currentPhoto.src = data.url + '?t=' + Date.now();
                     if (adminPhoto) adminPhoto.src = data.url + '?t=' + Date.now();
 
-                    showToast('Photo mise à jour avec succès', 'success');
+                    showToast('Photo mise à jour avec succès', CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showToast(error.message || 'Erreur lors de l\'upload', 'error');
+                    showToast(error.message || 'Erreur lors de l\'upload', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 } finally {
                     const btn = document.getElementById('uploadProfilePhotoBtn');
                     if (btn) {
@@ -1442,14 +1529,14 @@
                     }
 
                     const data = await response.json();
-                    showToast(`${data.imported} matricules importés avec succès`, 'success');
+                    showToast(`${data.imported} matricules importés avec succès`, CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
 
                     const modal = document.getElementById('importModal');
                     modal.classList.remove('active');
                     resetImportForm();
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showToast(error.message || 'Erreur lors de l\'import', 'error');
+                    showToast(error.message || 'Erreur lors de l\'import', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 } finally {
                     hideLoading();
                     const btn = document.getElementById('confirmImport');
@@ -1468,7 +1555,7 @@
                 const count = parseInt(countInput?.value);
 
                 if (!count || count < 1 || count > 100) {
-                    showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
+                    showToast('Veuillez entrer un nombre entre 1 et 100', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                     return;
                 }
 
@@ -1494,10 +1581,10 @@
                     if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
 
                     displayGeneratedCodes(data.codes);
-                    showToast(`${data.codes.length} codes générés avec succès`, 'success');
+                    showToast(`${data.codes.length} codes générés avec succès`, CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
                 } catch (error) {
                     console.error('Erreur génération codes:', error);
-                    showToast(error.message || 'Échec de la génération', 'error');
+                    showToast(error.message || 'Échec de la génération', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                 } finally {
                     generateBtn.innerHTML = originalBtnText;
                     generateBtn.disabled = false;
@@ -1560,7 +1647,7 @@
                     })
                     .catch(err => {
                         console.error('Erreur copie:', err);
-                        showToast('Erreur lors de la copie', 'error');
+                        showToast('Erreur lors de la copie', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                     });
             });
 
@@ -1701,6 +1788,8 @@
             loadStats();
             loadActivity();
             loadVoteStats();
+            loadAdminInfo();
+            loadNotifications();
         });
     </script>
 </body>
