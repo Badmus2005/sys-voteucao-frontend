@@ -856,6 +856,87 @@
             box-shadow: var(--shadow-md);
             display: none;
         }
+
+
+        /* ==== Améliorations visuelles ==== */
+
+        /* Sidebar dégradé */
+        .sidebar {
+            background: linear-gradient(180deg, var(--bleu-nuit), #1a2748);
+        }
+
+        /* Hover plus doux sur sidebar */
+        .sidebar-menu li a:hover {
+            background: linear-gradient(90deg, rgba(122, 0, 38, 0.2), rgba(0, 0, 0, 0.1));
+            transform: translateX(5px);
+        }
+
+        /* Cartes statistiques animées */
+        .admin-card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--or);
+        }
+
+        /* Notifications slide down */
+        .notification-panel {
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification-panel.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Profil avatar halo */
+        .avatar-wrapper {
+            box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.3);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .avatar-wrapper:hover {
+            box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.6);
+        }
+
+        /* Champs formulaire modernisés */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: white;
+            padding: 0 5px;
+            font-size: 0.85rem;
+            color: var(--gris-moyen);
+        }
+
+        .form-group input:focus+label,
+        .form-group textarea:focus+label {
+            color: var(--rouge-bordeaux);
+        }
+
+        /* Boutons modernisés */
+        .btn-primary {
+            background: linear-gradient(90deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
+            border: none;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--rouge-bordeaux-light), var(--rouge-bordeaux));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
     </style>
 </head>
 
@@ -1007,6 +1088,110 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
+
+    <section class="profile-section" id="profileSection">
+        <div class="profile-header">
+            <h2><i class="fas fa-user-edit"></i> Modifier le Profil</h2>
+            <button aria-label="Fermer" class="close-btn" id="closeProfileBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="profile-content">
+            <div class="profile-card">
+                <div class="profile-avatar-container">
+                    <div class="avatar-wrapper">
+                        <img alt="Photo de profil" class="profile-avatar" id="currentPhoto"
+                            src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg" />
+                        <div class="avatar-overlay" id="changePhotoBtn">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <input accept="image/*" id="profilePhotoInput" style="display:none;" type="file" />
+                    </div>
+                    <div class="profile-meta">
+                        <h2 id="displayName">Nom Utilisateur</h2>
+                        <p id="displayEmail">email@exemple.com</p>
+                        <span class="profile-badge">ADMINISTRATEUR</span>
+                    </div>
+                </div>
+            </div>
+            <form class="profile-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputPrenom"><i class="fas fa-user"></i> Prénom</label>
+                        <input id="inputPrenom" placeholder="Entrez votre prénom" type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label for="inputNom"><i class="fas fa-user-tag"></i> Nom</label>
+                        <input id="inputNom" placeholder="Entrez votre nom" type="text" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail"><i class="fas fa-envelope"></i> Email</label>
+                    <input disabled="" id="inputEmail" placeholder="email@exemple.com" type="email" />
+                </div>
+                <!-- Section Upload Photo -->
+                <div class="form-group photo-upload-group">
+                    <label><i class="fas fa-image"></i> Photo de Profil</label>
+                    <div class="upload-actions">
+                        <label class="upload-btn" for="profilePhotoInput">
+                            <i class="fas fa-folder-open"></i> Choisir une image
+                        </label>
+                        <button class="upload-submit-btn" id="uploadProfilePhotoBtn" type="button">
+                            <i class="fas fa-cloud-upload-alt"></i> Téléverser
+                        </button>
+                    </div>
+                    <p class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</p>
+                </div>
+                <div class="update-result" id="updateResult"></div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" id="cancelProfileBtn" type="button">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button class="btn btn-primary" id="saveProfileBtn" type="button">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="markAllReadBtn">Tout marquer comme lu</button>
+        </div>
+        <div id="notificationList"></div>
+    </div>
+    <div class="modal-overlay" id="importModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-import"></i> Importer des matricules</h3>
+                <button class="close-btn" id="closeImportModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="file-drop-area" id="fileDropArea">
+                    <i class="fas fa-cloud-upload-alt"
+                        style="font-size: 2rem; margin-bottom: 15px; color: var(--gris-moyen);"></i>
+                    <p>Glissez-déposez votre fichier ici ou</p>
+                    <label class="btn btn-primary" for="fileInput" style="margin-top: 15px;">
+                        <i class="fas fa-folder-open"></i> Parcourir
+                    </label>
+                    <input accept=".csv,.xlsx,.xls" class="file-input" id="fileInput" type="file" />
+                </div>
+                <div id="fileInfo" style="display: none; margin-top: 20px;">
+                    <p><strong>Fichier sélectionné:</strong> <span id="fileName"></span></p>
+                    <p><strong>Type:</strong> <span id="fileType"></span></p>
+                    <p><strong>Taille:</strong> <span id="fileSize"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelImport">Annuler</button>
+                <button class="btn btn-primary" disabled="" id="confirmImport">Importer</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script>
         // Fonction utilitaire pour gérer les event listeners
@@ -1780,110 +1965,89 @@
             loadAdminInfo();
             loadNotifications();
         });
-    </script>
 
-    <section class="profile-section" id="profileSection">
-        <div class="profile-header">
-            <h2><i class="fas fa-user-edit"></i> Modifier le Profil</h2>
-            <button aria-label="Fermer" class="close-btn" id="closeProfileBtn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="profile-content">
-            <div class="profile-card">
-                <div class="profile-avatar-container">
-                    <div class="avatar-wrapper">
-                        <img alt="Photo de profil" class="profile-avatar" id="currentPhoto"
-                            src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg" />
-                        <div class="avatar-overlay" id="changePhotoBtn">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <input accept="image/*" id="profilePhotoInput" style="display:none;" type="file" />
-                    </div>
-                    <div class="profile-meta">
-                        <h2 id="displayName">Nom Utilisateur</h2>
-                        <p id="displayEmail">email@exemple.com</p>
-                        <span class="profile-badge">ADMINISTRATEUR</span>
-                    </div>
-                </div>
-            </div>
-            <form class="profile-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="inputPrenom"><i class="fas fa-user"></i> Prénom</label>
-                        <input id="inputPrenom" placeholder="Entrez votre prénom" type="text" />
-                    </div>
-                    <div class="form-group">
-                        <label for="inputNom"><i class="fas fa-user-tag"></i> Nom</label>
-                        <input id="inputNom" placeholder="Entrez votre nom" type="text" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="inputEmail"><i class="fas fa-envelope"></i> Email</label>
-                    <input disabled="" id="inputEmail" placeholder="email@exemple.com" type="email" />
-                </div>
-                <!-- Section Upload Photo -->
-                <div class="form-group photo-upload-group">
-                    <label><i class="fas fa-image"></i> Photo de Profil</label>
-                    <div class="upload-actions">
-                        <label class="upload-btn" for="profilePhotoInput">
-                            <i class="fas fa-folder-open"></i> Choisir une image
-                        </label>
-                        <button class="upload-submit-btn" id="uploadProfilePhotoBtn" type="button">
-                            <i class="fas fa-cloud-upload-alt"></i> Téléverser
-                        </button>
-                    </div>
-                    <p class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</p>
-                </div>
-                <div class="update-result" id="updateResult"></div>
-                <div class="form-actions">
-                    <button class="btn btn-secondary" id="cancelProfileBtn" type="button">
-                        <i class="fas fa-times"></i> Annuler
-                    </button>
-                    <button class="btn btn-primary" id="saveProfileBtn" type="button">
-                        <i class="fas fa-save"></i> Enregistrer
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
-    <div class="notification-panel" id="notificationPanel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button id="markAllReadBtn">Tout marquer comme lu</button>
-        </div>
-        <div id="notificationList"></div>
-    </div>
-    <div class="modal-overlay" id="importModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3><i class="fas fa-file-import"></i> Importer des matricules</h3>
-                <button class="close-btn" id="closeImportModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="file-drop-area" id="fileDropArea">
-                    <i class="fas fa-cloud-upload-alt"
-                        style="font-size: 2rem; margin-bottom: 15px; color: var(--gris-moyen);"></i>
-                    <p>Glissez-déposez votre fichier ici ou</p>
-                    <label class="btn btn-primary" for="fileInput" style="margin-top: 15px;">
-                        <i class="fas fa-folder-open"></i> Parcourir
-                    </label>
-                    <input accept=".csv,.xlsx,.xls" class="file-input" id="fileInput" type="file" />
-                </div>
-                <div id="fileInfo" style="display: none; margin-top: 20px;">
-                    <p><strong>Fichier sélectionné:</strong> <span id="fileName"></span></p>
-                    <p><strong>Type:</strong> <span id="fileType"></span></p>
-                    <p><strong>Taille:</strong> <span id="fileSize"></span></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelImport">Annuler</button>
-                <button class="btn btn-primary" disabled="" id="confirmImport">Importer</button>
-            </div>
-        </div>
-    </div>
+
+        // ---------------- PROFILE SECTION ----------------
+        safeAddListener('profileNavBtn', 'click', function (e) {
+            e.preventDefault();
+            const profile = document.getElementById('profileSection');
+            if (profile) profile.classList.add('active');
+        });
+        safeAddListener('closeProfileBtn', 'click', function () {
+            const profile = document.getElementById('profileSection');
+            if (profile) profile.classList.remove('active');
+        });
+        safeAddListener('profilePhotoInput', 'change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    const currentPhoto = document.getElementById('currentPhoto');
+                    if (currentPhoto) currentPhoto.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ---------------- NOTIFICATIONS ----------------
+        safeAddListener('notificationBtn', 'click', function (e) {
+            e.preventDefault();
+            const panel = document.getElementById('notificationPanel');
+            if (panel) panel.classList.toggle('active');
+        });
+
+        // ---------------- IMPORT MODAL ----------------
+        safeAddListener('importMatricules', 'click', function () {
+            const modal = document.getElementById('importModal');
+            if (modal) modal.classList.add('active');
+        });
+
+
+        // ---------------- PROFILE SAVE ----------------
+        safeAddListener('saveProfileBtn', 'click', async function (e) {
+            e.preventDefault();
+            const prenom = document.getElementById('inputPrenom')?.value || "";
+            const nom = document.getElementById('inputNom')?.value || "";
+            const email = document.getElementById('inputEmail')?.value || "";
+            const token = localStorage.getItem('adminToken');
+
+            try {
+                // Update infos textuelles
+                const res = await fetch(CONFIG.API.ENDPOINTS.ADMIN.UPDATE, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ prenom, nom, email })
+                });
+                if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+                showToast("Profil mis à jour avec succès ✅", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Échec de la mise à jour du profil ❌", "error");
+            }
+
+            // Upload photo si choisie
+            const photoInput = document.getElementById('profilePhotoInput');
+            if (photoInput && photoInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append("photo", photoInput.files[0]);
+                try {
+                    const uploadRes = await fetch(CONFIG.API.ENDPOINTS.UPLOAD.ADMIN, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    if (!uploadRes.ok) throw new Error("Erreur upload photo");
+                    showToast("Photo mise à jour avec succès 📸", "success");
+                } catch (err) {
+                    console.error(err);
+                    showToast("Échec de l'upload de la photo ❌", "error");
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
