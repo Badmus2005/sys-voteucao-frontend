@@ -39,10 +39,14 @@ const CONFIG = {
             UPLOAD: {
                 IMAGE: '/api/upload/image'
             },
+
             STATS: {
-                DASHBOARD: '/api/stats/dashboard',
-                ELECTION: (id) => `/api/stats/election/${id}`,
-                GENERAL: '/api/stats'
+                GENERAL: "/api/stats/general",
+                VOTES: "/api/stats/votes",
+                DISTRIBUTION: "/api/stats/distribution",
+                HOURLY: "/api/stats/hourly",
+                COMPARISON: "/api/stats/comparison",
+                EXPORT: "/api/stats/export"
             },
             USERS: {
                 FEED: '/api/users/feed',

@@ -548,7 +548,7 @@
         const STATS_HOURLY_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.HOURLY;
         const STATS_COMPARISON_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.COMPARISON;
         const STATS_EXPORT_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.EXPORT;
-        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTIONS.LIST;
+        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
         const token = localStorage.getItem('adminToken');
 
         // Vérification de l'authentification
@@ -608,7 +608,7 @@
             elections.forEach(election => {
                 const option = document.createElement('option');
                 option.value = election.id;
-                option.textContent = election.name;
+                option.textContent = election.titre || election.name;
                 electionFilter.appendChild(option);
             });
         }
@@ -642,10 +642,10 @@
         }
 
         function updateGeneralStats(stats) {
-            document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
-            document.getElementById('totalVotes').textContent = stats.totalVotes.toLocaleString();
-            document.getElementById('participationRate').textContent = `${stats.participationRate}%`;
-            document.getElementById('avgVoteTime').textContent = `${stats.avgVoteTime}s`;
+            document.getElementById('totalUsers').textContent = stats.totalUsers?.toLocaleString() || '0';
+            document.getElementById('totalVotes').textContent = stats.totalVotes?.toLocaleString() || '0';
+            document.getElementById('participationRate').textContent = `${stats.participationRate || '0'}%`;
+            document.getElementById('avgVoteTime').textContent = `${stats.avgVoteTime || '0'}s`;
         }
 
         // Charger les données pour les graphiques
@@ -655,21 +655,18 @@
                 const period = document.getElementById('statsPeriod').value;
 
                 // Charger les données pour chaque graphique
-                const [
-                    votesData,
-                    distributionData,
-                    hourlyData,
-                    comparisonData
-                ] = await Promise.all([
+                const [votesData, distributionData, hourlyData, comparisonData] = await Promise.all([
                     fetchChartData(STATS_VOTES_ENDPOINT, electionId, period),
-                    fetchChartData(STATS_DISTRIBUTION_ENDPOINT, electionId, period),
+                    electionId !== 'all' ? fetchChartData(STATS_DISTRIBUTION_ENDPOINT, electionId, period) : Promise.resolve({ labels: [], values: [] }),
                     fetchChartData(STATS_HOURLY_ENDPOINT, electionId, period),
                     fetchChartData(STATS_COMPARISON_ENDPOINT, electionId, period)
                 ]);
 
                 // Mettre à jour les graphiques
                 updateVotesChart(votesData);
-                updateDistributionChart(distributionData);
+                if (electionId !== 'all') {
+                    updateDistributionChart(distributionData);
+                }
                 updateHourlyChart(hourlyData);
                 updateComparisonChart(comparisonData);
             } catch (error) {
@@ -877,15 +874,31 @@
 
                 if (!response.ok) throw new Error('Erreur lors de l\'export');
 
-                const blob = await response.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = `statistiques-ucao-${new Date().toISOString().slice(0, 10)}.${format}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(downloadUrl);
+                if (format === 'json') {
+                    const data = await response.json();
+                    // Télécharger comme fichier JSON
+                    const dataStr = JSON.stringify(data, null, 2);
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const downloadUrl = window.URL.createObjectURL(dataBlob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `statistiques-ucao-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                } else {
+                    // Pour PDF/Excel, vous devriez recevoir un blob directement
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `statistiques-ucao-${new Date().toISOString().slice(0, 10)}.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(downloadUrl);
+                }
 
                 showToast(`Export ${format.toUpperCase()} réussi`);
             } catch (error) {
