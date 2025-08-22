@@ -1089,23 +1089,26 @@
         <div class="spinner"></div>
     </div>
 
-    <section class="profile-section" id="profileSection">
+    <!-- PROFILE SECTION -->
+    <section id="profileSection" class="profile-section">
         <div class="profile-header">
             <h2><i class="fas fa-user-edit"></i> Modifier le Profil</h2>
-            <button aria-label="Fermer" class="close-btn" id="closeProfileBtn">
+            <button id="closeProfileBtn" class="close-btn" aria-label="Fermer">
                 <i class="fas fa-times"></i>
             </button>
         </div>
+
         <div class="profile-content">
             <div class="profile-card">
                 <div class="profile-avatar-container">
                     <div class="avatar-wrapper">
-                        <img alt="Photo de profil" class="profile-avatar" id="currentPhoto"
-                            src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg" />
+                        <img id="currentPhoto"
+                            src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                            alt="Photo de profil" class="profile-avatar">
                         <div class="avatar-overlay" id="changePhotoBtn">
                             <i class="fas fa-camera"></i>
                         </div>
-                        <input accept="image/*" id="profilePhotoInput" style="display:none;" type="file" />
+                        <input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
                     </div>
                     <div class="profile-meta">
                         <h2 id="displayName">Nom Utilisateur</h2>
@@ -1114,46 +1117,55 @@
                     </div>
                 </div>
             </div>
+
             <form class="profile-form">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="inputPrenom"><i class="fas fa-user"></i> Prénom</label>
-                        <input id="inputPrenom" placeholder="Entrez votre prénom" type="text" />
+                        <input type="text" id="inputPrenom" placeholder="Entrez votre prénom">
                     </div>
+
                     <div class="form-group">
                         <label for="inputNom"><i class="fas fa-user-tag"></i> Nom</label>
-                        <input id="inputNom" placeholder="Entrez votre nom" type="text" />
+                        <input type="text" id="inputNom" placeholder="Entrez votre nom">
                     </div>
                 </div>
+
                 <div class="form-group">
                     <label for="inputEmail"><i class="fas fa-envelope"></i> Email</label>
-                    <input disabled="" id="inputEmail" placeholder="email@exemple.com" type="email" />
+                    <input type="email" id="inputEmail" placeholder="email@exemple.com" disabled>
                 </div>
+
                 <!-- Section Upload Photo -->
                 <div class="form-group photo-upload-group">
                     <label><i class="fas fa-image"></i> Photo de Profil</label>
                     <div class="upload-actions">
-                        <label class="upload-btn" for="profilePhotoInput">
+                        <label for="profilePhotoInput" class="upload-btn">
                             <i class="fas fa-folder-open"></i> Choisir une image
                         </label>
-                        <button class="upload-submit-btn" id="uploadProfilePhotoBtn" type="button">
+                        <button type="button" id="uploadProfilePhotoBtn" class="upload-submit-btn">
                             <i class="fas fa-cloud-upload-alt"></i> Téléverser
                         </button>
                     </div>
                     <p class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</p>
                 </div>
-                <div class="update-result" id="updateResult"></div>
+
+                <div id="updateResult" class="update-result"></div>
+
                 <div class="form-actions">
-                    <button class="btn btn-secondary" id="cancelProfileBtn" type="button">
+                    <button type="button" id="cancelProfileBtn" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Annuler
                     </button>
-                    <button class="btn btn-primary" id="saveProfileBtn" type="button">
+                    <button type="button" id="saveProfileBtn" class="btn btn-primary">
                         <i class="fas fa-save"></i> Enregistrer
                     </button>
                 </div>
             </form>
         </div>
     </section>
+
+    <!-- Section Notificationo -->
+
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
             <h3>Notifications</h3>
@@ -1260,6 +1272,23 @@
                 }
             });
 
+            // Gestion du profil
+            const profileBtn = document.getElementById('profileNavBtn');
+            const profileSection = document.getElementById('profileSection');
+            const closeBtn = document.getElementById('closeProfileBtn');
+            const dashboardSection = document.getElementById('dashboardSection');
+
+            profileBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                profileSection.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeBtn.addEventListener('click', function () {
+                profileSection.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
             // Gestionnaire de déconnexion
             safeAddListener('logout', 'click', function (e) {
                 e.preventDefault();
@@ -1284,7 +1313,7 @@
             const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
             const CANDIDATES_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
             const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
-            const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
+            const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.DASHBOARD;
 
             const token = localStorage.getItem('adminToken');
 
@@ -1509,7 +1538,7 @@
                 const email = document.getElementById('inputEmail')?.value.trim();
 
                 if (!nom || !prenom) {
-                    showToast('Nom et prénom sont obligatoires', 'error');
+                    showToast('Nom et prénom sont obligatoires', CONFIG.NOTIFICATIONS.TYPES.ERROR);
                     return;
                 }
 
@@ -1605,19 +1634,6 @@
                     };
                     reader.readAsDataURL(file);
                 }
-            });
-
-            // ---------------- NOTIFICATIONS ----------------
-            safeAddListener('notificationBtn', 'click', function (e) {
-                e.preventDefault();
-                const panel = document.getElementById('notificationPanel');
-                if (panel) panel.classList.toggle('active');
-            });
-
-            // ---------------- IMPORT MODAL ----------------
-            safeAddListener('importMatricules', 'click', function () {
-                const modal = document.getElementById('importModal');
-                if (modal) modal.classList.add('active');
             });
 
 
