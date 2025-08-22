@@ -1586,6 +1586,42 @@
                 }
             });
 
+            // ---------------- PROFILE SECTION ----------------
+            safeAddListener('profileNavBtn', 'click', function (e) {
+                e.preventDefault();
+                const profile = document.getElementById('profileSection');
+                if (profile) profile.classList.add('active');
+            });
+            safeAddListener('closeProfileBtn', 'click', function () {
+                const profile = document.getElementById('profileSection');
+                if (profile) profile.classList.remove('active');
+            });
+            safeAddListener('profilePhotoInput', 'change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const currentPhoto = document.getElementById('currentPhoto');
+                        if (currentPhoto) currentPhoto.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // ---------------- NOTIFICATIONS ----------------
+            safeAddListener('notificationBtn', 'click', function (e) {
+                e.preventDefault();
+                const panel = document.getElementById('notificationPanel');
+                if (panel) panel.classList.toggle('active');
+            });
+
+            // ---------------- IMPORT MODAL ----------------
+            safeAddListener('importMatricules', 'click', function () {
+                const modal = document.getElementById('importModal');
+                if (modal) modal.classList.add('active');
+            });
+
+
             // ------------ IMPORT MATRICULES ------------
             safeAddListener('importMatricules', 'click', function () {
                 const modal = document.getElementById('importModal');
@@ -1678,48 +1714,7 @@
                 confirmBtn.disabled = false;
             }
 
-            safeAddListener('confirmImport', 'click', async function () {
-                const file = document.getElementById('fileInput').files[0];
-                if (!file) return;
 
-                const formData = new FormData();
-                formData.append('file', file);
-
-                try {
-                    showLoading();
-                    const btn = this;
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Import...';
-
-                    const response = await fetch(`${API_BASE}${IMPORT_MATRICULES_ENDPOINT}`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        body: formData
-                    });
-
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Erreur lors de l\'import');
-                    }
-
-                    const data = await response.json();
-                    showToast(`${data.imported} matricules importés avec succès`, CONFIG.NOTIFICATIONS.TYPES.SUCCESS);
-
-                    const modal = document.getElementById('importModal');
-                    modal.classList.remove('active');
-                    resetImportForm();
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showToast(error.message || 'Erreur lors de l\'import', CONFIG.NOTIFICATIONS.TYPES.ERROR);
-                } finally {
-                    hideLoading();
-                    const btn = document.getElementById('confirmImport');
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = 'Importer';
-                    }
-                }
-            });
 
             // ------------ CODE GENERATION ------------
             safeAddListener('generateBtn', 'click', generateCodes);
@@ -1964,88 +1959,6 @@
             loadVoteStats();
             loadAdminInfo();
             loadNotifications();
-        });
-
-
-        // ---------------- PROFILE SECTION ----------------
-        safeAddListener('profileNavBtn', 'click', function (e) {
-            e.preventDefault();
-            const profile = document.getElementById('profileSection');
-            if (profile) profile.classList.add('active');
-        });
-        safeAddListener('closeProfileBtn', 'click', function () {
-            const profile = document.getElementById('profileSection');
-            if (profile) profile.classList.remove('active');
-        });
-        safeAddListener('profilePhotoInput', 'change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (ev) {
-                    const currentPhoto = document.getElementById('currentPhoto');
-                    if (currentPhoto) currentPhoto.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // ---------------- NOTIFICATIONS ----------------
-        safeAddListener('notificationBtn', 'click', function (e) {
-            e.preventDefault();
-            const panel = document.getElementById('notificationPanel');
-            if (panel) panel.classList.toggle('active');
-        });
-
-        // ---------------- IMPORT MODAL ----------------
-        safeAddListener('importMatricules', 'click', function () {
-            const modal = document.getElementById('importModal');
-            if (modal) modal.classList.add('active');
-        });
-
-
-        // ---------------- PROFILE SAVE ----------------
-        safeAddListener('saveProfileBtn', 'click', async function (e) {
-            e.preventDefault();
-            const prenom = document.getElementById('inputPrenom')?.value || "";
-            const nom = document.getElementById('inputNom')?.value || "";
-            const email = document.getElementById('inputEmail')?.value || "";
-            const token = localStorage.getItem('adminToken');
-
-            try {
-                // Update infos textuelles
-                const res = await fetch(CONFIG.API.ENDPOINTS.ADMIN.UPDATE, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ prenom, nom, email })
-                });
-                if (!res.ok) throw new Error("Erreur lors de la mise à jour");
-                showToast("Profil mis à jour avec succès ✅", "success");
-            } catch (err) {
-                console.error(err);
-                showToast("Échec de la mise à jour du profil ❌", "error");
-            }
-
-            // Upload photo si choisie
-            const photoInput = document.getElementById('profilePhotoInput');
-            if (photoInput && photoInput.files.length > 0) {
-                const formData = new FormData();
-                formData.append("photo", photoInput.files[0]);
-                try {
-                    const uploadRes = await fetch(CONFIG.API.ENDPOINTS.UPLOAD.ADMIN, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}` },
-                        body: formData
-                    });
-                    if (!uploadRes.ok) throw new Error("Erreur upload photo");
-                    showToast("Photo mise à jour avec succès 📸", "success");
-                } catch (err) {
-                    console.error(err);
-                    showToast("Échec de l'upload de la photo ❌", "error");
-                }
-            }
         });
     </script>
 </body>
