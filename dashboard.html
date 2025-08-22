@@ -814,13 +814,14 @@
             </div>
             <ul class="sidebar-menu">
                 <h3>Général</h3>
-                <li class="active"><a href="admin_dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de
+                <li class="active"><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de
                         Bord</a></li>
                 <li><a href="users.html"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
                 <li><a href="candidates.html"><i class="fas fa-user"></i> Candidats</a></li>
                 <li><a href="statistics.html"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
                 <h3>Administration</h3>
-                <li><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
+                <li><a href="user_index.html"><i class="fas fa-home"></i> Acceuil</a></li>
                 <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
                 <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
             </ul>
@@ -1074,6 +1075,527 @@
             function hideLoading() {
                 const loader = document.getElementById('loadingOverlay');
                 if (loader) loader.classList.remove('active');
+            }
+
+            // Formatage de la taille des fichiers
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            // ------------ NOTIFICATIONS ------------
+            safeAddListener('notificationBtn', 'click', function (e) {
+                e.preventDefault();
+                const panel = document.getElementById('notificationPanel');
+                panel.classList.toggle('active');
+
+                // Charger les notifications si le panel est ouvert
+                if (panel.classList.contains('active')) {
+                    loadNotifications();
+                }
+            });
+
+            async function loadNotifications() {
+                try {
+                    const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!response.ok) throw new Error('Erreur de chargement des notifications');
+
+                    const notifications = await response.json();
+                    displayNotifications(notifications);
+
+                    // Mettre à jour le badge
+                    const unreadCount = notifications.filter(n => !n.read).length;
+                    const badge = document.getElementById('notificationCount');
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de chargement des notifications', 'error');
+                }
+            }
+
+            function displayNotifications(notifications) {
+                const container = document.getElementById('notificationList');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--gris-moyen);">Aucune notification</p>';
+                    return;
+                }
+
+                notifications.forEach(notification => {
+                    const div = document.createElement('div');
+                    div.className = `notification-item ${notification.read ? '' : 'unread'}`;
+                    div.innerHTML = `
+                        <div class="notification-content">${notification.message}</div>
+                        <div class="notification-time">${new Date(notification.createdAt).toLocaleString()}</div>
+                    `;
+
+                    div.addEventListener('click', async () => {
+                        if (!notification.read) {
+                            await markAsRead(notification.id);
+                            div.classList.remove('unread');
+                            loadNotifications(); // Recharger pour mettre à jour le badge
+                        }
+                    });
+
+                    container.appendChild(div);
+                });
+            }
+
+            async function markAsRead(notificationId) {
+                try {
+                    await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+            }
+
+            safeAddListener('markAllReadBtn', 'click', async function () {
+                try {
+                    await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    loadNotifications(); // Recharger les notifications
+                    showToast('Toutes les notifications marquées comme lues', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast('Erreur lors du marquage des notifications', 'error');
+                }
+            });
+
+            // Fermer le panel de notifications en cliquant à l'extérieur
+            document.addEventListener('click', function (e) {
+                const panel = document.getElementById('notificationPanel');
+                const btn = document.getElementById('notificationBtn');
+
+                if (panel.classList.contains('active') &&
+                    !panel.contains(e.target) &&
+                    !btn.contains(e.target)) {
+                    panel.classList.remove('active');
+                }
+            });
+
+            // ------------ PROFILE MANAGEMENT ------------
+            async function loadAdminInfo() {
+                try {
+                    showLoading();
+                    const res = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (!res.ok) throw new Error('Erreur chargement profil');
+
+                    const admin = await res.json();
+                    updateProfileUI(admin);
+                } catch (err) {
+                    console.error('Erreur chargement info admin:', err);
+                    showToast('Erreur de chargement du profil', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            function updateProfileUI(admin) {
+                const elements = {
+                    displayName: `${admin.nom || ''} ${admin.prenom || ''}`,
+                    displayEmail: admin.email,
+                    displayPoste: admin.poste,
+                    inputNom: admin.nom || '',
+                    inputPrenom: admin.prenom || '',
+                    inputEmail: admin.email,
+                    adminName: `${admin.nom || ''} ${admin.prenom || ''}`,
+                    adminEmail: admin.email,
+                    adminPoste: admin.poste
+                };
+
+                Object.entries(elements).forEach(([id, value]) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.tagName === 'INPUT') {
+                            el.value = value;
+                        } else {
+                            el.textContent = value;
+                        }
+                    }
+                });
+
+                if (admin.photoUrl) {
+                    const currentPhoto = document.getElementById('currentPhoto');
+                    const adminPhoto = document.getElementById('adminPhoto');
+                    if (currentPhoto) currentPhoto.src = admin.photoUrl + '?t=' + Date.now();
+                    if (adminPhoto) adminPhoto.src = admin.photoUrl + '?t=' + Date.now();
+                }
+            }
+
+            // Sauvegarde du profil
+            safeAddListener('saveProfileBtn', 'click', async function () {
+                const nom = document.getElementById('inputNom')?.value.trim();
+                const prenom = document.getElementById('inputPrenom')?.value.trim();
+                const email = document.getElementById('inputEmail')?.value.trim();
+
+                if (!nom || !prenom) {
+                    showToast('Nom et prénom sont obligatoires', 'error');
+                    return;
+                }
+
+                try {
+                    showLoading();
+                    const response = await fetch(`${API_BASE}${ADMIN_UPDATE_ENDPOINT}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ nom, prenom, email })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erreur lors de la mise à jour');
+                    }
+
+                    showToast('Profil mis à jour avec succès', 'success');
+                    updateProfileUI({ nom, prenom, email });
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
+                } finally {
+                    hideLoading();
+                }
+            });
+
+            // Upload de photo
+            safeAddListener('uploadProfilePhotoBtn', 'click', async function () {
+                const fileInput = document.getElementById('profilePhotoInput');
+                if (!fileInput?.files?.length) {
+                    showToast('Veuillez sélectionner une photo', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('photo', fileInput.files[0]);
+
+                try {
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+                    const response = await fetch(`${API_BASE}${UPLOAD_ADMIN_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erreur lors de l\'upload');
+                    }
+
+                    const data = await response.json();
+                    const currentPhoto = document.getElementById('currentPhoto');
+                    const adminPhoto = document.getElementById('adminPhoto');
+                    if (currentPhoto) currentPhoto.src = data.url + '?t=' + Date.now();
+                    if (adminPhoto) adminPhoto.src = data.url + '?t=' + Date.now();
+
+                    showToast('Photo mise à jour avec succès', 'success');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast(error.message || 'Erreur lors de l\'upload', 'error');
+                } finally {
+                    const btn = document.getElementById('uploadProfilePhotoBtn');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Téléverser';
+                    }
+                }
+            });
+
+            // ------------ IMPORT MATRICULES ------------
+            safeAddListener('importMatricules', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.add('active');
+            });
+
+            safeAddListener('closeImportModal', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.remove('active');
+                resetImportForm();
+            });
+
+            safeAddListener('cancelImport', 'click', function () {
+                const modal = document.getElementById('importModal');
+                modal.classList.remove('active');
+                resetImportForm();
+            });
+
+            function resetImportForm() {
+                const fileInput = document.getElementById('fileInput');
+                const fileInfo = document.getElementById('fileInfo');
+                const confirmBtn = document.getElementById('confirmImport');
+
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                confirmBtn.disabled = true;
+            }
+
+            // Gestion du drag and drop
+            const fileDropArea = document.getElementById('fileDropArea');
+            const fileInput = document.getElementById('fileInput');
+
+            if (fileDropArea && fileInput) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, preventDefaults, false);
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    fileDropArea.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight() {
+                    fileDropArea.classList.add('active');
+                }
+
+                function unhighlight() {
+                    fileDropArea.classList.remove('active');
+                }
+
+                fileDropArea.addEventListener('drop', handleDrop, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (files.length) {
+                        fileInput.files = files;
+                        handleFileSelection(files[0]);
+                    }
+                }
+
+                fileInput.addEventListener('change', function () {
+                    if (this.files.length) {
+                        handleFileSelection(this.files[0]);
+                    }
+                });
+            }
+
+            function handleFileSelection(file) {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                const fileType = document.getElementById('fileType');
+                const fileSize = document.getElementById('fileSize');
+                const confirmBtn = document.getElementById('confirmImport');
+
+                fileName.textContent = file.name;
+                fileType.textContent = file.type || 'Inconnu';
+                fileSize.textContent = formatFileSize(file.size);
+
+                fileInfo.style.display = 'block';
+                confirmBtn.disabled = false;
+            }
+
+            safeAddListener('confirmImport', 'click', async function () {
+                const file = document.getElementById('fileInput').files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    showLoading();
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Import...';
+
+                    const response = await fetch(`${API_BASE}${IMPORT_MATRICULES_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erreur lors de l\'import');
+                    }
+
+                    const data = await response.json();
+                    showToast(`${data.imported} matricules importés avec succès`, 'success');
+
+                    const modal = document.getElementById('importModal');
+                    modal.classList.remove('active');
+                    resetImportForm();
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showToast(error.message || 'Erreur lors de l\'import', 'error');
+                } finally {
+                    hideLoading();
+                    const btn = document.getElementById('confirmImport');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Importer';
+                    }
+                }
+            });
+
+            // ------------ CODE GENERATION ------------
+            safeAddListener('generateBtn', 'click', generateCodes);
+
+            async function generateCodes() {
+                const countInput = document.getElementById('codeCountInput');
+                const count = parseInt(countInput?.value);
+
+                if (!count || count < 1 || count > 100) {
+                    showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
+                    return;
+                }
+
+                const generateBtn = document.getElementById('generateBtn');
+                if (!generateBtn) return;
+
+                const originalBtnText = generateBtn.innerHTML;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+                generateBtn.disabled = true;
+
+                try {
+                    showLoading();
+                    const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ quantity: count })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
+
+                    displayGeneratedCodes(data.codes);
+                    showToast(`${data.codes.length} codes générés avec succès`, 'success');
+                } catch (error) {
+                    console.error('Erreur génération codes:', error);
+                    showToast(error.message || 'Échec de la génération', 'error');
+                } finally {
+                    generateBtn.innerHTML = originalBtnText;
+                    generateBtn.disabled = false;
+                    hideLoading();
+                }
+            }
+
+            function displayGeneratedCodes(codes) {
+                const container = document.getElementById('codesContainer');
+                const resultsSection = document.getElementById('resultsSection');
+                if (!container || !resultsSection) return;
+
+                container.innerHTML = '';
+                codes.forEach(code => {
+                    const codeElement = document.createElement('div');
+                    codeElement.className = 'code-item';
+                    codeElement.innerHTML = `
+                        <span>${code}</span>
+                        <button class="copy-single-btn" data-code="${code}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    `;
+                    container.appendChild(codeElement);
+                });
+
+                document.querySelectorAll('.copy-single-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const code = this.getAttribute('data-code');
+                        navigator.clipboard.writeText(code)
+                            .then(() => {
+                                this.innerHTML = '<i class="fas fa-check" style="color:green;"></i>';
+                                setTimeout(() => {
+                                    this.innerHTML = '<i class="fas fa-copy"></i>';
+                                }, 2000);
+                            });
+                    });
+                });
+
+                resultsSection.style.display = 'block';
+                const codesCount = document.getElementById('codesCount');
+                if (codesCount) codesCount.textContent = `(${codes.length} codes)`;
+                resultsSection.style.animation = 'fadeIn 0.3s ease-out';
+            }
+
+            safeAddListener('copyAllBtn', 'click', () => {
+                const codes = Array.from(document.querySelectorAll('.code-item span'))
+                    .map(el => el.textContent)
+                    .join('\n');
+
+                navigator.clipboard.writeText(codes)
+                    .then(() => {
+                        const copyBtn = document.getElementById('copyAllBtn');
+                        if (!copyBtn) return;
+
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalHtml;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Erreur copie:', err);
+                        showToast('Erreur lors de la copie', 'error');
+                    });
+            });
+
+            safeAddListener('downloadBtn', 'click', () => {
+                const codes = Array.from(document.querySelectorAll('.code-item span'))
+                    .map(el => el.textContent)
+                    .join('\n');
+
+                const blob = new Blob([codes], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `codes-ucao-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Vérification du rôle admin
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const user = await response.json();
+
+                    if (user.role !== 'ADMIN') {
+                        const genSection = document.getElementById('generation-section');
+                        if (genSection) genSection.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Erreur vérification rôle:', error);
+                }
             }
 
             // ------------ DASHBOARD DATA ------------
