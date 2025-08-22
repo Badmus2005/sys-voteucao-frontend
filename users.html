@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Utilisateurs - Admin UCAO</title>
+    <title>Gestion des Étudiants - Admin UCAO</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -43,7 +43,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar (identique aux autres pages) */
+        /* Sidebar */
         .sidebar {
             width: 310px;
             background: var(--bleu-nuit);
@@ -180,9 +180,11 @@
             font-size: 0.85rem;
             font-weight: 500;
             color: var(--bleu-nuit);
+            margin-bottom: 5px;
         }
 
-        .filter-group select {
+        .filter-group select,
+        .filter-group input {
             padding: 10px 12px;
             border: 1px solid var(--gris-clair);
             border-radius: 6px;
@@ -210,7 +212,7 @@
             cursor: pointer;
         }
 
-        /* Tableau des utilisateurs */
+        /* Tableau des étudiants */
         .table-container {
             background: white;
             border-radius: 10px;
@@ -221,7 +223,7 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 120px 100px;
+            grid-template-columns: 80px 1fr 1fr 1fr 1fr 100px 100px;
             padding: 15px 20px;
             background: var(--bleu-nuit);
             color: white;
@@ -230,7 +232,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 120px 100px;
+            grid-template-columns: 80px 1fr 1fr 1fr 1fr 100px 100px;
             padding: 15px 20px;
             border-bottom: 1px solid var(--gris-clair);
             align-items: center;
@@ -238,6 +240,14 @@
 
         .table-row:last-child {
             border-bottom: none;
+        }
+
+        .student-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--or);
         }
 
         .status-badge {
@@ -322,7 +332,7 @@
             background: var(--gris-clair);
         }
 
-        /* Toast and loading (identique aux autres pages) */
+        /* Toast and loading */
         .toast {
             position: fixed;
             top: 20px;
@@ -378,6 +388,19 @@
             }
         }
 
+        @media (max-width: 1200px) {
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 60px 1fr 1fr 1fr 100px 100px;
+            }
+
+            .table-header div:nth-child(4),
+            .table-row div:nth-child(4) {
+                display: none;
+            }
+        }
+
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -390,6 +413,16 @@
             .main-content {
                 margin-left: 0;
                 padding: 20px;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 60px 1fr 1fr 100px 100px;
+            }
+
+            .table-header div:nth-child(3),
+            .table-row div:nth-child(3) {
+                display: none;
             }
         }
 
@@ -435,6 +468,11 @@
                 content: attr(data-label);
                 font-weight: 600;
                 color: var(--bleu-nuit);
+                margin-right: 10px;
+            }
+
+            .student-photo {
+                margin: 0 auto;
             }
         }
     </style>
@@ -454,14 +492,13 @@
             </div>
             <ul class="sidebar-menu">
                 <h3>Général</h3>
-                <li class="active"><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de
-                        Bord</a></li>
-                <li><a href="users.html"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</a></li>
+                <li class="active"><a href="users.html"><i class="fas fa-users"></i> Étudiants</a></li>
                 <li><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
                 <li><a href="candidates.html"><i class="fas fa-user"></i> Candidats</a></li>
                 <li><a href="statistics.html"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
                 <h3>Administration</h3>
-                <li><a href="user_index.html"><i class="fas fa-home"></i> Acceuil</a></li>
+                <li><a href="user_index.html"><i class="fas fa-home"></i> Accueil</a></li>
                 <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
                 <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
             </ul>
@@ -470,14 +507,37 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="admin-header">
-                <h1><i class="fas fa-users"></i> Gestion des Utilisateurs</h1>
+                <h1><i class="fas fa-user-graduate"></i> Gestion des Étudiants</h1>
                 <div class="search-box">
-                    <input type="text" placeholder="Rechercher par matricule..." id="userSearch">
+                    <input type="text" placeholder="Rechercher par nom, matricule..." id="studentSearch">
                     <button><i class="fas fa-search"></i></button>
                 </div>
             </div>
 
             <div class="filters">
+                <div class="filter-group">
+                    <label for="filiereFilter">Filière</label>
+                    <select id="filiereFilter">
+                        <option value="all">Toutes les filières</option>
+                        <option value="Informatique">Informatique</option>
+                        <option value="Gestion">Gestion</option>
+                        <option value="Droit">Droit</option>
+                        <option value="Medecine">Médecine</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="anneeFilter">Année</label>
+                    <select id="anneeFilter">
+                        <option value="all">Toutes les années</option>
+                        <option value="1">1ère année</option>
+                        <option value="2">2ème année</option>
+                        <option value="3">3ème année</option>
+                        <option value="4">4ème année</option>
+                        <option value="5">5ème année</option>
+                    </select>
+                </div>
+
                 <div class="filter-group">
                     <label for="statusFilter">Statut</label>
                     <select id="statusFilter">
@@ -490,19 +550,21 @@
 
             <div class="table-container">
                 <div class="table-header">
-                    <div>Matricule</div>
-                    <div>Nom</div>
+                    <div>Photo</div>
+                    <div>Nom Complet</div>
+                    <div>Identifiant</div>
                     <div>Email</div>
+                    <div>Filière/Année</div>
                     <div>Statut</div>
                     <div>Actions</div>
                 </div>
-                <div id="usersList">
-                    <!-- Users will be loaded here dynamically -->
+                <div id="studentsList">
+                    <!-- Les étudiants seront chargés ici dynamiquement -->
                 </div>
             </div>
 
             <div class="pagination" id="pagination">
-                <!-- Pagination will be loaded here dynamically -->
+                <!-- Pagination sera chargée ici dynamiquement -->
             </div>
         </main>
     </div>
@@ -519,9 +581,9 @@
     <script>
         // Configuration API
         const API_BASE = CONFIG.API.BASE_URL;
-        const USERS_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.LIST;
-        const USER_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.UPDATE_STATUS;
-        const USER_SEARCH_ENDPOINT = CONFIG.API.ENDPOINTS.USERS.SEARCH;
+        const STUDENTS_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.LIST;
+        const STUDENT_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.UPDATE_STATUS;
+        const STUDENT_SEARCH_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.SEARCH;
         const token = localStorage.getItem('adminToken');
 
         // Vérification de l'authentification
@@ -530,15 +592,15 @@
         }
 
         // Éléments DOM
-        const usersList = document.getElementById('usersList');
+        const studentsList = document.getElementById('studentsList');
         const pagination = document.getElementById('pagination');
         const toast = document.getElementById('toast');
         const loadingOverlay = document.getElementById('loadingOverlay');
 
         // Variables de pagination
         let currentPage = 1;
-        const usersPerPage = 10;
-        let totalUsers = 0;
+        const studentsPerPage = 10;
+        let totalStudents = 0;
         let totalPages = 0;
 
         // Fonctions utilitaires
@@ -560,18 +622,22 @@
             loadingOverlay.classList.remove('active');
         }
 
-        // Charger les utilisateurs
-        async function loadUsers(page = 1) {
+        // Charger les étudiants
+        async function loadStudents(page = 1) {
             try {
                 showLoading();
                 currentPage = page;
 
+                const filiereFilter = document.getElementById('filiereFilter').value;
+                const anneeFilter = document.getElementById('anneeFilter').value;
                 const statusFilter = document.getElementById('statusFilter').value;
-                const searchTerm = document.getElementById('userSearch').value;
+                const searchTerm = document.getElementById('studentSearch').value;
 
-                let url = `${API_BASE}${USERS_ENDPOINT}?page=${page}&limit=${usersPerPage}`;
+                let url = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
                 const params = new URLSearchParams();
 
+                if (filiereFilter !== 'all') params.append('filiere', filiereFilter);
+                if (anneeFilter !== 'all') params.append('annee', anneeFilter);
                 if (statusFilter !== 'all') params.append('status', statusFilter);
                 if (searchTerm) params.append('search', searchTerm);
 
@@ -583,58 +649,69 @@
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur lors du chargement des utilisateurs');
+                if (!response.ok) throw new Error('Erreur lors du chargement des étudiants');
 
                 const data = await response.json();
-                totalUsers = data.total;
-                totalPages = Math.ceil(totalUsers / usersPerPage);
+                totalStudents = data.total;
+                totalPages = Math.ceil(totalStudents / studentsPerPage);
 
-                displayUsers(data.users);
+                displayStudents(data.students);
                 setupPagination();
             } catch (error) {
                 console.error('Erreur:', error);
-                showToast('Erreur de chargement des utilisateurs', 'error');
+                showToast('Erreur de chargement des étudiants', 'error');
             } finally {
                 hideLoading();
             }
         }
 
-        function displayUsers(users) {
-            usersList.innerHTML = '';
+        function displayStudents(students) {
+            studentsList.innerHTML = '';
 
-            if (users.length === 0) {
-                usersList.innerHTML = `
+            if (students.length === 0) {
+                studentsList.innerHTML = `
                     <div class="table-row">
-                        <div colspan="5" style="text-align: center; padding: 30px;">
-                            <i class="fas fa-user-slash" style="font-size: 2rem; color: var(--gris-moyen); margin-bottom: 10px;"></i>
-                            <p>Aucun utilisateur trouvé</p>
+                        <div colspan="7" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-user-graduate" style="font-size: 2rem; color: var(--gris-moyen); margin-bottom: 10px;"></i>
+                            <p>Aucun étudiant trouvé</p>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            users.forEach(user => {
+            students.forEach(student => {
                 const row = document.createElement('div');
                 row.className = 'table-row';
 
+                // Déterminer l'identifiant (matricule ou code)
+                const identifiant = student.matricule || student.codeInscription || 'N/A';
+
+                // Photo de l'étudiant
+                const photoUrl = student.photoUrl || 'https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg';
+
                 row.innerHTML = `
-                    <div data-label="Matricule">${user.matricule}</div>
-                    <div data-label="Nom">${user.nom} ${user.prenom}</div>
-                    <div data-label="Email">${user.email}</div>
+                    <div data-label="Photo">
+                        <img src="${photoUrl}" alt="${student.prenom} ${student.nom}" class="student-photo"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48Y2lyY2xlIGN4PSIyNSIgY3k9IjI1IiByPSIyMCIgZmlsbD0iI2U1ZTVlNSIvPjx0ZXh0IHg9IjI1IiB5PSIyOCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzk5OTk5OSI+RVQ8L3RleHQ+PC9zdmc+'">
+                    </div>
+                    <div data-label="Nom">${student.prenom} ${student.nom}</div>
+                    <div data-label="Identifiant">${identifiant}</div>
+                    <div data-label="Email">${student.user?.email || 'N/A'}</div>
+                    <div data-label="Filière/Année">${student.filiere || 'N/A'} / ${student.annee || 'N/A'}</div>
                     <div data-label="Statut">
-                        <span class="status-badge ${user.actif ? 'status-active' : 'status-inactive'}">
-                            ${user.actif ? 'Actif' : 'Inactif'}
+                        <span class="status-badge ${student.user?.actif ? 'status-active' : 'status-inactive'}">
+                            ${student.user?.actif ? 'Actif' : 'Inactif'}
                         </span>
                     </div>
                     <div data-label="Actions" class="action-buttons">
-                        <div class="btn-icon btn-edit toggle-status" data-id="${user.id}" data-status="${user.actif}">
-                            <i class="fas ${user.actif ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        <div class="btn-icon btn-edit toggle-status" data-id="${student.userId}" data-status="${student.user?.actif}">
+                            <i class="fas ${student.user?.actif ? 'fa-user-slash' : 'fa-user-check'}"></i>
                         </div>
                     </div>
                 `;
 
-                usersList.appendChild(row);
+                studentsList.appendChild(row);
             });
 
             // Ajouter les écouteurs d'événements
@@ -642,7 +719,7 @@
                 btn.addEventListener('click', (e) => {
                     const userId = e.currentTarget.getAttribute('data-id');
                     const currentStatus = e.currentTarget.getAttribute('data-status') === 'true';
-                    toggleUserStatus(userId, !currentStatus);
+                    toggleStudentStatus(userId, !currentStatus);
                 });
             });
         }
@@ -658,7 +735,7 @@
                 const prevBtn = document.createElement('div');
                 prevBtn.className = 'pagination-btn';
                 prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-                prevBtn.addEventListener('click', () => loadUsers(currentPage - 1));
+                prevBtn.addEventListener('click', () => loadStudents(currentPage - 1));
                 pagination.appendChild(prevBtn);
             }
 
@@ -667,7 +744,7 @@
                 const pageBtn = document.createElement('div');
                 pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
                 pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => loadUsers(i));
+                pageBtn.addEventListener('click', () => loadStudents(i));
                 pagination.appendChild(pageBtn);
             }
 
@@ -676,16 +753,16 @@
                 const nextBtn = document.createElement('div');
                 nextBtn.className = 'pagination-btn';
                 nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                nextBtn.addEventListener('click', () => loadUsers(currentPage + 1));
+                nextBtn.addEventListener('click', () => loadStudents(currentPage + 1));
                 pagination.appendChild(nextBtn);
             }
         }
 
-        // Changer le statut d'un utilisateur
-        async function toggleUserStatus(userId, newStatus) {
+        // Changer le statut d'un étudiant
+        async function toggleStudentStatus(userId, newStatus) {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${USER_UPDATE_ENDPOINT.replace(':id', userId)}`, {
+                const response = await fetch(`${API_BASE}${STUDENT_UPDATE_ENDPOINT.replace(':id', userId)}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -696,8 +773,8 @@
 
                 if (!response.ok) throw new Error('Erreur lors de la modification du statut');
 
-                showToast(`Utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`);
-                loadUsers(currentPage);
+                showToast(`Étudiant ${newStatus ? 'activé' : 'désactivé'} avec succès`);
+                loadStudents(currentPage);
             } catch (error) {
                 console.error('Erreur:', error);
                 showToast(error.message || 'Erreur lors de la modification', 'error');
@@ -706,20 +783,30 @@
             }
         }
 
-        // Recherche d'utilisateurs
-        async function searchUsers() {
+        // Recherche d'étudiants
+        async function searchStudents() {
             currentPage = 1;
-            await loadUsers(1);
+            await loadStudents(1);
         }
 
         // Gestionnaires d'événements
-        document.getElementById('statusFilter').addEventListener('change', () => {
+        document.getElementById('filiereFilter').addEventListener('change', () => {
             currentPage = 1;
-            loadUsers(1);
+            loadStudents(1);
         });
 
-        document.getElementById('userSearch').addEventListener('input', debounce(searchUsers, 300));
-        document.querySelector('.search-box button').addEventListener('click', searchUsers);
+        document.getElementById('anneeFilter').addEventListener('change', () => {
+            currentPage = 1;
+            loadStudents(1);
+        });
+
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            currentPage = 1;
+            loadStudents(1);
+        });
+
+        document.getElementById('studentSearch').addEventListener('input', debounce(searchStudents, 300));
+        document.querySelector('.search-box button').addEventListener('click', searchStudents);
 
         // Déconnexion
         document.getElementById('logout').addEventListener('click', () => {
@@ -742,7 +829,7 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
-            loadUsers(1);
+            loadStudents(1);
         });
     </script>
 </body>

@@ -56,6 +56,12 @@ const CONFIG = {
                 ME: '/api/admin/me',
                 UPDATE: '/api/admin/update'
             },
+            STUDENTS: {
+                LIST: "/students",
+                UPDATE_STATUS: "/students/:id/status",
+                SEARCH: "/students",
+                STATS: "/students/stats"
+            },
             ACTIVITY: {
                 LIST: '/api/activity'
             },
@@ -63,7 +69,7 @@ const CONFIG = {
                 GENERATE: '/api/codes/generate'
             },
             UPLOAD: {
-                ADMIN: '/api/upload/admin'
+                IMAGE: '/api/upload/image'
             }
         }
     },
