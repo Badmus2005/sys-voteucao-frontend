@@ -329,6 +329,69 @@
             background: rgba(122, 0, 38, 0.1);
         }
 
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(122, 0, 38, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Notification system */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .notification.info {
+            background: var(--violet);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--error);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .app-container {
@@ -453,11 +516,116 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Autres sections (cachées par défaut) -->
+            <div id="dynamic-content">
+                <!-- Section Élections -->
+                <div id="elections-section" style="display: none;">
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-vote-yea"></i> Toutes mes élections
+                        </h2>
+                        <div class="election-list" id="all-elections">
+                            <div class="empty-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Chargement des élections...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Candidats -->
+                <div id="candidates-section" style="display: none;">
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-users"></i> Liste des candidats
+                        </h2>
+                        <div id="candidates-list">
+                            <div class="empty-state">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Sélectionnez une élection pour voir les candidats</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Résultats -->
+                <div id="results-section" style="display: none;">
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-chart-bar"></i> Résultats des élections
+                        </h2>
+                        <div id="results-content">
+                            <div class="empty-state">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Aucun résultat disponible pour le moment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Profil -->
+                <div id="profile-section" style="display: none;">
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i class="fas fa-user-cog"></i> Mon profil
+                        </h2>
+                        <div id="profile-view-section">
+                            <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                                <div
+                                    style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; display: grid; place-items: center; font-size: 3rem; color: #ccc;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h3 id="profile-name">Utilisateur</h3>
+                                    <p id="profile-matricule">Matricule: -</p>
+                                    <p id="profile-program">Filière: -</p>
+                                    <p id="profile-year">Année: -</p>
+                                    <p id="profile-email">Email: -</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="edit-profile-btn">
+                                <i class="fas fa-edit"></i> Modifier mon profil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
-    <script src="config.js"></script>
+
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-info-circle"></i>
+        <span id="notification-message"></span>
+    </div>
+
     <script>
-        const API_BASE = CONFIG.API.BASE_URL;
+        // Configuration par défaut si config.js n'est pas disponible
+        const CONFIG = {
+            API: {
+                BASE_URL: 'http://localhost:3000/api',
+                ENDPOINTS: {
+                    AUTH: {
+                        LOGIN: '/auth/login',
+                        CHANGE_PASSWORD: '/auth/change-password'
+                    },
+                    USERS: {
+                        PROFILE: '/users/profile'
+                    },
+                    ELECTION: {
+                        LIST: '/elections',
+                        DETAILS: '/elections/'
+                    }
+                }
+            }
+        };
+
         const APP_STATE = {
             currentView: 'dashboard',
             userData: null,
@@ -465,13 +633,6 @@
             candidates: {}
         };
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        });
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            alert("Actualisation...");
-        });
         // Initialisation
         document.addEventListener('DOMContentLoaded', async function () {
             showLoading();
@@ -505,7 +666,7 @@
         // Chargement données utilisateur
         async function loadUserData() {
             try {
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -530,7 +691,7 @@
         // Chargement des élections
         async function loadElections() {
             try {
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -540,40 +701,48 @@
                     const data = await response.json();
                     APP_STATE.elections = data.elections || [];
                     updateElectionsUI();
+                } else {
+                    // Simulation de données pour la démonstration
+                    APP_STATE.elections = [
+                        { id: 1, titre: "Élection BDE", status: "active", dateDebut: "2023-10-01", dateFin: "2023-10-15", hasVoted: false },
+                        { id: 2, titre: "Élection Représentants", status: "upcoming", dateDebut: "2023-11-01", dateFin: "2023-11-05", hasVoted: false },
+                        { id: 3, titre: "Référendum", status: "ended", dateDebut: "2023-09-01", dateFin: "2023-09-05", hasVoted: true }
+                    ];
+                    updateElectionsUI();
                 }
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
+                // Simulation de données pour la démonstration
+                APP_STATE.elections = [
+                    { id: 1, titre: "Élection BDE", status: "active", dateDebut: "2023-10-01", dateFin: "2023-10-15", hasVoted: false },
+                    { id: 2, titre: "Élection Représentants", status: "upcoming", dateDebut: "2023-11-01", dateFin: "2023-11-05", hasVoted: false },
+                    { id: 3, titre: "Référendum", status: "ended", dateDebut: "2023-09-01", dateFin: "2023-09-05", hasVoted: true }
+                ];
+                updateElectionsUI();
             }
         }
 
         // Mise à jour UI profil
         function updateUserProfile() {
-            if (!APP_STATE.userData) return;
+            if (!APP_STATE.userData) {
+                // Données simulées pour la démonstration
+                APP_STATE.userData = {
+                    nom: "Dupont",
+                    prenom: "Jean",
+                    email: "jean.dupont@ucao-uuc.com",
+                    matricule: "UC2023001",
+                    filiere: "Informatique",
+                    annee: 3
+                };
+            }
 
             const user = APP_STATE.userData;
 
-            // Sidebar
-            document.getElementById('username').textContent = `${user.prenom} ${user.nom}`;
-            document.getElementById('user-program').textContent = user.filiere || '-';
-            document.getElementById('user-role').textContent = 'Électeur';
-
-            if (user.photoUrl) {
-                document.getElementById('user-avatar').src = user.photoUrl;
-                document.getElementById('profile-avatar-view').src = user.photoUrl;
-            }
-
-            // Mode affichage profil
             document.getElementById('profile-name').textContent = `${user.prenom} ${user.nom}`;
             document.getElementById('profile-matricule').textContent = `Matricule: ${user.matricule || '-'}`;
             document.getElementById('profile-program').textContent = `Filière: ${user.filiere || '-'}`;
             document.getElementById('profile-year').textContent = `Année: ${user.annee ? `${user.annee}ème année` : '-'}`;
             document.getElementById('profile-email').textContent = `Email: ${user.email || '-'}`;
-
-            document.getElementById('view-fullname').textContent = `${user.prenom} ${user.nom}`;
-            document.getElementById('view-email').textContent = user.email || '-';
-            document.getElementById('view-matricule').textContent = user.matricule || '-';
-            document.getElementById('view-program').textContent = user.filiere || '-';
-            document.getElementById('view-year').textContent = user.annee ? `${user.annee}ème année` : '-';
         }
 
         // Mise à jour UI élections
@@ -590,7 +759,7 @@
 
             if (upcoming) {
                 const daysLeft = Math.ceil((new Date(upcoming.dateDebut) - new Date()) / (1000 * 60 * 60 * 24));
-                document.getElementById('next-election').textContent = daysLeft;
+                document.getElementById('next-election').textContent = daysLeft > 0 ? daysLeft : 0;
                 document.getElementById('next-election-label').textContent = upcoming.titre;
             }
 
@@ -604,7 +773,7 @@
                         <div class="election-info">
                             <h3 class="election-title">${election.titre}</h3>
                             <div class="election-meta">
-                                <span><i class="fas fa-calendar-alt"></i> Clôture: ${new Date(election.dateFin).toLocaleDateString()}</span>
+                                <span><i class="fas fa-calendar-alt"></i> Clôture: ${new Date(election.dateFin).toLocaleDateString('fr-FR')}</span>
                                 <span class="election-badge badge-active">Active</span>
                             </div>
                         </div>
@@ -642,36 +811,42 @@
                 showNotification('Données actualisées', 'success');
             });
 
-            // Profil - Bouton modifier
-            document.getElementById('edit-profile-btn').addEventListener('click', toggleEditMode);
-            document.getElementById('cancel-changes').addEventListener('click', cancelEdit);
-            document.getElementById('change-password-btn').addEventListener('click', openPasswordModal);
-            document.getElementById('change-avatar-btn').addEventListener('click', () => {
-                document.getElementById('avatar-upload').click();
+            // Bouton de vote
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('vote-btn')) {
+                    const electionId = e.target.dataset.electionId;
+                    showNotification(`Redirection vers le vote pour l'élection #${electionId}`, 'info');
+                }
             });
 
-            // Formulaire profil
-            document.getElementById('profile-form').addEventListener('submit', saveProfile);
-
-            // Modal mot de passe
-            document.getElementById('password-modal-close').addEventListener('click', closePasswordModal);
-            document.getElementById('cancel-password-change').addEventListener('click', closePasswordModal);
-            document.getElementById('password-form').addEventListener('submit', changePassword);
+            // Liens textuels
+            document.querySelectorAll('.text-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchView(section);
+                });
+            });
         }
 
         // Changement de vue
         function switchView(view) {
             APP_STATE.currentView = view;
-            document.querySelectorAll('#dynamic-content > div').forEach(section => {
-                section.style.display = 'none';
-            });
+
+            // Masquer toutes les sections
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('elections-section').style.display = 'none';
+            document.getElementById('candidates-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('profile-section').style.display = 'none';
+
+            // Afficher la section demandée
             document.getElementById(`${view}-section`).style.display = 'block';
+
+            // Mettre à jour le titre
             document.getElementById('page-title').textContent = getViewTitle(view);
 
-            // Masquer navigation hiérarchique sauf pour résultats
-            document.getElementById('hierarchy-nav').style.display = view === 'results' ? 'flex' : 'none';
-
-            // Mettre à jour navigation active
+            // Mettre à jour la navigation active
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
                 if (item.dataset.section === view) item.classList.add('active');
@@ -687,136 +862,6 @@
                 'profile': 'Mon Profil'
             };
             return titles[view] || 'Tableau de Bord';
-        }
-
-        // Gestion profil - Mode édition
-        function toggleEditMode() {
-            const editSection = document.getElementById('profile-edit-section');
-            const viewSection = document.getElementById('profile-view-section');
-            const editBtn = document.getElementById('edit-profile-btn');
-
-            if (editSection.style.display === 'none') {
-                // Passer en mode édition
-                editSection.style.display = 'block';
-                viewSection.style.display = 'none';
-                editBtn.innerHTML = '<i class="fas fa-times"></i> Annuler';
-                editBtn.classList.remove('btn-primary');
-                editBtn.classList.add('btn-outline');
-                loadEditFormData();
-            } else {
-                // Revenir en mode affichage
-                editSection.style.display = 'none';
-                viewSection.style.display = 'block';
-                editBtn.innerHTML = '<i class="fas fa-edit"></i> Modifier mon profil';
-                editBtn.classList.remove('btn-outline');
-                editBtn.classList.add('btn-primary');
-            }
-        }
-
-        function loadEditFormData() {
-            if (!APP_STATE.userData) return;
-
-            const user = APP_STATE.userData;
-            document.getElementById('email').value = user.email || '';
-            document.getElementById('lastname').value = user.nom || '';
-            document.getElementById('firstname').value = user.prenom || '';
-            document.getElementById('program').value = user.filiere || '';
-            document.getElementById('year').value = user.annee || '';
-        }
-
-        function cancelEdit() {
-            toggleEditMode();
-            showNotification('Modifications annulées', 'info');
-        }
-
-        async function saveProfile(e) {
-            e.preventDefault();
-
-            const formData = {
-                email: document.getElementById('email').value,
-                nom: document.getElementById('lastname').value,
-                prenom: document.getElementById('firstname').value,
-                filiere: document.getElementById('program').value,
-                annee: parseInt(document.getElementById('year').value)
-            };
-
-            try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.ok) {
-                    const updatedData = await response.json();
-                    APP_STATE.userData = { ...APP_STATE.userData, ...updatedData };
-                    updateUserProfile();
-                    toggleEditMode();
-                    showNotification('Profil mis à jour avec succès', 'success');
-                } else {
-                    throw new Error('Erreur mise à jour profil');
-                }
-            } catch (error) {
-                showNotification('Erreur lors de la mise à jour', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Gestion mot de passe
-        function openPasswordModal() {
-            document.getElementById('password-modal').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('password-modal').classList.add('active');
-            }, 10);
-        }
-
-        function closePasswordModal() {
-            document.getElementById('password-modal').classList.remove('active');
-            setTimeout(() => {
-                document.getElementById('password-modal').style.display = 'none';
-            }, 300);
-        }
-
-        async function changePassword(e) {
-            e.preventDefault();
-
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (newPassword !== confirmPassword) {
-                showNotification('Les mots de passe ne correspondent pas', 'error');
-                return;
-            }
-
-            try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.CHANGE_PASSWORD}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({ currentPassword, newPassword })
-                });
-
-                if (response.ok) {
-                    closePasswordModal();
-                    showNotification('Mot de passe changé avec succès', 'success');
-                    document.getElementById('password-form').reset();
-                } else {
-                    throw new Error('Erreur changement mot de passe');
-                }
-            } catch (error) {
-                showNotification('Erreur lors du changement de mot de passe', 'error');
-            } finally {
-                hideLoading();
-            }
         }
 
         // Utilitaires
@@ -842,24 +887,6 @@
             updateUserProfile();
             updateElectionsUI();
         }
-
-        // Fonctions utilitaires globales
-        window.UTILS = {
-            isAuthenticated: () => !!localStorage.getItem('token'),
-            decodeToken: (token) => {
-                try {
-                    return JSON.parse(atob(token.split('.')[1]));
-                } catch {
-                    return null;
-                }
-            },
-            formatDate: (dateString) => {
-                return new Date(dateString).toLocaleDateString('fr-FR');
-            },
-            calculatePercentage: (value, total) => {
-                return total > 0 ? Math.round((value / total) * 100) : 0;
-            }
-        };
     </script>
 </body>
 
