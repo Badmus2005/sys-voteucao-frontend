@@ -33,13 +33,14 @@
         body {
             background-color: var(--background);
             color: var(--text);
+            line-height: 1.6;
         }
 
         /* ===== Layout ===== */
         .app-container {
             display: grid;
-            grid-template-rows: 60px 1fr;
-            grid-template-columns: 60px 1fr;
+            grid-template-rows: 70px 1fr;
+            grid-template-columns: 80px 1fr;
             grid-template-areas:
                 "topbar topbar"
                 "sidebar main";
@@ -49,52 +50,63 @@
         /* ===== Topbar ===== */
         .app-topbar {
             grid-area: topbar;
-            background: var(--secondary);
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 1.5rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-            z-index: 10;
+            padding: 0 2rem;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            position: sticky;
+            top: 0;
         }
 
         .topbar-left {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .brand-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background-color: var(--accent);
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, var(--accent), #e6c44c);
             display: grid;
             place-items: center;
-            color: var(--secondary);
+            color: white;
             font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .topbar-left h2 {
+            font-weight: 600;
+            font-size: 1.4rem;
         }
 
         .topbar-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         /* ===== Sidebar ===== */
         .app-sidebar {
             grid-area: sidebar;
-            background: var(--secondary);
+            background: linear-gradient(to bottom, var(--secondary), var(--secondary-light));
             color: white;
-            padding: 1rem 0.5rem;
-            transition: width 0.3s ease;
-            width: 60px;
+            padding: 1.5rem 0.5rem;
+            transition: all 0.3s ease;
+            width: 80px;
             overflow-x: hidden;
             position: relative;
+            z-index: 90;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
         }
 
         .app-sidebar:hover {
-            width: 240px;
+            width: 260px;
         }
 
         .nav-menu {
@@ -107,226 +119,318 @@
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.8);
+            gap: 1rem;
+            padding: 0.9rem 1.2rem;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
             white-space: nowrap;
             transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .nav-item i {
             width: 24px;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            transition: transform 0.2s;
         }
 
-        .nav-item:hover,
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item:hover i {
+            transform: scale(1.1);
+        }
+
         .nav-item.active {
             background: var(--violet);
             color: white;
+            box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
         }
 
         /* ===== Main Content ===== */
         .app-main {
             grid-area: main;
-            padding: 2rem;
+            padding: 2.5rem;
             overflow-y: auto;
+            background-color: #f5f7fa;
+        }
+
+        .page-title {
+            margin-bottom: 2.5rem;
         }
 
         .page-title h1 {
-            font-size: 1.75rem;
+            font-size: 2.1rem;
             color: var(--primary);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
         }
 
         .page-title p {
             color: var(--text-light);
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            max-width: 600px;
         }
 
         /* ===== Cards & Dashboard ===== */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .stats-card {
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--violet));
         }
 
         .stats-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-header h3 {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            font-weight: 600;
         }
 
         .stats-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            background: rgba(107, 70, 193, 0.15);
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, rgba(107, 70, 193, 0.15), rgba(122, 0, 38, 0.1));
             display: grid;
             place-items: center;
             color: var(--violet);
+            font-size: 1.4rem;
         }
 
         .stats-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin: 0.75rem 0;
             color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
         .stats-label {
             color: var(--text-light);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
         }
 
         .text-link {
             color: var(--violet);
             text-decoration: none;
-            font-weight: 500;
-            margin-top: 0.5rem;
-            display: inline-block;
-        }
-
-        .text-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Section titles */
-        .section-title {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            color: var(--secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        /* Elections */
-        .election-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .election-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-radius: 8px;
-            background: rgba(245, 245, 245, 0.8);
-            transition: all 0.2s ease;
-        }
-
-        .election-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .election-title {
             font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: var(--secondary);
-        }
-
-        .election-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-
-        .election-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge-active {
-            background: rgba(56, 161, 105, 0.2);
-            color: var(--success);
-        }
-
-        .badge-upcoming {
-            background: rgba(221, 107, 32, 0.2);
-            color: var(--warning);
-        }
-
-        .badge-ended {
-            background: rgba(229, 62, 62, 0.2);
-            color: var(--error);
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
-        }
-
-        .empty-state i {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #ccc;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
+            margin-top: 0.75rem;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s ease;
         }
 
+        .text-link:hover {
+            color: var(--primary);
+            gap: 0.7rem;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+        }
+
+        .section-title i {
+            background: linear-gradient(45deg, var(--primary), var(--violet));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Elections */
+        .election-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .election-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .election-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .election-info {
+            flex: 1;
+        }
+
+        .election-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .election-description {
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            max-width: 500px;
+        }
+
+        .election-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .election-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .election-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(56, 161, 105, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(56, 161, 105, 0.3);
+        }
+
+        .badge-upcoming {
+            background: rgba(221, 107, 32, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(221, 107, 32, 0.3);
+        }
+
+        .badge-ended {
+            background: rgba(229, 62, 62, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(229, 62, 62, 0.3);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #d1d5db;
+            opacity: 0.7;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
         .btn-primary {
-            background: var(--primary);
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
             color: white;
+            box-shadow: 0 4px 10px rgba(122, 0, 38, 0.25);
         }
 
         .btn-primary:hover {
-            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(122, 0, 38, 0.35);
         }
 
         .btn-violet {
-            background: var(--violet);
+            background: linear-gradient(to right, var(--violet), #8577c9);
             color: white;
+            box-shadow: 0 4px 10px rgba(107, 70, 193, 0.25);
         }
 
         .btn-violet:hover {
-            background: #553c9a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(107, 70, 193, 0.35);
         }
 
         .btn-outline {
             background: transparent;
-            border: 1px solid var(--primary);
+            border: 2px solid var(--primary);
             color: var(--primary);
         }
 
         .btn-outline:hover {
             background: rgba(122, 0, 38, 0.1);
+            transform: translateY(-2px);
         }
 
         /* Loading overlay */
@@ -336,20 +440,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.92);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(122, 0, 38, 0.2);
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(122, 0, 38, 0.1);
             border-radius: 50%;
             border-top-color: var(--primary);
             animation: spin 1s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--text);
+            font-weight: 500;
         }
 
         @keyframes spin {
@@ -361,42 +473,103 @@
         /* Notification system */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
+            top: 25px;
+            right: 25px;
+            padding: 1.2rem 1.8rem;
+            border-radius: 12px;
             color: white;
             opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
+            transform: translateX(100px);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             z-index: 10000;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
         }
 
         .notification.show {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(0);
         }
 
         .notification.info {
-            background: var(--violet);
+            background: linear-gradient(to right, var(--violet), #8577c9);
         }
 
         .notification.success {
-            background: var(--success);
+            background: linear-gradient(to right, var(--success), #48bb78);
         }
 
         .notification.error {
-            background: var(--error);
+            background: linear-gradient(to right, var(--error), #f56565);
+        }
+
+        .notification i {
+            font-size: 1.4rem;
+        }
+
+        /* Profile section */
+        .profile-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-light), var(--violet));
+            display: grid;
+            place-items: center;
+            font-size: 3.5rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-info h3 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .detail-card h4 {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-card p {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            font-weight: 500;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .app-container {
                 grid-template-columns: 1fr;
-                grid-template-rows: 60px auto auto;
+                grid-template-rows: 70px auto 1fr;
                 grid-template-areas:
                     "topbar"
                     "sidebar"
@@ -408,6 +581,7 @@
                 height: auto;
                 display: flex;
                 overflow: auto;
+                padding: 1rem;
             }
 
             .app-sidebar:hover {
@@ -417,6 +591,52 @@
             .nav-menu {
                 flex-direction: row;
                 justify-content: space-around;
+                margin-top: 0;
+                width: 100%;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .app-main {
+                padding: 1.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .election-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.2rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .topbar-actions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-main {
+                padding: 1rem;
+            }
+
+            .election-meta {
+                flex-direction: column;
+                gap: 0.7rem;
+            }
+
+            .card {
+                padding: 1.5rem;
             }
         }
     </style>
@@ -427,8 +647,8 @@
         <!-- Topbar -->
         <header class="app-topbar">
             <div class="topbar-left">
-                <div class="brand-logo">UE</div>
-                <h2>UCAO Élections</h2>
+                <div class="brand-logo">UCAO</div>
+                <h2>Plateforme de Vote Électronique</h2>
             </div>
             <div class="topbar-actions">
                 <button class="btn btn-outline" id="notifications-btn">
@@ -570,24 +790,38 @@
                         <h2 class="section-title">
                             <i class="fas fa-user-cog"></i> Mon profil
                         </h2>
-                        <div id="profile-view-section">
-                            <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-                                <div
-                                    style="width: 120px; height: 120px; border-radius: 50%; background: #f0f0f0; display: grid; place-items: center; font-size: 3rem; color: #ccc;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div>
-                                    <h3 id="profile-name">Utilisateur</h3>
-                                    <p id="profile-matricule">Matricule: -</p>
-                                    <p id="profile-program">Filière: -</p>
-                                    <p id="profile-year">Année: -</p>
-                                    <p id="profile-email">Email: -</p>
-                                </div>
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
                             </div>
-                            <button class="btn btn-primary" id="edit-profile-btn">
-                                <i class="fas fa-edit"></i> Modifier mon profil
-                            </button>
+                            <div class="profile-info">
+                                <h3 id="profile-name">Utilisateur</h3>
+                                <p>Électeur UCAO-UUC</p>
+                            </div>
                         </div>
+
+                        <div class="profile-details">
+                            <div class="detail-card">
+                                <h4>Matricule</h4>
+                                <p id="profile-matricule">-</p>
+                            </div>
+                            <div class="detail-card">
+                                <h4>Filière</h4>
+                                <p id="profile-program">-</p>
+                            </div>
+                            <div class="detail-card">
+                                <h4>Année</h4>
+                                <p id="profile-year">-</p>
+                            </div>
+                            <div class="detail-card">
+                                <h4>Email</h4>
+                                <p id="profile-email">-</p>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="edit-profile-btn">
+                            <i class="fas fa-edit"></i> Modifier mon profil
+                        </button>
                     </div>
                 </div>
             </div>
@@ -597,6 +831,7 @@
     <!-- Overlay de chargement -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">Chargement en cours...</div>
     </div>
 
     <!-- Notification -->
@@ -618,13 +853,17 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', async function () {
-            showLoading();
+            showLoading('Chargement de votre espace...');
             await checkAuth();
-            await loadUserData();
-            await loadElections();
+            await Promise.all([loadUserData(), loadElections()]);
             setupEventListeners();
             updateUI();
             hideLoading();
+
+            // Afficher notification de bienvenue
+            setTimeout(() => {
+                showNotification('Bienvenue sur la plateforme de vote UCAO-UUC', 'success');
+            }, 1000);
         });
 
         // Vérification authentification
@@ -649,6 +888,7 @@
         // Chargement données utilisateur
         async function loadUserData() {
             try {
+                showLoading('Chargement de votre profil...');
                 const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -674,6 +914,7 @@
         // Chargement des élections
         async function loadElections() {
             try {
+                showLoading('Chargement des élections...');
                 const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -685,47 +926,27 @@
                     APP_STATE.elections = data.elections || [];
                     updateElectionsUI();
                 } else {
-                    // Simulation de données pour la démonstration
-                    APP_STATE.elections = [
-                        { id: 1, titre: "Élection BDE", status: "active", dateDebut: "2023-10-01", dateFin: "2023-10-15", hasVoted: false },
-                        { id: 2, titre: "Élection Représentants", status: "upcoming", dateDebut: "2023-11-01", dateFin: "2023-11-05", hasVoted: false },
-                        { id: 3, titre: "Référendum", status: "ended", dateDebut: "2023-09-01", dateFin: "2023-09-05", hasVoted: true }
-                    ];
-                    updateElectionsUI();
+                    throw new Error('Erreur lors du chargement des élections');
                 }
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
-                // Simulation de données pour la démonstration
-                APP_STATE.elections = [
-                    { id: 1, titre: "Élection BDE", status: "active", dateDebut: "2023-10-01", dateFin: "2023-10-15", hasVoted: false },
-                    { id: 2, titre: "Élection Représentants", status: "upcoming", dateDebut: "2023-11-01", dateFin: "2023-11-05", hasVoted: false },
-                    { id: 3, titre: "Référendum", status: "ended", dateDebut: "2023-09-01", dateFin: "2023-09-05", hasVoted: true }
-                ];
+                showNotification('Impossible de charger les élections', 'error');
+                APP_STATE.elections = [];
                 updateElectionsUI();
             }
         }
 
         // Mise à jour UI profil
         function updateUserProfile() {
-            if (!APP_STATE.userData) {
-                // Données simulées pour la démonstration
-                APP_STATE.userData = {
-                    nom: "Dupont",
-                    prenom: "Jean",
-                    email: "jean.dupont@ucao-uuc.com",
-                    matricule: "UC2023001",
-                    filiere: "Informatique",
-                    annee: 3
-                };
-            }
+            if (!APP_STATE.userData) return;
 
             const user = APP_STATE.userData;
 
             document.getElementById('profile-name').textContent = `${user.prenom} ${user.nom}`;
-            document.getElementById('profile-matricule').textContent = `Matricule: ${user.matricule || '-'}`;
-            document.getElementById('profile-program').textContent = `Filière: ${user.filiere || '-'}`;
-            document.getElementById('profile-year').textContent = `Année: ${user.annee ? `${user.annee}ème année` : '-'}`;
-            document.getElementById('profile-email').textContent = `Email: ${user.email || '-'}`;
+            document.getElementById('profile-matricule').textContent = user.matricule || '-';
+            document.getElementById('profile-program').textContent = user.filiere || '-';
+            document.getElementById('profile-year').textContent = user.annee ? `${user.annee}ème année` : '-';
+            document.getElementById('profile-email').textContent = user.email || '-';
         }
 
         // Mise à jour UI élections
@@ -755,13 +976,15 @@
                     <div class="election-item">
                         <div class="election-info">
                             <h3 class="election-title">${election.titre}</h3>
+                            ${election.description ? `<p class="election-description">${election.description}</p>` : ''}
                             <div class="election-meta">
-                                <span><i class="fas fa-calendar-alt"></i> Clôture: ${new Date(election.dateFin).toLocaleDateString('fr-FR')}</span>
+                                <span><i class="fas fa-calendar-alt"></i> Début: ${new Date(election.dateDebut).toLocaleDateString('fr-FR')}</span>
+                                <span><i class="fas fa-calendar-check"></i> Fin: ${new Date(election.dateFin).toLocaleDateString('fr-FR')}</span>
                                 <span class="election-badge badge-active">Active</span>
                             </div>
                         </div>
                         ${election.hasVoted ?
-                        '<span class="election-badge" style="background: rgba(56, 161, 105, 0.2); color: var(--success);"><i class="fas fa-check"></i> Vote effectué</span>' :
+                        '<span class="election-badge" style="background: rgba(56, 161, 105, 0.15); color: var(--success); border: 1px solid rgba(56, 161, 105, 0.3);"><i class="fas fa-check"></i> Vote effectué</span>' :
                         '<button class="btn btn-primary vote-btn" data-election-id="${election.id}"><i class="fas fa-pen"></i> Voter</button>'
                     }
                     </div>
@@ -788,7 +1011,7 @@
 
             // Rafraîchissement
             document.getElementById('refresh-btn').addEventListener('click', async () => {
-                showLoading();
+                showLoading('Actualisation des données...');
                 await loadElections();
                 hideLoading();
                 showNotification('Données actualisées', 'success');
@@ -798,7 +1021,7 @@
             document.addEventListener('click', function (e) {
                 if (e.target.classList.contains('vote-btn')) {
                     const electionId = e.target.dataset.electionId;
-                    showNotification(`Redirection vers le vote pour l'élection #${electionId}`, 'info');
+                    window.location.href = `vote.html?election=${electionId}`;
                 }
             });
 
@@ -834,6 +1057,17 @@
                 item.classList.remove('active');
                 if (item.dataset.section === view) item.classList.add('active');
             });
+
+            // Charger les données spécifiques à la vue si nécessaire
+            if (view === 'elections') {
+                loadAllElections();
+            } else if (view === 'candidates') {
+                loadCandidates();
+            } else if (view === 'results') {
+                loadResults();
+            } else if (view === 'profile') {
+                // Rien à faire, déjà chargé
+            }
         }
 
         function getViewTitle(view) {
@@ -847,9 +1081,80 @@
             return titles[view] || 'Tableau de Bord';
         }
 
+        // Charger toutes les élections
+        async function loadAllElections() {
+            const container = document.getElementById('all-elections');
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Chargement des élections...</p></div>';
+
+            try {
+                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const elections = data.elections || [];
+
+                    if (elections.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Aucune élection disponible</p></div>';
+                    } else {
+                        container.innerHTML = elections.map(election => {
+                            let badgeClass = 'badge-upcoming';
+                            if (election.status === 'active') badgeClass = 'badge-active';
+                            if (election.status === 'ended') badgeClass = 'badge-ended';
+
+                            return `
+                                <div class="election-item">
+                                    <div class="election-info">
+                                        <h3 class="election-title">${election.titre}</h3>
+                                        ${election.description ? `<p class="election-description">${election.description}</p>` : ''}
+                                        <div class="election-meta">
+                                            <span><i class="fas fa-calendar-alt"></i> Début: ${new Date(election.dateDebut).toLocaleDateString('fr-FR')}</span>
+                                            <span><i class="fas fa-calendar-check"></i> Fin: ${new Date(election.dateFin).toLocaleDateString('fr-FR')}</span>
+                                            <span class="election-badge ${badgeClass}">${election.status === 'active' ? 'Active' : election.status === 'upcoming' ? 'À venir' : 'Terminée'}</span>
+                                        </div>
+                                    </div>
+                                    ${election.status === 'active' && !election.hasVoted ?
+                                    '<button class="btn btn-primary vote-btn" data-election-id="${election.id}"><i class="fas fa-pen"></i> Voter</button>' :
+                                    election.hasVoted ?
+                                        '<span class="election-badge" style="background: rgba(56, 161, 105, 0.15); color: var(--success); border: 1px solid rgba(56, 161, 105, 0.3);"><i class="fas fa-check"></i> Vote effectué</span>' :
+                                        '<button class="btn btn-outline" disabled>Non disponible</button>'
+                                }
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Erreur de chargement des élections</p></div>';
+            }
+        }
+
+        // Charger les candidats
+        async function loadCandidates() {
+            const container = document.getElementById('candidates-list');
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Chargement des candidats...</p></div>';
+
+            // Implémentez la logique pour charger les candidats depuis votre API
+            // Cette partie dépend de votre structure API
+        }
+
+        // Charger les résultats
+        async function loadResults() {
+            const container = document.getElementById('results-content');
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Chargement des résultats...</p></div>';
+
+            // Implémentez la logique pour charger les résultats depuis votre API
+            // Cette partie dépend de votre structure API
+        }
+
         // Utilitaires
-        function showLoading() {
+        function showLoading(text = 'Chargement en cours...') {
             document.getElementById('loading-overlay').style.display = 'flex';
+            document.getElementById('loading-text').textContent = text;
         }
 
         function hideLoading() {
