@@ -186,7 +186,7 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px;
+            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
             padding: 15px 20px;
             background: var(--bleu-nuit);
             color: white;
@@ -195,7 +195,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px;
+            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
             padding: 15px 20px;
             border-bottom: 1px solid var(--gris-clair);
             align-items: center;
@@ -221,6 +221,15 @@
         .status-completed {
             background: rgba(108, 117, 125, 0.15);
             color: #6c757d;
+        }
+
+        .election-type {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(122, 0, 38, 0.1);
+            color: var(--rouge-bordeaux);
         }
 
         .action-buttons {
@@ -272,7 +281,7 @@
             background: white;
             border-radius: 10px;
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: var(--shadow-md);
@@ -430,6 +439,19 @@
             display: none;
         }
 
+        @media (max-width: 1200px) {
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr 120px 120px 100px 100px;
+            }
+
+            .table-header div:nth-child(2),
+            .table-row div:nth-child(2) {
+                display: none;
+            }
+        }
+
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -450,9 +472,11 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr 100px;
             }
 
+            .table-header div:nth-child(3),
+            .table-row div:nth-child(3),
             .table-header div:nth-child(4),
             .table-row div:nth-child(4) {
                 display: none;
@@ -467,11 +491,11 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 100px;
             }
 
-            .table-header div:nth-child(3),
-            .table-row div:nth-child(3) {
+            .table-header div:nth-child(5),
+            .table-row div:nth-child(5) {
                 display: none;
             }
         }
@@ -489,8 +513,8 @@
                 padding: 10px;
             }
 
-            .table-header div:nth-child(2),
-            .table-row div:nth-child(2) {
+            .table-header div:nth-child(6),
+            .table-row div:nth-child(6) {
                 display: none;
             }
 
@@ -554,9 +578,10 @@
             <div class="table-container">
                 <div class="table-header">
                     <div>Nom de l'élection</div>
+                    <div>Type</div>
                     <div>Date de début</div>
                     <div>Date de fin</div>
-                    <div>Statut</div>
+                    <div>Niveau</div>
                     <div>Actions</div>
                 </div>
                 <div id="electionsList">
@@ -593,8 +618,28 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="electionNiveau">Niveau *</label>
+                        <select id="electionNiveau" required>
+                            <option value="">Sélectionnez un niveau</option>
+                            <option value="1">Niveau 1 - Responsables de Salle</option>
+                            <option value="2">Niveau 2 - Délégués d'École</option>
+                            <option value="3">Niveau 3 - Délégués Universitaires</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="delegueTypeGroup" style="display: none;">
+                        <label for="delegueType">Type de délégué</label>
+                        <select id="delegueType">
+                            <option value="">Sélectionnez un type</option>
+                            <option value="PREMIER">Premier Délégué</option>
+                            <option value="DEUXIEME">Deuxième Délégué</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label for="electionTitre">Titre de l'élection *</label>
-                        <input type="text" id="electionTitre" placeholder="Ex: Élection BDE 2023" required>
+                        <input type="text" id="electionTitre"
+                            placeholder="Ex: Élection Responsables de Salle - Informatique L2" required>
                     </div>
 
                     <div class="form-group">
@@ -623,7 +668,12 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="annee">Année *</label>
-                                    <input type="number" id="annee" placeholder="Ex: 2" min="1" max="5">
+                                    <select id="annee">
+                                        <option value="">Sélectionnez une année</option>
+                                        <option value="1">Licence 1</option>
+                                        <option value="2">Licence 2</option>
+                                        <option value="3">Licence 3</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -631,7 +681,13 @@
                         <div id="ecoleFields" style="display: none;">
                             <div class="form-group">
                                 <label for="ecole">École *</label>
-                                <input type="text" id="ecole" placeholder="Ex: École d'Ingénierie">
+                                <select id="ecole">
+                                    <option value="">Sélectionnez une école</option>
+                                    <option value="EGEI">EGEI</option>
+                                    <option value="ESMEA">ESMEA</option>
+                                    <option value="FSAE">FSAE</option>
+                                    <option value="FDE">FDE</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -653,7 +709,6 @@
     </div>
     <script src="config.js"></script>
     <script>
-
         // Configuration API
         const API_BASE = CONFIG.API.BASE_URL;
         const ELECTION_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
@@ -676,13 +731,30 @@
         const menuToggle = document.querySelector('.menu-toggle');
         const sidebar = document.querySelector('.sidebar');
         const electionType = document.getElementById('electionType');
+        const electionNiveau = document.getElementById('electionNiveau');
+        const delegueTypeGroup = document.getElementById('delegueTypeGroup');
+        const delegueType = document.getElementById('delegueType');
         const conditionalFields = document.getElementById('conditionalFields');
         const salleFields = document.getElementById('salleFields');
         const ecoleFields = document.getElementById('ecoleFields');
 
-        // Gestion des champs conditionnels selon le type d'élection
-        electionType.addEventListener('change', function () {
-            const type = this.value;
+        // Gestion des champs conditionnels
+        electionType.addEventListener('change', updateFormFields);
+        electionNiveau.addEventListener('change', updateFormFields);
+
+        function updateFormFields() {
+            const type = electionType.value;
+            const niveau = electionNiveau.value;
+
+            // Afficher/masquer le type de délégué
+            if (niveau === '2') {
+                delegueTypeGroup.style.display = 'block';
+            } else {
+                delegueTypeGroup.style.display = 'none';
+                delegueType.value = '';
+            }
+
+            // Gérer les champs conditionnels
             conditionalFields.style.display = 'block';
             salleFields.style.display = 'none';
             ecoleFields.style.display = 'none';
@@ -692,12 +764,11 @@
             } else if (type === 'ECOLE') {
                 ecoleFields.style.display = 'block';
             } else if (type === 'UNIVERSITE') {
-                // Pas de champs supplémentaires pour l'université
                 conditionalFields.style.display = 'none';
             } else {
                 conditionalFields.style.display = 'none';
             }
-        });
+        }
 
         // Fonctions utilitaires
         function showToast(message, type = 'success') {
@@ -736,18 +807,6 @@
         window.addEventListener('resize', updateMenu);
         updateMenu();
 
-        // Gestion de la navigation
-        const currentPage = window.location.pathname.split('/').pop();
-        const menuItems = document.querySelectorAll('.sidebar-menu li a');
-
-        menuItems.forEach(item => {
-            if (item.getAttribute('href') === currentPage) {
-                item.parentElement.classList.add('active');
-            } else {
-                item.parentElement.classList.remove('active');
-            }
-        });
-
         // Gestionnaire de déconnexion
         document.getElementById('logout').addEventListener('click', function (e) {
             e.preventDefault();
@@ -769,12 +828,11 @@
 
                 if (!response.ok) throw new Error('Erreur lors du chargement des élections');
 
-                const elections = await response.json();
-                displayElections(elections);
+                const data = await response.json();
+                displayElections(data.elections || data);
             } catch (error) {
                 console.error('Erreur:', error);
                 showToast('Erreur de chargement des élections', 'error');
-                // Charger les élections depuis le stockage local en cas d'échec
                 loadElectionsFromLocalStorage();
             } finally {
                 hideLoading();
@@ -789,7 +847,7 @@
             } else {
                 electionsList.innerHTML = `
                     <div class="table-row">
-                        <div colspan="5" style="text-align: center; padding: 30px;">
+                        <div colspan="6" style="text-align: center; padding: 30px;">
                             Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
                         </div>
                     </div>
@@ -800,10 +858,10 @@
         function displayElections(elections) {
             electionsList.innerHTML = '';
 
-            if (elections.length === 0) {
+            if (!elections || elections.length === 0) {
                 electionsList.innerHTML = `
                     <div class="table-row">
-                        <div colspan="5" style="text-align: center; padding: 30px;">
+                        <div colspan="6" style="text-align: center; padding: 30px;">
                             Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
                         </div>
                     </div>
@@ -817,8 +875,8 @@
 
                 // Déterminer le statut
                 const now = new Date();
-                const startDate = new Date(election.dateDebut || election.startDate);
-                const endDate = new Date(election.dateFin || election.endDate);
+                const startDate = new Date(election.dateDebut);
+                const endDate = new Date(election.dateFin);
 
                 let statusClass = 'status-upcoming';
                 let statusText = 'À venir';
@@ -831,11 +889,18 @@
                     statusText = 'Terminée';
                 }
 
+                // Formater le type d'élection
+                let typeText = election.type;
+                if (election.type === 'SALLE') typeText = 'Salle';
+                if (election.type === 'ECOLE') typeText = 'École';
+                if (election.type === 'UNIVERSITE') typeText = 'Université';
+
                 row.innerHTML = `
-                    <div>${election.titre || election.name}</div>
-                    <div>${formatDate(election.dateDebut || election.startDate)}</div>
-                    <div>${formatDate(election.dateFin || election.endDate)}</div>
-                    <div><span class="status-badge ${statusClass}">${statusText}</span></div>
+                    <div>${election.titre}</div>
+                    <div><span class="election-type">${typeText}</span></div>
+                    <div>${formatDate(election.dateDebut)}</div>
+                    <div>${formatDate(election.dateFin)}</div>
+                    <div>N${election.niveau}</div>
                     <div class="action-buttons">
                         <div class="btn-icon btn-edit" data-id="${election.id}">
                             <i class="fas fa-edit"></i>
@@ -880,7 +945,7 @@
         async function createElection(electionData) {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_ENDPOINT}`, {
+                const response = await fetch(`${API_BASE}${ELECTION_CREATE_ENDPOINT}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -900,23 +965,8 @@
                 return result;
             } catch (error) {
                 console.error('Erreur API:', error);
-
-                // En cas d'échec de l'API, sauvegarder localement
-                const localElections = JSON.parse(localStorage.getItem('elections')) || [];
-                const newElection = {
-                    id: Date.now(),
-                    ...electionData,
-                    isActive: true,
-                    createdAt: new Date().toISOString()
-                };
-
-                localElections.push(newElection);
-                localStorage.setItem('elections', JSON.stringify(localElections));
-
-                showToast('Élection sauvegardée localement (mode hors ligne)', 'success');
-                loadElectionsFromLocalStorage();
-
-                return newElection;
+                showToast(error.message || 'Erreur lors de la création', 'error');
+                throw error;
             } finally {
                 hideLoading();
             }
@@ -928,7 +978,7 @@
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_ENDPOINT}/${electionId}`, {
+                const response = await fetch(`${API_BASE}${ELECTION_DELETE_ENDPOINT}/${electionId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -941,14 +991,7 @@
                 loadElections();
             } catch (error) {
                 console.error('Erreur:', error);
-
-                // Supprimer localement en cas d'échec
-                const localElections = JSON.parse(localStorage.getItem('elections')) || [];
-                const updatedElections = localElections.filter(e => e.id != electionId);
-                localStorage.setItem('elections', JSON.stringify(updatedElections));
-
-                showToast('Élection supprimée localement (mode hors ligne)', 'success');
-                loadElectionsFromLocalStorage();
+                showToast('Erreur lors de la suppression', 'error');
             } finally {
                 hideLoading();
             }
@@ -972,16 +1015,23 @@
         function resetForm() {
             electionForm.reset();
             conditionalFields.style.display = 'none';
+            delegueTypeGroup.style.display = 'none';
         }
 
         document.getElementById('saveElection').addEventListener('click', async () => {
             const electionData = {
                 type: document.getElementById('electionType').value,
+                niveau: parseInt(document.getElementById('electionNiveau').value),
                 titre: document.getElementById('electionTitre').value,
                 description: document.getElementById('electionDescription').value,
                 dateDebut: document.getElementById('startDate').value,
                 dateFin: document.getElementById('endDate').value
             };
+
+            // Ajouter le type de délégué si niveau 2
+            if (electionData.niveau === 2) {
+                electionData.delegueType = document.getElementById('delegueType').value;
+            }
 
             // Ajouter les champs conditionnels
             if (electionData.type === 'SALLE') {
@@ -997,6 +1047,11 @@
                 return;
             }
 
+            if (!electionData.niveau) {
+                showToast('Veuillez sélectionner un niveau', 'error');
+                return;
+            }
+
             if (!electionData.titre) {
                 showToast('Veuillez saisir un titre pour l\'élection', 'error');
                 return;
@@ -1009,6 +1064,11 @@
 
             if (electionData.type === 'ECOLE' && !electionData.ecole) {
                 showToast('Veuillez saisir le nom de l\'école', 'error');
+                return;
+            }
+
+            if (electionData.niveau === 2 && !electionData.delegueType) {
+                showToast('Veuillez sélectionner un type de délégué', 'error');
                 return;
             }
 
