@@ -12,6 +12,7 @@
             --bleu-nuit: #1a2a4a;
             --blanc-casse: #f8f4e9;
             --or: #d4af37;
+            --vert-olive: #556B2F;
         }
 
         * {
@@ -30,6 +31,7 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
         }
 
         .background-slider {
@@ -55,7 +57,7 @@
         }
 
         .background-slide.active {
-            opacity: 1;
+            opacity: 0.7;
         }
 
         .background-overlay {
@@ -64,7 +66,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.85) 0%, rgba(128, 0, 32, 0.85) 100%);
             z-index: -1;
         }
 
@@ -73,12 +75,13 @@
             max-width: 500px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            border-top: 5px solid var(--rouge-bordeaux);
+            border-top: 5px solid var(--or);
             animation: fadeIn 0.8s ease-out;
             position: relative;
             z-index: 1;
+            backdrop-filter: blur(10px);
         }
 
         @keyframes fadeIn {
@@ -100,14 +103,25 @@
 
         .login-header h1 {
             color: var(--bleu-nuit);
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .login-header img {
-            width: 80px;
+            width: 100px;
             height: auto;
-            border-radius: 50%;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+        }
+
+        .login-header p {
+            color: var(--bleu-nuit);
+            font-size: 1rem;
+            opacity: 0.8;
         }
 
         .form-group {
@@ -120,21 +134,24 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--bleu-nuit);
+            font-size: 0.9rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 15px 15px;
+            border: 2px solid #e6e6e6;
+            border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s;
+            background: #f9f9f9;
         }
 
         .form-group input:focus {
             border-color: var(--or);
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
             outline: none;
+            background: #fff;
         }
 
         .password-toggle {
@@ -143,6 +160,12 @@
             top: 42px;
             cursor: pointer;
             color: var(--bleu-nuit);
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
         }
 
         .btn-login {
@@ -151,17 +174,22 @@
             background: linear-gradient(135deg, var(--rouge-bordeaux), #a00030);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
         }
 
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
         }
 
         .btn-login:disabled {
@@ -175,35 +203,58 @@
             margin-top: 20px;
         }
 
+        .login-footer p {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
         .login-footer a {
             color: var(--rouge-bordeaux);
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
         }
 
         .login-footer a:hover {
             color: var(--or);
         }
 
+        .login-footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--or);
+            transition: width 0.3s;
+        }
+
+        .login-footer a:hover::after {
+            width: 100%;
+        }
+
         .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 10px;
-            border-radius: 5px;
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #c33;
+            border-left: 4px solid #c62828;
             display: none;
+            font-size: 0.9rem;
         }
 
         .success-message {
-            background: #efe;
-            color: #3c3;
-            padding: 10px;
-            border-radius: 5px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #3c3;
+            border-left: 4px solid #2e7d32;
             display: none;
+            font-size: 0.9rem;
         }
 
         .loading {
@@ -256,13 +307,25 @@
 
         .modal-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 15px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            transform: translateY(-20px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(-30px);
             transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--rouge-bordeaux), var(--or));
         }
 
         .modal.active .modal-content {
@@ -279,23 +342,48 @@
         .modal-header h3 {
             color: var(--bleu-nuit);
             margin: 0;
+            font-size: 1.5rem;
         }
 
         .modal-close {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
             color: var(--bleu-nuit);
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body p {
+            margin-bottom: 15px;
+            color: #555;
         }
 
         .modal-body input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 15px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e6e6e6;
+            border-radius: 8px;
             font-size: 1rem;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+
+        .modal-body input:focus {
+            border-color: var(--or);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+            outline: none;
+            background: #fff;
         }
 
         .modal-actions {
@@ -305,33 +393,69 @@
         }
 
         .btn-modal {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
         .btn-cancel {
-            background: #ddd;
-            color: #333;
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
         }
 
         .btn-submit {
-            background: var(--rouge-bordeaux);
+            background: linear-gradient(135deg, var(--rouge-bordeaux), #a00030);
             color: white;
+            box-shadow: 0 4px 10px rgba(128, 0, 32, 0.25);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(128, 0, 32, 0.3);
+        }
+
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .modal-content {
+                padding: 25px 20px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .btn-modal {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Slider d'arrière-plan -->
+    <!-- Slider d'arrière-plan avec nouvelles images -->
     <div class="background-slider">
         <div class="background-slide active"
-            style="background-image: url('https://tse1.mm.bing.net/th/id/OIP.8dkVEghxeRoRaYQhVnxS-QHaEK?rs=1&pid=ImgDetMain&o=7&rm=3')">
+            style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
         </div>
         <div class="background-slide"
-            style="background-image: url('https://tse2.mm.bing.net/th/id/OIP.wH6T4TJ766iMBK9a7nO0WgAAAA?w=390&h=280&rs=1&pid=ImgDetMain&o=7&rm=3')">
+            style="background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
+        </div>
+        <div class="background-slide"
+            style="background-image: url('https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
         </div>
         <div class="background-overlay"></div>
     </div>
@@ -340,6 +464,7 @@
         <div class="login-header">
             <h1>Connexion UCAO-UUC</h1>
             <img src="https://www.ucaobenin.org/img/logo_ucao-uuc-benin.png" alt="Logo UCAO">
+            <p>Accédez à votre espace personnel</p>
         </div>
 
         <div class="error-message" id="errorMessage"></div>
@@ -351,27 +476,27 @@
 
         <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="email" name="email" placeholder="votre@email.com" required>
             </div>
 
             <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
+                <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
+                <input type="password" id="password" name="password" placeholder="Votre mot de passe" required>
                 <span class="password-toggle" id="passwordToggle">
                     <i class="fas fa-eye"></i>
                 </span>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">
-                Se connecter
+                <i class="fas fa-sign-in-alt"></i> Se connecter
             </button>
         </form>
 
         <div class="login-footer">
             <p>Mot de passe oublié ? <a href="#" id="forgot-password-link">Réinitialiser</a></p>
             <p>Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
-            <p><a href="user_index.html">← Retour à l'accueil</a></p>
+            <p><a href="user_index.html"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
         </div>
     </div>
 
@@ -385,16 +510,16 @@
             <div class="modal-body">
                 <p>Entrez votre email pour recevoir les instructions de réinitialisation :</p>
                 <input type="email" id="resetEmail" placeholder="Votre email" required>
-                <div class="modal-actions">
-                    <button class="btn-modal btn-cancel" id="cancelReset">Annuler</button>
-                    <button class="btn-modal btn-submit" id="submitReset">Envoyer</button>
-                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="cancelReset">Annuler</button>
+                <button class="btn-modal btn-submit" id="submitReset">Envoyer</button>
             </div>
         </div>
     </div>
 
     <!-- Configuration et scripts -->
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script>
         // Gestion du slider d'arrière-plan
         function initBackgroundSlider() {
@@ -449,6 +574,13 @@
             modalClose.addEventListener('click', closeModal);
             cancelReset.addEventListener('click', closeModal);
 
+            // Fermer le modal en cliquant à l'extérieur
+            resetModal.addEventListener('click', function (e) {
+                if (e.target === resetModal) {
+                    closeModal();
+                }
+            });
+
             submitReset.addEventListener('click', async function () {
                 const email = resetEmail.value.trim();
 
@@ -457,10 +589,11 @@
                     return;
                 }
 
-                if (!UTILS.isValidEmail(email)) {
+                if (!isValidEmail(email)) {
                     showMessage('Veuillez entrer un email valide', 'error');
                     return;
                 }
+
                 showModalLoading(true);
                 try {
                     const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
@@ -485,6 +618,12 @@
                     showModalLoading(false);
                 }
             });
+        }
+
+        // Fonction de validation d'email
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
 
         // Fonctions d'affichage des messages
@@ -512,6 +651,7 @@
                 }, 5000);
             }
         }
+
         function showLoading(show) {
             const loading = document.getElementById('loading');
             const loginBtn = document.getElementById('loginBtn');
@@ -519,6 +659,7 @@
             loading.style.display = show ? 'block' : 'none';
             loginBtn.disabled = show;
         }
+
         function showModalLoading(show) {
             const submitBtn = document.getElementById('submitReset');
             submitBtn.disabled = show;
@@ -526,6 +667,7 @@
                 '<i class="fas fa-spinner fa-spin"></i> Envoi...' :
                 'Envoyer';
         }
+
         // Connexion utilisateur
         async function handleLogin(email, password) {
             const API_BASE = CONFIG.API.BASE_URL;
@@ -545,17 +687,17 @@
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    showMessage(CONFIG.MESSAGES.SUCCESS.LOGIN, 'success');
+                    showMessage('Connexion réussie! Redirection en cours...', 'success');
 
                     setTimeout(() => {
                         window.location.href = 'user_dashboard.html';
                     }, 1500);
                 } else {
-                    showMessage(data.message || CONFIG.MESSAGES.ERROR.LOGIN_FAILED, 'error');
+                    showMessage(data.message || 'Email ou mot de passe incorrect', 'error');
                 }
             } catch (error) {
                 console.error('Erreur de connexion:', error);
-                showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+                showMessage('Erreur de connexion au serveur', 'error');
             } finally {
                 showLoading(false);
             }
@@ -576,12 +718,12 @@
                 const password = document.getElementById('password').value;
 
                 if (!email || !password) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
+                    showMessage('Veuillez remplir tous les champs', 'error');
                     return;
                 }
 
-                if (!UTILS.isValidEmail(email)) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
+                if (!isValidEmail(email)) {
+                    showMessage('Veuillez entrer un email valide', 'error');
                     return;
                 }
 
