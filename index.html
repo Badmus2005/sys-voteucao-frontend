@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Admin - UCAO-UUC</title>
+    <meta name="description" content="Plateforme sécurisée de vote électronique de l'UCAO-UUC">
+    <title>UCAO-UUC - Vote Électronique Sécurisé</title>
     <style>
         :root {
             --rouge-bordeaux: #7a0026;
@@ -13,12 +14,14 @@
             --bleu-nuit-light: #1e2b4d;
             --blanc-casse: #f8f4e9;
             --or: #c9a227;
-            --or-light: #e0b745;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --success: #38a169;
+            --warning: #dd6b20;
+            --error: #e53e3e;
             --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
             --shadow-md: 0 4px 12px rgba(15, 26, 49, 0.15);
-            --shadow-lg: 0 10px 25px rgba(15, 26, 49, 0.2);
             --transition: all 0.3s ease;
-            --border-radius: 10px;
         }
 
         * {
@@ -30,189 +33,15 @@
 
         body {
             background-color: var(--blanc-casse);
-            color: var(--bleu-nuit);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            color: var(--text-dark);
             line-height: 1.6;
         }
 
-        /* Header amélioré */
-        .admin-header {
-            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
-            color: white;
-            padding: 25px 0;
-            text-align: center;
-            border-bottom: 4px solid var(--or);
-            box-shadow: var(--shadow-md);
-        }
-
-        .admin-header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            margin-bottom: 5px;
-        }
-
-        .admin-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-top: 5px;
-            font-weight: 300;
-        }
-
-        /* Main Content amélioré */
-        .admin-main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 50px 20px;
-            background: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
-            background-size: cover;
-            position: relative;
-        }
-
-        .admin-main::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(15, 26, 49, 0.9), rgba(122, 0, 38, 0.8));
-        }
-
-        .admin-container {
-            display: flex;
-            max-width: 1100px;
-            width: 100%;
-            z-index: 1;
-            gap: 40px;
-        }
-
-        /* Welcome Section améliorée */
-        .welcome-section {
-            flex: 1;
-            padding: 40px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: rgba(15, 26, 49, 0.7);
-            border-radius: var(--border-radius);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .welcome-section h2 {
-            font-size: 2.2rem;
-            margin-bottom: 25px;
-            color: var(--or);
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .welcome-section p {
-            margin-bottom: 20px;
-            line-height: 1.7;
-            font-size: 1.05rem;
-        }
-
-        .features-list {
-            margin-top: 30px;
-            list-style: none;
-        }
-
-        .features-list li {
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            font-size: 1.05rem;
-        }
-
-        .features-list i {
-            color: var(--or);
-            margin-right: 15px;
-            font-size: 1.3rem;
-            min-width: 25px;
-            text-align: center;
-        }
-
-        /* Auth Section améliorée */
-        .auth-section {
-            width: 420px;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .auth-section:hover {
-            transform: translateY(-5px);
-        }
-
-        .auth-tabs {
-            display: flex;
-            background: var(--bleu-nuit);
-        }
-
-        .auth-tab {
-            flex: 1;
-            text-align: center;
-            padding: 18px;
-            color: white;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-            font-size: 1.05rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-tab.active {
-            background: var(--rouge-bordeaux);
-            font-weight: 600;
-        }
-
-        .auth-tab:not(.active):hover {
-            background: var(--rouge-bordeaux-light);
-        }
-
-        .auth-tab::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 3px;
-            background: var(--or);
-            transition: var(--transition);
-            transform: translateX(-50%);
-        }
-
-        .auth-tab.active::after {
-            width: 80%;
-        }
-
-        .auth-content {
-            padding: 35px;
-        }
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-            animation: fadeIn 0.5s ease-out;
-        }
-
+        /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
 
             to {
@@ -221,325 +50,18 @@
             }
         }
 
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            color: var(--bleu-nuit);
-            font-weight: 500;
-            font-size: 1.05rem;
-        }
-
-        .form-group input,
-        .form-group select {
+        /* Layout */
+        .container {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5eb;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: var(--transition);
-            background: #f9fafc;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--rouge-bordeaux);
-            box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1);
-            background: white;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 15px;
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            background: var(--rouge-bordeaux);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        .message.error {
-            background: #fde8e8;
-            color: var(--rouge-bordeaux);
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.success {
-            background: #e6f7ee;
-            color: #1a5732;
-            border: 1px solid #c3e6cb;
-        }
-
-        .links {
-            text-align: center;
-            margin-top: 25px;
-        }
-
-        .links a {
-            color: var(--rouge-bordeaux);
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-block;
-            margin: 0 10px 10px;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .links a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--rouge-bordeaux);
-            transition: var(--transition);
-        }
-
-        .links a:hover::after {
-            width: 100%;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .admin-info {
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background: #e6f7ee;
-            border-radius: 8px;
-            color: #1a5732;
-            display: none;
-            box-shadow: var(--shadow-sm);
-        }
-
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a0026' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 16px;
-        }
-
-        /* Footer amélioré */
-        .admin-footer {
-            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
-            color: white;
-            padding: 40px 0 0;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 30px 40px;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .footer-logo img {
-            width: 45px;
-            height: 45px;
-            border-radius: 8px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .footer-logo span {
-            font-weight: 700;
-            color: var(--or);
-            font-size: 1.2rem;
-        }
-
-        .footer-links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 5px 0;
-        }
-
-        .footer-links a:hover {
-            color: var(--or);
-            transform: translateX(5px);
-        }
-
-        .footer-links i {
-            width: 20px;
-            text-align: center;
-            color: var(--or);
-        }
-
-        .footer-info p {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .footer-info i {
-            width: 20px;
-            text-align: center;
-            color: var(--or);
-        }
-
-        .footer-bottom {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px 30px;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .footer-bottom p {
-            margin: 0;
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-links a {
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .social-links a:hover {
-            background: var(--or);
-            color: var(--bleu-nuit);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Responsive amélioré */
-        @media (max-width: 992px) {
-            .admin-container {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .welcome-section {
-                padding: 30px 25px;
-                text-align: center;
-            }
-
-            .auth-section {
-                width: 100%;
-                max-width: 500px;
-                margin: 0 auto;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .auth-content {
-                padding: 25px 20px;
-            }
-
-            .admin-header h1 {
-                font-size: 1.8rem;
-            }
-
-            .admin-header p {
-                font-size: 1rem;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 25px;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
-
-        /* Améliorations d'accessibilité */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+            padding: 0 20px;
         }
 
         .sr-only {
@@ -551,303 +73,1074 @@
             overflow: hidden;
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
-            border: 0;
+            border-width: 0;
         }
 
-        /* Focus visible pour l'accessibilité */
-        button:focus-visible,
-        input:focus-visible,
-        select:focus-visible,
-        a:focus-visible {
+        /* Header */
+        .university-header {
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--rouge-bordeaux);
+        }
+
+        .university-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .university-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Navigation */
+        .academic-nav {
+            background-color: var(--bleu-nuit);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .university-logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .university-logo img {
+            height: 40px;
+            margin-right: 10px;
+            alt: "Logo UCAO-UUC";
+        }
+
+        .academic-links {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .academic-links li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 0;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .academic-links li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--or);
+            transition: var(--transition);
+        }
+
+        .academic-links li a:hover::after {
+            width: 100%;
+        }
+
+        .academic-links li a:hover {
+            color: var(--or);
+        }
+
+        /* Hero Section */
+        .academic-hero {
+            background: linear-gradient(rgba(15, 26, 49, 0.9), rgba(15, 26, 49, 0.9)),
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 40px;
+        }
+
+        .academic-hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
+            color: white;
+        }
+
+        .academic-hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Buttons */
+        .academic-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--rouge-bordeaux);
+            color: white;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--rouge-bordeaux-light);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            outline: none;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover,
+        .btn-secondary:focus {
+            background-color: white;
+            color: var(--bleu-nuit);
+            transform: translateY(-3px);
+            outline: none;
+        }
+
+        /* Features */
+        .academic-features {
+            padding: 60px 0;
+            background-color: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 50px;
+            color: var(--bleu-nuit);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--rouge-bordeaux), var(--or));
+            margin: 15px auto 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-top: 4px solid var(--rouge-bordeaux);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            color: var(--or);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--bleu-nuit);
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: var(--rouge-bordeaux);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 50px;
+            text-align: center;
+        }
+
+        /* Elections */
+        .elections-section {
+            padding: 60px 0;
+            background-color: #f5f7fa;
+        }
+
+        .elections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .election-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid var(--rouge-bordeaux);
+        }
+
+        .election-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .election-badge {
+            background-color: var(--rouge-bordeaux);
+            color: white;
+            padding: 5px 15px;
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 0 0 4px 0;
+        }
+
+        .election-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bleu-nuit-light);
+        }
+
+        .election-content {
+            padding: 20px;
+        }
+
+        .election-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--bleu-nuit);
+        }
+
+        .election-content p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .election-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .election-meta i {
+            color: var(--rouge-bordeaux);
+            margin-right: 5px;
+        }
+
+        .election-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 60px 0;
+            background-color: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .faq-question {
+            padding: 15px 20px;
+            background-color: var(--blanc-casse);
+            color: var(--bleu-nuit);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background-color: #f0ece1;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--rouge-bordeaux);
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '-';
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 20px;
+            max-height: 500px;
+        }
+
+        .faq-answer p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* CTA */
+        .academic-cta {
+            padding: 80px 20px;
+            text-align: center;
+            background: linear-gradient(rgba(122, 0, 38, 0.9), rgba(122, 0, 38, 0.9)),
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        .academic-cta h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .academic-cta p {
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Footer */
+        .university-footer {
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 3rem;
+            border-top: 3px solid var(--or);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--or);
+        }
+
+        .footer-logo i {
+            font-size: 2rem;
+        }
+
+        .footer-description {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .footer-column h4 {
+            color: var(--or);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--or);
+        }
+
+        .footer-links i {
+            width: 16px;
+            color: var(--or);
+        }
+
+        .footer-contact {
+            margin-top: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-item i {
+            color: var(--or);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            text-align: center;
+        }
+
+        .footer-copyright p {
+            margin: 0.25rem 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(122, 0, 38, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--rouge-bordeaux);
+            animation: spin 1s ease-in-out infinite;
+            margin: 30px auto;
+            display: none;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e0;
+        }
+
+        .empty-state h3 {
+            color: var(--bleu-nuit);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .academic-hero h2 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .academic-links {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .features-grid,
+            .elections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .election-actions {
+                flex-direction: column;
+            }
+
+            .academic-hero {
+                padding: 60px 20px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .footer-container {
+                padding: 0 1rem;
+            }
+
+            .footer-logo {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .footer-description {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .university-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .academic-hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .feature-card,
+            .election-card {
+                padding: 20px;
+            }
+
+            .academic-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        button:focus,
+        a:focus,
+        input:focus,
+        select:focus,
+        textarea:focus {
             outline: 2px solid var(--or);
             outline-offset: 2px;
         }
+
+        /* Utility classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .mt-3 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="admin-header">
-        <h1>Espace Administrateur UCAO-UUC</h1>
-        <p>Plateforme de gestion des élections universitaires</p>
+    <!-- University Header -->
+    <header class="university-header">
+        <div class="container">
+            <h1>Université Catholique de l'Afrique de l'Ouest</h1>
+            <p>Unité Universitaire de Cotonou - Plateforme de Vote Sécurisée</p>
+        </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="admin-main">
-        <div class="admin-container">
-            <!-- Welcome Section -->
-            <section class="welcome-section">
-                <h2>Bienvenue sur l'espace administrateur</h2>
-                <p>Gérez l'ensemble du processus électoral de l'université en toute sécurité et transparence grâce à nos
-                    outils avancés.</p>
-
-                <ul class="features-list">
-                    <li><i class="fas fa-check-circle"></i> Créez et gérez les élections simplement</li>
-                    <li><i class="fas fa-check-circle"></i> Supervisez le déroulement des votes en temps réel</li>
-                    <li><i class="fas fa-check-circle"></i> Consultez les résultats détaillés et statistiques</li>
-                    <li><i class="fas fa-check-circle"></i> Gérez les comptes administrateurs et leurs permissions</li>
-                    <li><i class="fas fa-check-circle"></i> Exportez les données électorales aux formats variés</li>
-                </ul>
-            </section>
-
-            <!-- Auth Section -->
-            <section class="auth-section">
-                <div class="auth-tabs">
-                    <div class="auth-tab active" data-tab="login">Connexion</div>
-                    <div class="auth-tab" data-tab="register">Inscription</div>
-                </div>
-
-                <div class="auth-content">
-                    <!-- Login Form -->
-                    <form id="loginForm" class="auth-form active">
-                        <div id="loginMessage" class="message" aria-live="polite"></div>
-
-                        <div class="form-group">
-                            <label for="email">Adresse email</label>
-                            <input type="email" id="email" name="email" required aria-describedby="emailHelp">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Mot de passe</label>
-                            <input type="password" id="password" name="password" required
-                                aria-describedby="passwordHelp">
-                        </div>
-
-                        <button type="submit" class="btn" id="loginBtn">
-                            <span id="loginBtnText">Se connecter</span>
-                            <span id="loginLoading" class="loading">Connexion en cours...</span>
-                        </button>
-
-                        <div id="adminInfo" class="admin-info" style="display: none;">
-                            <h3>✅ Connexion réussie !</h3>
-                            <p>Redirection en cours vers votre tableau de bord...</p>
-                        </div>
-                    </form>
-
-                    <!-- Register Form -->
-                    <form id="registerForm" class="auth-form">
-                        <div id="registerMessage" class="message" aria-live="polite"></div>
-
-                        <div class="form-group">
-                            <label for="registerEmail">Adresse email *</label>
-                            <input type="email" id="registerEmail" name="email" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="registerPassword">Mot de passe *</label>
-                            <input type="password" id="registerPassword" name="password" required minlength="6">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="registerNom">Nom *</label>
-                            <input type="text" id="registerNom" name="nom" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="registerPrenom">Prénom *</label>
-                            <input type="text" id="registerPrenom" name="prenom" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="registerPoste">Poste *</label>
-                            <select id="registerPoste" name="poste" required>
-                                <option value="">Sélectionnez un poste</option>
-                                <option value="Directeur">Responsable administratif</option>
-                                <option value="Responsable IT">Responsable informatique</option>
-                                <option value="Administrateur Système">Administrateur système</option>
-                                <option value="Superviseur">Superviseur électoral</option>
-                                <option value="Autre">Autre poste</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn" id="registerBtn">
-                            <span id="registerBtnText">Créer le compte administrateur</span>
-                            <span id="registerLoading" class="loading">Création en cours...</span>
-                        </button>
-                    </form>
-                </div>
-            </section>
+    <!-- Navigation -->
+    <nav class="academic-nav">
+        <div class="container nav-container">
+            <a href="#" class="university-logo">
+                <img src="https://www.ucaobenin.org/img/logo_ucao-uuc-benin.png" alt="Logo UCAO-UUC">
+                <span>UCAO-Vote</span>
+            </a>
+            <ul class="academic-links">
+                <li><a href="#features">Fonctionnalités</a></li>
+                <li><a href="#elections">Élections</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div>
+                <a href="login.html" class="academic-btn btn-secondary">Connexion</a>
+                <a href="register.html" class="academic-btn btn-primary">S'inscrire</a>
+            </div>
         </div>
-    </main>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="academic-hero">
+        <div class="container">
+            <h2>Votez en toute sécurité</h2>
+            <p>Plateforme officielle de vote électronique sécurisé de l'UCAO-UUC pour les élections universitaires.</p>
+            <div style="margin-top: 30px;">
+                <a href="register.html" class="academic-btn btn-primary">Créer un compte</a>
+                <a href="#how-it-works" class="academic-btn btn-secondary">Comment ça marche</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="academic-features" id="features">
+        <div class="container">
+            <h2 class="section-title">Notre Plateforme de Vote</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                    </div>
+                    <h3>Sécurité Maximale</h3>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-id-card" aria-hidden="true"></i>
+                    </div>
+                    <h3>Authentification Forte</h3>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                    </div>
+                    <h3>Multi-Device</h3>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield" aria-hidden="true"></i>
+                    </div>
+                    <h3>Anonymat Garanti</h3>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    </div>
+                    <h3>Résultats en Temps Réel</h3>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gavel" aria-hidden="true"></i>
+                    </div>
+                    <h3>Conforme à la Réglementation</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Elections -->
+    <section class="elections-section" id="elections">
+        <div class="container">
+            <h2 class="section-title">Élections en Cours</h2>
+            <div class="loading" id="loading-elections"></div>
+            <div class="elections-grid" id="elections-container">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="academic-features" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Comment voter en 3 étapes</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="step-number">1</span>
+                    </div>
+                    <h3>Authentification</h3>
+                    <p>Connectez-vous avec vos identifiants après avoir crée un compte.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="step-number">2</span>
+                    </div>
+                    <h3>Sélection</h3>
+                    <p>Consultez les programmes et sélectionnez votre candidat ou option préférée dans votre dashboard.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <span class="step-number">3</span>
+                    </div>
+                    <h3>Confirmation</h3>
+                    <p>Validez définitivement votre choix qui sera enregistré de manière sécurisée.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+        <div class="container">
+            <h2 class="section-title">Questions Fréquentes</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">Comment m'inscrire pour voter ?</div>
+                    <div class="faq-answer">
+                        <p>Pour vous inscrire, cliquez sur le bouton “S’inscrire” dans le menu, puis remplissez
+                            soigneusement vos informations
+                            personnelles.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Puis-je modifier mon vote après confirmation ?</div>
+                    <div class="faq-answer">
+                        <p>Non, pour garantir l'intégrité du scrutin, un vote confirmé est définitif et ne peut être
+                            modifié.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Comment vérifier que mon vote a bien été pris en compte ?</div>
+                    <div class="faq-answer">
+                        <p>Vous recevez immédiatement un accusé de réception avec un code de vérification anonyme qui
+                            vous permet de vérifier ultérieurement que votre vote a bien été comptabilisé sans révéler
+                            votre choix.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Quelles sont les mesures contre la fraude ?</div>
+                    <div class="faq-answer">
+                        <p>Notre système utilise : chiffrement de bout en bout, limitation à un vote par électeur,
+                            journal d'audit inviolable, et vérification par huissier indépendant.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="academic-cta" id="cta">
+        <div class="container">
+            <h2>Prêt à exercer votre droit de vote ?</h2>
+            <p>Accédez à la plateforme avec vos identifiants universitaires pour participer aux élections en cours.</p>
+            <a href="login.html" class="academic-btn btn-primary" style="margin-top: 20px;">Accéder au Portail de
+                Vote</a>
+        </div>
+    </section>
 
     <!-- Footer -->
-    <footer class="admin-footer">
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="https://via.placeholder.com/40x40?text=UCAO" alt="Logo UCAO">
-                <span>Plateforme de Vote Admin</span>
+    <!-- Footer -->
+    <footer class="university-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Colonne 1 : À propos -->
+                <div class="footer-column">
+                    <div class="footer-logo">
+                        <i class="fas fa-vote-yea"></i>
+                        <span>UCAO-Vote</span>
+                    </div>
+                    <p class="footer-description">
+                        Plateforme officielle de vote électronique sécurisé de l'Université Catholique de l'Afrique de
+                        l'Ouest.
+                    </p>
+                    <div class="footer-contact">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Lot 246, rue de l'hôpital St Jean - Cotonou</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne 2 : Ressources -->
+                <div class="footer-column">
+                    <h4>Ressources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://www.ucaobenin.org/" target="_blank" rel="noopener">
+                                <i class="fas fa-external-link-alt"></i>Site Officiel UCAO-UUC
+                            </a></li>
+                        <li><a href="reglement-electoral.pdf">
+                                <i class="fas fa-file-pdf"></i>Règlement Électoral
+                            </a></li>
+                        <li><a href="guide-vote.pdf">
+                                <i class="fas fa-file-pdf"></i>Guide du Votant
+                            </a></li>
+                    </ul>
+                </div>
+
+                <!-- Colonne 3 : Assistance -->
+                <div class="footer-column">
+                    <h4>Assistance</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:support-vote@ucao-uuc.com">
+                                <i class="fas fa-envelope"></i>support-vote@ucao-uuc.com
+                            </a></li>
+                        <li><a href="tel:+229010000000">
+                                <i class="fas fa-phone"></i>+229 01 00 00 00 00
+                            </a></li>
+                        <li><a href="declaration_souci.html">
+                                <i class="fas fa-exclamation-circle"></i>Déclarer un souci
+                            </a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="#"><i class="fas fa-shield-alt"></i> Politique de sécurité</a>
-                <a href="#"><i class="fas fa-envelope"></i> Contact technique</a>
-            </div>
-            <div class="footer-info">
-                <p><i class="fas fa-map-marker-alt"></i> UCAO-UUC, Saint Jean, Cotonou</p>
-                <p><i class="fas fa-phone"></i> +229 XX XX XX XX</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2025 UCAO-UUC - Tous droits réservés | Version 1.0.0</p>
-            <div class="social-links">
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+
+            <!-- Barre du bas -->
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 UCAO-UUC - Tous droits réservés</p>
+                    <p>Plateforme développée par UCAO-TECH</p>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Configuration et scripts -->
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script>
-        // Tab Switching
-        const tabs = document.querySelectorAll('.auth-tab');
-        const forms = document.querySelectorAll('.auth-form');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabName = tab.dataset.tab;
-
-                tabs.forEach(t => t.classList.remove('active'));
-                forms.forEach(f => f.classList.remove('active'));
-
-                tab.classList.add('active');
-                document.getElementById(tabName + 'Form').classList.add('active');
-            });
-        });
-
-        // Attendre que la configuration soit chargée
         document.addEventListener('DOMContentLoaded', function () {
-            // Utiliser la configuration centralisée
+            // Configuration
             const API_BASE = CONFIG.API.BASE_URL;
-            const FRONTEND_BASE = window.location.origin;
-            const ADMIN_LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_LOGIN;
-            const ADMIN_REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.ADMIN_REGISTER;
+            const ELECTION_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
+            // Load active elections
+            loadActiveElections();
 
-            // Login Form
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
+            // Initialize FAQ
+            initFAQ();
 
-                const submitBtn = document.getElementById('loginBtn');
-                const btnText = document.getElementById('loginBtnText');
-                const loading = document.getElementById('loginLoading');
-                const messageDiv = document.getElementById('loginMessage');
-                const adminInfo = document.getElementById('adminInfo');
-
-                // Désactiver le bouton et afficher le loading
-                submitBtn.disabled = true;
-                btnText.style.display = 'none';
-                loading.style.display = 'inline';
-
-                // Masquer les messages précédents
-                messageDiv.textContent = '';
-                messageDiv.className = '';
-                adminInfo.style.display = 'none';
-
-                // Récupérer les données du formulaire
-                const formData = {
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('password').value
-                };
-
-                try {
-                    const response = await fetch(`${API_BASE}${ADMIN_LOGIN_ENDPOINT}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData),
-                        credentials: "include"
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.token) {
-                        // Stocker le JWT
-                        localStorage.setItem('adminToken', data.token);
-                        localStorage.setItem('adminRole', 'ADMIN');
-                        // Afficher le message de bienvenue
-                        adminInfo.style.display = 'block';
-                        showMessage(messageDiv, 'Connexion réussie ! Bienvenue dans votre espace administrateur.', 'success');
-
-                        // Redirection vers dashboard en production
-                        setTimeout(() => {
-                            window.location.href = `${FRONTEND_BASE}/dashboard.html`;
-                        }, 2000);
-                    } else {
-                        showMessage(messageDiv, data.message || 'Email ou mot de passe incorrect', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    btnText.style.display = 'inline';
-                    loading.style.display = 'none';
-                }
-            });
-
-            // Register Form
-            document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const submitBtn = document.getElementById('registerBtn');
-                const btnText = document.getElementById('registerBtnText');
-                const loading = document.getElementById('registerLoading');
-                const messageDiv = document.getElementById('registerMessage');
-
-                // Désactiver le bouton et afficher le loading
-                submitBtn.disabled = true;
-                btnText.style.display = 'none';
-                loading.style.display = 'inline';
-
-                // Récupérer les données du formulaire
-                const formData = {
-                    email: document.getElementById('registerEmail').value,
-                    password: document.getElementById('registerPassword').value,
-                    nom: document.getElementById('registerNom').value,
-                    prenom: document.getElementById('registerPrenom').value,
-                    poste: document.getElementById('registerPoste').value
-                };
-
-                try {
-                    const response = await fetch(`${API_BASE}${ADMIN_REGISTER_ENDPOINT}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData),
-                        credentials: 'include'
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage(messageDiv, 'Compte administrateur créé avec succès ! Vous pouvez maintenant vous connecter.', 'success');
-                        document.getElementById('registerForm').reset();
-                        // Switch to login tab
-                        tabs[0].click();
-                    } else {
-                        showMessage(messageDiv, data.message || 'Erreur lors de la création du compte', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showMessage(messageDiv, 'Erreur de connexion au serveur. Vérifiez que le backend est démarré.', 'error');
-                } finally {
-                    submitBtn.disabled = false;
-                    btnText.style.display = 'inline';
-                    loading.style.display = 'none';
-                }
-            });
-
-            function showMessage(element, text, type) {
-                element.textContent = text;
-                element.className = `message ${type}`;
-
-                setTimeout(() => {
-                    element.textContent = '';
-                    element.className = 'message';
-                }, 5000);
-            }
+            // Add focus styles for accessibility
+            addFocusStyles();
         });
+
+        async function loadActiveElections() {
+            const loader = document.getElementById('loading-elections');
+            const container = document.getElementById('elections-container');
+
+            try {
+                const response = await fetch(`${API_BASE}${ELECTION_LIST_ENDPOINT}`);
+                if (response.ok) {
+                    const elections = await response.json();
+                    displayElections(elections);
+                }
+
+                if (elections.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                            <h3 style="color: var(--bleu-nuit); margin-bottom: 15px;">Aucune élection en cours</h3>
+                            <p>Les prochaines élections seront annoncées par voie officielle. Consultez régulièrement la plateforme.</p>
+                        </div>
+                    `;
+                } else {
+                    displayElections(elections);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--rouge-bordeaux);">
+                        <h3 style="margin-bottom: 15px;">Service temporairement indisponible</h3>
+                        <p>Nous rencontrons des difficultés techniques. Veuillez réessayer plus tard.</p>
+                        <button onclick="loadActiveElections()" class="academic-btn btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-sync-alt"></i> Réessayer
+                        </button>
+                    </div>
+                `;
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Mock function to simulate API call
+        async function mockFetchElections() {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            return [
+                {
+                    id: "elec-2023-delegues",
+                    titre: "Élection des Délégués 2023-2024",
+                    description: "Élection des représentants étudiants pour chaque promotion de l'UCAO-UUC.",
+                    dateDebut: "2023-11-01",
+                    dateFin: "2023-11-15",
+                    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                    candidatesCount: 28,
+                    status: "active"
+                },
+                {
+                    id: "elec-2023-conseil",
+                    titre: "Conseil Académique",
+                    description: "Élection des représentants étudiants au conseil académique pour un mandat de 2 ans.",
+                    dateDebut: "2023-11-10",
+                    dateFin: "2023-11-25",
+                    imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+                    candidatesCount: 15,
+                    status: "active"
+                }
+            ];
+        }
+
+        function displayElections(elections) {
+            const container = document.getElementById('elections-container');
+
+            container.innerHTML = elections.map(election => `
+                <div class="election-card">
+                    <div class="election-badge">${election.status === 'active' ? 'En Cours' : 'À Venir'}</div>
+                    <div class="election-image" style="background-image: url('${election.imageUrl}');" 
+                         aria-label="Image illustrative pour ${election.titre}"></div>
+                    <div class="election-content">
+                        <h3>${election.titre}</h3>
+                        <p>${election.description}</p>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> ${formatDateRange(election.dateDebut, election.dateFin)}</span>
+                            <span><i class="fas fa-users" aria-hidden="true"></i> ${election.candidatesCount} candidats</span>
+                        </div>
+                        <div class="election-actions">
+                            <a href="vote.html?election=${election.id}" class="academic-btn btn-primary btn-small">
+                                <i class="fas fa-vote-yea" aria-hidden="true"></i> Voter
+                            </a>
+                            <a href="candidats.html?election=${election.id}" class="academic-btn btn-secondary btn-small">
+                                <i class="fas fa-list-ul" aria-hidden="true"></i> Candidats
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatDateRange(start, end) {
+            const options = { day: 'numeric', month: 'numeric' };
+            const startDate = new Date(start).toLocaleDateString('fr-FR', options);
+            const endDate = new Date(end).toLocaleDateString('fr-FR', options);
+            return `Du ${startDate} au ${endDate}`;
+        }
+
+        function initFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+
+                question.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                });
+
+                // Keyboard accessibility
+                question.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        item.classList.toggle('active');
+                    }
+                });
+            });
+        }
+
+        function addFocusStyles() {
+            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+            const focusableContent = document.querySelectorAll(focusableElements);
+
+            focusableContent.forEach(element => {
+                element.setAttribute('tabindex', '0');
+            });
+        }
     </script>
 </body>
 
