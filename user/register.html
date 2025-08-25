@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - UCAO-UUC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --rouge-bordeaux: #800020;
             --bleu-nuit: #1a2a4a;
             --blanc-casse: #f8f4e9;
             --or: #d4af37;
+            --vert-olive: #556B2F;
         }
 
         * {
@@ -25,52 +27,62 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            /* Changé pour permettre le défilement */
+            align-items: center;
             padding: 20px;
             position: relative;
-            background-color: var(--blanc-casse);
             overflow-x: hidden;
-            /* Empêche le défilement horizontal */
+            background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
         }
 
-        /* Arrière-plan fixe avec superposition */
+        .background-slider {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .background-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .background-slide.active {
+            opacity: 0.7;
+        }
+
         .background-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -2;
-            background-color: rgba(248, 244, 233, 0.8);
-            /* Couche semi-transparente */
-        }
-
-        .background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -3;
-            background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.15;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.85) 0%, rgba(128, 0, 32, 0.85) 100%);
+            z-index: -1;
         }
 
         .register-container {
             width: 100%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.98);
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            border-top: 5px solid var(--rouge-bordeaux);
+            border-top: 5px solid var(--or);
             animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
             margin: 40px 0;
-            /* Espacement vertical */
         }
 
         @keyframes fadeIn {
@@ -91,13 +103,35 @@
         }
 
         .register-header h1 {
-            color: var(--rouge-bordeaux);
-            font-size: 2rem;
-            margin-bottom: 10px;
+            color: var(--bleu-nuit);
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Effet de dégradé pour les navigateurs modernes */
+        @supports (background-clip: text) or (-webkit-background-clip: text) {
+            .register-header h1 {
+                background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+
+        .register-header img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
         }
 
         .register-header p {
             color: var(--bleu-nuit);
+            font-size: 1rem;
+            opacity: 0.8;
         }
 
         .form-row {
@@ -108,7 +142,8 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .form-group.full-width {
@@ -120,17 +155,18 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--bleu-nuit);
+            font-size: 0.9rem;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 15px;
+            border: 2px solid #e6e6e6;
+            border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s;
-            background-color: white;
+            background: #f9f9f9;
         }
 
         .form-group input:focus,
@@ -138,6 +174,21 @@
             border-color: var(--or);
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
             outline: none;
+            background: #fff;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            cursor: pointer;
+            color: var(--bleu-nuit);
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
         }
 
         .btn-register {
@@ -146,17 +197,22 @@
             background: linear-gradient(135deg, var(--rouge-bordeaux), #a00030);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
         }
 
         .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.4);
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
         }
 
         .btn-register:disabled {
@@ -168,38 +224,60 @@
         .register-footer {
             text-align: center;
             margin-top: 20px;
-            color: var(--bleu-nuit);
+        }
+
+        .register-footer p {
+            margin-bottom: 10px;
+            color: #666;
         }
 
         .register-footer a {
             color: var(--rouge-bordeaux);
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
         }
 
         .register-footer a:hover {
             color: var(--or);
         }
 
+        .register-footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--or);
+            transition: width 0.3s;
+        }
+
+        .register-footer a:hover::after {
+            width: 100%;
+        }
+
         .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 10px;
-            border-radius: 5px;
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #c33;
+            border-left: 4px solid #c62828;
             display: none;
+            font-size: 0.9rem;
         }
 
         .success-message {
-            background: #efe;
-            color: #3c3;
-            padding: 10px;
-            border-radius: 5px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #3c3;
+            border-left: 4px solid #2e7d32;
             display: none;
+            font-size: 0.9rem;
         }
 
         .loading {
@@ -234,36 +312,41 @@
             }
 
             .register-container {
-                padding: 25px;
-                margin: 20px 0;
-            }
-
-            body {
-                padding: 10px;
-                align-items: flex-start;
+                padding: 30px 20px;
             }
         }
 
-        @media (max-width: 480px) {
-            .register-container {
-                padding: 20px;
+        @media (max-width: 576px) {
+            .register-header h1 {
+                font-size: 1.8rem;
             }
 
-            .register-header h1 {
-                font-size: 1.5rem;
+            .register-container {
+                padding: 25px 15px;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- Arrière-plan fixe -->
-    <div class="background-image" aria-hidden="true"></div>
-    <div class="background-overlay" aria-hidden="true"></div>
+    <!-- Slider d'arrière-plan avec nouvelles images -->
+    <div class="background-slider">
+        <div class="background-slide active"
+            style="background-image: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
+        </div>
+        <div class="background-slide"
+            style="background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
+        </div>
+        <div class="background-slide"
+            style="background-image: url('https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.1&auto=format&fit=crop&w=2000&q=80')">
+        </div>
+        <div class="background-overlay"></div>
+    </div>
 
     <div class="register-container">
         <div class="register-header">
             <h1>Inscription UCAO-UUC</h1>
+            <img src="https://www.ucaobenin.org/img/logo_ucao-uuc-benin.png" alt="Logo UCAO">
             <p>Créez votre compte étudiant</p>
         </div>
 
@@ -277,76 +360,161 @@
         <form id="registerForm">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="nom">Nom</label>
+                    <label for="nom"><i class="fas fa-user"></i> Nom</label>
                     <input type="text" id="nom" name="nom" required>
                 </div>
                 <div class="form-group">
-                    <label for="prenom">Prénom</label>
+                    <label for="prenom"><i class="fas fa-user"></i> Prénom</label>
                     <input type="text" id="prenom" name="prenom" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email"><i class="fas fa-envelope"></i> Email</label>
                 <input type="email" id="email" name="email" required>
             </div>
 
             <div class="form-group">
-                <label for="ecole">École/Faculté</label>
+                <label for="ecole"><i class="fas fa-graduation-cap"></i> École/Faculté</label>
                 <select id="ecole" name="ecole" required>
                     <option value="">Sélectionnez votre école/faculté</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="filiere">Filière</label>
+                <label for="filiere"><i class="fas fa-book"></i> Filière</label>
                 <select id="filiere" name="filiere" required>
                     <option value="">Sélectionnez votre filière</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="annee">Année d'étude</label>
+                <label for="annee"><i class="fas fa-calendar-alt"></i> Année d'étude</label>
                 <select id="annee" name="annee" required>
                     <option value="">Sélectionnez votre année</option>
                 </select>
             </div>
 
             <div class="form-group" id="matriculeGroup" style="display:none;">
-                <label for="matricule">Matricule</label>
+                <label for="matricule"><i class="fas fa-id-card"></i> Matricule</label>
                 <input type="text" id="matricule" name="matricule">
             </div>
 
             <div class="form-group" id="codeGroup" style="display:none;">
-                <label for="code">Code d'inscription</label>
+                <label for="code"><i class="fas fa-key"></i> Code d'inscription</label>
                 <input type="text" id="code" name="code">
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="password">Mot de passe</label>
+                    <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
                     <input type="password" id="password" name="password" required>
+                    <span class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </span>
                 </div>
                 <div class="form-group">
-                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                    <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmer le mot de passe</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <span class="password-toggle" id="confirmPasswordToggle">
+                        <i class="fas fa-eye"></i>
+                    </span>
                 </div>
             </div>
 
             <button type="submit" class="btn-register" id="registerBtn">
-                S'inscrire
+                <i class="fas fa-user-plus"></i> S'inscrire
             </button>
         </form>
 
         <div class="register-footer">
             <p>Déjà un compte ? <a href="login.html">Se connecter</a></p>
-            <p><a href="user_index.html">← Retour à l'accueil</a></p>
+            <p><a href="user_index.html"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
         </div>
     </div>
 
     <script src="config.js"></script>
     <script>
+        // Gestion du slider d'arrière-plan
+        function initBackgroundSlider() {
+            const slides = document.querySelectorAll('.background-slide');
+            let currentSlide = 0;
+
+            function nextSlide() {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }
+
+            // Changer de slide toutes les 5 secondes
+            setInterval(nextSlide, 5000);
+        }
+
+        // Gestion de la visibilité du mot de passe
+        function initPasswordToggle() {
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+
+            passwordToggle.addEventListener('click', function () {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            confirmPasswordToggle.addEventListener('click', function () {
+                const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+                confirmPasswordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+        }
+
+        // Fonction de validation d'email
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Fonctions d'affichage des messages
+        function showMessage(message, type) {
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            // Masquer tous les messages d'abord
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            if (type === 'error') {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            } else {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+            }
+
+            // Masquer après 5 secondes seulement pour les messages de succès/erreur
+            if (type === 'error' || type === 'success') {
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                    successMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const registerBtn = document.getElementById('registerBtn');
+
+            loading.style.display = show ? 'block' : 'none';
+            registerBtn.disabled = show;
+        }
+
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
+            initBackgroundSlider();
+            initPasswordToggle();
+
             // Configuration et initialisation
             const API_BASE = CONFIG.API.BASE_URL;
             const REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.REGISTER;
@@ -364,18 +532,8 @@
                 matriculeGroup: document.getElementById('matriculeGroup'),
                 codeGroup: document.getElementById('codeGroup'),
                 matricule: document.getElementById('matricule'),
-                code: document.getElementById('code'),
-                backgroundImages: document.querySelectorAll('.background-slider img')
+                code: document.getElementById('code')
             };
-
-            // Animation du slider
-            let currentImage = 0;
-            const changeBackground = () => {
-                elements.backgroundImages[currentImage].classList.remove('active');
-                currentImage = (currentImage + 1) % elements.backgroundImages.length;
-                elements.backgroundImages[currentImage].classList.add('active');
-            };
-            setInterval(changeBackground, 5000);
 
             // Fonctions de remplissage des selects
             const populateEcoles = () => {
@@ -424,24 +582,6 @@
                 elements.matricule.value = '';
             };
 
-            // Gestion des messages
-            const showMessage = (message, type) => {
-                if (type === 'error') {
-                    elements.error.textContent = message;
-                    elements.error.style.display = 'block';
-                    elements.success.style.display = 'none';
-                } else {
-                    elements.success.textContent = message;
-                    elements.success.style.display = 'block';
-                    elements.error.style.display = 'none';
-                }
-            };
-
-            const showLoading = (show) => {
-                elements.loading.style.display = show ? 'block' : 'none';
-                elements.button.disabled = show;
-            };
-
             // Validation
             const validateForm = () => {
                 const fields = {
@@ -472,7 +612,7 @@
                     return false;
                 }
 
-                if (!UTILS.isValidEmail(fields.email)) {
+                if (!isValidEmail(fields.email)) {
                     showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
                     return false;
                 }
