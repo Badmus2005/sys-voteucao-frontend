@@ -30,7 +30,8 @@
             align-items: center;
             padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
+            height: auto;
             background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
         }
 
@@ -106,9 +107,19 @@
             font-size: 2.2rem;
             margin-bottom: 15px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            /* Solution alternative pour un effet similaire sans -webkit-propriétés */
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Effet de dégradé pour les navigateurs modernes */
+        @supports (background-clip: text) or (-webkit-background-clip: text) {
+            .login-header h1 {
+                background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--rouge-bordeaux) 100%);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
         }
 
         .login-header img {
@@ -495,8 +506,8 @@
 
         <div class="login-footer">
             <p>Mot de passe oublié ? <a href="#" id="forgot-password-link">Réinitialiser</a></p>
-            <p>Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
-            <p><a href="user_index.html"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
+            <p>Pas encore de compte ? <a href="/user/register">Créer un compte</a></p>
+            <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
         </div>
     </div>
 
@@ -690,7 +701,7 @@
                     showMessage('Connexion réussie! Redirection en cours...', 'success');
 
                     setTimeout(() => {
-                        window.location.href = 'user_dashboard.html';
+                        window.location.href = 'dashboard.html';
                     }, 1500);
                 } else {
                     showMessage(data.message || 'Email ou mot de passe incorrect', 'error');
