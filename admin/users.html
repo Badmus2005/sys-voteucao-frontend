@@ -772,58 +772,11 @@
                 if (!response.ok) throw new Error('Erreur de chargement des statistiques');
 
                 const data = await response.json();
-                updateStats(data);
+                updateStats(data.statistics);
             } catch (error) {
                 console.error('Erreur chargement stats:', error);
+                document.getElementById('statsError').textContent = "Impossible de charger les statistiques.";
             }
-        }
-
-        // Afficher les étudiants
-        function displayStudents(students) {
-            const container = document.getElementById('studentsList');
-
-            if (!students || students.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-graduate"></i>
-                        <h3>Aucun étudiant trouvé</h3>
-                        <p>Aucun étudiant ne correspond à vos critères de recherche</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = '';
-
-            students.forEach(student => {
-                const row = document.createElement('div');
-                row.className = 'table-row';
-
-                // Déterminer l'identifiant (matricule pour années sup, identifiantTemporaire pour 1ère année)
-                const identifiant = student.matricule || student.identifiantTemporaire || 'N/A';
-                const statut = student.user ? (student.user.requirePasswordChange ? 'À réinitialiser' : (student.user.actif ? 'Actif' : 'Inactif')) : 'N/A';
-
-                row.innerHTML = `
-                    <div>
-                        <strong>${student.prenom} ${student.nom}</strong>
-                    </div>
-                    <div>${identifiant}</div>
-                    <div>${student.user?.email || 'N/A'}</div>
-                    <div>${student.filiere || 'N/A'} / ${student.annee || 'N/A'}</div>
-                    <div>
-                        <span class="status-badge ${statut === 'Actif' ? 'status-active' : statut === 'Inactif' ? 'status-inactive' : 'status-warning'}">
-                            ${statut}
-                        </span>
-                    </div>
-                    <div class="action-buttons">
-                        <div class="btn-icon btn-reset" title="Réinitialiser les accès" onclick="showResetModal(${student.id}, '${student.prenom} ${student.nom}', '${identifiant}', '${student.filiere}', ${student.annee})">
-                            <i class="fas fa-key"></i>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(row);
-            });
         }
 
         // Mettre à jour les statistiques
@@ -831,7 +784,7 @@
             document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
             document.getElementById('activeStudents').textContent = stats.activeStudents || 0;
             document.getElementById('inactiveStudents').textContent = stats.inactiveStudents || 0;
-            document.getElementById('activationRate').textContent = `${stats.activationRate || 0}%`;
+            document.getElementById('activationRate').textContent = `${stats.activationRate || '0.00'}%`;
         }
 
         // Fonctions utilitaires
