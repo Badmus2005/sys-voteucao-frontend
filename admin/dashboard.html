@@ -1846,7 +1846,15 @@
 
                 if (!response.ok) throw new Error('Erreur de chargement des notifications');
 
-                const notifications = await response.json();
+                const result = await response.json();
+
+                // Sécurisation du format attendu
+                const notifications = Array.isArray(result.data)
+                    ? result.data
+                    : Array.isArray(result)
+                        ? result
+                        : [];
+
                 displayNotifications(notifications);
 
                 // Mettre à jour le badge
@@ -1862,11 +1870,19 @@
             }
         }
 
+
         function displayNotifications(notifications) {
             const container = document.getElementById('notificationList');
             if (!container) return;
 
             container.innerHTML = '';
+
+            // Vérification du type
+            if (!Array.isArray(notifications)) {
+                console.warn('notifications n’est pas un tableau:', notifications);
+                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--rouge-clair);">Erreur de chargement des notifications</p>';
+                return;
+            }
 
             if (notifications.length === 0) {
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--gris-moyen);">Aucune notification</p>';
@@ -1877,9 +1893,9 @@
                 const div = document.createElement('div');
                 div.className = `notification-item ${notification.read ? '' : 'unread'}`;
                 div.innerHTML = `
-                    <div class="notification-content">${notification.message}</div>
-                    <div class="notification-time">${formatDate(notification.createdAt)}</div>
-                `;
+            <div class="notification-content">${notification.message}</div>
+            <div class="notification-time">${formatDate(notification.createdAt)}</div>
+        `;
 
                 div.addEventListener('click', async () => {
                     if (!notification.read) {
@@ -1892,6 +1908,7 @@
                 container.appendChild(div);
             });
         }
+
 
         async function markAsRead(notificationId) {
             try {
