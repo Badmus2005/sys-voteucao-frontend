@@ -245,6 +245,11 @@
             color: #6c757d;
         }
 
+        .status-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -253,7 +258,7 @@
         .btn-icon {
             width: 32px;
             height: 32px;
-            border-Radius: 6px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -554,10 +559,7 @@
                 <label for="ecoleFilter">Ecole/Faculté</label>
                 <select id="ecoleFilter">
                     <option value="all">Toutes les écoles/facultés</option>
-                    <option value="FSAE">FSAE</option>
-                    <option value="EGEI">EGEI</option>
-                    <option value="FDE">FDE</option>
-                    <option value="ESMEA">ESMEA</option>
+                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
 
@@ -565,10 +567,7 @@
                 <label for="filiereFilter">Filière</label>
                 <select id="filiereFilter">
                     <option value="all">Toutes les filières</option>
-                    <option value="Informatique">Informatique</option>
-                    <option value="Gestion">Gestion</option>
-                    <option value="Droit">Droit</option>
-                    <option value="Medecine">Médecine</option>
+                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
 
@@ -576,9 +575,7 @@
                 <label for="anneeFilter">Année</label>
                 <select id="anneeFilter">
                     <option value="all">Toutes les années</option>
-                    <option value="1">1ère année</option>
-                    <option value="2">2ème année</option>
-                    <option value="3">3ème année</option>
+                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
 
@@ -691,27 +688,72 @@
         let currentStudentId = null;
 
         // Chargement initial
-
         document.addEventListener('DOMContentLoaded', function () {
+            populateFiltersFromConfig();
             loadDashboardData();
             setupEventListeners();
         });
 
+        // Remplir les filtres avec les données de configuration
+        function populateFiltersFromConfig() {
+            // Remplir le filtre des écoles
+            const ecoleFilter = document.getElementById('ecoleFilter');
+            Object.keys(CONFIG.ACADEMIC.ECOLES).forEach(ecoleKey => {
+                const option = document.createElement('option');
+                option.value = ecoleKey;
+                option.textContent = CONFIG.ACADEMIC.ECOLES[ecoleKey].nom;
+                ecoleFilter.appendChild(option);
+            });
+
+            // Remplir le filtre des années
+            const anneeFilter = document.getElementById('anneeFilter');
+            CONFIG.ACADEMIC.ANNEES.forEach(annee => {
+                const option = document.createElement('option');
+                option.value = annee;
+                option.textContent = `${annee}ère année`;
+                anneeFilter.appendChild(option);
+            });
+        }
+
+        // Mettre à jour les filières en fonction de l'école sélectionnée
+        function updateFilieresByEcole() {
+            const ecoleFilter = document.getElementById('ecoleFilter');
+            const filiereFilter = document.getElementById('filiereFilter');
+
+            // Garder l'option "Toutes les filières"
+            filiereFilter.innerHTML = '<option value="all">Toutes les filières</option>';
+
+            if (ecoleFilter.value !== 'all') {
+                const ecole = CONFIG.ACADEMIC.ECOLES[ecoleFilter.value];
+                if (ecole && ecole.filieres) {
+                    ecole.filieres.forEach(filiere => {
+                        const option = document.createElement('option');
+                        option.value = filiere;
+                        option.textContent = filiere;
+                        filiereFilter.appendChild(option);
+                    });
+                }
+            }
+        }
+
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
             // Filtres 
-            document.getElementById('ecoleFilter').addEventListener('change', () => loadDashboardData(1));
+            document.getElementById('ecoleFilter').addEventListener('change', function () {
+                updateFilieresByEcole();
+                loadDashboardData(1);
+            });
             document.getElementById('filiereFilter').addEventListener('change', () => loadDashboardData(1));
             document.getElementById('anneeFilter').addEventListener('change', () => loadDashboardData(1));
             document.getElementById('statusFilter').addEventListener('change', () => loadDashboardData(1));
             document.getElementById('searchInput').addEventListener('input', debounce(() => loadDashboardData(1), 300));
-
 
             // Modal de réinitialisation
             document.getElementById('closeResetModal').addEventListener('click', hideResetModal);
             document.getElementById('cancelReset').addEventListener('click', hideResetModal);
             document.getElementById('confirmReset').addEventListener('click', resetStudentCredentials);
         }
+
         async function loadDashboardData(page = 1) {
             try {
                 showLoading();
@@ -727,13 +769,13 @@
                 // Construction URL étudiants
                 let studentsUrl = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
                 if (ecoleFilter !== 'all') studentsUrl += `&ecole=${ecoleFilter}`;
-                if (filiereFilter !== 'all') studentsUrl += `&filiere=${filiereFilter}`;
+                if (filiereFilter !== 'all') studentsUrl += `&filiere=${encodeURIComponent(filiereFilter)}`;
                 if (anneeFilter !== 'all') studentsUrl += `&annee=${anneeFilter}`;
                 if (statusFilter !== 'all') studentsUrl += `&status=${statusFilter}`;
                 if (searchTerm) studentsUrl += `&search=${encodeURIComponent(searchTerm)}`;
 
                 // Construction URL statistiques
-                let statsUrl = `${API_BASE}${STUDENTS_STAT_ENDPOINT}?ecole=${ecoleFilter}&filiere=${filiereFilter}&annee=${anneeFilter}`;
+                let statsUrl = `${API_BASE}${STUDENTS_STAT_ENDPOINT}?ecole=${ecoleFilter}&filiere=${encodeURIComponent(filiereFilter)}&annee=${anneeFilter}`;
 
                 // Requêtes parallèles
                 const [studentsResponse, statsResponse] = await Promise.all([
@@ -764,10 +806,8 @@
             } catch (error) {
                 console.error('Erreur dashboard:', error);
                 showError('Impossible de charger les données du tableau de bord');
-                document.getElementById('statsError').textContent = "Impossible de charger les statistiques.";
             }
         }
-
 
         // Afficher les étudiants
         function displayStudents(students) {
@@ -817,7 +857,6 @@
             });
         }
 
-
         // Mettre à jour les statistiques
         function updateStats(stats) {
             document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
@@ -825,7 +864,6 @@
             document.getElementById('inactiveStudents').textContent = stats.inactiveStudents || 0;
             document.getElementById('activationRate').textContent = `${stats.activationRate || '0.00'}%`;
         }
-
 
         // Fonctions utilitaires
         function debounce(func, wait) {
@@ -851,7 +889,7 @@
                 <div class="empty-state">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>${message}</h3>
-                    <button class="btn btn-primary" onclick="loadStudents()">Réessayer</button>
+                    <button class="btn btn-primary" onclick="loadDashboardData()">Réessayer</button>
                 </div>
             `;
         }
@@ -868,7 +906,7 @@
                 const prevBtn = document.createElement('div');
                 prevBtn.className = 'pagination-btn';
                 prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-                prevBtn.addEventListener('click', () => loadStudents(currentPage - 1));
+                prevBtn.addEventListener('click', () => loadDashboardData(currentPage - 1));
                 container.appendChild(prevBtn);
             }
 
@@ -877,7 +915,7 @@
                 const pageBtn = document.createElement('div');
                 pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
                 pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => loadStudents(i));
+                pageBtn.addEventListener('click', () => loadDashboardData(i));
                 container.appendChild(pageBtn);
             }
 
@@ -886,7 +924,7 @@
                 const nextBtn = document.createElement('div');
                 nextBtn.className = 'pagination-btn';
                 nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                nextBtn.addEventListener('click', () => loadStudents(currentPage + 1));
+                nextBtn.addEventListener('click', () => loadDashboardData(currentPage + 1));
                 container.appendChild(nextBtn);
             }
         }
@@ -940,7 +978,7 @@
             if (!currentStudentId) return;
 
             try {
-                const resetUrl = `${CONFIG.API_BASE}${CONFIG.API.ENDPOINTS.STUDENTS.RESET_ACCESS(currentStudentId)}`;
+                const resetUrl = `${API_BASE}/api/students/${currentStudentId}/reset-access`;
                 const response = await fetch(resetUrl, {
                     method: 'POST',
                     headers: {
