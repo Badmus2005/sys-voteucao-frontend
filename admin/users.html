@@ -552,8 +552,8 @@
         <div class="filters">
 
             <div class="filter-group">
-                <label for="filiereFilter">Ecole/Faculté</label>
-                <select id="filiereFilter">
+                <label for="ecoleFilter">Ecole/Faculté</label>
+                <select id="ecoleFilter">
                     <option value="all">Toutes les écoles/facultés</option>
                     <option value="FSAE">FSAE</option>
                     <option value="EGEI">EGEI</option>
@@ -703,7 +703,8 @@
 
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
-            // Filtres
+            // Filtres 
+            document.getElementById('ecoleFilter').addEventListener('change', () => loadStudents(1));
             document.getElementById('filiereFilter').addEventListener('change', () => loadStudents(1));
             document.getElementById('anneeFilter').addEventListener('change', () => loadStudents(1));
             document.getElementById('statusFilter').addEventListener('change', () => loadStudents(1));
@@ -720,7 +721,7 @@
             try {
                 showLoading();
                 currentPage = page;
-
+                const ecoleFilter = document.getElementById('ecoleFilter').value;
                 const filiereFilter = document.getElementById('filiereFilter').value;
                 const anneeFilter = document.getElementById('anneeFilter').value;
                 const statusFilter = document.getElementById('statusFilter').value;
@@ -728,6 +729,9 @@
 
                 let url = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
 
+                if (ecoleFilter !== 'all') {
+                    url += `&ecole=${ecoleFilter}`;
+                }
                 if (filiereFilter !== 'all') {
                     url += `&filiere=${filiereFilter}`;
                 }
