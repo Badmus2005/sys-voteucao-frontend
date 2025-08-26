@@ -691,73 +691,83 @@
         let currentStudentId = null;
 
         // Chargement initial
+
         document.addEventListener('DOMContentLoaded', function () {
-            loadStudents();
-            loadStats();
+            loadDashboardData();
             setupEventListeners();
         });
 
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
             // Filtres 
-            document.getElementById('ecoleFilter').addEventListener('change', () => loadStudents(1));
-            document.getElementById('filiereFilter').addEventListener('change', () => loadStudents(1));
-            document.getElementById('anneeFilter').addEventListener('change', () => loadStudents(1));
-            document.getElementById('statusFilter').addEventListener('change', () => loadStudents(1));
-            document.getElementById('searchInput').addEventListener('input', debounce(() => loadStudents(1), 300));
+            document.getElementById('ecoleFilter').addEventListener('change', () => loadDashboardData(1));
+            document.getElementById('filiereFilter').addEventListener('change', () => loadDashboardData(1));
+            document.getElementById('anneeFilter').addEventListener('change', () => loadDashboardData(1));
+            document.getElementById('statusFilter').addEventListener('change', () => loadDashboardData(1));
+            document.getElementById('searchInput').addEventListener('input', debounce(() => loadDashboardData(1), 300));
+
 
             // Modal de réinitialisation
             document.getElementById('closeResetModal').addEventListener('click', hideResetModal);
             document.getElementById('cancelReset').addEventListener('click', hideResetModal);
             document.getElementById('confirmReset').addEventListener('click', resetStudentCredentials);
         }
-
-        // Charger les étudiants
-        async function loadStudents(page = 1) {
+        async function loadDashboardData(page = 1) {
             try {
                 showLoading();
                 currentPage = page;
+
+                // Récupération des filtres
                 const ecoleFilter = document.getElementById('ecoleFilter').value;
                 const filiereFilter = document.getElementById('filiereFilter').value;
                 const anneeFilter = document.getElementById('anneeFilter').value;
                 const statusFilter = document.getElementById('statusFilter').value;
                 const searchTerm = document.getElementById('searchInput').value;
 
-                let url = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
+                // Construction URL étudiants
+                let studentsUrl = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
+                if (ecoleFilter !== 'all') studentsUrl += `&ecole=${ecoleFilter}`;
+                if (filiereFilter !== 'all') studentsUrl += `&filiere=${filiereFilter}`;
+                if (anneeFilter !== 'all') studentsUrl += `&annee=${anneeFilter}`;
+                if (statusFilter !== 'all') studentsUrl += `&status=${statusFilter}`;
+                if (searchTerm) studentsUrl += `&search=${encodeURIComponent(searchTerm)}`;
 
-                if (ecoleFilter !== 'all') {
-                    url += `&ecole=${ecoleFilter}`;
-                }
-                if (filiereFilter !== 'all') {
-                    url += `&filiere=${filiereFilter}`;
-                }
-                if (anneeFilter !== 'all') {
-                    url += `&annee=${anneeFilter}`;
-                }
-                if (statusFilter !== 'all') {
-                    url += `&status=${statusFilter}`;
-                }
-                if (searchTerm) {
-                    url += `&search=${encodeURIComponent(searchTerm)}`;
-                }
+                // Construction URL statistiques
+                let statsUrl = `${API_BASE}${STUDENTS_STAT_ENDPOINT}?ecole=${ecoleFilter}&filiere=${filiereFilter}&annee=${anneeFilter}`;
 
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // Requêtes parallèles
+                const [studentsResponse, statsResponse] = await Promise.all([
+                    fetch(studentsUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }),
+                    fetch(statsUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                ]);
 
-                if (!response.ok) throw new Error('Erreur de chargement des étudiants');
+                if (!studentsResponse.ok) throw new Error('Erreur de chargement des étudiants');
+                if (!statsResponse.ok) throw new Error('Erreur de chargement des statistiques');
 
-                const data = await response.json();
-                displayStudents(data.data.students);
-                updatePagination(data.data.pagination.total, data.data.pagination.pages);
+                const studentsData = await studentsResponse.json();
+                const statsData = await statsResponse.json();
+
+                displayStudents(studentsData.data.students);
+                updatePagination(studentsData.data.pagination.total, studentsData.data.pagination.pages);
+                updateStats(statsData.statistics);
+
             } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur de chargement des étudiants');
+                console.error('Erreur dashboard:', error);
+                showError('Impossible de charger les données du tableau de bord');
+                document.getElementById('statsError').textContent = "Impossible de charger les statistiques.";
             }
         }
+
 
         // Afficher les étudiants
         function displayStudents(students) {
@@ -807,26 +817,6 @@
             });
         }
 
-        // Charger les statistiques
-        async function loadStats() {
-            try {
-                const url = `${API_BASE}${STUDENTS_STAT_ENDPOINT}?filiere=${selectedFiliere}&annee=${selectedAnnee}&ecole=${selectedEcole}`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Erreur de chargement des statistiques');
-
-                const data = await response.json();
-                updateStats(data.statistics);
-            } catch (error) {
-                console.error('Erreur chargement stats:', error);
-                document.getElementById('statsError').textContent = "Impossible de charger les statistiques.";
-            }
-        }
 
         // Mettre à jour les statistiques
         function updateStats(stats) {
