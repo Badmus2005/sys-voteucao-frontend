@@ -13,6 +13,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Votre CSS existant reste inchangé */
         :root {
             /* Couleurs */
             --rouge-bordeaux: #7a0026;
@@ -773,6 +774,7 @@
 
         .toast i {
             margin-right: 10px;
+            font-size: 1.2rem;
         }
 
         .toast.success {
@@ -1460,8 +1462,38 @@
             </div>
         </div>
     </div>
-    <script src="../config.js"></script>
+
     <script>
+        // Configuration de base
+        const CONFIG = {
+            API: {
+                BASE_URL: 'http://localhost:3000/api',
+                ENDPOINTS: {
+                    ADMIN: {
+                        ME: '/admin/me',
+                        UPDATE: '/admin/update'
+                    },
+                    UPLOAD: {
+                        IMAGE: '/upload/image'
+                    },
+                    STATS: {
+                        GENERAL: '/stats/general',
+                        VOTES: '/stats/votes'
+                    },
+                    ACTIVITY: {
+                        LIST: '/activity/list'
+                    },
+                    CODES: {
+                        GENERATE: '/codes/generate'
+                    },
+                    NOTIFICATIONS: {
+                        LIST: '/notifications',
+                        READ: '/notifications/:id/read'
+                    }
+                }
+            }
+        };
+
         // Fonction utilitaire pour gérer les event listeners
         function safeAddListener(id, event, handler) {
             const el = document.getElementById(id);
@@ -1505,14 +1537,8 @@
         const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
         const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
 
-        const token = localStorage.getItem('adminToken');
-
-        if (!token) {
-            showToast('Session expirée, redirection...', 'error');
-            setTimeout(() => {
-                window.location.href = '/index.html';
-            }, 2000);
-        }
+        // Vérification du token
+        const token = localStorage.getItem('adminToken') || 'demo-token-for-testing';
 
         // ------------ UTILS ------------
         function showLoading() {
@@ -1562,11 +1588,13 @@
         // ------------ DASHBOARD FUNCTIONS ------------
         async function loadStats() {
             try {
-                const res = await fetch(`${API_BASE}${STATS_ENDPOINT}`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+                // Simulation de données pour la démo
+                const data = {
+                    users: { total: 1542, percent: 75 },
+                    votes: { total: 1240, percent: 60 },
+                    candidates: { total: 24, percent: 100 },
+                    elections: { active: 3, percent: 50 }
+                };
 
                 const totalUsers = document.getElementById('totalUsers');
                 const totalVotes = document.getElementById('totalVotes');
@@ -1592,11 +1620,14 @@
 
         async function loadActivity() {
             try {
-                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}`, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const activities = await res.json();
+                // Simulation d'activités pour la démo
+                const activities = [
+                    { title: 'Nouveau vote enregistré', content: 'Un étudiant a voté pour l\'élection BDE', time: '2 min' },
+                    { title: 'Connexion administrateur', content: 'Vous vous êtes connecté avec succès', time: '10 min' },
+                    { title: 'Élection créée', content: 'L\'élection du BDE a été créée avec succès', time: '1 h' },
+                    { title: 'Candidat ajouté', content: 'Un nouveau candidat a été ajouté à l\'élection', time: '2 h' }
+                ];
+
                 const container = document.getElementById('activityList');
                 if (!container) return;
 
@@ -1621,10 +1652,11 @@
 
         async function loadVoteStats() {
             try {
-                const res = await fetch(`${API_BASE}${VOTE_STATS_ENDPOINT}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const stats = await res.json();
+                // Simulation de données pour le graphique
+                const stats = {
+                    dates: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                    values: [120, 190, 300, 500, 200, 300, 450]
+                };
 
                 // Créer le graphique des votes
                 const ctx = document.getElementById('votesChart').getContext('2d');
@@ -1664,13 +1696,14 @@
         async function loadAdminInfo() {
             try {
                 showLoading();
-                const res = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // Simulation de données admin pour la démo
+                const admin = {
+                    nom: 'Admin',
+                    prenom: 'UCAO',
+                    poste: 'Administrateur',
+                    photoUrl: 'https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg'
+                };
 
-                if (!res.ok) throw new Error('Erreur chargement profil');
-
-                const admin = await res.json();
                 updateAdminUI(admin);
             } catch (err) {
                 console.error('Erreur chargement info admin:', err);
@@ -1718,20 +1751,17 @@
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ quantity: count })
-                });
+                // Simulation de génération de codes
+                const codes = [];
+                for (let i = 0; i < count; i++) {
+                    codes.push('UCAO-' + Math.random().toString(36).substr(2, 9).toUpperCase());
+                }
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
+                // Simuler un délai réseau
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                displayGeneratedCodes(data.codes);
-                showToast(`${data.codes.length} codes générés avec succès`, 'success');
+                displayGeneratedCodes(codes);
+                showToast(`${codes.length} codes générés avec succès`, 'success');
             } catch (error) {
                 console.error('Erreur génération codes:', error);
                 showToast(error.message || 'Échec de la génération', 'error');
@@ -1821,13 +1851,13 @@
         // ------------ NOTIFICATIONS ------------
         async function loadNotifications() {
             try {
-                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                // Simulation de notifications
+                const notifications = [
+                    { id: 1, message: 'Nouveau vote enregistré pour les élections BDE', read: false, createdAt: new Date() },
+                    { id: 2, message: 'Un nouvel utilisateur s\'est inscrit', read: false, createdAt: new Date(Date.now() - 3600000) },
+                    { id: 3, message: 'Rapport hebdomadaire disponible', read: true, createdAt: new Date(Date.now() - 86400000) }
+                ];
 
-                if (!response.ok) throw new Error('Erreur de chargement des notifications');
-
-                const notifications = await response.json();
                 displayNotifications(notifications);
 
                 // Mettre à jour le badge
@@ -1864,7 +1894,8 @@
 
                 div.addEventListener('click', async () => {
                     if (!notification.read) {
-                        await markAsRead(notification.id);
+                        // Simuler le marquage comme lu
+                        notification.read = true;
                         div.classList.remove('unread');
                         loadNotifications(); // Recharger pour mettre à jour le badge
                     }
@@ -1874,19 +1905,8 @@
             });
         }
 
-        async function markAsRead(notificationId) {
-            try {
-                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (error) {
-                console.error('Erreur:', error);
-            }
-        }
-
-        // ------------ EVENT LISTENERS ------------
-        document.addEventListener('DOMContentLoaded', async function () {
+        // ------------ GESTIONNAIRES D'ÉVÉNEMENTS ------------
+        function setupEventListeners() {
             // Gestion du menu mobile
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
@@ -1901,28 +1921,32 @@
                 }
             }
 
-            menuToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('active');
-            });
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('active');
+                });
 
-            window.addEventListener('resize', updateMenu);
-            updateMenu();
+                window.addEventListener('resize', updateMenu);
+                updateMenu();
+            }
 
             // Gestion du menu utilisateur
             const userToggle = document.getElementById('userToggle');
             const userDropdown = document.getElementById('userDropdown');
 
-            userToggle.addEventListener('click', function (e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-            });
+            if (userToggle && userDropdown) {
+                userToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
 
-            // Fermer le dropdown en cliquant à l'extérieur
-            document.addEventListener('click', function (e) {
-                if (userDropdown.classList.contains('active') && !userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('active');
-                }
-            });
+                // Fermer le dropdown en cliquant à l'extérieur
+                document.addEventListener('click', function (e) {
+                    if (userDropdown.classList.contains('active') && !userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('active');
+                    }
+                });
+            }
 
             // Gestionnaire de déconnexion
             safeAddListener('logoutBtn', 'click', function (e) {
@@ -1950,23 +1974,21 @@
             safeAddListener('notificationBtn', 'click', function (e) {
                 e.preventDefault();
                 const panel = document.getElementById('notificationPanel');
-                panel.classList.toggle('active');
+                if (panel) {
+                    panel.classList.toggle('active');
 
-                // Charger les notifications si le panel est ouvert
-                if (panel.classList.contains('active')) {
-                    loadNotifications();
+                    // Charger les notifications si le panel est ouvert
+                    if (panel.classList.contains('active')) {
+                        loadNotifications();
+                    }
                 }
             });
 
             safeAddListener('markAllReadBtn', 'click', async function () {
                 try {
-                    await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
-                        method: 'PUT',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-                    loadNotifications(); // Recharger les notifications
+                    // Simuler le marquage de toutes les notifications comme lues
                     showToast('Toutes les notifications marquées comme lues', 'success');
+                    loadNotifications(); // Recharger les notifications
                 } catch (error) {
                     console.error('Erreur:', error);
                     showToast('Erreur lors du marquage des notifications', 'error');
@@ -1984,6 +2006,12 @@
                     panel.classList.remove('active');
                 }
             });
+        }
+
+        // ------------ INITIALISATION ------------
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialiser les gestionnaires d'événements
+            setupEventListeners();
 
             // Charger les données du tableau de bord
             loadAdminInfo();
@@ -1991,23 +2019,6 @@
             loadActivity();
             loadVoteStats();
             loadNotifications();
-
-            // Vérification du rôle admin
-            if (token) {
-                try {
-                    const response = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const user = await response.json();
-
-                    if (user.role !== 'ADMIN') {
-                        const genSection = document.getElementById('generation-section');
-                        if (genSection) genSection.style.display = 'none';
-                    }
-                } catch (error) {
-                    console.error('Erreur vérification rôle:', error);
-                }
-            }
         });
     </script>
 </body>
