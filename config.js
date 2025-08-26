@@ -62,10 +62,13 @@ const CONFIG = {
             },
             STUDENTS: {
                 LIST: "/api/students",
-                UPDATE_STATUS: "/api/students/:id/status",
                 SEARCH: "/api/students",
                 STATS: "/api/students/stats",
-                RESET: "/api/students/:studentId/reset-access"
+                UPDATE_STATUS: (id) => `/api/students/${id}/status`,
+                RESET_ACCESS: (studentId) => `/api/students/${studentId}/reset-access`,
+                BY_ID: (id) => `/api/students/${id}`,
+                DELETE: (id) => `/api/students/${id}/delete`,
+                ACTIVATE: (id) => `/api/students/${id}/activate`,
             },
             ACTIVITY: {
                 LIST: '/api/activity'
