@@ -74,6 +74,15 @@ const CONFIG = {
             },
             UPLOAD: {
                 IMAGE: '/api/upload/image'
+            },
+            NOTIFICATIONS: {
+                LIST: '/api/notifications',
+                READ: '/api/notifications/:id/read',
+                READ_ALL: '/api/notifications/read-all',
+                DELETE: '/api/notifications/:id',
+                DELETE_ALL: '/api/notifications',
+                STATS: '/api/notifications/stats',
+                ADMIN: '/api/notifications/admin'
             }
         }
     },
@@ -197,14 +206,6 @@ const CONFIG = {
 
     // Configuration des notifications
     NOTIFICATIONS: {
-        LIST: '/api/notifications',
-        READ: '/api/notifications/:id/read',
-        READ_ALL: '/api/notifications/read-all',
-        DELETE: '/api/notifications/:id',
-        DELETE_ALL: '/api/notifications',
-        STATS: '/api/notifications/stats',
-        ADMIN: '/api/notifications/admin',
-
         AUTO_HIDE_DELAY: 5000, // 5 secondes
         POSITION: 'top-right',
         TYPES: {
