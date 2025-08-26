@@ -5,11 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Élections - Admin UCAO</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --rouge-bordeaux: #7a0026;
@@ -20,9 +16,9 @@
             --blanc-casse: #f8f4e9;
             --gris-clair: #e5e5e5;
             --gris-moyen: #999999;
-            --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
         }
 
         * {
@@ -36,176 +32,140 @@
             background-color: var(--blanc-casse);
             color: var(--bleu-nuit);
             line-height: 1.6;
+            padding: 20px;
         }
 
         .container {
-            display: flex;
-            min-height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* Sidebar */
-        .sidebar {
-            width: 310px;
-            background: var(--bleu-nuit);
-            color: white;
-            padding: 25px 0;
-            box-shadow: var(--shadow-md);
-            transition: transform 0.3s ease;
-            z-index: 100;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            text-align: center;
-            padding: 0 25px 25px;
-            border-bottom: 1px solid var(--bleu-nuit-light);
-        }
-
-        .sidebar-header img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--or);
-            object-fit: cover;
-            margin-bottom: 15px;
-        }
-
-        .admin-badge {
-            display: inline-block;
-            background: linear-gradient(to right, var(--or), #e8c873);
-            color: var(--bleu-nuit);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .sidebar-menu {
-            padding: 20px 15px 0;
-        }
-
-        .sidebar-menu h3 {
-            color: var(--gris-clair);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            margin: 25px 0 15px 10px;
-        }
-
-        .sidebar-menu li {
-            list-style: none;
-            margin-bottom: 5px;
-        }
-
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            padding: 12px 15px;
-            border-radius: 6px;
-            transition: var(--transition);
-        }
-
-        .sidebar-menu li a i {
-            margin-right: 12px;
-            color: var(--or);
-            font-size: 1rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-menu li a:hover {
-            background-color: var(--bleu-nuit-light);
-            color: white;
-        }
-
-        .sidebar-menu li.active a {
-            background: linear-gradient(to right, rgba(122, 0, 38, 0.3), transparent);
-            color: white;
-            border-left: 3px solid var(--or);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            margin-left: 280px;
-            background-color: #f9f9f9;
-            min-height: 100vh;
-            transition: margin 0.3s ease;
-        }
-
-        .admin-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            padding-bottom: 15px;
             border-bottom: 1px solid var(--gris-clair);
         }
 
-        .admin-header h1 {
+        .header h1 {
             color: var(--bleu-nuit);
             font-size: 1.8rem;
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
         }
 
-        .admin-header h1 i {
+        .header h1 i {
             color: var(--rouge-bordeaux);
             margin-right: 15px;
         }
 
-        .admin-actions {
+        .btn {
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
             display: flex;
-            gap: 15px;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
         }
 
-        .admin-actions a {
-            color: var(--bleu-nuit-light);
-            font-size: 1.2rem;
-            position: relative;
-            transition: var(--transition);
+        .btn-primary {
+            background: linear-gradient(90deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
+            color: white;
         }
 
-        .admin-actions a:hover {
-            color: var(--rouge-bordeaux);
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--rouge-bordeaux-light), var(--rouge-bordeaux));
             transform: translateY(-2px);
         }
 
-        /* Table styles */
-        .table-container {
+        .btn-secondary {
+            background: var(--gris-clair);
+            color: var(--bleu-nuit);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .elections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .election-card {
             background: white;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(15, 26, 49, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--rouge-bordeaux);
         }
 
-        .table-header {
-            display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
-            padding: 15px 20px;
-            background: var(--bleu-nuit);
-            color: white;
+        .election-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .election-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .election-title {
+            font-size: 1.2rem;
             font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 5px;
         }
 
-        .table-row {
-            display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--gris-clair);
+        .election-type {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: rgba(122, 0, 38, 0.1);
+            color: var(--rouge-bordeaux);
+        }
+
+        .election-dates {
+            margin-bottom: 15px;
+        }
+
+        .election-date {
+            display: flex;
             align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
         }
 
-        .status-badge {
+        .election-date i {
+            color: var(--gris-moyen);
+        }
+
+        .election-status {
+            display: inline-block;
             padding: 5px 10px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
+            margin-bottom: 15px;
         }
 
         .status-active {
@@ -223,34 +183,32 @@
             color: #6c757d;
         }
 
-        .election-type {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            background: rgba(122, 0, 38, 0.1);
-            color: var(--rouge-bordeaux);
-        }
-
-        .action-buttons {
+        .election-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .btn-icon {
-            width: 32px;
-            height: 32px;
+        .action-btn {
+            padding: 8px 12px;
             border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
+            gap: 5px;
+            transition: all 0.3s ease;
+            border: none;
         }
 
-        .btn-edit {
+        .btn-view {
             background: rgba(58, 160, 255, 0.15);
             color: #3aa0ff;
+        }
+
+        .btn-close {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
         }
 
         .btn-delete {
@@ -258,7 +216,7 @@
             color: #dc3545;
         }
 
-        /* Modal */
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -269,22 +227,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1100;
-            display: none;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
 
         .modal-overlay.active {
-            display: flex;
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal {
             background: white;
             border-radius: 10px;
             width: 90%;
-            max-width: 800px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
         }
 
         .modal-header {
@@ -307,7 +274,6 @@
             gap: 10px;
         }
 
-        /* Form styles */
         .form-group {
             margin-bottom: 20px;
         }
@@ -329,198 +295,68 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
 
-        .conditional-fields {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 6px;
-            border-left: 3px solid var(--or);
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            cursor: pointer;
+        .loading {
             display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--rouge-bordeaux);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--gris-clair);
-            color: var(--bleu-nuit);
-        }
-
-        /* Toast and loading */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 6px;
-            color: white;
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            box-shadow: var(--shadow-md);
-        }
-
-        .toast.success {
-            background-color: #28a745;
-        }
-
-        .toast.error {
-            background-color: var(--rouge-bordeaux);
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
             justify-content: center;
-            z-index: 2000;
-            display: none;
-        }
-
-        .loading-overlay.active {
-            display: flex;
+            align-items: center;
+            padding: 40px;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gris-clair);
+            border-top: 4px solid var(--rouge-bordeaux);
             border-radius: 50%;
-            border-top-color: var(--or);
-            animation: spin 1s ease-in-out infinite;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            to {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
                 transform: rotate(360deg);
             }
         }
 
-        /* Menu toggle pour mobile */
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--rouge-bordeaux);
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 90;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            display: none;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gris-moyen);
         }
 
-        @media (max-width: 1200px) {
-
-            .table-header,
-            .table-row {
-                grid-template-columns: 1fr 120px 120px 100px 100px;
-            }
-
-            .table-header div:nth-child(2),
-            .table-row div:nth-child(2) {
-                display: none;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-            .menu-toggle {
-                display: flex;
-            }
-
-            .table-header,
-            .table-row {
-                grid-template-columns: 1fr 1fr 100px;
-            }
-
-            .table-header div:nth-child(3),
-            .table-row div:nth-child(3),
-            .table-header div:nth-child(4),
-            .table-row div:nth-child(4) {
-                display: none;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--gris-clair);
         }
 
         @media (max-width: 768px) {
-
-            .table-header,
-            .table-row {
-                grid-template-columns: 1fr 100px;
-            }
-
-            .table-header div:nth-child(5),
-            .table-row div:nth-child(5) {
-                display: none;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .admin-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .table-header,
-            .table-row {
+            .form-row {
                 grid-template-columns: 1fr;
-                padding: 10px;
             }
 
-            .table-header div:nth-child(6),
-            .table-row div:nth-child(6) {
-                display: none;
+            .elections-grid {
+                grid-template-columns: 1fr;
             }
 
-            .action-buttons {
-                justify-content: center;
-                margin-top: 10px;
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
         }
     </style>
@@ -528,71 +364,17 @@
 
 <body>
     <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img id="adminPhoto"
-                    src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
-                    alt="Photo Admin"
-                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzAwMCI+QWRtaW48L3RleHQ+PC9zdmc+'">
-                <h3 id="adminName">Admin UCAO</h3>
-                <p id="adminEmail">superadmin@ucao-uuc.com</p>
-                <span class="admin-badge" id="adminPoste">Administrateur</span>
-            </div>
-            <ul class="sidebar-menu">
-                <h3>Général</h3>
-                <li class="active"><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de
-                        Bord</a></li>
-                <li><a href="users.html"><i class="fas fa-users"></i> Utilisateurs</a></li>
-                <li><a href="elections.html"><i class="fas fa-vote-yea"></i> Élections</a></li>
-                <li><a href="candidates.html"><i class="fas fa-user"></i> Candidats</a></li>
-                <li><a href="statistics.html"><i class="fas fa-chart-pie"></i> Statistiques</a></li>
-                <h3>Administration</h3>
-                <li><a href="user_index.html"><i class="fas fa-home"></i> Acceuil</a></li>
-                <li><a href="#" id="profileNavBtn"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
-                <li><a href="#" id="logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
-            </ul>
-        </aside>
+        <div class="header">
+            <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
+            <button class="btn btn-primary" id="createElectionBtn">
+                <i class="fas fa-plus"></i> Nouvelle Élection
+            </button>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="admin-header">
-                <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
-                <div class="admin-actions">
-                    <a href="#" class="alert-btn" aria-label="Notifications" id="notificationBtn">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
-                    </a>
-                    <a href="#" aria-label="Messages"><i class="fas fa-envelope"></i></a>
-                    <a href="#" aria-label="Aide"><i class="fas fa-question-circle"></i></a>
-                </div>
+        <div id="electionsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
             </div>
-
-            <div class="admin-header">
-                <h2>Liste des élections</h2>
-                <button class="btn btn-primary" id="createElectionBtn">
-                    <i class="fas fa-plus"></i> Nouvelle Élection
-                </button>
-            </div>
-
-            <div class="table-container">
-                <div class="table-header">
-                    <div>Nom de l'élection</div>
-                    <div>Type</div>
-                    <div>Date de début</div>
-                    <div>Date de fin</div>
-                    <div>Niveau</div>
-                    <div>Actions</div>
-                </div>
-                <div id="electionsList">
-                    <!-- Les élections seront chargées ici dynamiquement -->
-                </div>
-            </div>
-        </main>
-
-        <!-- Menu Toggle Mobile -->
-        <div class="menu-toggle">
-            <i class="fas fa-bars"></i>
         </div>
     </div>
 
@@ -695,66 +477,203 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelElection">Annuler</button>
-                <button class="btn btn-primary" id="saveElection">Enregistrer</button>
+                <button class="btn btn-primary" id="saveElection">Créer l'Élection</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast" id="toast" style="display: none;"></div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-    </div>
-    <script src="config.js"></script>
     <script>
-        // Configuration API
+        // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
-        const ELECTION_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
-        const ELECTION_CREATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.CREATE;
-        const ELECTION_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.UPDATE;
-        const ELECTION_DELETE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.DELETE;
+        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
+        const ELECTIONS_CREATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.CREATE;
+        const ELECTIONS_DELETE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.DELETE;
+        const ELECTIONS_CLOSE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.CLOSE;
         const token = localStorage.getItem('adminToken');
 
-        // Vérification de l'authentification
         if (!token) {
             window.location.href = 'index.html';
         }
 
-        // Éléments DOM
-        const electionsList = document.getElementById('electionsList');
-        const electionModal = document.getElementById('electionModal');
-        const electionForm = document.getElementById('electionForm');
-        const toast = document.getElementById('toast');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const electionType = document.getElementById('electionType');
-        const electionNiveau = document.getElementById('electionNiveau');
-        const delegueTypeGroup = document.getElementById('delegueTypeGroup');
-        const delegueType = document.getElementById('delegueType');
-        const conditionalFields = document.getElementById('conditionalFields');
-        const salleFields = document.getElementById('salleFields');
-        const ecoleFields = document.getElementById('ecoleFields');
+        // Chargement initial
+        document.addEventListener('DOMContentLoaded', function () {
+            loadElections();
+            setupEventListeners();
+        });
 
-        // Gestion des champs conditionnels
-        electionType.addEventListener('change', updateFormFields);
-        electionNiveau.addEventListener('change', updateFormFields);
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Modal d'élection
+            document.getElementById('createElectionBtn').addEventListener('click', showElectionModal);
+            document.getElementById('closeModal').addEventListener('click', hideElectionModal);
+            document.getElementById('cancelElection').addEventListener('click', hideElectionModal);
+            document.getElementById('saveElection').addEventListener('click', createElection);
 
-        function updateFormFields() {
-            const type = electionType.value;
-            const niveau = electionNiveau.value;
+            // Champs conditionnels
+            document.getElementById('electionType').addEventListener('change', updateElectionFormFields);
+            document.getElementById('electionNiveau').addEventListener('change', updateElectionFormFields);
+        }
+
+        // Charger les élections
+        async function loadElections() {
+            try {
+                showLoading();
+
+                const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur de chargement des élections');
+
+                const elections = await response.json();
+                displayElections(elections);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de chargement des élections');
+            }
+        }
+
+        // Afficher les élections
+        function displayElections(elections) {
+            const container = document.getElementById('electionsContainer');
+
+            if (!elections || elections.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-vote-yea"></i>
+                        <h3>Aucune élection créée</h3>
+                        <p>Créez votre première élection pour commencer</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            elections.forEach(election => {
+                const status = getElectionStatus(election);
+                const statusClass = getStatusClass(status);
+
+                const card = document.createElement('div');
+                card.className = 'election-card';
+                card.innerHTML = `
+                    <div class="election-header">
+                        <div>
+                            <div class="election-title">${election.titre}</div>
+                            <span class="election-type">${election.type}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="election-dates">
+                        <div class="election-date">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Début: ${formatDate(election.dateDebut)}</span>
+                        </div>
+                        <div class="election-date">
+                            <i class="fas fa-flag-checkered"></i>
+                            <span>Fin: ${formatDate(election.dateFin)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="election-status ${statusClass}">${status}</div>
+                    
+                    <div class="election-actions">
+                        <button class="action-btn btn-view" onclick="viewElection(${election.id})">
+                            <i class="fas fa-eye"></i> Voir
+                        </button>
+                        ${status === 'Active' ? `
+                        <button class="action-btn btn-close" onclick="closeElection(${election.id})">
+                            <i class="fas fa-lock"></i> Clôturer
+                        </button>
+                        ` : ''}
+                        <button class="action-btn btn-delete" onclick="deleteElection(${election.id})">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Fonctions utilitaires
+        function getElectionStatus(election) {
+            const now = new Date();
+            const start = new Date(election.dateDebut);
+            const end = new Date(election.dateFin);
+
+            if (!election.isActive) return 'Terminée';
+            if (now < start) return 'À venir';
+            if (now >= start && now <= end) return 'Active';
+            return 'Terminée';
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Active': return 'status-active';
+                case 'À venir': return 'status-upcoming';
+                case 'Terminée': return 'status-completed';
+                default: return '';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showLoading() {
+            const container = document.getElementById('electionsContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        }
+
+        function showError(message) {
+            const container = document.getElementById('electionsContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="loadElections()">Réessayer</button>
+                </div>
+            `;
+        }
+
+        // Gestion de la modal d'élection
+        function showElectionModal() {
+            document.getElementById('electionModal').classList.add('active');
+        }
+
+        function hideElectionModal() {
+            document.getElementById('electionModal').classList.remove('active');
+            document.getElementById('electionForm').reset();
+        }
+
+        function updateElectionFormFields() {
+            const type = document.getElementById('electionType').value;
+            const niveau = document.getElementById('electionNiveau').value;
 
             // Afficher/masquer le type de délégué
+            const delegueTypeGroup = document.getElementById('delegueTypeGroup');
             if (niveau === '2') {
                 delegueTypeGroup.style.display = 'block';
             } else {
                 delegueTypeGroup.style.display = 'none';
-                delegueType.value = '';
             }
 
             // Gérer les champs conditionnels
+            const conditionalFields = document.getElementById('conditionalFields');
+            const salleFields = document.getElementById('salleFields');
+            const ecoleFields = document.getElementById('ecoleFields');
+
             conditionalFields.style.display = 'block';
             salleFields.style.display = 'none';
             ecoleFields.style.display = 'none';
@@ -770,215 +689,82 @@
             }
         }
 
-        // Fonctions utilitaires
-        function showToast(message, type = 'success') {
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.style.display = 'flex';
+        async function createElection() {
+            try {
+                const formData = {
+                    type: document.getElementById('electionType').value,
+                    niveau: parseInt(document.getElementById('electionNiveau').value),
+                    titre: document.getElementById('electionTitre').value,
+                    description: document.getElementById('electionDescription').value,
+                    dateDebut: document.getElementById('startDate').value,
+                    dateFin: document.getElementById('endDate').value
+                };
 
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-        }
+                // Ajouter le type de délégué si niveau 2
+                if (formData.niveau === 2) {
+                    formData.delegueType = document.getElementById('delegueType').value;
+                }
 
-        function showLoading() {
-            loadingOverlay.classList.add('active');
-        }
+                // Ajouter les champs conditionnels
+                if (formData.type === 'SALLE') {
+                    formData.filiere = document.getElementById('filiere').value;
+                    formData.annee = parseInt(document.getElementById('annee').value);
+                } else if (formData.type === 'ECOLE') {
+                    formData.ecole = document.getElementById('ecole').value;
+                }
 
-        function hideLoading() {
-            loadingOverlay.classList.remove('active');
-        }
+                const response = await fetch(`${API_BASE}${ELECTIONS_CREATE_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
 
-        // Gestion du menu mobile
-        function updateMenu() {
-            if (window.innerWidth <= 992) {
-                menuToggle.style.display = 'flex';
-                sidebar.classList.remove('active');
-            } else {
-                menuToggle.style.display = 'none';
-                sidebar.classList.add('active');
+                if (!response.ok) throw new Error('Erreur lors de la création');
+
+                const result = await response.json();
+                hideElectionModal();
+                loadElections();
+                alert('Élection créée avec succès!');
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la création: ' + error.message);
             }
         }
 
-        menuToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('active');
-        });
+        // Fonctions d'action
+        function viewElection(id) {
+            window.location.href = `election-details.html?id=${id}`;
+        }
 
-        window.addEventListener('resize', updateMenu);
-        updateMenu();
+        async function closeElection(id) {
+            if (!confirm('Êtes-vous sûr de vouloir clôturer cette élection ?')) return;
 
-        // Gestionnaire de déconnexion
-        document.getElementById('logout').addEventListener('click', function (e) {
-            e.preventDefault();
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRole');
-            window.location.href = 'index.html';
-        });
-
-        // Charger les élections
-        async function loadElections() {
             try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_ENDPOINT}`, {
-                    method: 'GET',
+                const response = await fetch(`${API_BASE}${ELECTIONS_CLOSE_ENDPOINT}`, {
+                    method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur lors du chargement des élections');
+                if (!response.ok) throw new Error('Erreur lors de la clôture');
 
-                const data = await response.json();
-                displayElections(data.elections || data);
+                loadElections();
+                alert('Élection clôturée avec succès!');
             } catch (error) {
                 console.error('Erreur:', error);
-                showToast('Erreur de chargement des élections', 'error');
-                loadElectionsFromLocalStorage();
-            } finally {
-                hideLoading();
+                alert('Erreur lors de la clôture: ' + error.message);
             }
         }
 
-        function loadElectionsFromLocalStorage() {
-            const localElections = JSON.parse(localStorage.getItem('elections')) || [];
-            if (localElections.length > 0) {
-                displayElections(localElections);
-                showToast('Mode hors ligne: données locales chargées', 'success');
-            } else {
-                electionsList.innerHTML = `
-                    <div class="table-row">
-                        <div colspan="6" style="text-align: center; padding: 30px;">
-                            Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function displayElections(elections) {
-            electionsList.innerHTML = '';
-
-            if (!elections || elections.length === 0) {
-                electionsList.innerHTML = `
-                    <div class="table-row">
-                        <div colspan="6" style="text-align: center; padding: 30px;">
-                            Aucune élection trouvée. Cliquez sur "Nouvelle Élection" pour en créer une.
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            elections.forEach(election => {
-                const row = document.createElement('div');
-                row.className = 'table-row';
-
-                // Déterminer le statut
-                const now = new Date();
-                const startDate = new Date(election.dateDebut);
-                const endDate = new Date(election.dateFin);
-
-                let statusClass = 'status-upcoming';
-                let statusText = 'À venir';
-
-                if (now >= startDate && now <= endDate) {
-                    statusClass = 'status-active';
-                    statusText = 'Active';
-                } else if (now > endDate) {
-                    statusClass = 'status-completed';
-                    statusText = 'Terminée';
-                }
-
-                // Formater le type d'élection
-                let typeText = election.type;
-                if (election.type === 'SALLE') typeText = 'Salle';
-                if (election.type === 'ECOLE') typeText = 'École';
-                if (election.type === 'UNIVERSITE') typeText = 'Université';
-
-                row.innerHTML = `
-                    <div>${election.titre}</div>
-                    <div><span class="election-type">${typeText}</span></div>
-                    <div>${formatDate(election.dateDebut)}</div>
-                    <div>${formatDate(election.dateFin)}</div>
-                    <div>N${election.niveau}</div>
-                    <div class="action-buttons">
-                        <div class="btn-icon btn-edit" data-id="${election.id}">
-                            <i class="fas fa-edit"></i>
-                        </div>
-                        <div class="btn-icon btn-delete" data-id="${election.id}">
-                            <i class="fas fa-trash"></i>
-                        </div>
-                    </div>
-                `;
-
-                electionsList.appendChild(row);
-            });
-
-            // Ajouter les écouteurs d'événements pour les boutons
-            document.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const electionId = e.currentTarget.getAttribute('data-id');
-                    editElection(electionId);
-                });
-            });
-
-            document.querySelectorAll('.btn-delete').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const electionId = e.currentTarget.getAttribute('data-id');
-                    deleteElection(electionId);
-                });
-            });
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Créer une élection
-        async function createElection(electionData) {
-            try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_CREATE_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(electionData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la création');
-                }
-
-                const result = await response.json();
-                showToast('Élection créée avec succès');
-                loadElections();
-                return result;
-            } catch (error) {
-                console.error('Erreur API:', error);
-                showToast(error.message || 'Erreur lors de la création', 'error');
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Supprimer une élection
-        async function deleteElection(electionId) {
+        async function deleteElection(id) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
 
             try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${ELECTION_DELETE_ENDPOINT}/${electionId}`, {
+                const response = await fetch(`${API_BASE}${ELECTIONS_DELETE_ENDPOINT}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -987,117 +773,19 @@
 
                 if (!response.ok) throw new Error('Erreur lors de la suppression');
 
-                showToast('Élection supprimée avec succès');
                 loadElections();
+                alert('Élection supprimée avec succès!');
             } catch (error) {
                 console.error('Erreur:', error);
-                showToast('Erreur lors de la suppression', 'error');
-            } finally {
-                hideLoading();
+                alert('Erreur lors de la suppression: ' + error.message);
             }
         }
 
-        // Gestionnaires d'événements
-        document.getElementById('createElectionBtn').addEventListener('click', () => {
-            electionModal.classList.add('active');
-        });
-
-        document.getElementById('closeModal').addEventListener('click', () => {
-            electionModal.classList.remove('active');
-            resetForm();
-        });
-
-        document.getElementById('cancelElection').addEventListener('click', () => {
-            electionModal.classList.remove('active');
-            resetForm();
-        });
-
-        function resetForm() {
-            electionForm.reset();
-            conditionalFields.style.display = 'none';
-            delegueTypeGroup.style.display = 'none';
-        }
-
-        document.getElementById('saveElection').addEventListener('click', async () => {
-            const electionData = {
-                type: document.getElementById('electionType').value,
-                niveau: parseInt(document.getElementById('electionNiveau').value),
-                titre: document.getElementById('electionTitre').value,
-                description: document.getElementById('electionDescription').value,
-                dateDebut: document.getElementById('startDate').value,
-                dateFin: document.getElementById('endDate').value
-            };
-
-            // Ajouter le type de délégué si niveau 2
-            if (electionData.niveau === 2) {
-                electionData.delegueType = document.getElementById('delegueType').value;
-            }
-
-            // Ajouter les champs conditionnels
-            if (electionData.type === 'SALLE') {
-                electionData.filiere = document.getElementById('filiere').value;
-                electionData.annee = parseInt(document.getElementById('annee').value);
-            } else if (electionData.type === 'ECOLE') {
-                electionData.ecole = document.getElementById('ecole').value;
-            }
-
-            // Validation des données
-            if (!electionData.type) {
-                showToast('Veuillez sélectionner un type d\'élection', 'error');
-                return;
-            }
-
-            if (!electionData.niveau) {
-                showToast('Veuillez sélectionner un niveau', 'error');
-                return;
-            }
-
-            if (!electionData.titre) {
-                showToast('Veuillez saisir un titre pour l\'élection', 'error');
-                return;
-            }
-
-            if (electionData.type === 'SALLE' && (!electionData.filiere || !electionData.annee)) {
-                showToast('Veuillez remplir tous les champs obligatoires pour une élection de salle', 'error');
-                return;
-            }
-
-            if (electionData.type === 'ECOLE' && !electionData.ecole) {
-                showToast('Veuillez saisir le nom de l\'école', 'error');
-                return;
-            }
-
-            if (electionData.niveau === 2 && !electionData.delegueType) {
-                showToast('Veuillez sélectionner un type de délégué', 'error');
-                return;
-            }
-
-            // Validation des dates
-            if (new Date(electionData.dateDebut) >= new Date(electionData.dateFin)) {
-                showToast('La date de fin doit être postérieure à la date de début', 'error');
-                return;
-            }
-
-            try {
-                await createElection(electionData);
-                electionModal.classList.remove('active');
-                resetForm();
-            } catch (error) {
-                // L'erreur est déjà gérée dans createElection
-            }
-        });
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            loadElections();
-
-            // Vérifier le rôle administrateur
-            const adminRole = localStorage.getItem('adminRole');
-            if (adminRole !== 'ADMIN') {
-                document.getElementById('createElectionBtn').style.display = 'none';
-                showToast('Vous n\'avez pas les permissions pour créer des élections', 'error');
-            }
-        });
+        // Exposer les fonctions globales
+        window.viewElection = viewElection;
+        window.closeElection = closeElection;
+        window.deleteElection = deleteElection;
+        window.loadElections = loadElections;
     </script>
 </body>
 

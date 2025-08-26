@@ -480,6 +480,7 @@
             border-radius: 6px;
             font-family: 'Poppins', sans-serif;
             transition: var(--transition);
+            background-color: #f9f9f9;
         }
 
         .form-group input:focus,
@@ -488,11 +489,21 @@
             border-color: var(--rouge-bordeaux);
             outline: none;
             box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1);
+            background-color: white;
         }
 
         .form-group textarea {
             min-height: 100px;
             resize: vertical;
+        }
+
+        .form-group input:disabled,
+        .form-group textarea:disabled,
+        .form-group select:disabled {
+            background-color: #f5f5f5;
+            color: var(--bleu-nuit);
+            border: 1px solid #eee;
+            cursor: not-allowed;
         }
 
         .photo-upload-group {
@@ -607,6 +618,17 @@
 
         .btn-secondary:hover {
             background: #ddd;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-edit {
+            background: linear-gradient(90deg, var(--or), #e8c873);
+            color: var(--bleu-nuit);
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(90deg, #e8c873, var(--or));
             transform: translateY(-2px);
             box-shadow: var(--shadow-sm);
         }
@@ -801,21 +823,77 @@
 <body>
     <div class="container">
         <!-- Header amélioré -->
-        <header>
-            <div class="logo"><i class="fas fa-vote-yea"></i> Profil</div>
-            <nav class="user-nav">
-                <span id="username"><i class="fas fa-user"></i> <span>Admin</span></span>
-                <a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
-                <a href="/admin" id="logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a>
-            </nav>
+        <header class="main-header">
+            <div class="logo-container">
+                <div class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <img src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                    alt="Logo UCAO">
+                <div class="logo-text">
+                    <h1>Admin UCAO</h1>
+                    <p>Portail d'administration</p>
+                </div>
+            </div>
+
+            <div class="top-nav">
+                <a href="#" class="nav-icon" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                </a>
+
+                <div class="user-menu">
+                    <div class="user-toggle" id="userToggle">
+                        <img src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                            alt="Photo Admin" class="user-avatar">
+                        <div class="user-info">
+                            <span class="user-name" id="headerUserName">Admin UCAO</span>
+                            <span class="user-role" id="headerUserRole">Administrateur</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mon Profil</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Aide</span>
+                        </a>
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </header>
 
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <h3>Général</h3>
+                <li><a href="dashboard.html" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Tableau de
+                        Bord</a></li>
+                <li><a href="users.html" data-page="users"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="elections.html" data-page="elections"><i class="fas fa-vote-yea"></i> Élections</a></li>
+                <li><a href="candidates.html" data-page="candidates"><i class="fas fa-user"></i> Candidats</a></li>
+                <li><a href="statistics.html" data-page="statistics"><i class="fas fa-chart-pie"></i> Statistiques</a>
+                </li>
+                <h3>Administration</h3>
+                <li><a href="/"><i class="fas fa-home"></i> Accueil</a></li>
+                <li class="active"><a href="profile.html"><i class="fas fa-user-cog"></i> Modifier Profil</a></li>
+            </ul>
+        </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <a href="/user/dashboard" class="back-link">
-                <i class="fas fa-arrow-left"></i> Retour au dashboard
-            </a>
             <div class="page-header">
                 <h1><i class="fas fa-user-cog"></i> Mon Profil</h1>
                 <div class="breadcrumb">
@@ -867,7 +945,7 @@
                     <div class="profile-card">
                         <h3><i class="fas fa-info-circle"></i> Informations de compte</h3>
                         <div class="account-info">
-                            <p><strong>Membre depuis:</strong> <span id="memberSince">01/01/2023</span></p>
+                            <p><strong>Membre depuis:</strong> <span id="memberSince">20/08/2025</span></p>
                             <p><strong>Dernière connexion:</strong> <span id="lastLogin">Aujourd'hui</span></p>
                             <p><strong>Statut:</strong> <span class="profile-badge">Actif</span></p>
                         </div>
@@ -876,29 +954,35 @@
 
                 <!-- Profile Form -->
                 <div class="profile-form">
-                    <h3><i class="fas fa-user-edit"></i> Modifier les informations</h3>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3><i class="fas fa-user-edit"></i> Informations personnelles</h3>
+                        <button type="button" id="editProfileBtn" class="btn btn-edit">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                    </div>
 
                     <form id="profileForm">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="inputPrenom"><i class="fas fa-user"></i> Prénom</label>
-                                <input type="text" id="inputPrenom" placeholder="Entrez votre prénom">
+                                <input type="text" id="inputPrenom" placeholder="Entrez votre prénom" disabled>
                             </div>
 
                             <div class="form-group">
                                 <label for="inputNom"><i class="fas fa-user-tag"></i> Nom</label>
-                                <input type="text" id="inputNom" placeholder="Entrez votre nom">
+                                <input type="text" id="inputNom" placeholder="Entrez votre nom" disabled>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="inputEmail"><i class="fas fa-envelope"></i> Email</label>
-                            <input type="email" id="inputEmail" placeholder="email@exemple.com">
+                            <input type="email" id="inputEmail" placeholder="email@exemple.com" disabled>
                         </div>
 
                         <div class="form-group">
                             <label for="inputPhone"><i class="fas fa-phone"></i> Téléphone</label>
-                            <input type="tel" id="inputPhone" placeholder="Votre numéro de téléphone">
+                            <input type="tel" id="inputPhone" placeholder="+221 XX XXX XX XX" disabled>
                         </div>
 
                         <div class="form-group">
@@ -908,7 +992,7 @@
 
                         <div class="form-group">
                             <label for="inputBio"><i class="fas fa-file-alt"></i> Bio</label>
-                            <textarea id="inputBio" placeholder="Parlez-nous un peu de vous..."></textarea>
+                            <textarea id="inputBio" placeholder="Décrivez-vous en quelques mots..." disabled></textarea>
                         </div>
 
                         <!-- Section Upload Photo -->
@@ -927,7 +1011,7 @@
 
                         <div id="updateResult" class="update-result"></div>
 
-                        <div class="form-actions">
+                        <div class="form-actions" id="formActions" style="display: none;">
                             <button type="button" id="cancelProfileBtn" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Annuler
                             </button>
@@ -948,7 +1032,6 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
-
     <script src="../config.js"></script>
     <script>
         // Fonction utilitaire pour gérer les event listeners
@@ -1031,7 +1114,6 @@
 
             // ------------ CONFIG ------------
             const API_BASE = CONFIG.API.BASE_URL;
-            const FRONTEND_BASE = window.location.origin;
             const ADMIN_ME_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.ME;
             const ADMIN_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.UPDATE;
             const UPLOAD_IMAGE_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
@@ -1042,7 +1124,7 @@
             if (!token) {
                 showToast('Session expirée, redirection...', 'error');
                 setTimeout(() => {
-                    window.location.href = `${FRONTEND_BASE}/index.html`;
+                    window.location.href = '/index.html';
                 }, 2000);
                 return;
             }
@@ -1058,6 +1140,9 @@
                 if (loader) loader.classList.remove('active');
             }
 
+            // Variables pour stocker les données originales
+            let originalData = {};
+
             // ------------ ADMIN INFO ------------
             async function loadAdminInfo() {
                 try {
@@ -1069,6 +1154,7 @@
                     if (!res.ok) throw new Error('Erreur chargement profil');
 
                     const admin = await res.json();
+                    originalData = { ...admin }; // Sauvegarder les données originales
                     updateProfileUI(admin);
                 } catch (err) {
                     console.error('Erreur chargement info admin:', err);
@@ -1131,6 +1217,25 @@
                 }
             }
 
+            // Activer/désactiver les champs du formulaire
+            function toggleFormEditing(editing) {
+                const inputs = document.querySelectorAll('#profileForm input, #profileForm textarea');
+                inputs.forEach(input => {
+                    input.disabled = !editing;
+                });
+
+                const formActions = document.getElementById('formActions');
+                const editProfileBtn = document.getElementById('editProfileBtn');
+
+                if (editing) {
+                    formActions.style.display = 'flex';
+                    editProfileBtn.style.display = 'none';
+                } else {
+                    formActions.style.display = 'none';
+                    editProfileBtn.style.display = 'flex';
+                }
+            }
+
             // Sauvegarde du profil
             safeAddListener('saveProfileBtn', 'click', async function () {
                 const nom = document.getElementById('inputNom')?.value.trim();
@@ -1159,7 +1264,8 @@
                     if (!response.ok) throw new Error(data.message || 'Erreur lors de la mise à jour');
 
                     showToast('Profil mis à jour avec succès', 'success');
-                    updateProfileUI({ nom, prenom, email, telephone, bio });
+                    originalData = { ...originalData, nom, prenom, email, telephone, bio };
+                    toggleFormEditing(false);
                 } catch (error) {
                     console.error('Erreur:', error);
                     showToast(error.message || 'Erreur lors de la sauvegarde', 'error');
@@ -1227,9 +1333,15 @@
                 }
             });
 
+            // Activer l'édition
+            safeAddListener('editProfileBtn', 'click', function () {
+                toggleFormEditing(true);
+            });
+
             // Annuler les modifications
             safeAddListener('cancelProfileBtn', 'click', function () {
-                loadAdminInfo();
+                updateProfileUI(originalData);
+                toggleFormEditing(false);
                 showToast('Modifications annulées', 'info');
             });
 
