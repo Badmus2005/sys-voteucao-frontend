@@ -1513,7 +1513,16 @@
                 const result = await response.json();
 
                 // Vérifier le format de la réponse
-                allCodes = Array.isArray(result.codes) ? result.codes : Array.isArray(result) ? result : [];
+                if (result.success && result.codes) {
+                    // Le backend renvoie un objet avec une propriété "codes"
+                    allCodes = Array.isArray(result.codes) ? result.codes : [];
+                } else if (Array.isArray(result)) {
+                    // Format alternatif (si le backend renvoie directement un tableau)
+                    allCodes = result;
+                } else {
+                    console.warn('Format de réponse inattendu:', result);
+                    allCodes = [];
+                }
 
                 // Trier les codes par date de génération (du plus récent au plus ancien)
                 allCodes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
