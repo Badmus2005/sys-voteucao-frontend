@@ -47,6 +47,7 @@
             margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--gris-clair);
+            position: relative;
         }
 
         .header h1 {
@@ -54,11 +55,19 @@
             font-size: 1.8rem;
             display: flex;
             align-items: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
+
 
         .header h1 i {
             color: var(--rouge-bordeaux);
             margin-right: 15px;
+        }
+
+        .btn-back {
+            margin-right: auto;
         }
 
         .btn {
@@ -743,7 +752,8 @@
             if (!confirm('Êtes-vous sûr de vouloir clôturer cette élection ?')) return;
 
             try {
-                const response = await fetch(`${API_BASE}${ELECTIONS_CLOSE_ENDPOINT}`, {
+                const closeUrl = `${API_BASE}${ELECTIONS_CLOSE_ENDPOINT}/${id}`;
+                const response = await fetch(closeUrl, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -764,7 +774,8 @@
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
 
             try {
-                const response = await fetch(`${API_BASE}${ELECTIONS_DELETE_ENDPOINT}`, {
+                const deleteUrl = `${API_BASE}${ELECTIONS_DELETE_ENDPOINT}/${id}`;
+                const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
