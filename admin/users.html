@@ -435,6 +435,7 @@
             border-radius: 8px;
             border-left: 4px solid var(--warning);
             margin-bottom: 20px;
+            overflow-wrap: break-word;
         }
 
         .credentials h4 {
@@ -456,6 +457,9 @@
         .credential-text {
             font-family: monospace;
             font-size: 0.9rem;
+            word-break: break-all;
+            flex: 1;
+            margin-right: 10px;
         }
 
         .copy-btn {
@@ -667,7 +671,62 @@
         </div>
     </div>
 
-    <script src="../config.js"></script>
+    <script>
+        // Configuration intégrée directement pour éviter les problèmes de chemin
+        const CONFIG = {
+            API: {
+                BASE_URL: 'https://sys-voteucao-backend-production-311c.up.railway.app',
+                ENDPOINTS: {
+                    STUDENTS: {
+                        LIST: "/api/students",
+                        STATS: "/api/students/stats",
+                        RESET_ACCESS: (studentId) => `/api/students/${studentId}/reset-access`
+                    }
+                }
+            },
+            ACADEMIC: {
+                ECOLES: {
+                    EGEI: {
+                        nom: "EGEI",
+                        filieres: [
+                            'Électronique',
+                            'Génie Télécoms et TIC',
+                            'Informatique Industrielle et Maintenance',
+                            'Electrotechnique']
+                    },
+                    ESMEA: {
+                        nom: "ESMEA",
+                        filieres: [
+                            'Assurances',
+                            'Banque et Finance d\'Entreprise',
+                            'Audit et Contrôle de Gestion',
+                            'Management des Ressources Humaines',
+                            'Action Commerciale et Force de Vente',
+                            'Communication et Action Publicitaire',
+                            'Commerce',
+                            'Informatique de Gestion',
+                            'Transport et Logistique']
+                    },
+                    FSAE: {
+                        nom: "FSAE",
+                        filieres: [
+                            'Gestion de l\'Environnement et Aménagement du Territoire',
+                            'Production et Gestion des Ressources Animales',
+                            'Sciences et Techniques de Production Végétale',
+                            'Stockage Conservation et Conditionnement des Produits Agricoles',
+                            'Gestion des Entreprises Rurales et Agricoles']
+                    },
+                    FDE: {
+                        nom: "FDE",
+                        filieres: [
+                            'Droit',
+                            'Economie']
+                    }
+                },
+                ANNEES: [1, 2, 3]
+            }
+        };
+    </script>
     <script>
         // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
