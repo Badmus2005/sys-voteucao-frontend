@@ -558,332 +558,136 @@
     <!-- Configuration et scripts -->
     <script src="../config.js"></script>
     <script>
-
         const API_BASE = CONFIG.API.BASE_URL;
         const LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.LOGIN;
 
-        // Gestion du slider d'arrière-plan
+        // --- Slider arrière-plan ---
         function initBackgroundSlider() {
             const slides = document.querySelectorAll('.background-slide');
-            let currentSlide = 0;
-
-            function nextSlide() {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }
-
-            // Changer de slide toutes les 5 secondes
-            setInterval(nextSlide, 5000);
+            let current = 0;
+            setInterval(() => {
+                slides[current].classList.remove('active');
+                current = (current + 1) % slides.length;
+                slides[current].classList.add('active');
+            }, 5000);
         }
 
-        // Gestion de la visibilité du mot de passe
+        // --- Toggle mot de passe ---
         function initPasswordToggle() {
-            const passwordToggle = document.getElementById('passwordToggle');
-            const passwordInput = document.getElementById('password');
-
-            passwordToggle.addEventListener('click', function () {
-                const type = passwordInput.type === 'password' ? 'text' : 'password';
-                passwordInput.type = type;
-                const icon = this.querySelector('i');
-                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-                this.setAttribute('aria-label', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+            const pwInput = document.getElementById('password');
+            const toggle = document.getElementById('passwordToggle');
+            toggle.addEventListener('click', () => {
+                const type = pwInput.type === 'password' ? 'text' : 'password';
+                pwInput.type = type;
+                toggle.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
             });
         }
 
-        // Validation en temps réel
-        function initRealTimeValidation() {
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const emailError = document.getElementById('emailError');
-            const passwordError = document.getElementById('passwordError');
+        // --- Validation email/mot de passe ---
+        function isValidEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 
-            emailInput.addEventListener('blur', function () {
-                validateEmailField(this, emailError);
-            });
-
-            passwordInput.addEventListener('blur', function () {
-                validatePasswordField(this, passwordError);
-            });
-
-            emailInput.addEventListener('input', function () {
-                if (this.classList.contains('error')) {
-                    validateEmailField(this, emailError);
-                }
-            });
-
-            passwordInput.addEventListener('input', function () {
-                if (this.classList.contains('error')) {
-                    validatePasswordField(this, passwordError);
-                }
-            });
+        function showFieldError(input, errorEl, msg) {
+            input.classList.add('error'); input.classList.remove('success');
+            errorEl.textContent = msg; errorEl.style.display = 'block';
+        }
+        function clearFieldError(input, errorEl) {
+            input.classList.remove('error'); input.classList.add('success');
+            errorEl.style.display = 'none';
+        }
+        function validateEmailField(input, errorEl) {
+            if (!input.value.trim()) return showFieldError(input, errorEl, 'L\'email est requis'), false;
+            if (!isValidEmail(input.value.trim())) return showFieldError(input, errorEl, 'Email invalide'), false;
+            clearFieldError(input, errorEl); return true;
+        }
+        function validatePasswordField(input, errorEl) {
+            if (!input.value) return showFieldError(input, errorEl, 'Le mot de passe est requis'), false;
+            if (input.value.length < 8) return showFieldError(input, errorEl, 'Minimum 8 caractères'), false;
+            clearFieldError(input, errorEl); return true;
         }
 
-        function validateEmailField(input, errorElement) {
-            const email = input.value.trim();
-
-            if (!email) {
-                showFieldError(input, errorElement, 'L\'email est requis');
-                return false;
-            }
-
-            if (!isValidEmail(email)) {
-                showFieldError(input, errorElement, 'Veuillez entrer un email valide');
-                return false;
-            }
-
-            clearFieldError(input, errorElement);
-            return true;
-        }
-
-        function validatePasswordField(input, errorElement) {
-            const password = input.value;
-
-            if (!password) {
-                showFieldError(input, errorElement, 'Le mot de passe est requis');
-                return false;
-            }
-
-            if (password.length < 8) {
-                showFieldError(input, errorElement, 'Le mot de passe doit contenir au moins 8 caractères');
-                return false;
-            }
-
-            clearFieldError(input, errorElement);
-            return true;
-        }
-
-        function showFieldError(input, errorElement, message) {
-            input.classList.add('error');
-            input.classList.remove('success');
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
-
-        function clearFieldError(input, errorElement) {
-            input.classList.remove('error');
-            input.classList.add('success');
-            errorElement.style.display = 'none';
-        }
-
-        // Gestion du modal de réinitialisation
+        // --- Modal réinitialisation ---
         function initResetModal() {
-            const forgotLink = document.getElementById('forgot-password-link');
-            const resetModal = document.getElementById('resetModal');
-            const modalClose = document.getElementById('modalClose');
-            const cancelReset = document.getElementById('cancelReset');
-            const submitReset = document.getElementById('submitReset');
-            const resetEmail = document.getElementById('resetEmail');
-            const resetEmailError = document.getElementById('resetEmailError');
-
-            function openModal() {
-                resetModal.classList.add('active');
-                resetEmail.focus();
-            }
-
-            function closeModal() {
-                resetModal.classList.remove('active');
-                resetEmail.value = '';
-                resetEmail.classList.remove('error');
-                resetEmailError.style.display = 'none';
-            }
-
-            forgotLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                openModal();
-            });
-
-            modalClose.addEventListener('click', closeModal);
-            cancelReset.addEventListener('click', closeModal);
-
-            // Fermer le modal en cliquant à l'extérieur
-            resetModal.addEventListener('click', function (e) {
-                if (e.target === resetModal) {
-                    closeModal();
-                }
-            });
-
-            // Validation de l'email dans le modal
-            resetEmail.addEventListener('blur', function () {
-                validateEmailField(this, resetEmailError);
-            });
-
-            resetEmail.addEventListener('input', function () {
-                if (this.classList.contains('error')) {
-                    validateEmailField(this, resetEmailError);
-                }
-            });
-
-            submitReset.addEventListener('click', async function () {
-                const email = resetEmail.value.trim();
-
-                if (!validateEmailField(resetEmail, resetEmailError)) {
-                    return;
-                }
-
-                await sendResetInstructions(email);
-            });
-        }
-
-        async function sendResetInstructions(email) {
-            showModalLoading(true);
-            try {
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('Si cet email existe, un lien de réinitialisation a été envoyé', 'success');
-                    closeModal();
-                } else {
-                    throw new Error(data.message || 'Erreur lors de l\'envoi');
-                }
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showMessage('Erreur lors de l\'envoi des instructions. Veuillez réessayer.', 'error');
-            } finally {
-                showModalLoading(false);
-            }
-        }
-
-        // Fonction de validation d'email
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        // Fonctions d'affichage des messages
-        function showMessage(message, type) {
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-
-            // Masquer tous les messages d'abord
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-
-            if (type === 'error') {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-
-                // Faire défiler jusqu'au message d'erreur
-                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                successMessage.textContent = message;
-                successMessage.style.display = 'block';
-            }
-
-            // Masquer après 5 secondes seulement pour les messages de succès/erreur
-            if (type === 'error' || type === 'success') {
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                    successMessage.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-        function showLoading(show) {
-            const loading = document.getElementById('loading');
-            const loginBtn = document.getElementById('loginBtn');
-
-            loading.style.display = show ? 'block' : 'none';
-            loginBtn.disabled = show;
-
-            if (show) {
-                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Connexion...';
-            } else {
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt" aria-hidden="true"></i> Se connecter';
-            }
-        }
-
-        function showModalLoading(show) {
+            const modal = document.getElementById('resetModal');
+            const emailInput = document.getElementById('resetEmail');
             const submitBtn = document.getElementById('submitReset');
-            submitBtn.disabled = show;
+            const closeElements = [
+                document.getElementById('modalClose'),
+                document.getElementById('cancelReset')
+            ];
+            document.getElementById('forgot-password-link').addEventListener('click', e => {
+                e.preventDefault(); modal.classList.add('active'); emailInput.focus();
+            });
+            closeElements.forEach(el => el.addEventListener('click', () => {
+                modal.classList.remove('active'); emailInput.value = '';
+                emailInput.classList.remove('error'); document.getElementById('resetEmailError').style.display = 'none';
+            }));
+            modal.addEventListener('click', e => { if (e.target === modal) el.click(); });
 
-            if (show) {
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
-            } else {
-                submitBtn.innerHTML = 'Envoyer';
-            }
+            emailInput.addEventListener('blur', () => validateEmailField(emailInput, document.getElementById('resetEmailError')));
+            emailInput.addEventListener('input', () => { if (emailInput.classList.contains('error')) validateEmailField(emailInput, document.getElementById('resetEmailError')); });
+
+            submitBtn.addEventListener('click', async () => {
+                if (!validateEmailField(emailInput, document.getElementById('resetEmailError'))) return;
+                submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+                try {
+                    const res = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: emailInput.value.trim() })
+                    });
+                    const data = await res.json();
+                    showMessage(res.ok ? 'Instructions envoyées si l\'email existe' : data.message || 'Erreur envoi', res.ok ? 'success' : 'error');
+                    if (res.ok) modal.classList.remove('active'); emailInput.value = '';
+                } catch (err) { showMessage('Erreur réseau, réessayez', 'error'); }
+                submitBtn.disabled = false; submitBtn.innerHTML = 'Envoyer';
+            });
         }
 
+        // --- Messages & loader ---
+        function showMessage(msg, type) {
+            const errorEl = document.getElementById('errorMessage'), successEl = document.getElementById('successMessage');
+            errorEl.style.display = successEl.style.display = 'none';
+            if (type === 'error') { errorEl.textContent = msg; errorEl.style.display = 'block'; errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            else { successEl.textContent = msg; successEl.style.display = 'block'; }
+            if (type === 'error' || type === 'success') setTimeout(() => { errorEl.style.display = successEl.style.display = 'none'; }, 5000);
+        }
+        function showLoading(show) {
+            const btn = document.getElementById('loginBtn');
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            btn.disabled = show; btn.innerHTML = show ? '<i class="fas fa-spinner fa-spin"></i> Connexion...' : '<i class="fas fa-sign-in-alt"></i> Se connecter';
+        }
 
-        // Connexion utilisateur
+        // --- Connexion ---
         async function handleLogin(email, password) {
-            showLoading(true);
-            showMessage('', 'error');
-
+            showLoading(true); showMessage('', 'error');
             try {
-                const response = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                const res = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
+                const data = await res.json();
+                if (res.ok) {
                     localStorage.setItem('token', data.token);
-                    showMessage('Connexion réussie! Redirection en cours...', 'success');
-
-                    // Redirection selon le rôle ou statut
-                    setTimeout(() => {
-                        if (data.requirePasswordChange) {
-                            window.location.href = '/user/change-password';
-                        } else {
-                            window.location.href = '/user/dashboard';
-                        }
-                    }, 1500);
-                } else {
-                    // Message d'erreur plus précis
-                    const errorMsg = data.message ||
-                        (response.status === 401 ? 'Email ou mot de passe incorrect' :
-                            'Erreur de connexion');
-                    showMessage(errorMsg, 'error');
-                }
-            } catch (error) {
-                console.error('Erreur de connexion:', error);
-                showMessage('Erreur de connexion au serveur. Veuillez vérifier votre connexion.', 'error');
-            } finally {
-                showLoading(false);
-            }
+                    showMessage('Connexion réussie! Redirection...', 'success');
+                    setTimeout(() => window.location.href = data.requirePasswordChange ? '/user/change-password' : '/user/dashboard', 1500);
+                } else { showMessage(data.message || 'Email ou mot de passe incorrect', 'error'); }
+            } catch (err) { showMessage('Erreur serveur ou connexion', 'error'); }
+            finally { showLoading(false); }
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function () {
-            initBackgroundSlider();
-            initPasswordToggle();
-            initRealTimeValidation();
-            initResetModal();
-
-            const loginForm = document.getElementById('loginForm');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const emailError = document.getElementById('emailError');
-            const passwordError = document.getElementById('passwordError');
-
-            loginForm.addEventListener('submit', async function (e) {
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackgroundSlider(); initPasswordToggle(); initResetModal();
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', async e => {
                 e.preventDefault();
-
-                const email = emailInput.value.trim();
-                const password = passwordInput.value;
-
-                // Validation des champs
-                const isEmailValid = validateEmailField(emailInput, emailError);
-                const isPasswordValid = validatePasswordField(passwordInput, passwordError);
-
-                if (!isEmailValid || !isPasswordValid) {
-                    return;
+                const emailInput = document.getElementById('email'), passwordInput = document.getElementById('password');
+                if (validateEmailField(emailInput, document.getElementById('emailError')) &&
+                    validatePasswordField(passwordInput, document.getElementById('passwordError'))) {
+                    await handleLogin(emailInput.value.trim(), passwordInput.value);
                 }
-
-                await handleLogin(email, password);
             });
         });
     </script>
+
 </body>
 
 </html>

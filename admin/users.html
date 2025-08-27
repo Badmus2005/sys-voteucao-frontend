@@ -7,6 +7,7 @@
     <title>Gestion des Étudiants - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* === Variables === */
         :root {
             --rouge-bordeaux: #7a0026;
             --rouge-bordeaux-light: #a73354;
@@ -40,6 +41,7 @@
             margin: 0 auto;
         }
 
+        /* === Header === */
         .header {
             display: flex;
             justify-content: space-between;
@@ -63,10 +65,6 @@
         .header h1 i {
             color: var(--rouge-bordeaux);
             margin-right: 15px;
-        }
-
-        .btn-back {
-            margin-right: auto;
         }
 
         .btn {
@@ -112,6 +110,7 @@
             color: var(--bleu-nuit);
         }
 
+        /* === Statistiques === */
         .stats-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -152,6 +151,7 @@
             font-size: 0.9rem;
         }
 
+        /* === Filtres === */
         .filters {
             background: white;
             border-radius: 10px;
@@ -206,7 +206,7 @@
             cursor: pointer;
         }
 
-        /* CORRECTION PRINCIPALE : Structure du tableau */
+        /* === Tableau === */
         .table-container {
             background: white;
             border-radius: 10px;
@@ -216,23 +216,23 @@
             overflow-x: auto;
         }
 
-        .table-header {
-            display: grid;
-            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
-            padding: 15px 20px;
-            background: var(--bleu-nuit);
-            color: white;
-            font-weight: 600;
-            gap: 15px;
-        }
-
+        .table-header,
         .table-row {
             display: grid;
             grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
             padding: 15px 20px;
+            gap: 15px;
+        }
+
+        .table-header {
+            background: var(--bleu-nuit);
+            color: white;
+            font-weight: 600;
+        }
+
+        .table-row {
             border-bottom: 1px solid var(--gris-clair);
             align-items: center;
-            gap: 15px;
         }
 
         .table-row:hover {
@@ -280,21 +280,12 @@
             transition: all 0.3s ease;
         }
 
-        .btn-edit {
-            background: rgba(58, 160, 255, 0.15);
-            color: #3aa0ff;
-        }
-
         .btn-reset {
             background: rgba(255, 193, 7, 0.15);
             color: #ffc107;
         }
 
-        .btn-delete {
-            background: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-        }
-
+        /* Pagination */
         .pagination {
             display: flex;
             justify-content: center;
@@ -325,6 +316,7 @@
             background: var(--gris-clair);
         }
 
+        /* Loading & Empty state */
         .loading {
             display: flex;
             justify-content: center;
@@ -363,7 +355,7 @@
             color: var(--gris-clair);
         }
 
-        /* Modal Styles */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -401,60 +393,21 @@
             transform: scale(1);
         }
 
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--gris-clair);
+        .modal-header,
+        .modal-footer {
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--gris-clair);
         }
 
         .modal-body {
             padding: 20px;
         }
 
-        .modal-footer {
-            padding: 15px 20px;
-            border-top: 1px solid var(--gris-clair);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .student-info {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            margin-bottom: 10px;
-        }
-
-        .info-label {
-            font-weight: 600;
-            min-width: 120px;
-            color: var(--bleu-nuit);
-        }
-
-        .info-value {
-            color: var(--gris-moyen);
-        }
-
         .credentials {
-            background-color: #fff4e5;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--warning);
-            margin-bottom: 20px;
-            overflow-wrap: break-word;
-        }
-
-        .credentials h4 {
-            margin-bottom: 10px;
-            color: var(--bleu-nuit);
+            margin-top: 15px;
         }
 
         .credential-item {
@@ -470,7 +423,6 @@
 
         .credential-text {
             font-family: monospace;
-            font-size: 0.9rem;
             word-break: break-all;
             flex: 1;
             margin-right: 10px;
@@ -487,110 +439,6 @@
 
         .copy-btn:hover {
             background-color: rgba(122, 0, 38, 0.1);
-        }
-
-        /* Responsive design amélioré */
-        @media (max-width: 1200px) {
-
-            .table-header,
-            .table-row {
-                grid-template-columns: minmax(120px, 1fr) minmax(100px, 100px) minmax(150px, 1fr) minmax(120px, 1fr) minmax(90px, 90px) minmax(100px, 100px);
-                gap: 10px;
-            }
-        }
-
-        @media (max-width: 992px) {
-
-            .table-header,
-            .table-row {
-                grid-template-columns: 1fr 1fr 1fr;
-                grid-template-areas:
-                    "name name name"
-                    "id email email"
-                    "filiere status actions";
-                gap: 10px;
-            }
-
-            .table-header div:nth-child(1),
-            .table-row div:nth-child(1) {
-                grid-area: name;
-            }
-
-            .table-header div:nth-child(2),
-            .table-row div:nth-child(2) {
-                grid-area: id;
-            }
-
-            .table-header div:nth-child(3),
-            .table-row div:nth-child(3) {
-                grid-area: email;
-            }
-
-            .table-header div:nth-child(4),
-            .table-row div:nth-child(4) {
-                grid-area: filiere;
-            }
-
-            .table-header div:nth-child(5),
-            .table-row div:nth-child(5) {
-                grid-area: status;
-            }
-
-            .table-header div:nth-child(6),
-            .table-row div:nth-child(6) {
-                grid-area: actions;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-box {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .search-box input {
-                width: 100%;
-            }
-
-            .stats-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .table-header,
-            .table-row {
-                padding: 10px 15px;
-            }
-
-            .action-buttons {
-                justify-content: flex-start;
-            }
-        }
-
-        @media (max-width: 576px) {
-
-            .table-header,
-            .table-row {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    "name"
-                    "id"
-                    "email"
-                    "filiere"
-                    "status"
-                    "actions";
-                gap: 8px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
         }
     </style>
 </head>
@@ -610,30 +458,22 @@
         <!-- Statistiques -->
         <div class="stats-cards">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
                 <div class="stat-value" id="totalStudents">0</div>
                 <div class="stat-label">Étudiants Totaux</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-user-check"></i></div>
                 <div class="stat-value" id="activeStudents">0</div>
                 <div class="stat-label">Étudiants Actifs</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-user-slash"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-user-slash"></i></div>
                 <div class="stat-value" id="inactiveStudents">0</div>
                 <div class="stat-label">Étudiants Inactifs</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-percentage"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-percentage"></i></div>
                 <div class="stat-value" id="activationRate">0%</div>
                 <div class="stat-label">Taux d'Activation</div>
             </div>
@@ -645,26 +485,20 @@
                 <label for="ecoleFilter">Ecole/Faculté</label>
                 <select id="ecoleFilter">
                     <option value="all">Toutes les écoles/facultés</option>
-                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
-
             <div class="filter-group">
                 <label for="filiereFilter">Filière</label>
                 <select id="filiereFilter">
                     <option value="all">Toutes les filières</option>
-                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
-
             <div class="filter-group">
                 <label for="anneeFilter">Année</label>
                 <select id="anneeFilter">
                     <option value="all">Toutes les années</option>
-                    <!-- Options chargées dynamiquement depuis la config -->
                 </select>
             </div>
-
             <div class="filter-group">
                 <label for="statusFilter">Statut</label>
                 <select id="statusFilter">
@@ -673,14 +507,13 @@
                     <option value="inactive">Inactifs</option>
                 </select>
             </div>
-
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Rechercher un étudiant...">
                 <button><i class="fas fa-search"></i></button>
             </div>
         </div>
 
-        <!-- Tableau des étudiants -->
+        <!-- Tableau -->
         <div class="table-container">
             <div class="table-header">
                 <div>Nom Complet</div>
@@ -697,405 +530,239 @@
             </div>
         </div>
 
-        <!-- Pagination -->
         <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- Modal de réinitialisation -->
+    <!-- Modal Réinitialisation -->
     <div class="modal-overlay" id="resetModal">
         <div class="modal">
             <div class="modal-header">
                 <h2><i class="fas fa-key"></i> Réinitialiser les Accès</h2>
-                <button class="close-btn" id="closeResetModal">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="close-btn" id="closeResetModal"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="student-info">
                     <h3 id="resetStudentName"></h3>
-                    <div class="info-item">
-                        <span class="info-label">Identifiant:</span>
-                        <span class="info-value" id="resetStudentIdentifiant"></span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Filière:</span>
-                        <span class="info-value" id="resetStudentFiliere"></span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Année:</span>
-                        <span class="info-value" id="resetStudentAnnee"></span>
-                    </div>
+                    <p><strong>Identifiant:</strong> <span id="resetStudentIdentifiant"></span></p>
+                    <p><strong>Filière:</strong> <span id="resetStudentFiliere"></span></p>
+                    <p><strong>Année:</strong> <span id="resetStudentAnnee"></span></p>
                 </div>
-
                 <div class="credentials">
                     <h4>Nouveaux Identifiants Temporaires</h4>
                     <div class="credential-item">
                         <span class="credential-text" id="newIdentifiant"></span>
-                        <button class="copy-btn" onclick="copyToClipboard('newIdentifiant')">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        <button class="copy-btn" onclick="copyToClipboard('newIdentifiant')"><i
+                                class="fas fa-copy"></i></button>
                     </div>
                     <div class="credential-item">
                         <span class="credential-text" id="newPassword"></span>
-                        <button class="copy-btn" onclick="copyToClipboard('newPassword')">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                        <button class="copy-btn" onclick="copyToClipboard('newPassword')"><i
+                                class="fas fa-copy"></i></button>
                     </div>
                 </div>
-
-                <p><strong>Note:</strong> Ces identifiants temporaires permettront à l'étudiant de se connecter et
-                    devront être changés à la première connexion.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelReset">Annuler</button>
-                <button class="btn btn-primary" id="confirmReset">Confirmer la Réinitialisation</button>
+                <button class="btn btn-primary" id="confirmReset">Confirmer</button>
             </div>
         </div>
     </div>
 
     <script src="../config.js"></script>
     <script>
-        // Configuration
+
+        // === users.js ===
+
+        // URLs API 
         const API_BASE = CONFIG.API.BASE_URL;
-        const STUDENTS_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.LIST;
-        const STUDENTS_STAT_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.STATS;
+        const API_STUDENTS = `${API_BASE}/students`;
+        const API_RESET = `${API_BASE}/students/:studentId/reset-access`;
 
-        const token = localStorage.getItem('adminToken');
-
-        if (!token) {
-            window.location.href = 'index.html';
-        }
-
-        // Variables globales
+        // Pagination
         let currentPage = 1;
-        const studentsPerPage = 10;
-        let totalStudents = 0;
-        let totalPages = 0;
-        let currentStudentId = null;
+        const rowsPerPage = 10;
 
-        // Chargement initial
-        document.addEventListener('DOMContentLoaded', function () {
-            populateFiltersFromConfig();
-            loadDashboardData();
-            setupEventListeners();
-        });
+        // Données
+        let studentsData = [];
+        let filteredData = [];
 
-        // Remplir les filtres avec les données de configuration
-        function populateFiltersFromConfig() {
-            // Remplir le filtre des écoles
-            const ecoleFilter = document.getElementById('ecoleFilter');
-            Object.keys(CONFIG.ACADEMIC.ECOLES).forEach(ecoleKey => {
-                const option = document.createElement('option');
-                option.value = ecoleKey;
-                option.textContent = CONFIG.ACADEMIC.ECOLES[ecoleKey].nom;
-                ecoleFilter.appendChild(option);
-            });
+        // DOM Elements
+        const studentsList = document.getElementById("studentsList");
+        const pagination = document.getElementById("pagination");
 
-            // Remplir le filtre des années
-            const anneeFilter = document.getElementById('anneeFilter');
-            CONFIG.ACADEMIC.ANNEES.forEach(annee => {
-                const option = document.createElement('option');
-                option.value = annee;
-                option.textContent = `${annee}ère année`;
-                anneeFilter.appendChild(option);
-            });
-        }
+        const ecoleFilter = document.getElementById("ecoleFilter");
+        const filiereFilter = document.getElementById("filiereFilter");
+        const anneeFilter = document.getElementById("anneeFilter");
+        const statusFilter = document.getElementById("statusFilter");
+        const searchInput = document.getElementById("searchInput");
 
-        // Mettre à jour les filières en fonction de l'école sélectionnée
-        function updateFilieresByEcole() {
-            const ecoleFilter = document.getElementById('ecoleFilter');
-            const filiereFilter = document.getElementById('filiereFilter');
+        // Modal
+        const resetModal = document.getElementById("resetModal");
+        const closeResetModal = document.getElementById("closeResetModal");
+        const cancelReset = document.getElementById("cancelReset");
+        const confirmReset = document.getElementById("confirmReset");
 
-            // Garder l'option "Toutes les filières"
-            filiereFilter.innerHTML = '<option value="all">Toutes les filières</option>';
+        let selectedStudent = null;
 
-            if (ecoleFilter.value !== 'all') {
-                const ecole = CONFIG.ACADEMIC.ECOLES[ecoleFilter.value];
-                if (ecole && ecole.filieres) {
-                    ecole.filieres.forEach(filiere => {
-                        const option = document.createElement('option');
-                        option.value = filiere;
-                        option.textContent = filiere;
-                        filiereFilter.appendChild(option);
-                    });
-                }
-            }
-        }
-
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            // Filtres 
-            document.getElementById('ecoleFilter').addEventListener('change', function () {
-                updateFilieresByEcole();
-                loadDashboardData(1);
-            });
-            document.getElementById('filiereFilter').addEventListener('change', () => loadDashboardData(1));
-            document.getElementById('anneeFilter').addEventListener('change', () => loadDashboardData(1));
-            document.getElementById('statusFilter').addEventListener('change', () => loadDashboardData(1));
-            document.getElementById('searchInput').addEventListener('input', debounce(() => loadDashboardData(1), 300));
-
-            // Modal de réinitialisation
-            document.getElementById('closeResetModal').addEventListener('click', hideResetModal);
-            document.getElementById('cancelReset').addEventListener('click', hideResetModal);
-            document.getElementById('confirmReset').addEventListener('click', resetStudentCredentials);
-        }
-
-        async function loadDashboardData(page = 1) {
+        // === Fetch étudiants ===
+        async function fetchStudents() {
+            studentsList.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
             try {
-                showLoading();
-                currentPage = page;
-
-                // Récupération des filtres
-                const ecoleFilter = document.getElementById('ecoleFilter').value;
-                const filiereFilter = document.getElementById('filiereFilter').value;
-                const anneeFilter = document.getElementById('anneeFilter').value;
-                const statusFilter = document.getElementById('statusFilter').value;
-                const searchTerm = document.getElementById('searchInput').value;
-
-                // Construction URL étudiants
-                let studentsUrl = `${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&limit=${studentsPerPage}`;
-                if (ecoleFilter !== 'all') studentsUrl += `&ecole=${ecoleFilter}`;
-                if (filiereFilter !== 'all') studentsUrl += `&filiere=${encodeURIComponent(filiereFilter)}`;
-                if (anneeFilter !== 'all') studentsUrl += `&annee=${anneeFilter}`;
-                if (statusFilter !== 'all') studentsUrl += `&status=${statusFilter}`;
-                if (searchTerm) studentsUrl += `&search=${encodeURIComponent(searchTerm)}`;
-
-                // Construction URL statistiques
-                let statsUrl = `${API_BASE}${STUDENTS_STAT_ENDPOINT}?ecole=${ecoleFilter}&filiere=${encodeURIComponent(filiereFilter)}&annee=${anneeFilter}`;
-
-                // Requêtes parallèles
-                const [studentsResponse, statsResponse] = await Promise.all([
-                    fetch(studentsUrl, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }),
-                    fetch(statsUrl, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                ]);
-
-                if (!studentsResponse.ok) throw new Error('Erreur de chargement des étudiants');
-                if (!statsResponse.ok) throw new Error('Erreur de chargement des statistiques');
-
-                const studentsData = await studentsResponse.json();
-                const statsData = await statsResponse.json();
-
-                displayStudents(studentsData.data.students);
-                updatePagination(studentsData.data.pagination.total, studentsData.data.pagination.pages);
-                updateStats(statsData.statistics);
-
+                const res = await fetch(API_STUDENTS);
+                if (!res.ok) throw new Error("Erreur lors du chargement des étudiants");
+                studentsData = await res.json();
+                populateFilters();
+                applyFilters();
             } catch (error) {
-                console.error('Erreur dashboard:', error);
-                showError('Impossible de charger les données du tableau de bord');
+                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Impossible de charger les étudiants.</p></div>`;
+                console.error(error);
             }
         }
 
-        // Afficher les étudiants
-        function displayStudents(students) {
-            const container = document.getElementById('studentsList');
+        // === Populate filters ===
+        function populateFilters() {
+            const ecoles = [...new Set(studentsData.map(s => s.ecole))];
+            const filieres = [...new Set(studentsData.map(s => s.filiere))];
+            const annees = [...new Set(studentsData.map(s => s.annee))];
 
-            if (!students || students.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-graduate"></i>
-                        <h3>Aucun étudiant trouvé</h3>
-                        <p>Aucun étudiant ne correspond à vos critères de recherche</p>
-                    </div>
-                `;
+            ecoleFilter.innerHTML = `<option value="all">Toutes les écoles/facultés</option>` +
+                ecoles.map(e => `<option value="${e}">${e}</option>`).join('');
+            filiereFilter.innerHTML = `<option value="all">Toutes les filières</option>` +
+                filieres.map(f => `<option value="${f}">${f}</option>`).join('');
+            anneeFilter.innerHTML = `<option value="all">Toutes les années</option>` +
+                annees.map(a => `<option value="${a}">${a}</option>`).join('');
+        }
+
+        // === Apply filters & search ===
+        function applyFilters() {
+            const ecole = ecoleFilter.value;
+            const filiere = filiereFilter.value;
+            const annee = anneeFilter.value;
+            const status = statusFilter.value;
+            const search = searchInput.value.toLowerCase();
+
+            filteredData = studentsData.filter(s => {
+                return (ecole === "all" || s.ecole === ecole) &&
+                    (filiere === "all" || s.filiere === filiere) &&
+                    (annee === "all" || s.annee === annee) &&
+                    (status === "all" || (status === "active" ? s.active : !s.active)) &&
+                    (s.nom.toLowerCase().includes(search) || s.prenom.toLowerCase().includes(search) || s.identifiant.toLowerCase().includes(search));
+            });
+
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+            updateStats();
+        }
+
+        // === Render tableau ===
+        function renderTable() {
+            if (filteredData.length === 0) {
+                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-graduate"></i><p>Aucun étudiant trouvé.</p></div>`;
                 return;
             }
 
-            container.innerHTML = '';
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = filteredData.slice(start, end);
 
-            students.forEach(student => {
-                const row = document.createElement('div');
-                row.className = 'table-row';
-
-                // Déterminer l'identifiant (matricule pour années sup, identifiantTemporaire pour 1ère année)
-                const identifiant = student.matricule || student.identifiantTemporaire || 'N/A';
-                const statut = student.user ? (student.user.requirePasswordChange ? 'À réinitialiser' : (student.user.actif ? 'Actif' : 'Inactif')) : 'N/A';
-
-                row.innerHTML = `
-                    <div>
-                        <strong>${student.prenom} ${student.nom}</strong>
-                    </div>
-                    <div>${identifiant}</div>
-                    <div>${student.user?.email || 'N/A'}</div>
-                    <div>${student.filiere || 'N/A'} / ${student.annee || 'N/A'}</div>
-                    <div>
-                        <span class="status-badge ${statut === 'Actif' ? 'status-active' : statut === 'Inactif' ? 'status-inactive' : 'status-warning'}">
-                            ${statut}
-                        </span>
-                    </div>
-                    <div class="action-buttons">
-                        <div class="btn-icon btn-reset" title="Réinitialiser les accès" onclick="showResetModal(${student.id}, '${student.prenom} ${student.nom}', '${identifiant}', '${student.filiere}', ${student.annee})">
-                            <i class="fas fa-key"></i>
-                        </div>
-                    </div>
-                `;
-
-                container.appendChild(row);
-            });
+            studentsList.innerHTML = pageData.map(s => `
+        <div class="table-row">
+            <div>${s.nom} ${s.prenom}</div>
+            <div>${s.identifiant}</div>
+            <div>${s.email}</div>
+            <div>${s.filiere} / ${s.annee}</div>
+            <div><span class="status-badge ${s.active ? "status-active" : "status-inactive"}">${s.active ? "Actif" : "Inactif"}</span></div>
+            <div class="action-buttons">
+                <div class="btn-icon btn-reset" onclick="openResetModal('${s.id}')"><i class="fas fa-key"></i></div>
+            </div>
+        </div>
+    `).join('');
         }
 
-        // Mettre à jour les statistiques
-        function updateStats(stats) {
-            document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
-            document.getElementById('activeStudents').textContent = stats.activeStudents || 0;
-            document.getElementById('inactiveStudents').textContent = stats.inactiveStudents || 0;
-            document.getElementById('activationRate').textContent = `${stats.activationRate || '0.00'}%`;
-        }
-
-        // Fonctions utilitaires
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        function showLoading() {
-            const container = document.getElementById('studentsList');
-            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-        }
-
-        function showError(message) {
-            const container = document.getElementById('studentsList');
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                    <button class="btn btn-primary" onclick="loadDashboardData()">Réessayer</button>
-                </div>
-            `;
-        }
-
-        // Mise à jour de la pagination
-        function updatePagination(total, totalPages) {
-            const container = document.getElementById('pagination');
-            container.innerHTML = '';
-
-            if (totalPages <= 1) return;
-
-            // Bouton précédent
-            if (currentPage > 1) {
-                const prevBtn = document.createElement('div');
-                prevBtn.className = 'pagination-btn';
-                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-                prevBtn.addEventListener('click', () => loadDashboardData(currentPage - 1));
-                container.appendChild(prevBtn);
+        // === Render pagination ===
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (totalPages <= 1) {
+                pagination.innerHTML = "";
+                return;
             }
 
-            // Pages
+            let html = "";
             for (let i = 1; i <= totalPages; i++) {
-                const pageBtn = document.createElement('div');
-                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => loadDashboardData(i));
-                container.appendChild(pageBtn);
+                html += `<div class="pagination-btn ${i === currentPage ? "active" : ""}" onclick="gotoPage(${i})">${i}</div>`;
             }
-
-            // Bouton suivant
-            if (currentPage < totalPages) {
-                const nextBtn = document.createElement('div');
-                nextBtn.className = 'pagination-btn';
-                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                nextBtn.addEventListener('click', () => loadDashboardData(currentPage + 1));
-                container.appendChild(nextBtn);
-            }
+            pagination.innerHTML = html;
         }
 
-        // Gestion de la modal de réinitialisation
-        function showResetModal(studentId, fullName, identifiant, filiere, annee) {
-            currentStudentId = studentId;
-
-            // Afficher les informations de l'étudiant
-            document.getElementById('resetStudentName').textContent = fullName;
-            document.getElementById('resetStudentIdentifiant').textContent = identifiant;
-            document.getElementById('resetStudentFiliere').textContent = filiere || 'N/A';
-            document.getElementById('resetStudentAnnee').textContent = annee || 'N/A';
-
-            // Générer des identifiants temporaires
-            const tempIdentifiant = `temp_${Math.random().toString(36).substring(2, 10)}`;
-            const tempPassword = generateTempPassword();
-
-            document.getElementById('newIdentifiant').textContent = tempIdentifiant;
-            document.getElementById('newPassword').textContent = tempPassword;
-
-            document.getElementById('resetModal').classList.add('active');
+        function gotoPage(page) {
+            currentPage = page;
+            renderTable();
+            renderPagination();
         }
 
-        function hideResetModal() {
-            document.getElementById('resetModal').classList.remove('active');
-            currentStudentId = null;
+        // === Update stats ===
+        function updateStats() {
+            document.getElementById("totalStudents").textContent = studentsData.length;
+            const activeCount = studentsData.filter(s => s.active).length;
+            document.getElementById("activeStudents").textContent = activeCount;
+            document.getElementById("inactiveStudents").textContent = studentsData.length - activeCount;
+            document.getElementById("activationRate").textContent = studentsData.length ? `${Math.round((activeCount / studentsData.length) * 100)}%` : "0%";
         }
 
-        function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    alert('Copié dans le presse-papier !');
+        // === Modal Réinitialisation ===
+        function openResetModal(studentId) {
+            selectedStudent = studentsData.find(s => s.id === studentId);
+            if (!selectedStudent) return;
+
+            document.getElementById("resetStudentName").textContent = `${selectedStudent.nom} ${selectedStudent.prenom}`;
+            document.getElementById("resetStudentIdentifiant").textContent = selectedStudent.identifiant;
+            document.getElementById("resetStudentFiliere").textContent = selectedStudent.filiere;
+            document.getElementById("resetStudentAnnee").textContent = selectedStudent.annee;
+
+            document.getElementById("newIdentifiant").textContent = "En attente...";
+            document.getElementById("newPassword").textContent = "En attente...";
+
+            resetModal.classList.add("active");
+
+            // Appel API pour générer identifiants temporaires
+            fetch(`${API_RESET}/${studentId}`, { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("newIdentifiant").textContent = data.identifiant;
+                    document.getElementById("newPassword").textContent = data.password;
                 })
                 .catch(err => {
-                    console.error('Erreur de copie:', err);
+                    document.getElementById("newIdentifiant").textContent = "Erreur";
+                    document.getElementById("newPassword").textContent = "Erreur";
+                    console.error(err);
                 });
         }
 
-        function generateTempPassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return password;
+        // === Close modal ===
+        closeResetModal.addEventListener("click", () => resetModal.classList.remove("active"));
+        cancelReset.addEventListener("click", () => resetModal.classList.remove("active"));
+
+        // === Confirm reset (optionnel: action supplémentaire) ===
+        confirmReset.addEventListener("click", () => {
+            alert("Identifiants réinitialisés pour " + selectedStudent.nom);
+            resetModal.classList.remove("active");
+        });
+
+        // === Copy credentials ===
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => alert("Copié dans le presse-papiers"));
         }
 
-        async function resetStudentCredentials() {
-            if (!currentStudentId) return;
+        // === Event listeners filtres ===
+        [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(el => el.addEventListener("change", applyFilters));
+        searchInput.addEventListener("input", applyFilters);
 
-            try {
-                const resetUrl = `${API_BASE}/api/students/${currentStudentId}/reset-access`;
-                const response = await fetch(resetUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+        // === Initial load ===
+        fetchStudents();
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Erreur lors de la réinitialisation');
-                }
 
-                const data = await response.json();
-
-                // Afficher les identifiants générés par le serveur
-                document.getElementById('newIdentifiant').textContent = data.data.temporaryIdentifiant;
-                document.getElementById('newPassword').textContent = data.data.temporaryPassword;
-
-                alert('Identifiants réinitialisés avec succès ! Les nouveaux identifiants ont été générés.');
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la réinitialisation: ' + error.message);
-            }
-        }
-
-        // Exposer les fonctions globales
-        window.showResetModal = showResetModal;
-        window.copyToClipboard = copyToClipboard;
-        window.loadDashboardData = loadDashboardData;
     </script>
 </body>
 
