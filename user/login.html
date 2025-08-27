@@ -13,6 +13,8 @@
             --blanc-casse: #f8f4e9;
             --or: #d4af37;
             --vert-olive: #556B2F;
+            --error-color: #c62828;
+            --success-color: #2e7d32;
         }
 
         * {
@@ -107,7 +109,6 @@
             font-size: 2.2rem;
             margin-bottom: 15px;
             font-weight: 700;
-            /* Solution alternative pour un effet similaire sans -webkit-propriétés */
             position: relative;
             display: inline-block;
         }
@@ -165,6 +166,21 @@
             background: #fff;
         }
 
+        .form-group input.error {
+            border-color: var(--error-color);
+        }
+
+        .form-group input.success {
+            border-color: var(--success-color);
+        }
+
+        .field-error {
+            color: var(--error-color);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         .password-toggle {
             position: absolute;
             right: 15px;
@@ -173,6 +189,9 @@
             color: var(--bleu-nuit);
             opacity: 0.6;
             transition: opacity 0.3s;
+            background: none;
+            border: none;
+            font-size: 1rem;
         }
 
         .password-toggle:hover {
@@ -192,6 +211,10 @@
             transition: all 0.3s;
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-login:hover {
@@ -248,22 +271,22 @@
 
         .error-message {
             background: #ffebee;
-            color: #c62828;
+            color: var(--error-color);
             padding: 12px 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #c62828;
+            border-left: 4px solid var(--error-color);
             display: none;
             font-size: 0.9rem;
         }
 
         .success-message {
             background: #e8f5e9;
-            color: #2e7d32;
+            color: var(--success-color);
             padding: 12px 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #2e7d32;
+            border-left: 4px solid var(--success-color);
             display: none;
             font-size: 0.9rem;
         }
@@ -487,27 +510,29 @@
 
         <form id="loginForm">
             <div class="form-group">
-                <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                <label for="email"><i class="fas fa-envelope" aria-hidden="true"></i> Email</label>
                 <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+                <div class="field-error" id="emailError"></div>
             </div>
 
             <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
+                <label for="password"><i class="fas fa-lock" aria-hidden="true"></i> Mot de passe</label>
                 <input type="password" id="password" name="password" placeholder="Votre mot de passe" required>
-                <span class="password-toggle" id="passwordToggle">
+                <button type="button" class="password-toggle" id="passwordToggle" aria-label="Afficher le mot de passe">
                     <i class="fas fa-eye"></i>
-                </span>
+                </button>
+                <div class="field-error" id="passwordError"></div>
             </div>
 
             <button type="submit" class="btn-login" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Se connecter
+                <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Se connecter
             </button>
         </form>
 
         <div class="login-footer">
             <p>Mot de passe oublié ? <a href="#" id="forgot-password-link">Réinitialiser</a></p>
             <p>Pas encore de compte ? <a href="/user/register">Créer un compte</a></p>
-            <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
+            <p><a href="/"><i class="fas fa-arrow-left" aria-hidden="true"></i> Retour à l'accueil</a></p>
         </div>
     </div>
 
@@ -515,12 +540,13 @@
     <div class="modal" id="resetModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-key"></i> Réinitialiser le mot de passe</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
+                <h3><i class="fas fa-key" aria-hidden="true"></i> Réinitialiser le mot de passe</h3>
+                <button class="modal-close" id="modalClose" aria-label="Fermer">&times;</button>
             </div>
             <div class="modal-body">
                 <p>Entrez votre email pour recevoir les instructions de réinitialisation :</p>
                 <input type="email" id="resetEmail" placeholder="Votre email" required>
+                <div class="field-error" id="resetEmailError"></div>
             </div>
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="cancelReset">Annuler</button>
@@ -530,8 +556,21 @@
     </div>
 
     <!-- Configuration et scripts -->
-    <script src="../config.js"></script>
+    <script src="/js/config.js"></script>
     <script>
+        // Configuration par défaut si config.js n'est pas chargé
+        window.CONFIG = window.CONFIG || {
+            API: {
+                BASE_URL: 'http://localhost:3000/api',
+                ENDPOINTS: {
+                    AUTH: {
+                        LOGIN: '/auth/login',
+                        FORGOT_PASSWORD: '/auth/forgot-password'
+                    }
+                }
+            }
+        };
+
         // Gestion du slider d'arrière-plan
         function initBackgroundSlider() {
             const slides = document.querySelectorAll('.background-slide');
@@ -555,8 +594,85 @@
             passwordToggle.addEventListener('click', function () {
                 const type = passwordInput.type === 'password' ? 'text' : 'password';
                 passwordInput.type = type;
-                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                const icon = this.querySelector('i');
+                icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+                this.setAttribute('aria-label', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
             });
+        }
+
+        // Validation en temps réel
+        function initRealTimeValidation() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+
+            emailInput.addEventListener('blur', function () {
+                validateEmailField(this, emailError);
+            });
+
+            passwordInput.addEventListener('blur', function () {
+                validatePasswordField(this, passwordError);
+            });
+
+            emailInput.addEventListener('input', function () {
+                if (this.classList.contains('error')) {
+                    validateEmailField(this, emailError);
+                }
+            });
+
+            passwordInput.addEventListener('input', function () {
+                if (this.classList.contains('error')) {
+                    validatePasswordField(this, passwordError);
+                }
+            });
+        }
+
+        function validateEmailField(input, errorElement) {
+            const email = input.value.trim();
+
+            if (!email) {
+                showFieldError(input, errorElement, 'L\'email est requis');
+                return false;
+            }
+
+            if (!isValidEmail(email)) {
+                showFieldError(input, errorElement, 'Veuillez entrer un email valide');
+                return false;
+            }
+
+            clearFieldError(input, errorElement);
+            return true;
+        }
+
+        function validatePasswordField(input, errorElement) {
+            const password = input.value;
+
+            if (!password) {
+                showFieldError(input, errorElement, 'Le mot de passe est requis');
+                return false;
+            }
+
+            if (password.length < 8) {
+                showFieldError(input, errorElement, 'Le mot de passe doit contenir au moins 8 caractères');
+                return false;
+            }
+
+            clearFieldError(input, errorElement);
+            return true;
+        }
+
+        function showFieldError(input, errorElement, message) {
+            input.classList.add('error');
+            input.classList.remove('success');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function clearFieldError(input, errorElement) {
+            input.classList.remove('error');
+            input.classList.add('success');
+            errorElement.style.display = 'none';
         }
 
         // Gestion du modal de réinitialisation
@@ -567,14 +683,18 @@
             const cancelReset = document.getElementById('cancelReset');
             const submitReset = document.getElementById('submitReset');
             const resetEmail = document.getElementById('resetEmail');
+            const resetEmailError = document.getElementById('resetEmailError');
 
             function openModal() {
                 resetModal.classList.add('active');
+                resetEmail.focus();
             }
 
             function closeModal() {
                 resetModal.classList.remove('active');
                 resetEmail.value = '';
+                resetEmail.classList.remove('error');
+                resetEmailError.style.display = 'none';
             }
 
             forgotLink.addEventListener('click', function (e) {
@@ -592,43 +712,52 @@
                 }
             });
 
+            // Validation de l'email dans le modal
+            resetEmail.addEventListener('blur', function () {
+                validateEmailField(this, resetEmailError);
+            });
+
+            resetEmail.addEventListener('input', function () {
+                if (this.classList.contains('error')) {
+                    validateEmailField(this, resetEmailError);
+                }
+            });
+
             submitReset.addEventListener('click', async function () {
                 const email = resetEmail.value.trim();
 
-                if (!email) {
-                    showMessage('Veuillez entrer votre email', 'error');
+                if (!validateEmailField(resetEmail, resetEmailError)) {
                     return;
                 }
 
-                if (!isValidEmail(email)) {
-                    showMessage('Veuillez entrer un email valide', 'error');
-                    return;
-                }
-
-                showModalLoading(true);
-                try {
-                    const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage('Si cet email existe, un lien de réinitialisation a été envoyé', 'success');
-                        closeModal();
-                    } else {
-                        throw new Error(data.message || 'Erreur lors de l\'envoi');
-                    }
-
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    showMessage('Erreur lors de l\'envoi des instructions', 'error');
-                } finally {
-                    showModalLoading(false);
-                }
+                await sendResetInstructions(email);
             });
+        }
+
+        async function sendResetInstructions(email) {
+            showModalLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Si cet email existe, un lien de réinitialisation a été envoyé', 'success');
+                    closeModal();
+                } else {
+                    throw new Error(data.message || 'Erreur lors de l\'envoi');
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur lors de l\'envoi des instructions. Veuillez réessayer.', 'error');
+            } finally {
+                showModalLoading(false);
+            }
         }
 
         // Fonction de validation d'email
@@ -649,6 +778,9 @@
             if (type === 'error') {
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'block';
+
+                // Faire défiler jusqu'au message d'erreur
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
                 successMessage.textContent = message;
                 successMessage.style.display = 'block';
@@ -669,19 +801,27 @@
 
             loading.style.display = show ? 'block' : 'none';
             loginBtn.disabled = show;
+
+            if (show) {
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Connexion...';
+            } else {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt" aria-hidden="true"></i> Se connecter';
+            }
         }
 
         function showModalLoading(show) {
             const submitBtn = document.getElementById('submitReset');
             submitBtn.disabled = show;
-            submitBtn.innerHTML = show ?
-                '<i class="fas fa-spinner fa-spin"></i> Envoi...' :
-                'Envoyer';
+
+            if (show) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+            } else {
+                submitBtn.innerHTML = 'Envoyer';
+            }
         }
 
         const API_BASE = CONFIG.API.BASE_URL;
         const LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.LOGIN;
-
 
         // Connexion utilisateur
         async function handleLogin(email, password) {
@@ -694,7 +834,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                console.log('URL appelée:', `${API_BASE}${LOGIN_ENDPOINT}`);
 
                 const data = await response.json();
 
@@ -719,7 +858,7 @@
                 }
             } catch (error) {
                 console.error('Erreur de connexion:', error);
-                showMessage('Erreur de connexion au serveur', 'error');
+                showMessage('Erreur de connexion au serveur. Veuillez vérifier votre connexion.', 'error');
             } finally {
                 showLoading(false);
             }
@@ -729,23 +868,26 @@
         document.addEventListener('DOMContentLoaded', function () {
             initBackgroundSlider();
             initPasswordToggle();
+            initRealTimeValidation();
             initResetModal();
 
             const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
 
             loginForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
 
-                if (!email || !password) {
-                    showMessage('Veuillez remplir tous les champs', 'error');
-                    return;
-                }
+                // Validation des champs
+                const isEmailValid = validateEmailField(emailInput, emailError);
+                const isPasswordValid = validatePasswordField(passwordInput, passwordError);
 
-                if (!isValidEmail(email)) {
-                    showMessage('Veuillez entrer un email valide', 'error');
+                if (!isEmailValid || !isPasswordValid) {
                     return;
                 }
 
