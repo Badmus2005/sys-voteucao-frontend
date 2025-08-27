@@ -610,14 +610,31 @@
                     await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
                 }
 
-                // Vérifier que les canvas existent
+                // Vérifier que les canvas existent et afficher un message d'erreur dans le DOM si absent
                 const canvasIds = ['votesChart', 'distributionChart', 'hourlyChart', 'comparisonChart'];
+
                 for (const id of canvasIds) {
-                    if (!document.getElementById(id)) {
+                    const canvas = document.getElementById(id);
+                    if (!canvas) {
                         console.error(`Canvas ${id} non trouvé`);
-                        return;
+
+                        // Cherche un conteneur parent pour afficher un message d'erreur visuel
+                        const container = document.getElementById(`${id}Container`) || document.querySelector(`[data-chart="${id}"]`);
+                        if (container) {
+                            container.innerHTML = `
+                <div class="chart-error">
+                    <p style="color: #c00; font-weight: bold;">
+                        Graphique "${id}" non disponible. Veuillez sélectionner une élection ou vérifier les données.
+                    </p>
+                </div>
+            `;
+                        }
+
+                        // Optionnel : continuer la boucle au lieu de return, pour afficher les erreurs de tous les canvas
+                        continue;
                     }
                 }
+
 
                 await Promise.all([
                     loadGeneralStats(),
