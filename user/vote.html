@@ -582,12 +582,17 @@
         let studentData = null;
         const urlParams = new URLSearchParams(window.location.search);
         const electionId = urlParams.get('id');
-
+        const token = localStorage.getItem('token');
         // Vérification de l'authentification
-        const token = localStorage.getItem('studentToken');
-        if (!token) {
-            window.location.href = 'login.html';
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
+
+        if (!isAuth) {
+            window.location.href = '/user/login.html';
+        } else if (role !== 'ETUDIANT') {
+            window.location.href = '/unauthorized.html';
         }
+
 
         if (!electionId) {
             showError('Aucune élection spécifiée');

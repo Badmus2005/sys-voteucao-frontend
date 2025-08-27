@@ -723,24 +723,16 @@
             updateUI();
             hideLoading();
         });
+        const token = localStorage.getItem('token');
 
         // Vérification authentification
-        async function checkAuth() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
 
-            try {
-                const decoded = JSON.parse(atob(token.split('.')[1]));
-                if (decoded.exp < Date.now() / 1000) {
-                    throw new Error('Token expiré');
-                }
-            } catch (error) {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
-            }
+        if (!isAuth) {
+            window.location.href = '/user/login.html';
+        } else if (role !== 'ETUDIANT') {
+            window.location.href = '/unauthorized.html';
         }
 
         // Chargement données utilisateur

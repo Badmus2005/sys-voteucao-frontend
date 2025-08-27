@@ -571,12 +571,22 @@
     <script src="../config.js"></script>
     <script>
 
-        // === users.js ===
-
         // URLs API 
         const API_BASE = CONFIG.API.BASE_URL;
         const API_STUDENTS = `${API_BASE}/students`;
         const API_RESET = `${API_BASE}/students/:studentId/reset-access`;
+
+        const token = localStorage.getItem('adminToken');
+
+        // Vérification de l'authentification et du rôle
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
+
+        if (!isAuth) {
+            window.location.href = '/admin';
+        } else if (role !== 'ADMIN') {
+            window.location.href = '/unauthorized.html';
+        }
 
         // Pagination
         let currentPage = 1;

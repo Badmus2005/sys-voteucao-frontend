@@ -268,7 +268,7 @@
         .sidebar-menu li a i {
             margin-right: 12px;
             color: var(--or);
-            font-size: 1rem;
+            font-size: 1.rem;
             width: 20px;
             text-align: center;
         }
@@ -350,6 +350,7 @@
         .admin-card h3 i {
             margin-right: 10px;
             color: var(--rouge-bordeaux);
+            font-size: 1.2rem;
         }
 
         .admin-card p {
@@ -974,6 +975,14 @@
             background: var(--gris-clair);
         }
 
+        .pagination-info {
+            margin-left: 15px;
+            color: var(--gris-moyen);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .sidebar {
@@ -1271,6 +1280,8 @@
                                     <th>État</th>
                                     <th>Date de génération</th>
                                     <th>Date d'utilisation</th>
+                                    <th>Généré par</th>
+                                    <th>Utilisé par</th>
                                 </tr>
                             </thead>
                             <tbody id="codesTableBody">
@@ -1394,6 +1405,41 @@
     </div>
     <script src="../config.js"></script>
     <script>
+
+        // Variables globales
+        const API_BASE = CONFIG.API.BASE_URL;
+        const ADMIN_ME_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.ME;
+        const ADMIN_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.UPDATE;
+        const UPLOAD_IMAGE_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
+        const STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.GENERAL;
+        const ACTIVITY_ENDPOINT = CONFIG.API.ENDPOINTS.ACTIVITY.LIST;
+        const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
+        const CODES_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.LIST;
+        const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
+        const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
+        const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
+        const token = localStorage.getItem('adminToken');
+        // Vérification de l'authentification et du rôle
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
+
+        if (!isAuth) {
+            window.location.href = '/admin';
+        } else if (role !== 'ADMIN') {
+            window.location.href = '/unauthorized.html';
+        }
+
+        // ------------ UTILS ------------
+        function showLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) loader.classList.add('active');
+        }
+
+        function hideLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) loader.classList.remove('active');
+        }
+
         // Fonction utilitaire pour gérer les event listeners
         function safeAddListener(id, event, handler) {
             const el = document.getElementById(id);
@@ -1423,39 +1469,6 @@
             setTimeout(() => {
                 toast.remove();
             }, 5000);
-        }
-
-        // ------------ CONFIG ------------
-        const API_BASE = CONFIG.API.BASE_URL;
-        const ADMIN_ME_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.ME;
-        const ADMIN_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.UPDATE;
-        const UPLOAD_IMAGE_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
-        const STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.GENERAL;
-        const ACTIVITY_ENDPOINT = CONFIG.API.ENDPOINTS.ACTIVITY.LIST;
-        const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
-        const CODES_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.LIST;
-        const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
-        const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
-        const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
-
-        const token = localStorage.getItem('adminToken');
-
-        if (!token) {
-            showToast('Session expirée, redirection...', 'error');
-            setTimeout(() => {
-                window.location.href = '/admin';
-            }, 2000);
-        }
-
-        // ------------ UTILS ------------
-        function showLoading() {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) loader.classList.add('active');
-        }
-
-        function hideLoading() {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) loader.classList.remove('active');
         }
 
         // Formatage de la taille des fichiers
@@ -1502,8 +1515,21 @@
         async function loadAllCodes() {
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CODES_LIST_ENDPOINT}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const statusFilter = document.getElementById('statusFilter').value;
+                const searchTerm = document.getElementById('codeSearch').value;
+
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    limit: itemsPerPage,
+                    ...(searchTerm && { search: searchTerm }),
+                    ...(statusFilter !== 'all' && { status: statusFilter })
+                });
+
+                const response = await fetch(`${API_BASE}${CODES_LIST_ENDPOINT}?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
                 if (!response.ok) {
@@ -1513,22 +1539,15 @@
                 const result = await response.json();
 
                 // Vérifier le format de la réponse
-                if (result.success && result.codes) {
-                    // Le backend renvoie un objet avec une propriété "codes"
-                    allCodes = Array.isArray(result.codes) ? result.codes : [];
-                } else if (Array.isArray(result)) {
-                    // Format alternatif (si le backend renvoie directement un tableau)
-                    allCodes = result;
+                if (result.success && result.data) {
+                    allCodes = Array.isArray(result.data.codes) ? result.data.codes : [];
+                    renderCodesTable();
+                    setupPagination(result.data.pagination);
                 } else {
                     console.warn('Format de réponse inattendu:', result);
                     allCodes = [];
+                    renderCodesTable();
                 }
-
-                // Trier les codes par date de génération (du plus récent au plus ancien)
-                allCodes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-                renderCodesTable();
-                setupPagination();
             } catch (error) {
                 console.error('Erreur lors du chargement des codes:', error);
                 showToast('Erreur lors du chargement des codes', 'error');
@@ -1542,39 +1561,14 @@
             const tableBody = document.getElementById('codesTableBody');
             if (!tableBody) return;
 
-            // Filtrer les codes selon les critères
-            const statusFilter = document.getElementById('statusFilter').value;
-            const searchTerm = document.getElementById('codeSearch').value.toLowerCase();
-
-            let filteredCodes = allCodes;
-
-            // Appliquer le filtre d'état
-            if (statusFilter !== 'all') {
-                filteredCodes = filteredCodes.filter(code =>
-                    statusFilter === 'used' ? code.used : !code.used
-                );
-            }
-
-            // Appliquer la recherche
-            if (searchTerm) {
-                filteredCodes = filteredCodes.filter(code =>
-                    code.code.toLowerCase().includes(searchTerm)
-                );
-            }
-
-            // Calculer la pagination
-            const totalPages = Math.ceil(filteredCodes.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const paginatedCodes = filteredCodes.slice(startIndex, startIndex + itemsPerPage);
-
             // Vider le tableau
             tableBody.innerHTML = '';
 
             // Remplir le tableau avec les codes
-            if (paginatedCodes.length === 0) {
+            if (allCodes.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 20px;">
+                        <td colspan="6" style="text-align: center; padding: 20px;">
                             Aucun code trouvé
                         </td>
                     </tr>
@@ -1582,7 +1576,7 @@
                 return;
             }
 
-            paginatedCodes.forEach(code => {
+            allCodes.forEach(code => {
                 const row = document.createElement('tr');
 
                 const statusClass = code.used ? 'status-used' : 'status-unused';
@@ -1590,34 +1584,28 @@
 
                 const createdAt = formatDate(code.createdAt);
                 const usedAt = code.usedAt ? formatDate(code.usedAt) : '-';
+                const generatedBy = code.generatedBy || 'Système';
+                const usedBy = code.usedBy || '-';
 
                 row.innerHTML = `
-                    <td>${code.code}</td>
+                    <td><strong>${code.code}</strong></td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${createdAt}</td>
                     <td>${usedAt}</td>
+                    <td>${generatedBy}</td>
+                    <td>${usedBy}</td>
                 `;
 
                 tableBody.appendChild(row);
             });
-
-            // Mettre à jour la pagination
-            updatePaginationControls(totalPages);
         }
 
         // Fonction pour configurer la pagination
-        function setupPagination() {
+        function setupPagination(paginationData) {
             const paginationContainer = document.getElementById('codesPagination');
             if (!paginationContainer) return;
 
-            const totalPages = Math.ceil(allCodes.length / itemsPerPage);
-            updatePaginationControls(totalPages);
-        }
-
-        // Fonction pour mettre à jour les contrôles de pagination
-        function updatePaginationControls(totalPages) {
-            const paginationContainer = document.getElementById('codesPagination');
-            if (!paginationContainer) return;
+            const totalPages = paginationData.total || 1;
 
             paginationContainer.innerHTML = '';
 
@@ -1630,19 +1618,22 @@
                 prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
                 prevBtn.addEventListener('click', () => {
                     currentPage--;
-                    renderCodesTable();
+                    loadAllCodes();
                 });
                 paginationContainer.appendChild(prevBtn);
             }
 
             // Pages
-            for (let i = 1; i <= totalPages; i++) {
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+
+            for (let i = startPage; i <= endPage; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
                 pageBtn.textContent = i;
                 pageBtn.addEventListener('click', () => {
                     currentPage = i;
-                    renderCodesTable();
+                    loadAllCodes();
                 });
                 paginationContainer.appendChild(pageBtn);
             }
@@ -1654,10 +1645,140 @@
                 nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
                 nextBtn.addEventListener('click', () => {
                     currentPage++;
-                    renderCodesTable();
+                    loadAllCodes();
                 });
                 paginationContainer.appendChild(nextBtn);
             }
+
+            // Informations sur la pagination
+            const infoText = document.createElement('div');
+            infoText.className = 'pagination-info';
+            infoText.textContent = `Page ${currentPage} sur ${totalPages} - ${paginationData.totalItems} codes`;
+            paginationContainer.appendChild(infoText);
+        }
+
+        // ------------ GÉNÉRATION DE CODES ------------
+        async function generateCodes() {
+            const countInput = document.getElementById('codeCountInput');
+            const count = parseInt(countInput?.value);
+
+            if (!count || count < 1 || count > 100) {
+                showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            if (!generateBtn) return;
+
+            const originalBtnText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+            generateBtn.disabled = true;
+
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        quantity: count,
+                        expiresInHours: 72 // 3 jours par défaut
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
+
+                displayGeneratedCodes(data.data.codes);
+                showToast(`${data.data.codes.length} codes générés avec succès`, 'success');
+
+                // Recharger la liste des codes
+                await loadAllCodes();
+            } catch (error) {
+                console.error('Erreur génération codes:', error);
+                showToast(error.message || 'Échec de la génération', 'error');
+            } finally {
+                generateBtn.innerHTML = originalBtnText;
+                generateBtn.disabled = false;
+                hideLoading();
+            }
+        }
+
+        function displayGeneratedCodes(codes) {
+            const container = document.getElementById('codesContainer');
+            const resultsSection = document.getElementById('resultsSection');
+            if (!container || !resultsSection) return;
+
+            container.innerHTML = '';
+            codes.forEach(code => {
+                const codeElement = document.createElement('div');
+                codeElement.className = 'code-item';
+                codeElement.innerHTML = `
+                    <span>${code}</span>
+                    <button class="copy-single-btn" data-code="${code}">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                `;
+                container.appendChild(codeElement);
+            });
+
+            document.querySelectorAll('.copy-single-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const code = this.getAttribute('data-code');
+                    navigator.clipboard.writeText(code)
+                        .then(() => {
+                            this.innerHTML = '<i class="fas fa-check" style="color:green;"></i>';
+                            setTimeout(() => {
+                                this.innerHTML = '<i class="fas fa-copy"></i>';
+                            }, 2000);
+                        });
+                });
+            });
+
+            resultsSection.style.display = 'block';
+            const codesCount = document.getElementById('codesCount');
+            if (codesCount) codesCount.textContent = `(${codes.length} codes)`;
+        }
+
+        function copyAllCodes() {
+            const codes = Array.from(document.querySelectorAll('.code-item span'))
+                .map(el => el.textContent)
+                .join('\n');
+
+            navigator.clipboard.writeText(codes)
+                .then(() => {
+                    const copyBtn = document.getElementById('copyAllBtn');
+                    if (!copyBtn) return;
+
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHtml;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Erreur copie:', err);
+                    showToast('Erreur lors de la copie', 'error');
+                });
+        }
+
+        function downloadCodes() {
+            const codes = Array.from(document.querySelectorAll('.code-item span'))
+                .map(el => el.textContent)
+                .join('\n');
+
+            const blob = new Blob([codes], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `codes-ucao-${new Date().toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // ------------ DASHBOARD FUNCTIONS ------------
@@ -1816,128 +1937,6 @@
                 const userAvatar = document.querySelector('.user-avatar');
                 if (userAvatar) userAvatar.src = admin.photoUrl + '?t=' + Date.now();
             }
-        }
-
-        // ------------ CODE GENERATION ------------
-        async function generateCodes() {
-            const countInput = document.getElementById('codeCountInput');
-            const count = parseInt(countInput?.value);
-
-            if (!count || count < 1 || count > 100) {
-                showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
-                return;
-            }
-
-            const generateBtn = document.getElementById('generateBtn');
-            if (!generateBtn) return;
-
-            const originalBtnText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
-            generateBtn.disabled = true;
-
-            try {
-                showLoading();
-                const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ quantity: count })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
-
-                displayGeneratedCodes(data.codes);
-                showToast(`${data.codes.length} codes générés avec succès`, 'success');
-
-                // Recharger la liste des codes
-                await loadAllCodes();
-            } catch (error) {
-                console.error('Erreur génération codes:', error);
-                showToast(error.message || 'Échec de la génération', 'error');
-            } finally {
-                generateBtn.innerHTML = originalBtnText;
-                generateBtn.disabled = false;
-                hideLoading();
-            }
-        }
-
-        function displayGeneratedCodes(codes) {
-            const container = document.getElementById('codesContainer');
-            const resultsSection = document.getElementById('resultsSection');
-            if (!container || !resultsSection) return;
-
-            container.innerHTML = '';
-            codes.forEach(code => {
-                const codeElement = document.createElement('div');
-                codeElement.className = 'code-item';
-                codeElement.innerHTML = `
-                    <span>${code}</span>
-                    <button class="copy-single-btn" data-code="${code}">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                `;
-                container.appendChild(codeElement);
-            });
-
-            document.querySelectorAll('.copy-single-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const code = this.getAttribute('data-code');
-                    navigator.clipboard.writeText(code)
-                        .then(() => {
-                            this.innerHTML = '<i class="fas fa-check" style="color:green;"></i>';
-                            setTimeout(() => {
-                                this.innerHTML = '<i class="fas fa-copy"></i>';
-                            }, 2000);
-                        });
-                });
-            });
-
-            resultsSection.style.display = 'block';
-            const codesCount = document.getElementById('codesCount');
-            if (codesCount) codesCount.textContent = `(${codes.length} codes)`;
-            resultsSection.style.animation = 'fadeIn 0.3s ease-out';
-        }
-
-        function copyAllCodes() {
-            const codes = Array.from(document.querySelectorAll('.code-item span'))
-                .map(el => el.textContent)
-                .join('\n');
-
-            navigator.clipboard.writeText(codes)
-                .then(() => {
-                    const copyBtn = document.getElementById('copyAllBtn');
-                    if (!copyBtn) return;
-
-                    const originalHtml = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalHtml;
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error('Erreur copie:', err);
-                    showToast('Erreur lors de la copie', 'error');
-                });
-        }
-
-        function downloadCodes() {
-            const codes = Array.from(document.querySelectorAll('.code-item span'))
-                .map(el => el.textContent)
-                .join('\n');
-
-            const blob = new Blob([codes], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `codes-ucao-${new Date().toISOString().slice(0, 10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         // ------------ NOTIFICATIONS ------------
@@ -2131,9 +2130,22 @@
             });
 
             // Gestion des filtres de codes
-            safeAddListener('statusFilter', 'change', renderCodesTable);
-            safeAddListener('codeSearch', 'input', debounce(renderCodesTable, 300));
-            safeAddListener('refreshCodesBtn', 'click', loadAllCodes);
+            safeAddListener('statusFilter', 'change', () => {
+                currentPage = 1;
+                loadAllCodes();
+            });
+
+            safeAddListener('codeSearch', 'input', debounce(() => {
+                currentPage = 1;
+                loadAllCodes();
+            }, 300));
+
+            safeAddListener('refreshCodesBtn', 'click', () => {
+                currentPage = 1;
+                document.getElementById('codeSearch').value = '';
+                document.getElementById('statusFilter').value = 'all';
+                loadAllCodes();
+            });
         }
 
         // ------------ INITIALISATION ------------

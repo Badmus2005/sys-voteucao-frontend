@@ -591,7 +591,16 @@
         document.addEventListener('DOMContentLoaded', function () {
             const API_BASE = CONFIG.API.BASE_URL;
             const ELECTION_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
+            const token = localStorage.getItem('token');
+            // Vérification de l'authentification et du rôle
+            const role = UTILS.getUserRole();
+            const isAuth = UTILS.isAuthenticated();
 
+            if (!isAuth) {
+                window.location.href = '/user/login';
+            } else if (role !== 'ETUDIANT') {
+                window.location.href = '/unauthorized.html';
+            }
             // Nom étudiant connecté
             const studentName = localStorage.getItem('studentName') || 'Étudiant';
             document.getElementById('studentName').innerHTML = `<i class="fas fa-user"></i> <span>${studentName}</span>`;

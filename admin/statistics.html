@@ -548,10 +548,15 @@
 
         const token = localStorage.getItem('adminToken');
 
-        if (!token) {
-            window.location.href = 'index.html';
-        }
+        // Vérification de l'authentification et du rôle
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
 
+        if (!isAuth) {
+            window.location.href = '/admin';
+        } else if (role !== 'ADMIN') {
+            window.location.href = '/unauthorized.html';
+        }
         // Variables globales
         let charts = {};
         let elections = [];

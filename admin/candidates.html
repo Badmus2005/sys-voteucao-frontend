@@ -746,14 +746,18 @@
     <script>
         // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
-        const CANDIDATES_ENDPOINT = '/api/candidats';
-        const ELECTIONS_ENDPOINT = '/api/election';
-        const UPLOAD_ENDPOINT = '/api/upload/image';
-
+        const CANDIDATES_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
+        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
+        const UPLOAD_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
         const token = localStorage.getItem('adminToken');
+        // Vérification de l'authentification et du rôle
+        const role = UTILS.getUserRole();
+        const isAuth = UTILS.isAuthenticated();
 
-        if (!token) {
+        if (!isAuth) {
             window.location.href = '/admin';
+        } else if (role !== 'ADMIN') {
+            window.location.href = '/unauthorized.html';
         }
 
         // Variables globales
