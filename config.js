@@ -75,7 +75,8 @@ const CONFIG = {
                 LIST: '/api/activity'
             },
             CODES: {
-                GENERATE: '/api/codes/generate'
+                GENERATE: '/api/codes/generate',
+                LIST: '/api/codes/listes'
             },
             UPLOAD: {
                 IMAGE: '/api/upload/image'
