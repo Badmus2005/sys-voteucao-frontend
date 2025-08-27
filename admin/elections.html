@@ -7,6 +7,7 @@
     <title>Gestion des Élections - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Votre CSS reste inchangé */
         :root {
             --rouge-bordeaux: #7a0026;
             --rouge-bordeaux-light: #a73354;
@@ -59,7 +60,6 @@
             left: 50%;
             transform: translateX(-50%);
         }
-
 
         .header h1 i {
             color: var(--rouge-bordeaux);
@@ -497,10 +497,10 @@
     <script>
         // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
-        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
-        const ELECTIONS_CREATE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.CREATE;
-        const ELECTIONS_DELETE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.DELETE;
-        const ELECTIONS_CLOSE_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.CLOSE;
+        const ELECTIONS_ENDPOINT = '/api/elections'; // Correction du endpoint
+        const ELECTIONS_CREATE_ENDPOINT = '/api/elections'; // Correction du endpoint
+        const ELECTIONS_DELETE_ENDPOINT = (id) => `/api/elections/${id}`; // Correction du endpoint
+        const ELECTIONS_CLOSE_ENDPOINT = (id) => `/api/elections/${id}/close`; // Correction du endpoint
         const token = localStorage.getItem('adminToken');
 
         if (!token) {
@@ -538,13 +538,16 @@
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur de chargement des élections');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur de chargement des élections');
+                }
 
                 const elections = await response.json();
                 displayElections(elections);
             } catch (error) {
                 console.error('Erreur:', error);
-                showError('Erreur de chargement des élections');
+                showError('Erreur de chargement des élections: ' + error.message);
             }
         }
 
@@ -643,6 +646,18 @@
             });
         }
 
+        function formatDateForAPI(dateString) {
+            // Convertir le format datetime-local en format ISO pour l'API
+            if (!dateString) return '';
+
+            const date = new Date(dateString);
+            // Ajouter le décalage de fuseau horaire pour obtenir l'heure UTC
+            const timezoneOffset = date.getTimezoneOffset() * 60000;
+            const adjustedDate = new Date(date.getTime() - timezoneOffset);
+
+            return adjustedDate.toISOString().slice(0, 19).replace('T', ' ');
+        }
+
         function showLoading() {
             const container = document.getElementById('electionsContainer');
             container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -667,6 +682,12 @@
         function hideElectionModal() {
             document.getElementById('electionModal').classList.remove('active');
             document.getElementById('electionForm').reset();
+
+            // Réinitialiser les champs conditionnels
+            document.getElementById('conditionalFields').style.display = 'none';
+            document.getElementById('salleFields').style.display = 'none';
+            document.getElementById('ecoleFields').style.display = 'none';
+            document.getElementById('delegueTypeGroup').style.display = 'none';
         }
 
         function updateElectionFormFields() {
@@ -703,26 +724,57 @@
 
         async function createElection() {
             try {
+                const type = document.getElementById('electionType').value;
+                const niveau = parseInt(document.getElementById('electionNiveau').value);
+                const titre = document.getElementById('electionTitre').value;
+                const description = document.getElementById('electionDescription').value;
+                const dateDebut = formatDateForAPI(document.getElementById('startDate').value);
+                const dateFin = formatDateForAPI(document.getElementById('endDate').value);
+
+                // Validation des champs requis
+                if (!type || !niveau || !titre || !dateDebut || !dateFin) {
+                    alert('Veuillez remplir tous les champs obligatoires');
+                    return;
+                }
+
                 const formData = {
-                    type: document.getElementById('electionType').value,
-                    niveau: parseInt(document.getElementById('electionNiveau').value),
-                    titre: document.getElementById('electionTitre').value,
-                    description: document.getElementById('electionDescription').value,
-                    dateDebut: document.getElementById('startDate').value,
-                    dateFin: document.getElementById('endDate').value
+                    type: type,
+                    niveau: niveau,
+                    titre: titre,
+                    description: description,
+                    dateDebut: dateDebut,
+                    dateFin: dateFin
                 };
 
-                // Ajouter le type de délégué si niveau 2
-                if (formData.niveau === 2) {
-                    formData.delegueType = document.getElementById('delegueType').value;
+                // Ajouter le type de délégué si niveau 2 ou 3
+                if (niveau === 2 || niveau === 3) {
+                    const delegueType = document.getElementById('delegueType').value;
+                    if (delegueType) {
+                        formData.delegueType = delegueType;
+                    }
                 }
 
                 // Ajouter les champs conditionnels
-                if (formData.type === 'SALLE') {
-                    formData.filiere = document.getElementById('filiere').value;
-                    formData.annee = parseInt(document.getElementById('annee').value);
-                } else if (formData.type === 'ECOLE') {
-                    formData.ecole = document.getElementById('ecole').value;
+                if (type === 'SALLE') {
+                    const filiere = document.getElementById('filiere').value;
+                    const annee = parseInt(document.getElementById('annee').value);
+
+                    if (!filiere || !annee) {
+                        alert('Veuillez remplir tous les champs obligatoires pour une élection de salle');
+                        return;
+                    }
+
+                    formData.filiere = filiere;
+                    formData.annee = annee;
+                } else if (type === 'ECOLE') {
+                    const ecole = document.getElementById('ecole').value;
+
+                    if (!ecole) {
+                        alert('Veuillez sélectionner une école');
+                        return;
+                    }
+
+                    formData.ecole = ecole;
                 }
 
                 const response = await fetch(`${API_BASE}${ELECTIONS_CREATE_ENDPOINT}`, {
@@ -734,7 +786,10 @@
                     body: JSON.stringify(formData)
                 });
 
-                if (!response.ok) throw new Error('Erreur lors de la création');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la création');
+                }
 
                 const result = await response.json();
                 hideElectionModal();
@@ -755,7 +810,7 @@
             if (!confirm('Êtes-vous sûr de vouloir clôturer cette élection ?')) return;
 
             try {
-                const closeUrl = `${API_BASE}${ELECTIONS_CLOSE_ENDPOINT}/${id}`;
+                const closeUrl = `${API_BASE}${ELECTIONS_CLOSE_ENDPOINT(id)}`;
                 const response = await fetch(closeUrl, {
                     method: 'PUT',
                     headers: {
@@ -763,7 +818,10 @@
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur lors de la clôture');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la clôture');
+                }
 
                 loadElections();
                 alert('Élection clôturée avec succès!');
@@ -777,7 +835,7 @@
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
 
             try {
-                const deleteUrl = `${API_BASE}${ELECTIONS_DELETE_ENDPOINT}/${id}`;
+                const deleteUrl = `${API_BASE}${ELECTIONS_DELETE_ENDPOINT(id)}`;
                 const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: {
@@ -785,7 +843,10 @@
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur lors de la suppression');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur lors de la suppression');
+                }
 
                 loadElections();
                 alert('Élection supprimée avec succès!');
