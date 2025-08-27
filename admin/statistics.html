@@ -196,11 +196,30 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        .error-message {
+            color: var(--danger);
+            text-align: center;
+            padding: 20px;
+            font-weight: 500;
+        }
+
+        .info-message {
+            color: var(--gris-moyen);
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
         .charts-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
         }
 
         .chart-card {
@@ -441,7 +460,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="chart-placeholder" id="votesChartContainer">
+                <div class="chart-container" id="votesChartContainer">
                     <canvas id="votesChart"></canvas>
                 </div>
             </div>
@@ -585,6 +604,21 @@
         async function loadAllStats() {
             try {
                 showLoading();
+
+                // Attendre que le DOM soit complètement chargé
+                if (document.readyState === 'loading') {
+                    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+                }
+
+                // Vérifier que les canvas existent
+                const canvasIds = ['votesChart', 'distributionChart', 'hourlyChart', 'comparisonChart'];
+                for (const id of canvasIds) {
+                    if (!document.getElementById(id)) {
+                        console.error(`Canvas ${id} non trouvé`);
+                        return;
+                    }
+                }
+
                 await Promise.all([
                     loadGeneralStats(),
                     loadVotesChart(),
@@ -592,6 +626,7 @@
                     loadHourlyChart(),
                     loadComparisonChart()
                 ]);
+
                 updateLastUpdate();
             } catch (error) {
                 console.error('Erreur:', error);
@@ -615,7 +650,10 @@
                     }
                 });
 
-                if (!response.ok) throw new Error('Erreur de chargement des statistiques générales');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Erreur ${response.status}: ${response.statusText}`);
+                }
 
                 const data = await response.json();
 
@@ -631,7 +669,8 @@
                 document.getElementById('participationTrend').textContent = `${data.participationRate || 0}%`;
 
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur détaillée:', error);
+                showError(`Erreur de chargement: ${error.message}`);
                 throw error;
             }
         }
@@ -639,6 +678,12 @@
         // Charger le graphique d'évolution des votes
         async function loadVotesChart() {
             try {
+                const container = document.getElementById('votesChartContainer');
+                if (!container) {
+                    console.error('Container votesChartContainer non trouvé');
+                    return;
+                }
+
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 
@@ -660,6 +705,9 @@
                 if (charts.votes) {
                     charts.votes.destroy();
                 }
+
+                // Recréer le canvas (important!)
+                container.innerHTML = '<canvas id="votesChart"></canvas>';
 
                 // Créer le nouveau graphique
                 const ctx = document.getElementById('votesChart').getContext('2d');
@@ -702,14 +750,22 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
-                document.getElementById('votesChartContainer').innerHTML =
-                    '<div class="error-message">Erreur de chargement du graphique</div>';
+                const container = document.getElementById('votesChartContainer');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">Erreur de chargement du graphique</div>';
+                }
             }
         }
 
         // Charger le graphique de répartition des votes
         async function loadDistributionChart() {
             try {
+                const container = document.getElementById('distributionChartContainer');
+                if (!container) {
+                    console.error('Container distributionChartContainer non trouvé');
+                    return;
+                }
+
                 const electionId = document.getElementById('electionFilter').value;
 
                 if (electionId === 'all') {
@@ -774,6 +830,12 @@
         // Charger le graphique de participation par heure
         async function loadHourlyChart() {
             try {
+                const container = document.getElementById('hourlyChartContainer');
+                if (!container) {
+                    console.error('Container hourlyChartContainer non trouvé');
+                    return;
+                }
+
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 
@@ -795,6 +857,9 @@
                 if (charts.hourly) {
                     charts.hourly.destroy();
                 }
+
+                // Recréer le canvas
+                container.innerHTML = '<canvas id="hourlyChart"></canvas>';
 
                 // Créer le nouveau graphique
                 const ctx = document.getElementById('hourlyChart').getContext('2d');
@@ -841,14 +906,22 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
-                document.getElementById('hourlyChartContainer').innerHTML =
-                    '<div class="error-message">Erreur de chargement du graphique</div>';
+                const container = document.getElementById('hourlyChartContainer');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">Erreur de chargement du graphique</div>';
+                }
             }
         }
 
         // Charger le graphique de comparaison des élections
         async function loadComparisonChart() {
             try {
+                const container = document.getElementById('comparisonChartContainer');
+                if (!container) {
+                    console.error('Container comparisonChartContainer non trouvé');
+                    return;
+                }
+
                 const period = document.getElementById('periodFilter').value;
 
                 const response = await fetch(`${API_BASE}${STATS_ENDPOINTS.COMPARISON}?period=${period}`, {
@@ -965,10 +1038,18 @@
 
         // Fonctions utilitaires
         function showLoading() {
-            // Afficher des indicateurs de chargement sur les graphiques
-            const chartContainers = document.querySelectorAll('.chart-placeholder');
-            chartContainers.forEach(container => {
-                container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            const containerIds = [
+                'votesChartContainer',
+                'distributionChartContainer',
+                'hourlyChartContainer',
+                'comparisonChartContainer'
+            ];
+
+            containerIds.forEach(id => {
+                const container = document.getElementById(id);
+                if (container) {
+                    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                }
             });
         }
 
