@@ -198,6 +198,7 @@
             cursor: pointer;
         }
 
+        /* CORRECTION PRINCIPALE : Structure du tableau */
         .table-container {
             background: white;
             border-radius: 10px;
@@ -209,19 +210,21 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
+            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
             padding: 15px 20px;
             background: var(--bleu-nuit);
             color: white;
             font-weight: 600;
+            gap: 15px;
         }
 
         .table-row {
             display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 100px 100px;
+            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
             padding: 15px 20px;
             border-bottom: 1px solid var(--gris-clair);
             align-items: center;
+            gap: 15px;
         }
 
         .table-row:hover {
@@ -233,6 +236,8 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
+            white-space: nowrap;
+            text-align: center;
         }
 
         .status-active {
@@ -253,6 +258,7 @@
         .action-buttons {
             display: flex;
             gap: 8px;
+            justify-content: center;
         }
 
         .btn-icon {
@@ -475,12 +481,56 @@
             background-color: rgba(122, 0, 38, 0.1);
         }
 
+        /* Responsive design amélioré */
         @media (max-width: 1200px) {
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: minmax(120px, 1fr) minmax(100px, 100px) minmax(150px, 1fr) minmax(120px, 1fr) minmax(90px, 90px) minmax(100px, 100px);
                 gap: 10px;
+            }
+        }
+
+        @media (max-width: 992px) {
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-areas:
+                    "name name name"
+                    "id email email"
+                    "filiere status actions";
+                gap: 10px;
+            }
+
+            .table-header div:nth-child(1),
+            .table-row div:nth-child(1) {
+                grid-area: name;
+            }
+
+            .table-header div:nth-child(2),
+            .table-row div:nth-child(2) {
+                grid-area: id;
+            }
+
+            .table-header div:nth-child(3),
+            .table-row div:nth-child(3) {
+                grid-area: email;
+            }
+
+            .table-header div:nth-child(4),
+            .table-row div:nth-child(4) {
+                grid-area: filiere;
+            }
+
+            .table-header div:nth-child(5),
+            .table-row div:nth-child(5) {
+                grid-area: status;
+            }
+
+            .table-header div:nth-child(6),
+            .table-row div:nth-child(6) {
+                grid-area: actions;
             }
         }
 
@@ -505,12 +555,33 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr;
-                gap: 10px;
+                padding: 10px 15px;
             }
 
             .action-buttons {
-                justify-content: center;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 576px) {
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "name"
+                    "id"
+                    "email"
+                    "filiere"
+                    "status"
+                    "actions";
+                gap: 8px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
         }
     </style>
@@ -671,62 +742,7 @@
         </div>
     </div>
 
-    <script>
-        // Configuration intégrée directement pour éviter les problèmes de chemin
-        const CONFIG = {
-            API: {
-                BASE_URL: 'https://sys-voteucao-backend-production-311c.up.railway.app',
-                ENDPOINTS: {
-                    STUDENTS: {
-                        LIST: "/api/students",
-                        STATS: "/api/students/stats",
-                        RESET_ACCESS: (studentId) => `/api/students/${studentId}/reset-access`
-                    }
-                }
-            },
-            ACADEMIC: {
-                ECOLES: {
-                    EGEI: {
-                        nom: "EGEI",
-                        filieres: [
-                            'Électronique',
-                            'Génie Télécoms et TIC',
-                            'Informatique Industrielle et Maintenance',
-                            'Electrotechnique']
-                    },
-                    ESMEA: {
-                        nom: "ESMEA",
-                        filieres: [
-                            'Assurances',
-                            'Banque et Finance d\'Entreprise',
-                            'Audit et Contrôle de Gestion',
-                            'Management des Ressources Humaines',
-                            'Action Commerciale et Force de Vente',
-                            'Communication et Action Publicitaire',
-                            'Commerce',
-                            'Informatique de Gestion',
-                            'Transport et Logistique']
-                    },
-                    FSAE: {
-                        nom: "FSAE",
-                        filieres: [
-                            'Gestion de l\'Environnement et Aménagement du Territoire',
-                            'Production et Gestion des Ressources Animales',
-                            'Sciences et Techniques de Production Végétale',
-                            'Stockage Conservation et Conditionnement des Produits Agricoles',
-                            'Gestion des Entreprises Rurales et Agricoles']
-                    },
-                    FDE: {
-                        nom: "FDE",
-                        filieres: [
-                            'Droit',
-                            'Economie']
-                    }
-                },
-                ANNEES: [1, 2, 3]
-            }
-        };
-    </script>
+    <script src="../config.js"></script>
     <script>
         // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
