@@ -943,6 +943,37 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--gris-clair);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination-btn.active {
+            background: var(--rouge-bordeaux);
+            color: white;
+            border-color: var(--rouge-bordeaux);
+        }
+
+        .pagination-btn:hover:not(.active) {
+            background: var(--gris-clair);
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .sidebar {
@@ -1363,7 +1394,6 @@
     </div>
     <script src="../config.js"></script>
     <script>
-
         // Fonction utilitaire pour gérer les event listeners
         function safeAddListener(id, event, handler) {
             const el = document.getElementById(id);
@@ -1408,7 +1438,14 @@
         const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
         const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
 
-        const token = localStorage.getItem('adminToken') || 'demo-token';
+        const token = localStorage.getItem('adminToken');
+
+        if (!token) {
+            showToast('Session expirée, redirection...', 'error');
+            setTimeout(() => {
+                window.location.href = '/admin/admin_home';
+            }, 2000);
+        }
 
         // ------------ UTILS ------------
         function showLoading() {
@@ -1465,31 +1502,18 @@
         async function loadAllCodes() {
             try {
                 showLoading();
-                // Simulation d'appel API - à remplacer par votre véritable appel
-                // const response = await fetch(`${API_BASE}${CODES_LIST_ENDPOINT}`, {
-                //     headers: { 'Authorization': `Bearer ${token}` }
-                // });
+                const response = await fetch(`${API_BASE}${CODES_LIST_ENDPOINT}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Simulation de données
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des codes');
+                }
 
-                // Données simulées
-                const mockCodes = [
-                    { id: 1, code: 'UCAO-7X9A-2B3C', used: true, createdAt: '2023-10-15T14:30:00Z', usedAt: '2023-10-20T09:15:00Z' },
-                    { id: 2, code: 'UCAO-5D6E-7F8G', used: false, createdAt: '2023-10-16T10:45:00Z', usedAt: null },
-                    { id: 3, code: 'UCAO-1H2I-3J4K', used: true, createdAt: '2023-10-17T16:20:00Z', usedAt: '2023-10-18T11:30:00Z' },
-                    { id: 4, code: 'UCAO-9L0M-1N2O', used: false, createdAt: '2023-10-18T08:15:00Z', usedAt: null },
-                    { id: 5, code: 'UCAO-3P4Q-5R6S', used: true, createdAt: '2023-10-19T13:40:00Z', usedAt: '2023-10-21T14:20:00Z' },
-                    { id: 6, code: 'UCAO-7T8U-9V0W', used: false, createdAt: '2023-10-20T09:30:00Z', usedAt: null },
-                    { id: 7, code: 'UCAO-2X3Y-4Z5A', used: false, createdAt: '2023-10-21T11:20:00Z', usedAt: null },
-                    { id: 8, code: 'UCAO-6B7C-8D9E', used: true, createdAt: '2023-10-22T15:10:00Z', usedAt: '2023-10-23T10:45:00Z' },
-                    { id: 9, code: 'UCAO-0F1G-2H3I', used: false, createdAt: '2023-10-23T12:35:00Z', usedAt: null },
-                    { id: 10, code: 'UCAO-4J5K-6L7M', used: true, createdAt: '2023-10-24T17:25:00Z', usedAt: '2023-10-25T08:30:00Z' },
-                    { id: 11, code: 'UCAO-8N9O-0P1Q', used: false, createdAt: '2023-10-25T14:15:00Z', usedAt: null },
-                    { id: 12, code: 'UCAO-2R3S-4T5U', used: true, createdAt: '2023-10-26T10:05:00Z', usedAt: '2023-10-27T16:40:00Z' }
-                ];
+                const result = await response.json();
 
-                allCodes = mockCodes;
+                // Vérifier le format de la réponse
+                allCodes = Array.isArray(result.data) ? result.data : Array.isArray(result) ? result : [];
 
                 // Trier les codes par date de génération (du plus récent au plus ancien)
                 allCodes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1630,16 +1654,16 @@
         // ------------ DASHBOARD FUNCTIONS ------------
         async function loadStats() {
             try {
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const res = await fetch(`${API_BASE}${STATS_ENDPOINT}`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Données simulées
-                const data = {
-                    users: { total: 1542, percent: 75 },
-                    votes: { total: 1247, percent: 62 },
-                    candidates: { total: 24, percent: 80 },
-                    elections: { active: 3, percent: 60 }
-                };
+                if (!res.ok) {
+                    throw new Error('Erreur lors du chargement des statistiques');
+                }
+
+                const data = await res.json();
 
                 const totalUsers = document.getElementById('totalUsers');
                 const totalVotes = document.getElementById('totalVotes');
@@ -1666,17 +1690,16 @@
 
         async function loadActivity() {
             try {
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 800));
+                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Données simulées
-                const activities = [
-                    { id: 1, title: 'Nouvelle élection créée', content: 'Élection du BDE 2023', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-                    { id: 2, title: 'Utilisateur inscrit', content: 'John Doe s\'est inscrit', timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-                    { id: 3, title: 'Vote enregistré', content: 'Un vote a été enregistré pour l\'élection du BDE', timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
-                    { id: 4, title: 'Codes générés', content: '50 codes ont été générés', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
-                ];
+                if (!res.ok) {
+                    throw new Error('Erreur lors du chargement des activités');
+                }
 
+                const activities = await res.json();
                 const container = document.getElementById('activityList');
                 if (!container) return;
 
@@ -1702,14 +1725,15 @@
 
         async function loadVoteStats() {
             try {
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 700));
+                const res = await fetch(`${API_BASE}${VOTE_STATS_ENDPOINT}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Données simulées
-                const stats = {
-                    dates: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-                    values: [120, 150, 180, 200, 240, 120, 80]
-                };
+                if (!res.ok) {
+                    throw new Error('Erreur lors du chargement des statistiques de votes');
+                }
+
+                const stats = await res.json();
 
                 // Créer le graphique des votes
                 const ctx = document.getElementById('votesChart').getContext('2d');
@@ -1750,17 +1774,13 @@
         async function loadAdminInfo() {
             try {
                 showLoading();
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 600));
+                const res = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Données simulées
-                const admin = {
-                    nom: 'Admin',
-                    prenom: 'UCAO',
-                    poste: 'Administrateur',
-                    photoUrl: 'https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg'
-                };
+                if (!res.ok) throw new Error('Erreur chargement profil');
 
+                const admin = await res.json();
                 updateAdminUI(admin);
             } catch (err) {
                 console.error('Erreur chargement info admin:', err);
@@ -1808,18 +1828,20 @@
 
             try {
                 showLoading();
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ quantity: count })
+                });
 
-                // Générer des codes de démonstration
-                const generatedCodes = [];
-                for (let i = 0; i < count; i++) {
-                    const randomCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-                    generatedCodes.push(`UCAO-${randomCode.substring(0, 4)}-${randomCode.substring(4)}`);
-                }
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
 
-                displayGeneratedCodes(generatedCodes);
-                showToast(`${generatedCodes.length} codes générés avec succès`, 'success');
+                displayGeneratedCodes(data.codes);
+                showToast(`${data.codes.length} codes générés avec succès`, 'success');
 
                 // Recharger la liste des codes
                 await loadAllCodes();
@@ -1912,15 +1934,20 @@
         // ------------ NOTIFICATIONS ------------
         async function loadNotifications() {
             try {
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                // Données simulées
-                const notifications = [
-                    { id: 1, message: 'Nouveau vote enregistré', read: false, createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-                    { id: 2, message: 'Élection approchant de sa fin', read: true, createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-                    { id: 3, message: 'Problème de connexion résolu', read: true, createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
-                ];
+                if (!response.ok) throw new Error('Erreur de chargement des notifications');
+
+                const result = await response.json();
+
+                // Sécurisation du format attendu
+                const notifications = Array.isArray(result.data)
+                    ? result.data
+                    : Array.isArray(result)
+                        ? result
+                        : [];
 
                 displayNotifications(notifications);
 
@@ -1943,6 +1970,7 @@
 
             container.innerHTML = '';
 
+            // Vérification du type
             if (!Array.isArray(notifications)) {
                 console.warn('notifications n’est pas un tableau:', notifications);
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--rouge-clair);">Erreur de chargement des notifications</p>';
@@ -1964,8 +1992,7 @@
 
                 div.addEventListener('click', async () => {
                     if (!notification.read) {
-                        // Simulation de marquage comme lu
-                        notification.read = true;
+                        await markAsRead(notification.id);
                         div.classList.remove('unread');
                         loadNotifications(); // Recharger pour mettre à jour le badge
                     }
@@ -1975,13 +2002,26 @@
             });
         }
 
+        async function markAsRead(notificationId) {
+            try {
+                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
         async function markAllAsRead() {
             try {
-                // Simulation d'appel API
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                showToast('Toutes les notifications marquées comme lues', 'success');
                 loadNotifications(); // Recharger les notifications
+                showToast('Toutes les notifications marquées comme lues', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
                 showToast('Erreur lors du marquage des notifications', 'error');
@@ -2036,7 +2076,7 @@
                 e.preventDefault();
                 localStorage.removeItem('adminToken');
                 localStorage.removeItem('adminRole');
-                window.location.href = '/admin';
+                window.location.href = 'index.html';
             });
 
             // Gestionnaire pour le bouton de génération de codes
