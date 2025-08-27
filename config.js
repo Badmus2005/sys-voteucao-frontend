@@ -13,7 +13,7 @@ const CONFIG = {
                 REGISTER: '/api/userRegister',
                 ADMIN_LOGIN: '/api/adminLogin',
                 ADMIN_REGISTER: '/api/adminRegister',
-                CHANGE_PASSWORD: '/api/userLogin/change-password',
+                CHANGE_PASSWORD_TEMPORARY: '/api/userLogin/change-password',
                 FORGOT_PASSWORD: '/api/userLogin/forgot-password',
                 RESET_PASSWORD: '/api/userLogin/reset-password',
                 TEST: '/api/userLogin/test'
