@@ -700,11 +700,20 @@
                     localStorage.setItem('token', data.token);
                     showMessage('Connexion réussie! Redirection en cours...', 'success');
 
+                    // Redirection selon le rôle ou statut
                     setTimeout(() => {
-                        window.location.href = '/user/dashboard';
+                        if (data.requirePasswordChange) {
+                            window.location.href = '/user/change-password';
+                        } else {
+                            window.location.href = '/user/dashboard';
+                        }
                     }, 1500);
                 } else {
-                    showMessage(data.message || 'Email ou mot de passe incorrect', 'error');
+                    // Message d'erreur plus précis
+                    const errorMsg = data.message ||
+                        (response.status === 401 ? 'Email ou mot de passe incorrect' :
+                            'Erreur de connexion');
+                    showMessage(errorMsg, 'error');
                 }
             } catch (error) {
                 console.error('Erreur de connexion:', error);
