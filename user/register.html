@@ -527,20 +527,60 @@
             return true;
         }
 
-
         // --- Soumission ---
         async function handleSubmit(e) {
-            e.preventDefault(); if (!validateForm()) return;
-            const formData = { nom: elements.nom.value.trim(), prenom: elements.prenom.value.trim(), email: elements.email.value.trim(), ecole: elements.ecole.value, filiere: elements.filiere.value, annee: parseInt(elements.annee.value), password: elements.password.value, matricule: elements.matricule.value.trim() || null, code: elements.code.value.trim() || null };
-            showLoading(true); showMessage('', 'error'); showMessage('', 'success');
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const form = document.getElementById('registerForm');
+            const elements = form.elements;
+            const annee = parseInt(elements.annee.value);
+
+            // Helper sécurisé
+            const getValue = (name) => {
+                const el = elements[name];
+                return el && el.offsetParent !== null ? el.value.trim() : null;
+            };
+
+            const formData = {
+                nom: getValue('nom'),
+                prenom: getValue('prenom'),
+                email: getValue('email'),
+                ecole: getValue('ecole'),
+                filiere: getValue('filiere'),
+                annee,
+                password: getValue('password'),
+                matricule: annee !== 1 ? getValue('matricule') : null,
+                code: annee === 1 ? getValue('code') : null
+            };
+
+            showLoading(true);
+            showMessage('', 'error');
+            showMessage('', 'success');
+
             try {
-                const res = await fetch(`${API_BASE}${REGISTER_ENDPOINT}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+                const res = await fetch(`${API_BASE}${REGISTER_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
                 const data = await res.json();
-                if (res.ok) { showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success'); setTimeout(() => window.location.href = 'login.html', 2000); }
-                else showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
-            } catch (err) { console.error('Erreur inscription:', err); showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error'); }
-            finally { showLoading(false); }
+
+                if (res.ok) {
+                    showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                } else {
+                    showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
+                }
+            } catch (err) {
+                console.error('Erreur inscription:', err);
+                showMessage(CONFIG.MESSAGES.ERROR.NETWORK_ERROR, 'error');
+            } finally {
+                showLoading(false);
+            }
         }
+
 
         // --- Init ---
         const elements = { form: document.getElementById('registerForm'), error: document.getElementById('errorMessage'), success: document.getElementById('successMessage'), loading: document.getElementById('loading'), button: document.getElementById('registerBtn'), ecole: document.getElementById('ecole'), filiere: document.getElementById('filiere'), annee: document.getElementById('annee'), matriculeGroup: document.getElementById('matriculeGroup'), codeGroup: document.getElementById('codeGroup'), matricule: document.getElementById('matricule'), code: document.getElementById('code'), nom: document.getElementById('nom'), prenom: document.getElementById('prenom'), password: document.getElementById('password'), confirmPassword: document.getElementById('confirmPassword') };
