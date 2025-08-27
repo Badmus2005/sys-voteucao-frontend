@@ -464,17 +464,69 @@
         function populateFilieres(ecoleKey) { elements.filiere.innerHTML = '<option value="">Sélectionnez une filière</option>'; if (ecoleKey) CONFIG.ACADEMIC.ECOLES[ecoleKey].filieres.forEach(f => elements.filiere.add(new Option(f, f))); }
         function populateAnnees() { CONFIG.ACADEMIC.ANNEES.forEach(a => elements.annee.add(new Option(`${a === 1 ? '1ère' : ' ' + a + 'ème'} année`, a))); }
 
-        // --- Validation ---
         function validateForm() {
-            const f = { nom: elements.nom.value.trim(), prenom: elements.prenom.value.trim(), email: elements.email.value.trim(), ecole: elements.ecole.value, filiere: elements.filiere.value, annee: elements.annee.value, password: elements.password.value, confirmPassword: elements.confirmPassword.value, matricule: elements.matricule.value.trim(), code: elements.code.value.trim() };
-            if (![f.nom, f.prenom, f.email, f.ecole, f.filiere, f.annee, f.password].every(Boolean)) return showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error'), false;
-            if (f.annee === "1" && !f.code) return showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error'), false;
-            if (f.annee !== "1" && !f.matricule) return showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error'), false;
-            if (!isValidEmail(f.email)) return showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error'), false;
-            if (f.password.length < CONFIG.SECURITY.PASSWORD_MIN_LENGTH) return showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORD_TOO_SHORT, 'error'), false;
-            if (f.password !== f.confirmPassword) return showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORDS_DONT_MATCH, 'error'), false;
+            const form = document.getElementById('registerForm');
+            const elements = form.elements;
+
+            // Helper sécurisé pour récupérer la valeur d’un champ visible
+            const getValue = (name) => {
+                const el = elements[name];
+                return el && el.offsetParent !== null ? el.value.trim() : '';
+            };
+
+            const f = {
+                nom: getValue('nom'),
+                prenom: getValue('prenom'),
+                email: getValue('email'),
+                ecole: getValue('ecole'),
+                filiere: getValue('filiere'),
+                annee: getValue('annee'),
+                password: getValue('password'),
+                confirmPassword: getValue('confirmPassword'),
+                matricule: getValue('matricule'),
+                code: getValue('code')
+            };
+
+            // Champs obligatoires communs
+            const requiredFields = [f.nom, f.prenom, f.email, f.ecole, f.filiere, f.annee, f.password];
+            if (!requiredFields.every(Boolean)) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
+                return false;
+            }
+
+            // Validation conditionnelle selon l’année
+            if (f.annee === "1") {
+                if (!f.code) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error');
+                    return false;
+                }
+            } else {
+                if (!f.matricule) {
+                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error');
+                    return false;
+                }
+            }
+
+            // Email
+            if (!isValidEmail(f.email)) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
+                return false;
+            }
+
+            // Mot de passe
+            if (f.password.length < CONFIG.SECURITY.PASSWORD_MIN_LENGTH) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORD_TOO_SHORT, 'error');
+                return false;
+            }
+
+            if (f.password !== f.confirmPassword) {
+                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORDS_DONT_MATCH, 'error');
+                return false;
+            }
+
             return true;
         }
+
 
         // --- Soumission ---
         async function handleSubmit(e) {
