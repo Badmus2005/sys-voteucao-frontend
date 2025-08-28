@@ -588,16 +588,42 @@
     </div>
     <script src="../config.js"></script>
     <script>
+        // Fonctions utilitaires manquantes
+        const UTILS = UTILS || {};
+        UTILS.formatDate = UTILS.formatDate || function (date, options = {}) {
+            const defaultOptions = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+
+            return new Date(date).toLocaleDateString('fr-FR', {
+                ...defaultOptions,
+                ...options
+            });
+        };
+
+        UTILS.formatNumber = UTILS.formatNumber || function (number) {
+            return new Intl.NumberFormat('fr-FR').format(number);
+        };
+
         const STUDENT_AUTH = {
             isAuthenticated: () => {
                 try {
                     const token = localStorage.getItem('token');
-                    console.log(token);
+                    console.log('Token found:', !!token);
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
                     const now = Date.now() / 1000;
-                    return payload.exp > now;
+                    const isExpired = payload.exp <= now;
+
+                    console.log('Token expiration:', new Date(payload.exp * 1000), 'Current time:', new Date(now * 1000));
+                    console.log('Token is expired:', isExpired);
+
+                    return !isExpired;
                 } catch (error) {
                     console.error('Erreur de vérification d\'authentification:', error);
                     return false;
@@ -619,17 +645,18 @@
 
             logout: () => {
                 localStorage.removeItem('token');
+                localStorage.removeItem('studentName');
                 window.location.href = '/user/login';
             }
         };
 
-
         document.addEventListener('DOMContentLoaded', function () {
-            const API_BASE = CONFIG.API.BASE_URL;
-            const ELECTION_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
             // Vérification de l'authentification et du rôle
             const role = STUDENT_AUTH.getUserRole();
             const isAuth = STUDENT_AUTH.isAuthenticated();
+
+            console.log('Authentication status:', isAuth);
+            console.log('User role:', role);
 
             if (!isAuth) {
                 console.log('Non authentifié, redirection vers /user/login');
@@ -642,6 +669,7 @@
                 window.location.href = '/unauthorized.html';
                 return;
             }
+
             // Nom étudiant connecté
             const studentName = localStorage.getItem('studentName') || 'Étudiant';
             document.getElementById('studentName').innerHTML = `<i class="fas fa-user"></i> <span>${studentName}</span>`;
@@ -854,10 +882,45 @@
                 }
 
                 elections.forEach((election, index) => {
-                    const item = document.createElement('div');
-                    item.classList.add('list-item');
-                    item.textContent = `${election.nom} - ${UTILS.formatDate(election.dateFin)}`;
-                    list.appendChild(item);
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.style.animationDelay = `${0.2 + index * 0.1}s`;
+
+                    const now = new Date();
+                    const endDate = new Date(election.dateFin);
+                    const isEnded = now > endDate;
+
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <h3>${election.nom}</h3>
+                            <span class="card-badge">
+                                ${election.ouvert ? (isEnded ? 'Terminée' : 'En cours') : 'À venir'}
+                            </span>
+                        </div>
+                        <div class="card-content">
+                            <p><strong>Description :</strong> ${election.description}</p>
+                            <p class="date-info">
+                                <i class="far fa-calendar-alt"></i> 
+                                <strong>Fin du vote :</strong> ${UTILS.formatDate(endDate)}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            ${election.ouvert && !election.dejaVote && !isEnded
+                            ? `<button class="btn btn-vote" onclick="vote(${election.id})">
+                                        <i class="fas fa-vote-yea"></i> Voter
+                                   </button>`
+                            : election.dejaVote || isEnded
+                                ? `<button class="btn btn-result" onclick="result(${election.id})">
+                                            <i class="fas fa-poll"></i> Résultats
+                                       </button>`
+                                : `<span class="date-info">
+                                            <i class="far fa-clock"></i> Élection non ouverte
+                                       </span>`}
+                            <span class="date-info">
+                                <i class="fas fa-users"></i> ${election.candidats || 0} candidat(s)
+                            </span>
+                        </div>`;
+                    list.appendChild(card);
                 });
             } catch (error) {
                 list.innerHTML = `
@@ -869,66 +932,114 @@
         }
 
         async function loadResults() {
+            const list = document.getElementById('resultsList');
+            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+
             try {
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.VOTE.RESULTS}`); // ta route backend
-                if (!response.ok) throw new Error("Erreur API résultats");
-
-                const data = await response.json();
-
-                const container = document.getElementById("results-container");
-                container.innerHTML = "";
-
-                if (data.length === 0) {
-                    container.innerHTML = "<p>Aucun résultat disponible.</p>";
-                    return;
-                }
-
-                data.forEach(result => {
-                    const div = document.createElement("div");
-                    div.classList.add("result-item");
-                    div.innerHTML = `
-                <h3>${result.candidate}</h3>
-                <p>Votes : ${result.votes}</p>
-            `;
-                    container.appendChild(div);
+                const token = localStorage.getItem('token');
+                // Utiliser l'endpoint des statistiques générales comme fallback
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.STATS.GENERAL}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
+
+                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
+
+                const stats = await response.json();
+                list.innerHTML = `
+                    <div class="card">
+                        <h3>Statistiques de vote</h3>
+                        <p>Total des élections: ${stats.elections || 0}</p>
+                        <p>Votes effectués: ${stats.votes || 0}</p>
+                        <p>Élections à venir: ${stats.upcoming || 0}</p>
+                    </div>`;
+
             } catch (error) {
-                console.error(error);
-                document.getElementById("results-container").innerHTML =
-                    "<p>Erreur lors du chargement des résultats.</p>";
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>${error.message}</p>
+                    </div>`;
             }
         }
 
         async function loadHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+
             try {
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.VOTE.HISTORY}`); // ta route backend
-                if (!response.ok) throw new Error("Erreur API historique");
+                const token = localStorage.getItem('token');
+                // Utiliser l'endpoint des élections comme fallback
+                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                const data = await response.json();
+                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
 
-                const container = document.getElementById("history-container");
-                container.innerHTML = "";
+                const elections = await response.json();
+                list.innerHTML = '';
 
-                if (data.length === 0) {
-                    container.innerHTML = "<p>Aucun historique disponible.</p>";
+                if (!elections || elections.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="far fa-calendar-times"></i>
+                            <p>Aucun historique de vote disponible.</p>
+                        </div>`;
                     return;
                 }
 
-                data.forEach(entry => {
-                    const div = document.createElement("div");
-                    div.classList.add("history-item");
-                    div.innerHTML = `
-                <p><strong>${entry.user}</strong> a voté pour <em>${entry.candidate}</em> le ${new Date(entry.date).toLocaleString()}</p>
-            `;
-                    container.appendChild(div);
+                // Filtrer les élections où l'utilisateur a déjà voté
+                const votedElections = elections.filter(election => election.dejaVote);
+
+                if (votedElections.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="far fa-calendar-times"></i>
+                            <p>Vous n'avez participé à aucune élection.</p>
+                        </div>`;
+                    return;
+                }
+
+                votedElections.forEach((election, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.style.animationDelay = `${0.2 + index * 0.1}s`;
+
+                    const endDate = new Date(election.dateFin);
+                    const isEnded = new Date() > endDate;
+
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <h3>${election.nom}</h3>
+                            <span class="card-badge">
+                                ${isEnded ? 'Terminée' : 'En cours'}
+                            </span>
+                        </div>
+                        <div class="card-content">
+                            <p><strong>Description :</strong> ${election.description}</p>
+                            <p class="date-info">
+                                <i class="far fa-calendar-alt"></i> 
+                                <strong>Fin du vote :</strong> ${UTILS.formatDate(endDate)}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-result" onclick="result(${election.id})">
+                                <i class="fas fa-poll"></i> Voir les résultats
+                            </button>
+                            <span class="date-info">
+                                <i class="fas fa-users"></i> ${election.candidats || 0} candidat(s)
+                            </span>
+                        </div>`;
+                    list.appendChild(card);
                 });
+
             } catch (error) {
-                console.error(error);
-                document.getElementById("history-container").innerHTML =
-                    "<p>Erreur lors du chargement de l’historique.</p>";
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>${error.message}</p>
+                    </div>`;
             }
         }
-
 
         function loadCalendar() {
             document.getElementById('calendar-content').innerHTML = `
