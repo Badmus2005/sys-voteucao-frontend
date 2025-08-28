@@ -1405,6 +1405,7 @@
     </div>
     <script src="../config.js"></script>
     <script>
+        // Remplacer tout le code JavaScript par ceci :
 
         // Variables globales
         const API_BASE = CONFIG.API.BASE_URL;
@@ -1419,14 +1420,16 @@
         const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
         const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
 
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
         // Fonctions d'authentification pour le dashboard
         const DASHBOARD_AUTH = {
-            /**
-             * Vérifie si l'admin est connecté
-             */
             isAuthenticated: () => {
                 try {
-                    const token = localStorage.getItem('token');
+                    const token = getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -1438,12 +1441,9 @@
                 }
             },
 
-            /**
-             * Vérifie le rôle de l'admin
-             */
             getUserRole: () => {
                 try {
-                    const token = localStorage.getItem('token');
+                    const token = getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -1454,12 +1454,10 @@
                 }
             },
 
-            /**
-             * Déconnexion de l'admin
-             */
             logout: () => {
                 localStorage.removeItem('token');
-                window.location.href = '/admin';
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin/login';
             }
         };
 
@@ -1469,8 +1467,8 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin');
-                window.location.href = '/admin';
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin/login';
                 return;
             }
 
@@ -1497,8 +1495,8 @@
 
             // Charger tous les codes
             loadAllCodes();
-
         }
+
         // ------------ UTILS ------------
         function showLoading() {
             const loader = document.getElementById('loadingOverlay');
@@ -1529,9 +1527,9 @@
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                ${message}
-            `;
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        ${message}
+    `;
 
             toastContainer.appendChild(toast);
 
@@ -1587,6 +1585,7 @@
                 showLoading();
                 const statusFilter = document.getElementById('statusFilter').value;
                 const searchTerm = document.getElementById('codeSearch').value;
+                const token = getToken();
 
                 const params = new URLSearchParams({
                     page: currentPage,
@@ -1637,12 +1636,12 @@
             // Remplir le tableau avec les codes
             if (allCodes.length === 0) {
                 tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 20px;">
-                            Aucun code trouvé
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px;">
+                    Aucun code trouvé
+                </td>
+            </tr>
+        `;
                 return;
             }
 
@@ -1658,13 +1657,13 @@
                 const usedBy = code.usedBy || '-';
 
                 row.innerHTML = `
-                    <td><strong>${code.code}</strong></td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${createdAt}</td>
-                    <td>${usedAt}</td>
-                    <td>${generatedBy}</td>
-                    <td>${usedBy}</td>
-                `;
+            <td><strong>${code.code}</strong></td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td>${createdAt}</td>
+            <td>${usedAt}</td>
+            <td>${generatedBy}</td>
+            <td>${usedBy}</td>
+        `;
 
                 tableBody.appendChild(row);
             });
@@ -1675,7 +1674,7 @@
             const paginationContainer = document.getElementById('codesPagination');
             if (!paginationContainer) return;
 
-            const totalPages = paginationData.total || 1;
+            const totalPages = paginationData.totalPages || 1;
 
             paginationContainer.innerHTML = '';
 
@@ -1723,7 +1722,7 @@
             // Informations sur la pagination
             const infoText = document.createElement('div');
             infoText.className = 'pagination-info';
-            infoText.textContent = `Page ${currentPage} sur ${totalPages} - ${paginationData.totalItems} codes`;
+            infoText.textContent = `Page ${currentPage} sur ${totalPages} - ${paginationData.totalItems || allCodes.length} codes`;
             paginationContainer.appendChild(infoText);
         }
 
@@ -1731,6 +1730,7 @@
         async function generateCodes() {
             const countInput = document.getElementById('codeCountInput');
             const count = parseInt(countInput?.value);
+            const token = getToken();
 
             if (!count || count < 1 || count > 100) {
                 showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
@@ -1786,11 +1786,11 @@
                 const codeElement = document.createElement('div');
                 codeElement.className = 'code-item';
                 codeElement.innerHTML = `
-                    <span>${code}</span>
-                    <button class="copy-single-btn" data-code="${code}">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                `;
+            <span>${code}</span>
+            <button class="copy-single-btn" data-code="${code}">
+                <i class="fas fa-copy"></i>
+            </button>
+        `;
                 container.appendChild(codeElement);
             });
 
@@ -1854,6 +1854,7 @@
         // ------------ DASHBOARD FUNCTIONS ------------
         async function loadStats() {
             try {
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${STATS_ENDPOINT}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -1890,6 +1891,7 @@
 
         async function loadActivity() {
             try {
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -1899,22 +1901,29 @@
                     throw new Error('Erreur lors du chargement des activités');
                 }
 
-                const activities = await res.json();
+                const result = await res.json();
+                const activities = result.data || result;
                 const container = document.getElementById('activityList');
                 if (!container) return;
 
                 container.innerHTML = '';
+
+                if (!Array.isArray(activities) || activities.length === 0) {
+                    container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--gris-moyen);">Aucune activité récente</p>';
+                    return;
+                }
+
                 activities.forEach(act => {
                     const div = document.createElement('div');
                     div.classList.add('activity-item');
                     div.innerHTML = `
-                        <div class="activity-icon"><i class="fas fa-check"></i></div>
-                        <div class="activity-content">
-                            <h4>${act.title}</h4>
-                            <p>${act.content}</p>
-                        </div>
-                        <div class="activity-time">${formatDate(act.timestamp)}</div>
-                    `;
+                <div class="activity-icon"><i class="fas fa-check"></i></div>
+                <div class="activity-content">
+                    <h4>${act.title || 'Activité'}</h4>
+                    <p>${act.content || 'Aucun détail'}</p>
+                </div>
+                <div class="activity-time">${formatDate(act.timestamp || act.createdAt)}</div>
+            `;
                     container.appendChild(div);
                 });
             } catch (err) {
@@ -1925,6 +1934,7 @@
 
         async function loadVoteStats() {
             try {
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${VOTE_STATS_ENDPOINT}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1933,11 +1943,15 @@
                     throw new Error('Erreur lors du chargement des statistiques de votes');
                 }
 
-                const stats = await res.json();
+                const result = await res.json();
+                const stats = result.data || result;
 
                 // Créer le graphique des votes
-                const ctx = document.getElementById('votesChart').getContext('2d');
-                new Chart(ctx, {
+                const ctx = document.getElementById('votesChart');
+                if (!ctx) return;
+
+                const chartCtx = ctx.getContext('2d');
+                new Chart(chartCtx, {
                     type: 'line',
                     data: {
                         labels: stats.dates || [],
@@ -1974,13 +1988,15 @@
         async function loadAdminInfo() {
             try {
                 showLoading();
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (!res.ok) throw new Error('Erreur chargement profil');
 
-                const admin = await res.json();
+                const result = await res.json();
+                const admin = result.data || result;
                 updateAdminUI(admin);
             } catch (err) {
                 console.error('Erreur chargement info admin:', err);
@@ -1992,7 +2008,7 @@
 
         function updateAdminUI(admin) {
             const elements = {
-                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`,
+                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
                 headerUserRole: admin.poste || 'Administrateur'
             };
 
@@ -2012,6 +2028,7 @@
         // ------------ NOTIFICATIONS ------------
         async function loadNotifications() {
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -2050,7 +2067,7 @@
 
             // Vérification du type
             if (!Array.isArray(notifications)) {
-                console.warn('notifications n’est pas un tableau:', notifications);
+                console.warn('notifications n/est pas un tableau', notifications);
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--rouge-clair);">Erreur de chargement des notifications</p>';
                 return;
             }
@@ -2064,9 +2081,9 @@
                 const div = document.createElement('div');
                 div.className = `notification-item ${notification.read ? '' : 'unread'}`;
                 div.innerHTML = `
-                    <div class="notification-content">${notification.message}</div>
-                    <div class="notification-time">${formatDate(notification.createdAt)}</div>
-                `;
+            <div class="notification-content">${notification.message}</div>
+            <div class="notification-time">${formatDate(notification.createdAt)}</div>
+        `;
 
                 div.addEventListener('click', async () => {
                     if (!notification.read) {
@@ -2082,6 +2099,7 @@
 
         async function markAsRead(notificationId) {
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -2093,6 +2111,7 @@
 
         async function markAllAsRead() {
             try {
+                const token = getToken();
                 await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -2152,9 +2171,7 @@
             // Gestionnaire de déconnexion
             safeAddListener('logoutBtn', 'click', function (e) {
                 e.preventDefault();
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('adminRole');
-                window.location.href = 'index.html';
+                DASHBOARD_AUTH.logout();
             });
 
             // Gestionnaire pour le bouton de génération de codes
@@ -2163,8 +2180,8 @@
             safeAddListener('downloadBtn', 'click', downloadCodes);
 
             // Gestionnaire pour les actions rapides
-            safeAddListener('addElection', 'click', () => showToast('Redirection vers la création d\'élection', 'info'));
-            safeAddListener('addCandidate', 'click', () => showToast('Redirection vers l\'ajout de candidat', 'info'));
+            safeAddListener('addElection', 'click', () => showToast('Redirection vers la création d/élection', 'info'));
+            safeAddListener('addCandidate', 'click', () => showToast('Redirection vers l/ajout de candidat', 'info'));
             safeAddListener('importMatricules', 'click', () => {
                 const modal = document.getElementById('importModal');
                 if (modal) modal.classList.add('active');
