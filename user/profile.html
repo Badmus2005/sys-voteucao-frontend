@@ -825,7 +825,11 @@
 
             // Sidebar
             document.getElementById('profile-name').textContent = `${user.prenom} ${user.nom}`;
-            document.getElementById('profile-matricule').textContent = `Matricule: ${user.matricule || '-'}`;
+            if (user.annee === 1) {
+                document.getElementById('profile-matricule').textContent = `Code inscription: ${user.codeInscription || '-'}`;
+            } else {
+                document.getElementById('profile-matricule').textContent = `Matricule: ${user.matricule || '-'}`;
+            }
             document.getElementById('profile-program').textContent = `Filière: ${user.filiere || '-'}`;
             document.getElementById('profile-year').textContent = `Année: ${user.annee ? `${user.annee}ème année` : '-'}`;
             document.getElementById('profile-email').textContent = `Email: ${user.email || '-'}`;
@@ -833,7 +837,10 @@
             // Mode affichage profil
             document.getElementById('view-fullname').textContent = `${user.prenom} ${user.nom}`;
             document.getElementById('view-email').textContent = user.email || '-';
-            document.getElementById('view-matricule').textContent = user.matricule || '-';
+            document.getElementById('view-matricule').textContent =
+                user.annee === 1
+                    ? (user.codeInscription || '-')
+                    : (user.matricule || '-');
             document.getElementById('view-program').textContent = user.filiere || '-';
             document.getElementById('view-year').textContent = user.annee ? `${user.annee}ème année` : '-';
 
