@@ -440,6 +440,31 @@
         .copy-btn:hover {
             background-color: rgba(122, 0, 38, 0.1);
         }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            z-index: 1001;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: var(--danger);
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -550,12 +575,12 @@
                 <div class="credentials">
                     <h4>Nouveaux Identifiants Temporaires</h4>
                     <div class="credential-item">
-                        <span class="credential-text" id="newIdentifiant"></span>
+                        <span class="credential-text" id="newIdentifiant">En attente...</span>
                         <button class="copy-btn" onclick="copyToClipboard('newIdentifiant')"><i
                                 class="fas fa-copy"></i></button>
                     </div>
                     <div class="credential-item">
-                        <span class="credential-text" id="newPassword"></span>
+                        <span class="credential-text" id="newPassword">En attente...</span>
                         <button class="copy-btn" onclick="copyToClipboard('newPassword')"><i
                                 class="fas fa-copy"></i></button>
                     </div>
@@ -563,31 +588,31 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelReset">Annuler</button>
-                <button class="btn btn-primary" id="confirmReset">Confirmer</button>
+                <button class="btn btn-primary" id="confirmReset">Confirmer la réinitialisation</button>
             </div>
         </div>
     </div>
 
+    <div id="toast" class="toast"></div>
+
     <script src="../config.js"></script>
     <script>
-
-        // URLs API 
+        // URLs API CORRIGÉES
         const API_BASE = CONFIG.API.BASE_URL;
         const API_STUDENTS = `${API_BASE}/students`;
-        const API_RESET = `${API_BASE}/students/:studentId/reset-access`;
+        const API_RESET_ACCESS = `${API_BASE}/students`;
 
         // Fonction pour récupérer le token
         function getToken() {
             return localStorage.getItem('token');
         }
 
-        // Fonctions d'authentification pour le dashboard
+        // Fonctions d'authentification
         const DASHBOARD_AUTH = {
             isAuthenticated: () => {
                 try {
                     const token = getToken();
                     if (!token) return false;
-
                     const payload = JSON.parse(atob(token.split('.')[1]));
                     const now = Date.now() / 1000;
                     return payload.exp > now;
@@ -601,21 +626,25 @@
                 try {
                     const token = getToken();
                     if (!token) return null;
-
                     const payload = JSON.parse(atob(token.split('.')[1]));
                     return payload.role;
                 } catch (error) {
                     console.error('Erreur de récupération du rôle:', error);
                     return null;
                 }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminName');
-                window.location.href = '/admin/login';
             }
         };
+
+        // Toast messages
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
 
         // Vérification de l'authentification au chargement de la page
         document.addEventListener('DOMContentLoaded', function () {
@@ -623,18 +652,15 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
                 window.location.href = '/admin/login';
                 return;
             }
 
             if (role !== 'ADMIN') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
                 window.location.href = '/unauthorized.html';
                 return;
             }
 
-            // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
             initializeDashboard();
         });
 
@@ -645,22 +671,17 @@
         // Pagination
         let currentPage = 1;
         const rowsPerPage = 10;
-
-        // Données
         let studentsData = [];
         let filteredData = [];
 
         // DOM Elements
         const studentsList = document.getElementById("studentsList");
         const pagination = document.getElementById("pagination");
-
         const ecoleFilter = document.getElementById("ecoleFilter");
         const filiereFilter = document.getElementById("filiereFilter");
         const anneeFilter = document.getElementById("anneeFilter");
         const statusFilter = document.getElementById("statusFilter");
         const searchInput = document.getElementById("searchInput");
-
-        // Modal
         const resetModal = document.getElementById("resetModal");
         const closeResetModal = document.getElementById("closeResetModal");
         const cancelReset = document.getElementById("cancelReset");
@@ -672,27 +693,55 @@
         async function fetchStudents() {
             studentsList.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
             try {
-                const res = await fetch(API_STUDENTS);
-                if (!res.ok) throw new Error("Erreur lors du chargement des étudiants");
-                studentsData = await res.json();
-                populateFilters();
-                applyFilters();
+                const response = await fetch(API_STUDENTS, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.students) {
+                    studentsData = result.data.students.map(student => ({
+                        id: student.id,
+                        nom: student.nom || '',
+                        prenom: student.prenom || '',
+                        identifiant: student.matricule || student.codeInscription || student.identifiantTemporaire || 'N/A',
+                        email: student.user?.email || 'N/A',
+                        filiere: student.filiere || 'N/A',
+                        annee: student.annee || 'N/A',
+                        ecole: student.ecole || 'N/A',
+                        active: student.user?.actif !== false
+                    }));
+
+                    populateFilters();
+                    applyFilters();
+                } else {
+                    throw new Error('Format de réponse invalide');
+                }
             } catch (error) {
-                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Impossible de charger les étudiants.</p></div>`;
-                console.error(error);
+                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Impossible de charger les étudiants: ${error.message}</p></div>`;
+                console.error('Erreur fetchStudents:', error);
             }
         }
 
         // === Populate filters ===
         function populateFilters() {
-            const ecoles = [...new Set(studentsData.map(s => s.ecole))];
-            const filieres = [...new Set(studentsData.map(s => s.filiere))];
-            const annees = [...new Set(studentsData.map(s => s.annee))];
+            const ecoles = [...new Set(studentsData.map(s => s.ecole).filter(Boolean))];
+            const filieres = [...new Set(studentsData.map(s => s.filiere).filter(Boolean))];
+            const annees = [...new Set(studentsData.map(s => s.annee).filter(Boolean))];
 
             ecoleFilter.innerHTML = `<option value="all">Toutes les écoles/facultés</option>` +
                 ecoles.map(e => `<option value="${e}">${e}</option>`).join('');
+
             filiereFilter.innerHTML = `<option value="all">Toutes les filières</option>` +
                 filieres.map(f => `<option value="${f}">${f}</option>`).join('');
+
             anneeFilter.innerHTML = `<option value="all">Toutes les années</option>` +
                 annees.map(a => `<option value="${a}">${a}</option>`).join('');
         }
@@ -708,9 +757,11 @@
             filteredData = studentsData.filter(s => {
                 return (ecole === "all" || s.ecole === ecole) &&
                     (filiere === "all" || s.filiere === filiere) &&
-                    (annee === "all" || s.annee === annee) &&
+                    (annee === "all" || s.annee == annee) &&
                     (status === "all" || (status === "active" ? s.active : !s.active)) &&
-                    (s.nom.toLowerCase().includes(search) || s.prenom.toLowerCase().includes(search) || s.identifiant.toLowerCase().includes(search));
+                    (s.nom.toLowerCase().includes(search) ||
+                        s.prenom.toLowerCase().includes(search) ||
+                        s.identifiant.toLowerCase().includes(search));
             });
 
             currentPage = 1;
@@ -731,17 +782,17 @@
             const pageData = filteredData.slice(start, end);
 
             studentsList.innerHTML = pageData.map(s => `
-        <div class="table-row">
-            <div>${s.nom} ${s.prenom}</div>
-            <div>${s.identifiant}</div>
-            <div>${s.email}</div>
-            <div>${s.filiere} / ${s.annee}</div>
-            <div><span class="status-badge ${s.active ? "status-active" : "status-inactive"}">${s.active ? "Actif" : "Inactif"}</span></div>
-            <div class="action-buttons">
-                <div class="btn-icon btn-reset" onclick="openResetModal('${s.id}')"><i class="fas fa-key"></i></div>
-            </div>
-        </div>
-    `).join('');
+                <div class="table-row">
+                    <div>${s.nom} ${s.prenom}</div>
+                    <div>${s.identifiant}</div>
+                    <div>${s.email}</div>
+                    <div>${s.filiere} / ${s.annee}</div>
+                    <div><span class="status-badge ${s.active ? "status-active" : "status-inactive"}">${s.active ? "Actif" : "Inactif"}</span></div>
+                    <div class="action-buttons">
+                        <div class="btn-icon btn-reset" onclick="openResetModal(${s.id})"><i class="fas fa-key"></i></div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         // === Render pagination ===
@@ -775,7 +826,7 @@
         }
 
         // === Modal Réinitialisation ===
-        function openResetModal(studentId) {
+        async function openResetModal(studentId) {
             selectedStudent = studentsData.find(s => s.id === studentId);
             if (!selectedStudent) return;
 
@@ -784,44 +835,61 @@
             document.getElementById("resetStudentFiliere").textContent = selectedStudent.filiere;
             document.getElementById("resetStudentAnnee").textContent = selectedStudent.annee;
 
-            document.getElementById("newIdentifiant").textContent = "En attente...";
-            document.getElementById("newPassword").textContent = "En attente...";
-
             resetModal.classList.add("active");
 
-            // Appel API pour générer identifiants temporaires
-            fetch(`${API_RESET}/${studentId}`, { method: "POST" })
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById("newIdentifiant").textContent = data.identifiant;
-                    document.getElementById("newPassword").textContent = data.password;
-                })
-                .catch(err => {
-                    document.getElementById("newIdentifiant").textContent = "Erreur";
-                    document.getElementById("newPassword").textContent = "Erreur";
-                    console.error(err);
+            try {
+                const response = await fetch(`${API_RESET_ACCESS}/${studentId}/reset-access`, {
+                    method: "POST",
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById("newIdentifiant").textContent = result.data.temporaryIdentifiant;
+                    document.getElementById("newPassword").textContent = result.data.temporaryPassword;
+                } else {
+                    throw new Error(result.message || 'Erreur lors de la réinitialisation');
+                }
+            } catch (error) {
+                document.getElementById("newIdentifiant").textContent = "Erreur";
+                document.getElementById("newPassword").textContent = "Erreur";
+                console.error('Erreur reset access:', error);
+                showToast('Erreur: ' + error.message, 'error');
+            }
         }
 
         // === Close modal ===
         closeResetModal.addEventListener("click", () => resetModal.classList.remove("active"));
         cancelReset.addEventListener("click", () => resetModal.classList.remove("active"));
 
-        // === Confirm reset (optionnel: action supplémentaire) ===
+        // === Confirm reset ===
         confirmReset.addEventListener("click", () => {
-            alert("Identifiants réinitialisés pour " + selectedStudent.nom);
+            showToast(`Accès réinitialisés pour ${selectedStudent.nom}`);
             resetModal.classList.remove("active");
+            fetchStudents(); // Rafraîchir la liste
         });
 
         // === Copy credentials ===
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => alert("Copié dans le presse-papiers"));
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copié dans le presse-papiers');
+            });
         }
 
         // === Event listeners filtres ===
         [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(el => el.addEventListener("change", applyFilters));
         searchInput.addEventListener("input", applyFilters);
+
+        // Initialisation des événements modal
+        document.addEventListener('DOMContentLoaded', function () {
+            closeResetModal.addEventListener("click", () => resetModal.classList.remove("active"));
+            cancelReset.addEventListener("click", () => resetModal.classList.remove("active"));
+        });
 
     </script>
 </body>
