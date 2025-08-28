@@ -89,7 +89,8 @@ const CONFIG = {
                 DELETE_ALL: '/api/notifications',
                 STATS: '/api/notifications/stats',
                 ADMIN: '/api/notifications/admin'
-            }
+            },
+            CONFIG_ACADEMIC: '/api/configAcademic'
         }
     },
 
