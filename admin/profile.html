@@ -709,15 +709,16 @@
         const UPLOAD_IMAGE_ENDPOINT = '/api/upload/image';
         const STATS_ENDPOINT = '/api/stats/general';
 
-        const token = localStorage.getItem('adminToken');
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
 
         // Fonctions d'authentification pour le dashboard
         const DASHBOARD_AUTH = {
-            /**
-             * Vérifie si l'admin est connecté
-             */
             isAuthenticated: () => {
                 try {
+                    const token = getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -729,11 +730,9 @@
                 }
             },
 
-            /**
-             * Vérifie le rôle de l'admin
-             */
             getUserRole: () => {
                 try {
+                    const token = getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -744,12 +743,10 @@
                 }
             },
 
-            /**
-             * Déconnexion de l'admin
-             */
             logout: () => {
-                localStorage.removeItem('adminToken');
-                window.location.href = '/admin';
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin/login';
             }
         };
 
@@ -759,8 +756,8 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin');
-                window.location.href = '/admin';
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin/login';
                 return;
             }
 
@@ -839,6 +836,7 @@
         // Charger les informations de l'admin
         async function loadAdminInfo() {
             try {
+                getToken();
                 showLoading();
                 const response = await fetch(`${API_BASE}${ADMIN_ME_ENDPOINT}`, {
                     headers: {
@@ -898,6 +896,7 @@
         // Charger les statistiques
         async function loadStats() {
             try {
+                getToken();
                 const response = await fetch(`${API_BASE}${STATS_ENDPOINT}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -953,6 +952,7 @@
             }
 
             try {
+                getToken();
                 showLoading();
                 const response = await fetch(`${API_BASE}${ADMIN_UPDATE_ENDPOINT}`, {
                     method: 'PUT',
@@ -991,6 +991,7 @@
             formData.append('photo', fileInput.files[0]);
 
             try {
+                getToken();
                 showLoading();
                 const response = await fetch(`${API_BASE}${UPLOAD_IMAGE_ENDPOINT}`, {
                     method: 'POST',
