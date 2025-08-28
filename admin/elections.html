@@ -501,15 +501,17 @@
         const ELECTIONS_CREATE_ENDPOINT = '/api/election';
         const ELECTIONS_DELETE_ENDPOINT = (id) => `/api/election/${id}`;
         const ELECTIONS_CLOSE_ENDPOINT = (id) => `/api/election/${id}/close`;
-        const token = localStorage.getItem('adminToken');
+
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
 
         // Fonctions d'authentification pour le dashboard
         const DASHBOARD_AUTH = {
-            /**
-             * Vérifie si l'admin est connecté
-             */
             isAuthenticated: () => {
                 try {
+                    const token = getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -521,11 +523,9 @@
                 }
             },
 
-            /**
-             * Vérifie le rôle de l'admin
-             */
             getUserRole: () => {
                 try {
+                    const token = getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -536,14 +536,13 @@
                 }
             },
 
-            /**
-             * Déconnexion de l'admin
-             */
             logout: () => {
-                localStorage.removeItem('adminToken');
-                window.location.href = '/admin';
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin/login';
             }
         };
+
 
         // Vérification de l'authentification au chargement de la page
         document.addEventListener('DOMContentLoaded', function () {
@@ -551,8 +550,8 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin');
-                window.location.href = '/admin';
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin/login';
                 return;
             }
 
@@ -590,6 +589,7 @@
         // Charger les élections
         async function loadElections() {
             try {
+                const token = getToken();
                 showLoading();
 
                 const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
@@ -786,6 +786,7 @@
 
         async function createElection() {
             try {
+                const token = getToken();
                 const type = document.getElementById('electionType').value;
                 const niveau = parseInt(document.getElementById('electionNiveau').value);
                 const titre = document.getElementById('electionTitre').value;
@@ -872,6 +873,7 @@
             if (!confirm('Êtes-vous sûr de vouloir clôturer cette élection ?')) return;
 
             try {
+                const token = getToken();
                 const closeUrl = `${API_BASE}${ELECTIONS_CLOSE_ENDPOINT(id)}`;
                 const response = await fetch(closeUrl, {
                     method: 'PUT',
@@ -898,6 +900,7 @@
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
 
             try {
+                const token = getToken();
                 const deleteUrl = `${API_BASE}${ELECTIONS_DELETE_ENDPOINT(id)}`;
                 const response = await fetch(deleteUrl, {
                     method: 'DELETE',

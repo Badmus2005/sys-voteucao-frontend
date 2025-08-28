@@ -546,16 +546,16 @@
         };
         const ELECTIONS_ENDPOINT = '/api/election';
 
-        const token = localStorage.getItem('adminToken');
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
 
         // Fonctions d'authentification pour le dashboard
         const DASHBOARD_AUTH = {
-            /**
-             * Vérifie si l'admin est connecté
-             */
             isAuthenticated: () => {
                 try {
-                    const token = localStorage.getItem('adminToken');
+                    const token = getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -567,12 +567,9 @@
                 }
             },
 
-            /**
-             * Vérifie le rôle de l'admin
-             */
             getUserRole: () => {
                 try {
-                    const token = localStorage.getItem('adminToken');
+                    const token = getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -583,12 +580,10 @@
                 }
             },
 
-            /**
-             * Déconnexion de l'admin
-             */
             logout: () => {
-                localStorage.removeItem('adminToken');
-                window.location.href = '/admin';
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin/login';
             }
         };
 
@@ -598,8 +593,8 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin');
-                window.location.href = '/admin';
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin/login';
                 return;
             }
 
@@ -608,6 +603,7 @@
                 window.location.href = '/unauthorized.html';
                 return;
             }
+
 
             // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
             initializeDashboard();
@@ -631,6 +627,7 @@
         // Charger la liste des élections
         async function loadElections() {
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
                     method: 'GET',
                     headers: {
@@ -714,6 +711,7 @@
         // Charger les statistiques générales
         async function loadGeneralStats() {
             try {
+                const token = getToken();
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 
@@ -755,6 +753,7 @@
         // Charger le graphique d'évolution des votes
         async function loadVotesChart() {
             try {
+                const token = getToken();
                 const container = document.getElementById('votesChartContainer');
                 if (!container) {
                     console.error('Container votesChartContainer non trouvé');
@@ -837,6 +836,7 @@
         // Charger le graphique de répartition des votes
         async function loadDistributionChart() {
             try {
+                const token = getToken();
                 const container = document.getElementById('distributionChartContainer');
                 if (!container) {
                     console.error('Container distributionChartContainer non trouvé');
@@ -907,6 +907,7 @@
         // Charger le graphique de participation par heure
         async function loadHourlyChart() {
             try {
+                const token = getToken();
                 const container = document.getElementById('hourlyChartContainer');
                 if (!container) {
                     console.error('Container hourlyChartContainer non trouvé');
@@ -993,6 +994,7 @@
         // Charger le graphique de comparaison des élections
         async function loadComparisonChart() {
             try {
+                const token = getToken();
                 const container = document.getElementById('comparisonChartContainer');
                 if (!container) {
                     console.error('Container comparisonChartContainer non trouvé');
@@ -1073,6 +1075,7 @@
         // Exporter les statistiques
         async function exportStats(format) {
             try {
+                const token = getToken();
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 

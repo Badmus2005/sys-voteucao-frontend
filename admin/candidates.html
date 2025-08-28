@@ -750,14 +750,16 @@
         const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
         const UPLOAD_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
 
-        const token = localStorage.getItem('adminToken');
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
         // Fonctions d'authentification pour le dashboard
         const DASHBOARD_AUTH = {
-            /**
-             * Vérifie si l'admin est connecté
-             */
             isAuthenticated: () => {
                 try {
+                    const token = getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -769,11 +771,9 @@
                 }
             },
 
-            /**
-             * Vérifie le rôle de l'admin
-             */
             getUserRole: () => {
                 try {
+                    const token = getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -784,12 +784,10 @@
                 }
             },
 
-            /**
-             * Déconnexion de l'admin
-             */
             logout: () => {
-                localStorage.removeItem('adminToken');
-                window.location.href = '/admin';
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin/login';
             }
         };
 
@@ -799,8 +797,8 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin');
-                window.location.href = '/admin';
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin/login';
                 return;
             }
 
@@ -857,6 +855,7 @@
         // Charger la liste des élections
         async function loadElections() {
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
                     method: 'GET',
                     headers: {
@@ -894,6 +893,7 @@
 
         async function loadDashboardData(page = 1) {
             try {
+                const token = getToken();
                 showLoading();
                 currentPage = page;
 
@@ -1083,6 +1083,10 @@
             }
 
             try {
+                const token = getToken();
+
+                // Préparer les données
+
                 const candidateData = {
                     nom: document.getElementById('nom').value,
                     prenom: document.getElementById('prenom').value,
@@ -1135,6 +1139,7 @@
             if (!currentCandidateId) return;
 
             try {
+                const token = getToken();
                 const response = await fetch(`${API_BASE}${CANDIDATES_ENDPOINT}/${currentCandidateId}`, {
                     method: 'DELETE',
                     headers: {
