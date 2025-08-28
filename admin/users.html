@@ -346,6 +346,18 @@
             color: var(--gris-clair);
         }
 
+        .error-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--danger);
+        }
+
+        .error-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--danger);
+        }
+
         /* Modal */
         .modal-overlay {
             position: fixed;
@@ -417,6 +429,7 @@
             word-break: break-all;
             flex: 1;
             margin-right: 10px;
+            font-size: 0.9rem;
         }
 
         .copy-btn {
@@ -583,7 +596,7 @@
     <script src="../config.js"></script>
     <script>
         // Configuration API
-        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const API_BASE_URL = CONFIG.API_BASE_URL;
         const API_STUDENTS = `${API_BASE_URL}/students`;
         const API_STATS = `${API_BASE_URL}/students/stats`;
 
@@ -646,17 +659,60 @@
             }, 3000);
         }
 
-        // Vérifier l'authentification
+        // Fonction API call avec gestion d'erreurs améliorée
+        async function apiCall(url, options = {}) {
+            const token = getToken();
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            };
 
+            try {
+                const response = await fetch(url, { ...defaultOptions, ...options });
 
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/admin';
+                    return null;
+                }
 
-        // Charger les étudiants
+                if (!response.ok) {
+                    // Pour les erreurs 500, on essaie de récupérer le message d'erreur
+                    if (response.status === 500) {
+                        try {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `Erreur serveur (500): ${response.statusText}`);
+                        } catch (jsonError) {
+                            throw new Error(`Erreur serveur (500): ${response.statusText}`);
+                        }
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // Charger les étudiants avec gestion d'erreurs améliorée
         async function fetchStudents(params = {}) {
             const queryParams = new URLSearchParams(params).toString();
             const url = queryParams ? `${API_STUDENTS}?${queryParams}` : API_STUDENTS;
 
             try {
+                document.getElementById('studentsList').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+
                 const result = await apiCall(url);
+
                 if (result && result.success) {
                     studentsData = result.data.map(student => ({
                         id: student.id,
@@ -666,24 +722,34 @@
                         email: student.user?.email || 'N/A',
                         filiere: student.filiere || 'N/A',
                         annee: student.annee || 'N/A',
+                        ecole: student.ecole || 'N/A',
                         status: student.user?.actif ? 'Actif' : 'Inactif',
                         actif: student.user?.actif || false
                     }));
 
                     applyFilters();
                     updateStatsFromData(studentsData);
+                } else {
+                    throw new Error(result?.message || 'Format de réponse invalide');
                 }
             } catch (error) {
+                console.error('Error fetching students:', error);
                 document.getElementById('studentsList').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle"></i>
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
                         <p>Erreur lors du chargement des étudiants</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
+                        <button class="btn btn-primary" onclick="fetchStudents()" style="margin-top: 15px;">
+                            <i class="fas fa-refresh"></i> Réessayer
+                        </button>
                     </div>
                 `;
+                // Mettre des valeurs par défaut pour les stats
+                updateStatsFromData([]);
             }
         }
 
-        // Charger les statistiques
+        // Charger les statistiques avec gestion d'erreurs
         async function fetchStats() {
             try {
                 const result = await apiCall(API_STATS);
@@ -696,7 +762,21 @@
                 }
             } catch (error) {
                 console.error('Error fetching stats:', error);
+                // On ne montre pas d'erreur pour les stats, on utilise les données locales
             }
+        }
+
+        // Mise à jour des statistiques depuis les données locales
+        function updateStatsFromData(data) {
+            const total = data.length;
+            const active = data.filter(s => s.actif).length;
+            const inactive = total - active;
+            const activationRate = total > 0 ? ((active / total) * 100).toFixed(2) : '0.00';
+
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('activeStudents').textContent = active;
+            document.getElementById('inactiveStudents').textContent = inactive;
+            document.getElementById('activationRate').textContent = `${activationRate}%`;
         }
 
         // Appliquer les filtres
@@ -717,7 +797,8 @@
                 const matchesSearch = search === '' ||
                     student.nom.toLowerCase().includes(search) ||
                     student.prenom.toLowerCase().includes(search) ||
-                    student.identifiantTemporaire.toLowerCase().includes(search);
+                    student.identifiantTemporaire.toLowerCase().includes(search) ||
+                    student.email.toLowerCase().includes(search);
 
                 return matchesEcole && matchesFiliere && matchesAnnee && matchesStatus && matchesSearch;
             });
@@ -737,6 +818,7 @@
                     <div class="empty-state">
                         <i class="fas fa-user-graduate"></i>
                         <p>Aucun étudiant trouvé</p>
+                        ${studentsData.length === 0 ? '<p>Veuillez réessayer plus tard</p>' : '<p>Essayez de modifier vos filtres</p>'}
                     </div>
                 `;
                 return;
@@ -791,19 +873,6 @@
             renderTable();
         }
 
-        // Mise à jour des statistiques depuis les données
-        function updateStatsFromData(data) {
-            const total = data.length;
-            const active = data.filter(s => s.actif).length;
-            const inactive = total - active;
-            const activationRate = total > 0 ? ((active / total) * 100).toFixed(2) : '0.00';
-
-            document.getElementById('totalStudents').textContent = total;
-            document.getElementById('activeStudents').textContent = active;
-            document.getElementById('inactiveStudents').textContent = inactive;
-            document.getElementById('activationRate').textContent = `${activationRate}%`;
-        }
-
         // Réinitialiser l'accès
         async function resetStudentAccess(studentId) {
             try {
@@ -846,8 +915,12 @@
         // Copier dans le presse-papiers
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
+            if (text === 'Erreur' || text === 'En attente...') return;
+
             navigator.clipboard.writeText(text).then(() => {
                 showToast('Copié dans le presse-papiers');
+            }).catch(() => {
+                showToast('Erreur lors de la copie', 'error');
             });
         }
 
@@ -896,7 +969,9 @@
             });
 
             // Charger les données initiales
-            fetchStats();
+            fetchStats().catch(() => {
+                // En cas d'erreur des stats, on continue avec les données locales
+            });
             fetchStudents();
         });
 
@@ -911,6 +986,11 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(applyFilters, 300);
         });
+
+        // Fonctions globales pour les événements onclick
+        window.openResetModal = openResetModal;
+        window.gotoPage = gotoPage;
+        window.fetchStudents = fetchStudents;
     </script>
 </body>
 
