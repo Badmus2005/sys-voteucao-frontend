@@ -572,6 +572,19 @@
             }, 5000);
         }
 
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackgroundSlider(); initPasswordToggle(); initResetModal();
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', async e => {
+                e.preventDefault();
+                const emailInput = document.getElementById('email'), passwordInput = document.getElementById('password');
+                if (validateEmailField(emailInput, document.getElementById('emailError')) &&
+                    validatePasswordField(passwordInput, document.getElementById('passwordError'))) {
+                    await handleLogin(emailInput.value.trim(), passwordInput.value);
+                }
+            });
+        });
         // --- Toggle mot de passe ---
         function initPasswordToggle() {
             const pwInput = document.getElementById('password');
@@ -673,19 +686,7 @@
             finally { showLoading(false); }
         }
 
-        // --- Init ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initBackgroundSlider(); initPasswordToggle(); initResetModal();
-            const form = document.getElementById('loginForm');
-            form.addEventListener('submit', async e => {
-                e.preventDefault();
-                const emailInput = document.getElementById('email'), passwordInput = document.getElementById('password');
-                if (validateEmailField(emailInput, document.getElementById('emailError')) &&
-                    validatePasswordField(passwordInput, document.getElementById('passwordError'))) {
-                    await handleLogin(emailInput.value.trim(), passwordInput.value);
-                }
-            });
-        });
+
     </script>
 
 </body>
