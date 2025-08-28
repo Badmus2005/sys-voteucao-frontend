@@ -261,44 +261,17 @@ const UTILS = {
     /**
      * Vérifie si l'utilisateur est connecté
      */
-    isAuthenticated: () => {
-        const token = localStorage.getItem('token');
-        if (!token) return false;
 
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const now = Date.now() / 1000;
-            return payload.exp > now;
-        } catch (error) {
-            return false;
-        }
-    },
 
     /**
      * Vérifie le rôle de l'utilisateur
      */
-    getUserRole: () => {
-        const token = localStorage.getItem('token');
-        if (!token) return null;
 
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.role;
-        } catch (error) {
-            return null;
-        }
-    },
 
     /**
      * Décode le token JWT
      */
-    decodeToken: (token) => {
-        try {
-            return JSON.parse(atob(token.split('.')[1]));
-        } catch (error) {
-            return null;
-        }
-    },
+
 
     /**
      * Génère un ID unique
