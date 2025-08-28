@@ -466,6 +466,15 @@
             }
         }
 
+        /* AFFICHAGE NOM FICHIER */
+        .file-name-display {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gris-texte);
+            font-style: italic;
+            display: none;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 900px) {
             .profile-container {
@@ -614,6 +623,7 @@
                                 <i class="fas fa-camera"></i> Changer la photo
                             </button>
                             <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                            <div id="file-name-display" class="file-name-display"></div>
                         </div>
                     </div>
                 </div>
@@ -687,11 +697,22 @@
 
     <script src="../config.js"></script>
     <script>
-        const API_BASE = CONFIG.API.BASE_URL;
-        const APP_STATE = {
-            userData: null
+        // Configuration par défaut si config.js n'est pas chargé
+        const DEFAULT_CONFIG = {
+            API: {
+                BASE_URL: 'https://sys-voteucao-backend-production-311c.up.railway.app',
+                ENDPOINTS: {
+                    AUTH: {
+                        CHANGE_PASSWORD: '/api/userLogin/change-password'
+                    },
+                    USERS: {
+                        PROFILE: '/api/users/profile',
+                        AVATAR: '/api/users/avatar'
+                    }
+                }
+            }
         };
-        const token = localStorage.getItem('token');
+
         // Fonctions d'authentification 
         const STUDENT_AUTH = {
             /**
@@ -699,6 +720,7 @@
              */
             isAuthenticated: () => {
                 try {
+                    const token = localStorage.getItem('token');
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -715,6 +737,7 @@
              */
             getUserRole: () => {
                 try {
+                    const token = localStorage.getItem('token');
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -733,9 +756,9 @@
                 window.location.href = '/user/login';
             }
         };
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', async function () {
-
             // Vérification de l'authentification et du rôle
             const role = STUDENT_AUTH.getUserRole();
             const isAuth = STUDENT_AUTH.isAuthenticated();
@@ -752,9 +775,7 @@
                 return;
             }
 
-
             showLoading();
-            await checkAuth();
             await loadUserData();
             setupEventListeners();
             updateUI();
@@ -764,9 +785,15 @@
         // Chargement données utilisateur
         async function loadUserData() {
             try {
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                // Utiliser la configuration importée ou la configuration par défaut
+                const config = window.CONFIG || DEFAULT_CONFIG;
+                const API_BASE = config.API.BASE_URL;
+                const profileEndpoint = config.API.ENDPOINTS.USERS.PROFILE || '/api/users/profile';
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}${profileEndpoint}`, {
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -778,7 +805,8 @@
 
                 if (!response.ok) throw new Error('Erreur chargement profil');
 
-                APP_STATE.userData = await response.json();
+                const userData = await response.json();
+                window.APP_STATE = { userData };
                 updateUserProfile();
             } catch (error) {
                 console.error('Erreur:', error);
@@ -788,12 +816,12 @@
 
         // Mise à jour UI profil
         function updateUserProfile() {
-            if (!APP_STATE.userData) return;
+            if (!window.APP_STATE || !window.APP_STATE.userData) return;
 
-            const user = APP_STATE.userData;
+            const user = window.APP_STATE.userData;
 
             // Header
-            document.getElementById('username').textContent = `${user.prenom} ${user.nom}`;
+            document.getElementById('username').querySelector('span').textContent = `${user.prenom} ${user.nom}`;
 
             // Sidebar
             document.getElementById('profile-name').textContent = `${user.prenom} ${user.nom}`;
@@ -817,9 +845,9 @@
         // Gestion événements
         function setupEventListeners() {
             // Déconnexion
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                localStorage.removeItem('token');
-                window.location.href = 'login.html';
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                STUDENT_AUTH.logout();
             });
 
             // Profil - Bouton modifier
@@ -840,6 +868,25 @@
 
             // Upload avatar
             document.getElementById('avatar-upload').addEventListener('change', handleAvatarUpload);
+
+            // Toggle visibilité mot de passe
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
         }
 
         // Gestion profil - Mode édition
@@ -867,14 +914,12 @@
         }
 
         function loadEditFormData() {
-            if (!APP_STATE.userData) return;
+            if (!window.APP_STATE || !window.APP_STATE.userData) return;
 
-            const user = APP_STATE.userData;
+            const user = window.APP_STATE.userData;
             document.getElementById('email').value = user.email || '';
             document.getElementById('lastname').value = user.nom || '';
             document.getElementById('firstname').value = user.prenom || '';
-            document.getElementById('program').value = user.filiere || '';
-            document.getElementById('year').value = user.annee || '';
         }
 
         function cancelEdit() {
@@ -888,25 +933,29 @@
             const formData = {
                 email: document.getElementById('email').value,
                 nom: document.getElementById('lastname').value,
-                prenom: document.getElementById('firstname').value,
-                filiere: document.getElementById('program').value,
-                annee: parseInt(document.getElementById('year').value)
+                prenom: document.getElementById('firstname').value
             };
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`, {
+                // Utiliser la configuration importée ou la configuration par défaut
+                const config = window.CONFIG || DEFAULT_CONFIG;
+                const API_BASE = config.API.BASE_URL;
+                const profileEndpoint = config.API.ENDPOINTS.USERS.PROFILE || '/api/users/profile';
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}${profileEndpoint}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(formData)
                 });
 
                 if (response.ok) {
                     const updatedData = await response.json();
-                    APP_STATE.userData = { ...APP_STATE.userData, ...updatedData };
+                    window.APP_STATE.userData = { ...window.APP_STATE.userData, ...updatedData };
                     updateUserProfile();
                     toggleEditMode();
                     showNotification('Profil mis à jour avec succès', 'success');
@@ -932,6 +981,7 @@
             document.getElementById('password-modal').classList.remove('active');
             setTimeout(() => {
                 document.getElementById('password-modal').style.display = 'none';
+                document.getElementById('password-form').reset();
             }, 300);
         }
 
@@ -949,11 +999,17 @@
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.CHANGE_PASSWORD}`, {
+                // Utiliser la configuration importée ou la configuration par défaut
+                const config = window.CONFIG || DEFAULT_CONFIG;
+                const API_BASE = config.API.BASE_URL;
+                const changePasswordEndpoint = config.API.ENDPOINTS.AUTH.CHANGE_PASSWORD || '/api/userLogin/change-password';
+
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}${changePasswordEndpoint}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ currentPassword, newPassword })
                 });
@@ -961,12 +1017,12 @@
                 if (response.ok) {
                     closePasswordModal();
                     showNotification('Mot de passe changé avec succès', 'success');
-                    document.getElementById('password-form').reset();
                 } else {
-                    throw new Error('Erreur changement mot de passe');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur changement mot de passe');
                 }
             } catch (error) {
-                showNotification('Erreur lors du changement de mot de passe', 'error');
+                showNotification(error.message || 'Erreur lors du changement de mot de passe', 'error');
             } finally {
                 hideLoading();
             }
@@ -977,20 +1033,32 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            // Afficher le nom du fichier
+            const fileNameDisplay = document.getElementById('file-name-display');
+            fileNameDisplay.textContent = `Fichier sélectionné: ${file.name}`;
+            fileNameDisplay.style.display = 'block';
+
             if (!file.type.match('image.*')) {
                 showNotification('Veuillez sélectionner une image', 'error');
+                fileNameDisplay.style.display = 'none';
                 return;
             }
 
             try {
                 showLoading();
+                // Utiliser la configuration importée ou la configuration par défaut
+                const config = window.CONFIG || DEFAULT_CONFIG;
+                const API_BASE = config.API.BASE_URL;
+                const avatarEndpoint = config.API.ENDPOINTS.USERS.AVATAR || '/api/users/avatar';
+
+                const token = localStorage.getItem('token');
                 const formData = new FormData();
                 formData.append('avatar', file);
 
-                const response = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.USERS.AVATAR}`, {
+                const response = await fetch(`${API_BASE}${avatarEndpoint}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: formData
                 });
@@ -999,11 +1067,16 @@
                     const result = await response.json();
                     document.getElementById('profile-avatar-view').src = result.avatarUrl;
                     showNotification('Photo de profil mise à jour', 'success');
+                    // Masquer l'affichage du nom de fichier après succès
+                    setTimeout(() => {
+                        fileNameDisplay.style.display = 'none';
+                    }, 3000);
                 } else {
                     throw new Error('Erreur upload avatar');
                 }
             } catch (error) {
                 showNotification('Erreur lors du changement de photo', 'error');
+                fileNameDisplay.style.display = 'none';
             } finally {
                 hideLoading();
                 e.target.value = '';
@@ -1021,9 +1094,32 @@
 
         function showNotification(message, type = 'info') {
             const notification = document.getElementById('notification');
-            notification.className = `notification ${type} show`;
+            const icon = notification.querySelector('i');
+
+            // Changer l'icône selon le type
+            switch (type) {
+                case 'success':
+                    icon.className = 'fas fa-check-circle';
+                    break;
+                case 'error':
+                    icon.className = 'fas fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    icon.className = 'fas fa-exclamation-triangle';
+                    break;
+                default:
+                    icon.className = 'fas fa-info-circle';
+            }
+
+            notification.className = `notification ${type}`;
             document.getElementById('notification-message').textContent = message;
 
+            // Afficher la notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            // Cacher après 5 secondes
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 5000);
