@@ -601,6 +601,7 @@
         const API_BASE = CONFIG.API.BASE_URL;
         const API_STUDENTS = `${API_BASE}/students`;
         const API_RESET_ACCESS = `${API_BASE}/students`;
+        const API_CONFIG_ACADEMIC = `${API_BASE}/config-academic`;
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -665,8 +666,11 @@
         });
 
         function initializeDashboard() {
-            fetchStudents();
+            chargerFiltres().then(() => {
+                fetchStudents();
+            });
         }
+        // === Variables Globales ===
 
         // Pagination
         let currentPage = 1;
@@ -689,6 +693,33 @@
 
         let selectedStudent = null;
 
+        // === Événements Filtres & Recherche ===
+        async function chargerFiltres() {
+            try {
+                const res = await fetch(`${API_BASE}${API_CONFIG_ACADEMIC}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+
+                remplirSelect('ecoleFilter', data.ecoles);
+                remplirSelect('filiereFilter', data.filieres);
+                remplirSelect('anneeFilter', data.annees);
+            } catch (err) {
+                console.error("Erreur chargement filtres:", err);
+                showToast("Erreur de chargement des filtres", "error");
+            }
+        }
+
+        function remplirSelect(id, options) {
+            const select = document.getElementById(id);
+            select.innerHTML = `<option value="all">Toutes</option>` +
+                options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+        }
+
+
         // === Fetch étudiants ===
         async function fetchStudents() {
             studentsList.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
@@ -701,7 +732,9 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`Erreur ${response.status}: ${errorText}`);
+
                 }
 
                 const result = await response.json();
@@ -883,7 +916,12 @@
 
         // === Event listeners filtres ===
         [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(el => el.addEventListener("change", applyFilters));
-        searchInput.addEventListener("input", applyFilters);
+        let debounceTimer;
+        searchInput.addEventListener("input", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilters, 300);
+        });
+
 
         // Initialisation des événements modal
         document.addEventListener('DOMContentLoaded', function () {
