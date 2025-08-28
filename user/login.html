@@ -680,7 +680,10 @@
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
                     showMessage('Connexion réussie! Redirection...', 'success');
-                    setTimeout(() => window.location.href = data.requirePasswordChange ? '/user/change-password' : '/user/dashboard', 1500);
+                    setTimeout(() => {
+                        window.location.replace(data.requirePasswordChange ? '/user/change-password' : '/user/dashboard');
+                    }, 1500);
+
                 } else { showMessage(data.message || 'Email ou mot de passe incorrect', 'error'); }
             } catch (err) { showMessage('Erreur serveur ou connexion', 'error'); }
             finally { showLoading(false); }
