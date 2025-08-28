@@ -1418,17 +1418,87 @@
         const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
         const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
         const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
+
         const token = localStorage.getItem('adminToken');
-        // Vérification de l'authentification et du rôle
-        const role = UTILS.getUserRole();
-        const isAuth = UTILS.isAuthenticated();
 
-        if (!isAuth) {
-            window.location.href = '/admin';
-        } else if (role !== 'ADMIN') {
-            window.location.href = '/unauthorized.html';
+        // Fonctions d'authentification pour le dashboard
+        const DASHBOARD_AUTH = {
+            /**
+             * Vérifie si l'admin est connecté
+             */
+            isAuthenticated: () => {
+                try {
+                    if (!token) return false;
+
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const now = Date.now() / 1000;
+                    return payload.exp > now;
+                } catch (error) {
+                    console.error('Erreur de vérification d\'authentification:', error);
+                    return false;
+                }
+            },
+
+            /**
+             * Vérifie le rôle de l'admin
+             */
+            getUserRole: () => {
+                try {
+                    if (!token) return null;
+
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.role;
+                } catch (error) {
+                    console.error('Erreur de récupération du rôle:', error);
+                    return null;
+                }
+            },
+
+            /**
+             * Déconnexion de l'admin
+             */
+            logout: () => {
+                localStorage.removeItem('adminToken');
+                window.location.href = '/admin';
+            }
+        };
+
+        // Vérification de l'authentification au chargement de la page
+        document.addEventListener('DOMContentLoaded', function () {
+            const role = DASHBOARD_AUTH.getUserRole();
+            const isAuth = DASHBOARD_AUTH.isAuthenticated();
+
+            if (!isAuth) {
+                console.log('Non authentifié, redirection vers /admin');
+                window.location.href = '/admin';
+                return;
+            }
+
+            if (role !== 'ADMIN') {
+                console.log('Rôle insuffisant, redirection vers /unauthorized');
+                window.location.href = '/unauthorized.html';
+                return;
+            }
+
+            // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            // Initialiser les gestionnaires d'événements
+            setupEventListeners();
+
+            // Charger les données du tableau de bord
+            loadAdminInfo();
+            loadStats();
+            loadActivity();
+            loadVoteStats();
+            loadNotifications();
+
+            // Charger tous les codes
+            loadAllCodes();
+
         }
-
         // ------------ UTILS ------------
         function showLoading() {
             const loader = document.getElementById('loadingOverlay');
@@ -2148,21 +2218,7 @@
             });
         }
 
-        // ------------ INITIALISATION ------------
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialiser les gestionnaires d'événements
-            setupEventListeners();
 
-            // Charger les données du tableau de bord
-            loadAdminInfo();
-            loadStats();
-            loadActivity();
-            loadVoteStats();
-            loadNotifications();
-
-            // Charger tous les codes
-            loadAllCodes();
-        });
     </script>
 </body>
 
