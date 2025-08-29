@@ -593,404 +593,112 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    <script src="../config.js"></script>
+
     <script>
-        // Configuration API
-        const API_BASE_URL = 'https://sys-voteucao-backend-production-311c.up.railway.app';
-        const API_STUDENTS = `${API_BASE_URL}/students`;
-        const API_STATS = `${API_BASE_URL}/students/stats`;
 
-        // Variables globales
-        let currentPage = 1;
-        const rowsPerPage = 10;
-        let studentsData = [];
-        let filteredData = [];
-        let selectedStudent = null;
+        const API_URL = "https://sys-voteucao-backend-production-311c.up.railway.app";
 
-        // Fonction pour récupérer le token
-        function getToken() {
-            return localStorage.getItem('token');
-        }
+        // récupérer le token du stockage local (si tu l’as mis après login)
+        const TOKEN = localStorage.getItem("token");
 
-        // Fonctions d'authentification pour le dashboard
-        const DASHBOARD_AUTH = {
-            isAuthenticated: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return false;
+        // refs DOM
+        const studentsList = document.getElementById("studentsList");
+        const totalStudentsEl = document.getElementById("totalStudents");
+        const activeStudentsEl = document.getElementById("activeStudents");
+        const inactiveStudentsEl = document.getElementById("inactiveStudents");
+        const activationRateEl = document.getElementById("activationRate");
 
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    return payload.exp > now;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
-                }
-            },
-
-            getUserRole: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminName');
-                window.location.href = '/admin/login';
-            }
-        };
-
-        // Toast messages
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
-        }
-
-        // Fonction API call avec gestion d'erreurs améliorée
-        async function apiCall(url, options = {}) {
-            const token = getToken();
-            const defaultOptions = {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                }
-            };
+        async function fetchStudents() {
+            studentsList.innerHTML = `
+    <div class="loading"><div class="spinner"></div></div>
+  `;
 
             try {
-                const response = await fetch(url, { ...defaultOptions, ...options });
-
-                if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    window.location.href = '/admin';
-                    return null;
-                }
-
-                if (!response.ok) {
-                    // Pour les erreurs 500, on essaie de récupérer le message d'erreur
-                    if (response.status === 500) {
-                        try {
-                            const errorData = await response.json();
-                            throw new Error(errorData.message || `Erreur serveur (500): ${response.statusText}`);
-                        } catch (jsonError) {
-                            throw new Error(`Erreur serveur (500): ${response.statusText}`);
-                        }
+                const res = await fetch(`${API_URL}/students`, {
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN}`,
+                        "Content-Type": "application/json"
                     }
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                });
+
+                if (!res.ok) throw new Error("Erreur API étudiants");
+
+                const students = await res.json();
+
+                if (!students || students.length === 0) {
+                    studentsList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-user-graduate"></i>
+          <p>Aucun étudiant trouvé.</p>
+        </div>`;
+                    return;
                 }
 
-                return await response.json();
-            } catch (error) {
-                console.error('API Error:', error);
-                throw error;
+                studentsList.innerHTML = students.map(student => `
+            <div class="table-row">
+                <div>${student.nom} ${student.prenom}</div>
+                <div>${student.matricule || student.identifiantTemporaire || "-"}</div>
+                <div>${student.email || "-"}</div>
+                <div>${student.filiere || "-"} / ${student.annee || "-"}</div>
+                <div>
+                    <span class="status-badge ${student.status === " Actif" ? "status-active" : "status-inactive"}">
+                    ${student.status || "?"}
+                </span>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-icon btn-reset" title="Réinitialiser">
+                    <i class="fas fa-key"></i>
+                </button>
+            </div>
+        </div>
+        `).join("");
+
+            } catch (err) {
+                console.error(err);
+                studentsList.innerHTML = `
+            < div class="error-state" >
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Impossible de charger les étudiants.</p>
+      </div > `;
             }
         }
 
-        // Charger les étudiants avec gestion d'erreurs améliorée
-        async function fetchStudents(params = {}) {
-            const queryParams = new URLSearchParams(params).toString();
-            const url = queryParams ? `${API_STUDENTS}?${queryParams}` : API_STUDENTS;
-
-            try {
-                document.getElementById('studentsList').innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                    </div>
-                `;
-
-                const result = await apiCall(url);
-
-                if (result && result.success) {
-                    studentsData = result.data.map(student => ({
-                        id: student.id,
-                        nom: student.nom || 'N/A',
-                        prenom: student.prenom || 'N/A',
-                        identifiantTemporaire: student.identifiantTemporaire || 'N/A',
-                        email: student.user?.email || 'N/A',
-                        filiere: student.filiere || 'N/A',
-                        annee: student.annee || 'N/A',
-                        ecole: student.ecole || 'N/A',
-                        status: student.user?.actif ? 'Actif' : 'Inactif',
-                        actif: student.user?.actif || false
-                    }));
-
-                    applyFilters();
-                    updateStatsFromData(studentsData);
-                } else {
-                    throw new Error(result?.message || 'Format de réponse invalide');
-                }
-            } catch (error) {
-                console.error('Error fetching students:', error);
-                document.getElementById('studentsList').innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Erreur lors du chargement des étudiants</p>
-                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
-                        <button class="btn btn-primary" onclick="fetchStudents()" style="margin-top: 15px;">
-                            <i class="fas fa-refresh"></i> Réessayer
-                        </button>
-                    </div>
-                `;
-                // Mettre des valeurs par défaut pour les stats
-                updateStatsFromData([]);
-            }
-        }
-
-        // Charger les statistiques avec gestion d'erreurs
         async function fetchStats() {
             try {
-                const result = await apiCall(API_STATS);
-                if (result && result.success) {
-                    const stats = result.statistics;
-                    document.getElementById('totalStudents').textContent = stats.totalStudents;
-                    document.getElementById('activeStudents').textContent = stats.activeStudents;
-                    document.getElementById('inactiveStudents').textContent = stats.inactiveStudents;
-                    document.getElementById('activationRate').textContent = `${stats.activationRate}%`;
-                }
-            } catch (error) {
-                console.error('Error fetching stats:', error);
-                // On ne montre pas d'erreur pour les stats, on utilise les données locales
-            }
-        }
-
-        // Mise à jour des statistiques depuis les données locales
-        function updateStatsFromData(data) {
-            const total = data.length;
-            const active = data.filter(s => s.actif).length;
-            const inactive = total - active;
-            const activationRate = total > 0 ? ((active / total) * 100).toFixed(2) : '0.00';
-
-            document.getElementById('totalStudents').textContent = total;
-            document.getElementById('activeStudents').textContent = active;
-            document.getElementById('inactiveStudents').textContent = inactive;
-            document.getElementById('activationRate').textContent = `${activationRate}%`;
-        }
-
-        // Appliquer les filtres
-        function applyFilters() {
-            const ecole = document.getElementById('ecoleFilter').value;
-            const filiere = document.getElementById('filiereFilter').value;
-            const annee = document.getElementById('anneeFilter').value;
-            const status = document.getElementById('statusFilter').value;
-            const search = document.getElementById('searchInput').value.toLowerCase();
-
-            filteredData = studentsData.filter(student => {
-                const matchesEcole = ecole === 'all' || student.ecole === ecole;
-                const matchesFiliere = filiere === 'all' || student.filiere === filiere;
-                const matchesAnnee = annee === 'all' || student.annee.toString() === annee;
-                const matchesStatus = status === 'all' ||
-                    (status === 'active' && student.actif) ||
-                    (status === 'inactive' && !student.actif);
-                const matchesSearch = search === '' ||
-                    student.nom.toLowerCase().includes(search) ||
-                    student.prenom.toLowerCase().includes(search) ||
-                    student.identifiantTemporaire.toLowerCase().includes(search) ||
-                    student.email.toLowerCase().includes(search);
-
-                return matchesEcole && matchesFiliere && matchesAnnee && matchesStatus && matchesSearch;
-            });
-
-            renderTable();
-            renderPagination();
-        }
-
-        // Rendu du tableau
-        function renderTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const pageData = filteredData.slice(start, end);
-
-            if (pageData.length === 0) {
-                document.getElementById('studentsList').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-graduate"></i>
-                        <p>Aucun étudiant trouvé</p>
-                        ${studentsData.length === 0 ? '<p>Veuillez réessayer plus tard</p>' : '<p>Essayez de modifier vos filtres</p>'}
-                    </div>
-                `;
-                return;
-            }
-
-            const tableHTML = pageData.map(student => `
-                <div class="table-row">
-                    <div>${student.nom} ${student.prenom}</div>
-                    <div>${student.identifiantTemporaire}</div>
-                    <div>${student.email}</div>
-                    <div>${student.filiere} / ${student.annee}</div>
-                    <div>
-                        <span class="status-badge ${student.actif ? 'status-active' : 'status-inactive'}">
-                            ${student.status}
-                        </span>
-                    </div>
-                    <div class="action-buttons">
-                        <div class="btn-icon btn-reset" onclick="openResetModal(${student.id})">
-                            <i class="fas fa-key"></i>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('studentsList').innerHTML = tableHTML;
-        }
-
-        // Pagination
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            const pagination = document.getElementById('pagination');
-
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-
-            let paginationHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                paginationHTML += `
-                    <div class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="gotoPage(${i})">
-                        ${i}
-                    </div>
-                `;
-            }
-
-            pagination.innerHTML = paginationHTML;
-        }
-
-        function gotoPage(page) {
-            currentPage = page;
-            renderTable();
-        }
-
-        // Réinitialiser l'accès
-        async function resetStudentAccess(studentId) {
-            try {
-                const result = await apiCall(`${API_STUDENTS}/${studentId}/reset-access`, {
-                    method: 'POST'
+                const res = await fetch(`${API_URL} /students/stats`, {
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN} `,
+                        "Content-Type": "application/json"
+                    }
                 });
 
-                if (result && result.success) {
-                    return result.data;
-                }
-                throw new Error(result?.message || 'Erreur lors de la réinitialisation');
-            } catch (error) {
-                showToast(error.message, 'error');
-                throw error;
+                if (!res.ok) throw new Error("Erreur API stats");
+
+                const stats = await res.json();
+
+                totalStudentsEl.textContent = stats.totalStudents || 0;
+                activeStudentsEl.textContent = stats.activeStudents || 0;
+                inactiveStudentsEl.textContent = stats.inactiveStudents || 0;
+                activationRateEl.textContent = stats.activationRate
+                    ? `${stats.activationRate}%`
+                    : "0%";
+
+            } catch (err) {
+                console.error(err);
+                totalStudentsEl.textContent = "-";
+                activeStudentsEl.textContent = "-";
+                inactiveStudentsEl.textContent = "-";
+                activationRateEl.textContent = "-";
             }
         }
 
-        // Ouvrir le modal de réinitialisation
-        async function openResetModal(studentId) {
-            selectedStudent = studentsData.find(s => s.id === studentId);
-            if (!selectedStudent) return;
-
-            document.getElementById('resetStudentName').textContent = `${selectedStudent.nom} ${selectedStudent.prenom}`;
-            document.getElementById('resetStudentIdentifiant').textContent = selectedStudent.identifiantTemporaire;
-            document.getElementById('resetStudentFiliere').textContent = selectedStudent.filiere;
-            document.getElementById('resetStudentAnnee').textContent = selectedStudent.annee;
-
-            document.getElementById('resetModal').classList.add('active');
-
-            try {
-                const credentials = await resetStudentAccess(studentId);
-                document.getElementById('newIdentifiant').textContent = credentials.temporaryIdentifiant;
-                document.getElementById('newPassword').textContent = credentials.temporaryPassword;
-            } catch (error) {
-                document.getElementById('newIdentifiant').textContent = 'Erreur';
-                document.getElementById('newPassword').textContent = 'Erreur';
-            }
-        }
-
-        // Copier dans le presse-papiers
-        function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            if (text === 'Erreur' || text === 'En attente...') return;
-
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Copié dans le presse-papiers');
-            }).catch(() => {
-                showToast('Erreur lors de la copie', 'error');
-            });
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function () {
-            const role = DASHBOARD_AUTH.getUserRole();
-            const isAuth = DASHBOARD_AUTH.isAuthenticated();
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
-                window.location.href = '/admin/login';
-                return;
-            }
-
-            if (role !== 'ADMIN') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '/unauthorized.html';
-                return;
-            }
-
-            // Événements
-            document.getElementById('searchBtn').addEventListener('click', applyFilters);
-            document.getElementById('searchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') applyFilters();
-            });
-
-            document.getElementById('closeResetModal').addEventListener('click', () => {
-                document.getElementById('resetModal').classList.remove('active');
-            });
-
-            document.getElementById('cancelReset').addEventListener('click', () => {
-                document.getElementById('resetModal').classList.remove('active');
-            });
-
-            document.getElementById('confirmReset').addEventListener('click', () => {
-                document.getElementById('resetModal').classList.remove('active');
-                showToast('Accès réinitialisés avec succès');
-                fetchStudents(); // Recharger les données
-            });
-
-            document.querySelectorAll('.copy-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const elementId = e.target.closest('.copy-btn').dataset.copy;
-                    copyToClipboard(elementId);
-                });
-            });
-
-            // Charger les données initiales
-            fetchStats().catch(() => {
-                // En cas d'erreur des stats, on continue avec les données locales
-            });
+        // Au chargement
+        document.addEventListener("DOMContentLoaded", () => {
             fetchStudents();
+            fetchStats();
         });
 
-        // Gestion des filtres
-        ['ecoleFilter', 'filiereFilter', 'anneeFilter', 'statusFilter'].forEach(id => {
-            document.getElementById(id).addEventListener('change', applyFilters);
-        });
 
-        // Recherche avec debounce
-        let searchTimeout;
-        document.getElementById('searchInput').addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(applyFilters, 300);
-        });
-
-        // Fonctions globales pour les événements onclick
-        window.openResetModal = openResetModal;
-        window.gotoPage = gotoPage;
-        window.fetchStudents = fetchStudents;
     </script>
 </body>
 
