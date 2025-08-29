@@ -482,6 +482,60 @@
             font-size: 0.9rem;
         }
 
+        /* Styles pour le tableau de codes */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--gris-clair);
+        }
+
+        .codes-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .codes-table th,
+        .codes-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gris-clair);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .codes-table th {
+            background-color: var(--bleu-nuit);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .codes-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Responsive pour les écrans plus petits */
+        @media (max-width: 1200px) {
+
+            .codes-table th,
+            .codes-table td {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .codes-table {
+                min-width: 1000px;
+            }
+        }
+
         /* Génération de codes */
         .generation-section {
             margin-bottom: 2rem;
@@ -1625,6 +1679,7 @@
             }
         }
 
+
         // Fonction pour afficher les codes dans le tableau
         function renderCodesTable() {
             const tableBody = document.getElementById('codesTableBody');
@@ -1651,10 +1706,12 @@
                 const statusClass = code.used ? 'status-used' : 'status-unused';
                 const statusText = code.used ? 'Utilisé' : 'Non utilisé';
 
-                const createdAt = formatDate(code.createdAt);
-                const usedAt = code.usedAt ? formatDate(code.usedAt) : '-';
-                const generatedBy = code.generatedBy || 'Système';
-                const usedBy = code.usedBy || '-';
+                // Correction ici : utilisation de code.created_at au lieu de code.createdAt
+                const createdAt = formatDate(code.created_at || code.createdAt);
+                // Correction ici : utilisation de code.used_at au lieu de code.usedAt
+                const usedAt = code.used_at || code.usedAt ? formatDate(code.used_at || code.usedAt) : '-';
+                const generatedBy = code.generatedBy || code.generated_by || 'Système';
+                const usedBy = code.usedBy || code.used_by || '-';
 
                 row.innerHTML = `
             <td><strong>${code.code}</strong></td>
@@ -1668,7 +1725,6 @@
                 tableBody.appendChild(row);
             });
         }
-
         // Fonction pour configurer la pagination
         function setupPagination(paginationData) {
             const paginationContainer = document.getElementById('codesPagination');
