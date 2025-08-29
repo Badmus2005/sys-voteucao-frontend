@@ -511,7 +511,7 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="email"><i class="fas fa-envelope" aria-hidden="true"></i> Email</label>
-                <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+                <input type="text" id="email" name="email" placeholder="Email ou identifiant" required>
                 <div class="field-error" id="emailError"></div>
             </div>
 
@@ -608,10 +608,17 @@
             errorEl.style.display = 'none';
         }
         function validateEmailField(input, errorEl) {
-            if (!input.value.trim()) return showFieldError(input, errorEl, 'L\'email est requis'), false;
-            if (!isValidEmail(input.value.trim())) return showFieldError(input, errorEl, 'Email invalide'), false;
-            clearFieldError(input, errorEl); return true;
+            const value = input.value.trim();
+            if (!value) return showFieldError(input, errorEl, 'L\'identifiant est requis'), false;
+
+            // Si ça contient @ => validation email classique
+            if (value.includes('@') && !isValidEmail(value))
+                return showFieldError(input, errorEl, 'Email invalide'), false;
+
+            clearFieldError(input, errorEl);
+            return true;
         }
+
         function validatePasswordField(input, errorEl) {
             if (!input.value) return showFieldError(input, errorEl, 'Le mot de passe est requis'), false;
             if (input.value.length < 8) return showFieldError(input, errorEl, 'Minimum 8 caractères'), false;
