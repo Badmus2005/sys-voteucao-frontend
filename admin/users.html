@@ -593,117 +593,197 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    <script src="../config.js"></script>
     <script>
-        // Config API   
-        const API_BASE = CONFIG.API.BASE_URL;
-        const STUDENTS_ENDPOINT = 'https://sys-voteucao-backend-production-311c.up.railway.app/api/students';
-        const STUDENTS_STATS_ENDPOINT = 'https://sys-voteucao-backend-production-311c.up.railway.app/api/students/stats';
-        // récupérer le token du stockage local (si tu l’as mis après login)
-        const TOKEN = localStorage.getItem("token");
+        // ============================
+        // Configuration
+        // ============================
+        const API_BASE = 'https://sys-voteucao-backend-production-311c.up.railway.app/api/students';
+        const studentsListEl = document.getElementById('studentsList');
+        const paginationEl = document.getElementById('pagination');
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const activeStudentsEl = document.getElementById('activeStudents');
+        const inactiveStudentsEl = document.getElementById('inactiveStudents');
+        const activationRateEl = document.getElementById('activationRate');
 
-        // refs DOM
-        const studentsList = document.getElementById("studentsList");
-        const totalStudentsEl = document.getElementById("totalStudents");
-        const activeStudentsEl = document.getElementById("activeStudents");
-        const inactiveStudentsEl = document.getElementById("inactiveStudents");
-        const activationRateEl = document.getElementById("activationRate");
+        // Filtres
+        const ecoleFilter = document.getElementById('ecoleFilter');
+        const filiereFilter = document.getElementById('filiereFilter');
+        const anneeFilter = document.getElementById('anneeFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
 
+        let currentPage = 1;
+        const limit = 10;
+
+        // ============================
+        // Récupérer les étudiants
+        // ============================
         async function fetchStudents() {
-            studentsList.innerHTML = `
-    <div class="loading"><div class="spinner"></div></div>
-  `;
-
             try {
-                const res = await fetch(STUDENTS_ENDPOINT, {
-                    headers: {
-                        "Authorization": `Bearer ${TOKEN}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-                const text = await res.text();
-                console.log("Réponse brute:", text);
+                studentsListEl.innerHTML = `<div class="loading">
+        <div class="spinner"></div>
+    </div>`;
 
-                if (!res.ok) throw new Error("Erreur API étudiants");
+                // Construire les query params selon filtres
+                const params = new URLSearchParams();
+                params.append('page', currentPage);
+                params.append('limit', limit);
 
-                const students = await res.json();
+                if (ecoleFilter.value !== 'all') params.append('ecole', ecoleFilter.value);
+                if (filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
+                if (anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
+                if (statusFilter.value !== 'all') params.append('status', statusFilter.value);
+                if (searchInput.value.trim() !== '') params.append('search', searchInput.value.trim());
 
-                if (!students || students.length === 0) {
-                    studentsList.innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-user-graduate"></i>
-          <p>Aucun étudiant trouvé.</p>
-        </div>`;
+                const response = await fetch(`${API_BASE}?${params.toString()}`);
+                const data = await response.json();
+
+                if (!data.success || !data.data) {
+                    studentsListEl.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i> Impossible de charger
+        les étudiants.</div>`;
                     return;
                 }
 
-                studentsList.innerHTML = students.map(student => `
-            <div class="table-row">
-                <div>${student.nom} ${student.prenom}</div>
-                <div>${student.matricule || student.identifiantTemporaire || "-"}</div>
-                <div>${student.email || "-"}</div>
-                <div>${student.filiere || "-"} / ${student.annee || "-"}</div>
-                <div>
-                    <span class="status-badge ${student.status === " Actif" ? "status-active" : "status-inactive"}">
-                    ${student.status || "?"}
-                </span>
-            </div>
-            <div class="action-buttons">
-                <button class="btn-icon btn-reset" title="Réinitialiser">
-                    <i class="fas fa-key"></i>
-                </button>
-            </div>
-        </div>
-        `).join("");
-
-            } catch (err) {
-                console.error(err);
-                studentsList.innerHTML = `
-            < div class="error-state" >
-        <i class="fas fa-exclamation-triangle"></i>
-        <p>Impossible de charger les étudiants.</p>
-      </div > `;
+                displayStudents(data.data);
+                setupPagination(data.pagination);
+                populateFilterOptions(data.data);
+            } catch (error) {
+                console.error(error);
+                studentsListEl.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i> Erreur serveur.</div>`;
             }
         }
 
+        // ============================
+        // Afficher étudiants dans le tableau
+        // ============================
+        function displayStudents(students) {
+            if (!students.length) {
+                studentsListEl.innerHTML = `<div class="empty-state"><i class="fas fa-user-graduate"></i> Aucun étudiant trouvé.</div>`;
+                return;
+            }
+
+            studentsListEl.innerHTML = '';
+            students.forEach(s => {
+                const row = document.createElement('div');
+                row.classList.add('table-row');
+                row.innerHTML = `
+    <div>${s.nom} ${s.prenom}</div>
+    <div>${s.identifiantTemporaire || '-'}</div>
+    <div>${s.email || '-'}</div>
+    <div>${s.filiere || '-'} / ${s.annee || '-'}</div>
+    <div>
+        <span class="status-badge ${s.status === 'Actif' ? 'status-active' : 'status-inactive'}">
+            ${s.status}
+        </span>
+    </div>
+    <div class="action-buttons">
+        <button class="btn-icon btn-reset" title="Réinitialiser"><i class="fas fa-key"></i></button>
+    </div>
+    `;
+                studentsListEl.appendChild(row);
+            });
+        }
+
+        // ============================
+        // Pagination
+        // ============================
+        function setupPagination({ page, pages }) {
+            paginationEl.innerHTML = '';
+            for (let i = 1; i <= pages; i++) {
+                const btn = document.createElement('button'); btn.textContent = i;
+                btn.classList.add('pagination-btn'); if (i === page) btn.classList.add('active'); btn.addEventListener('click', () => {
+                    currentPage = i;
+                    fetchStudents();
+                });
+                paginationEl.appendChild(btn);
+            }
+        }
+
+        // ============================
+        // Statistiques
+        // ============================
         async function fetchStats() {
             try {
-                const res = await fetch(STUDENTS_STATS_ENDPOINT, {
-                    headers: {
-                        "Authorization": `Bearer ${TOKEN} `,
-                        "Content-Type": "application/json"
-                    }
-                });
-                const text = await res.text();
-                console.log("Réponse brute:", text);
+                const response = await fetch(`${API_BASE}/stats`);
+                const data = await response.json();
 
-                if (!res.ok) throw new Error("Erreur API stats");
+                if (!data.success || !data.statistics) return;
 
-                const stats = await res.json();
-
-                totalStudentsEl.textContent = stats.totalStudents || 0;
-                activeStudentsEl.textContent = stats.activeStudents || 0;
-                inactiveStudentsEl.textContent = stats.inactiveStudents || 0;
-                activationRateEl.textContent = stats.activationRate
-                    ? `${stats.activationRate}%`
-                    : "0%";
-
-            } catch (err) {
-                console.error(err);
-                totalStudentsEl.textContent = "-";
-                activeStudentsEl.textContent = "-";
-                inactiveStudentsEl.textContent = "-";
-                activationRateEl.textContent = "-";
+                totalStudentsEl.textContent = data.statistics.totalStudents;
+                activeStudentsEl.textContent = data.statistics.activeStudents;
+                inactiveStudentsEl.textContent = data.statistics.inactiveStudents;
+                activationRateEl.textContent = `${data.statistics.activationRate}%`;
+            } catch (error) {
+                console.error(error);
             }
         }
 
-        // Au chargement
-        document.addEventListener("DOMContentLoaded", () => {
-            fetchStudents();
-            fetchStats();
+        // ============================
+        // Filtres et recherche
+        // ============================
+        function populateFilterOptions(students) {
+            // Ecoles
+            const ecoles = [...new Set(students.map(s => s.ecole).filter(Boolean))];
+            ecoles.forEach(e => {
+                if (!Array.from(ecoleFilter.options).some(opt => opt.value === e)) {
+                    const option = document.createElement('option');
+                    option.value = e;
+                    option.textContent = e;
+                    ecoleFilter.appendChild(option);
+                }
+            });
+
+            // Filieres
+            const filieres = [...new Set(students.map(s => s.filiere).filter(Boolean))];
+            filieres.forEach(f => {
+                if (!Array.from(filiereFilter.options).some(opt => opt.value === f)) {
+                    const option = document.createElement('option');
+                    option.value = f;
+                    option.textContent = f;
+                    filiereFilter.appendChild(option);
+                }
+            });
+
+            // Annees
+            const annees = [...new Set(students.map(s => s.annee).filter(Boolean))];
+            annees.forEach(a => {
+                if (!Array.from(anneeFilter.options).some(opt => opt.value == a)) {
+                    const option = document.createElement('option');
+                    option.value = a;
+                    option.textContent = a;
+                    anneeFilter.appendChild(option);
+                }
+            });
+        }
+
+        // ============================
+        // Événements filtres et recherche
+        // ============================
+        [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(f => {
+            f.addEventListener('change', () => {
+                currentPage = 1;
+                fetchStudents();
+            });
         });
 
+        searchBtn.addEventListener('click', () => {
+            currentPage = 1;
+            fetchStudents();
+        });
 
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                currentPage = 1;
+                fetchStudents();
+            }
+        });
+
+        // ============================
+        // Initialisation
+        // ============================
+        fetchStats();
+        fetchStudents();
     </script>
 </body>
 
