@@ -594,9 +594,9 @@
 
     <div id="toast" class="toast"></div>
     <script>
+        // --- Variables ---
         const API_BASE = 'https://sys-voteucao-backend-production-311c.up.railway.app/api/students';
 
-        // Sélecteurs
         const ecoleFilter = document.getElementById('ecoleFilter');
         const filiereFilter = document.getElementById('filiereFilter');
         const anneeFilter = document.getElementById('anneeFilter');
@@ -612,9 +612,31 @@
         const inactiveStudentsEl = document.getElementById('inactiveStudents');
         const activationRateEl = document.getElementById('activationRate');
 
-        let currentPage = 1;
+        // Modal elements
+        const resetModal = document.getElementById('resetModal');
+        const closeResetModal = document.getElementById('closeResetModal');
+        const cancelReset = document.getElementById('cancelReset');
+        const confirmReset = document.getElementById('confirmReset');
+        const resetStudentName = document.getElementById('resetStudentName');
+        const resetStudentIdentifiant = document.getElementById('resetStudentIdentifiant');
+        const resetStudentFiliere = document.getElementById('resetStudentFiliere');
+        const resetStudentAnnee = document.getElementById('resetStudentAnnee');
+        const newIdentifiantEl = document.getElementById('newIdentifiant');
+        const newPasswordEl = document.getElementById('newPassword');
 
-        // Construire URL avec filtres valides
+        // Toast
+        const toastEl = document.getElementById('toast');
+
+        let currentPage = 1;
+        let selectedStudentId = null;
+
+        // --- Helpers ---
+        function showToast(message, type = 'success') {
+            toastEl.textContent = message;
+            toastEl.className = `toast ${type}`;
+            setTimeout(() => toastEl.className = 'toast', 3000);
+        }
+
         function buildQueryParams(page = 1) {
             const params = new URLSearchParams();
             params.append('page', page);
@@ -628,7 +650,7 @@
             return params.toString();
         }
 
-        // Récupérer les étudiants
+        // --- Fetch students ---
         async function fetchStudents(page = 1) {
             studentsList.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
             try {
@@ -636,12 +658,7 @@
                 const res = await fetch(`${API_BASE}?${query}`);
                 const data = await res.json();
 
-                if (!data.success && !Array.isArray(data.data)) {
-                    studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i> Erreur serveur</div>`;
-                    return;
-                }
-
-                renderStudents(data.data);
+                renderStudents(data.data || []);
                 renderPagination(data.pagination);
             } catch (err) {
                 console.error(err);
@@ -649,7 +666,6 @@
             }
         }
 
-        // Affichage des étudiants
         function renderStudents(students) {
             if (!students.length) {
                 studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i> Aucun étudiant trouvé</div>`;
@@ -664,13 +680,22 @@
             <div>${student.filiere || '-'} / ${student.annee || '-'}</div>
             <div><span class="status-badge ${student.status === 'Actif' ? 'status-active' : 'status-inactive'}">${student.status}</span></div>
             <div class="action-buttons">
-                <button class="btn-icon btn-reset" data-id="${student.id}" title="Réinitialiser"><i class="fas fa-key"></i></button>
+                <button class="btn-icon btn-reset" data-id="${student.id}" 
+                    data-nom="${student.nom}" data-prenom="${student.prenom}" 
+                    data-filiere="${student.filiere}" data-annee="${student.annee}" title="Réinitialiser">
+                    <i class="fas fa-key"></i>
+                </button>
             </div>
         </div>
     `).join('');
+
+            // Ajouter listeners pour chaque bouton reset
+            document.querySelectorAll('.btn-reset').forEach(btn => {
+                btn.addEventListener('click', () => openResetModal(btn.dataset));
+            });
         }
 
-        // Pagination
+        // --- Pagination ---
         function renderPagination(pagination) {
             if (!pagination) return;
             const { page, pages } = pagination;
@@ -686,7 +711,7 @@
             }
         }
 
-        // Récupérer les statistiques
+        // --- Stats ---
         async function fetchStats() {
             try {
                 const query = buildQueryParams();
@@ -702,7 +727,62 @@
             }
         }
 
-        // Event listeners
+        // --- Reset modal ---
+        function openResetModal(studentData) {
+            selectedStudentId = studentData.id;
+            resetStudentName.textContent = `${studentData.nom} ${studentData.prenom}`;
+            resetStudentIdentifiant.textContent = studentData.id || '-';
+            resetStudentFiliere.textContent = studentData.filiere || '-';
+            resetStudentAnnee.textContent = studentData.annee || '-';
+            newIdentifiantEl.textContent = 'En attente...';
+            newPasswordEl.textContent = 'En attente...';
+            resetModal.classList.add('active');
+        }
+
+        function closeModal() {
+            resetModal.classList.remove('active');
+            selectedStudentId = null;
+        }
+
+        // Copier texte
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.copy;
+                const text = document.getElementById(targetId).textContent;
+                navigator.clipboard.writeText(text);
+                showToast('Copié dans le presse-papier', 'success');
+            });
+        });
+
+        // Confirm reset
+        confirmReset.addEventListener('click', async () => {
+            if (!selectedStudentId) return;
+            try {
+                const res = await fetch(`${API_BASE}/${selectedStudentId}/reset-access`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    newIdentifiantEl.textContent = data.data.temporaryIdentifiant;
+                    newPasswordEl.textContent = data.data.temporaryPassword;
+                    showToast('Accès réinitialisés avec succès', 'success');
+                    fetchStudents(currentPage);
+                    fetchStats();
+                } else {
+                    showToast('Échec de la réinitialisation', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erreur serveur', 'error');
+            }
+        });
+
+        // Event listeners modal
+        closeResetModal.addEventListener('click', closeModal);
+        cancelReset.addEventListener('click', closeModal);
+
+        // --- Filtres et recherche ---
         [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(select =>
             select.addEventListener('change', () => {
                 fetchStudents(1);
@@ -715,10 +795,9 @@
             fetchStats();
         });
 
-        // Initial load
+        // --- Initial load ---
         fetchStudents();
         fetchStats();
-
     </script>
 
 </body>
