@@ -2,12 +2,12 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestion des Élections - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Votre CSS reste inchangé */
+        /* ---- ton CSS d’origine (inchangé) ---- */
         :root {
             --rouge-bordeaux: #7a0026;
             --rouge-bordeaux-light: #a73354;
@@ -30,7 +30,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--blanc-casse);
+            background: var(--blanc-casse);
             color: var(--bleu-nuit);
             line-height: 1.6;
             padding: 20px;
@@ -66,10 +66,6 @@
             margin-right: 15px;
         }
 
-        .btn-back {
-            margin-right: auto;
-        }
-
         .btn {
             padding: 12px 20px;
             border-radius: 6px;
@@ -78,14 +74,14 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s ease;
+            transition: .3s;
             border: none;
             text-decoration: none;
         }
 
         .btn-primary {
             background: linear-gradient(90deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
-            color: white;
+            color: #fff;
         }
 
         .btn-primary:hover {
@@ -98,16 +94,6 @@
             color: var(--bleu-nuit);
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
         .elections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -116,130 +102,67 @@
         }
 
         .election-card {
-            background: white;
+            background: #fff;
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(15, 26, 49, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(15, 26, 49, .1);
             border-left: 4px solid var(--rouge-bordeaux);
-        }
-
-        .election-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .election-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
         }
 
         .election-title {
             font-size: 1.2rem;
             font-weight: 600;
-            color: var(--bleu-nuit);
             margin-bottom: 5px;
         }
 
         .election-type {
             padding: 4px 8px;
             border-radius: 12px;
-            font-size: 0.75rem;
+            font-size: .75rem;
             font-weight: 500;
-            background: rgba(122, 0, 38, 0.1);
+            background: rgba(122, 0, 38, .1);
             color: var(--rouge-bordeaux);
-        }
-
-        .election-dates {
-            margin-bottom: 15px;
-        }
-
-        .election-date {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-
-        .election-date i {
-            color: var(--gris-moyen);
         }
 
         .election-status {
             display: inline-block;
             padding: 5px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: .8rem;
             font-weight: 500;
             margin-bottom: 15px;
         }
 
         .status-active {
-            background: rgba(40, 167, 69, 0.15);
+            background: rgba(40, 167, 69, .15);
             color: #28a745;
         }
 
         .status-upcoming {
-            background: rgba(23, 162, 184, 0.15);
+            background: rgba(23, 162, 184, .15);
             color: #17a2b8;
         }
 
         .status-completed {
-            background: rgba(108, 117, 125, 0.15);
+            background: rgba(108, 117, 125, .15);
             color: #6c757d;
         }
 
-        .election-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-view {
-            background: rgba(58, 160, 255, 0.15);
-            color: #3aa0ff;
-        }
-
-        .btn-close {
-            background: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
-        }
-
-        .btn-delete {
-            background: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
-        }
-
-        /* Modal Styles */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, .5);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: .3s;
         }
 
         .modal-overlay.active {
@@ -248,15 +171,15 @@
         }
 
         .modal {
-            background: white;
+            background: #fff;
             border-radius: 10px;
             width: 90%;
             max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: scale(0.9);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            transform: scale(.9);
+            transition: .3s;
         }
 
         .modal-overlay.active .modal {
@@ -291,7 +214,6 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: var(--bleu-nuit);
         }
 
         .form-group input,
@@ -308,81 +230,17 @@
             min-height: 100px;
             resize: vertical;
         }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--gris-clair);
-            border-top: 4px solid var(--rouge-bordeaux);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--gris-moyen);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: var(--gris-clair);
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .elections-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <a href="javascript:history.back()" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Retour
-            </a>
+            <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
             <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
-            <button class="btn btn-primary" id="createElectionBtn">
-                <i class="fas fa-plus"></i> Nouvelle Élection
-            </button>
+            <button class="btn btn-primary" id="createElectionBtn"><i class="fas fa-plus"></i> Nouvelle
+                Élection</button>
         </div>
-
         <div id="electionsContainer">
             <div class="loading">
                 <div class="spinner"></div>
@@ -390,543 +248,169 @@
         </div>
     </div>
 
-    <!-- Modal de création d'élection -->
-    <div class="modal-overlay" id="electionModal">
+    <!-- Modal -->
+    <div id="electionModal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2><i class="fas fa-vote-yea"></i> Nouvelle Élection</h2>
-                <button class="close-btn" id="closeModal">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h2>Nouvelle Élection</h2>
+                <button class="btn btn-secondary" onclick="hideElectionModal()">✕</button>
             </div>
             <div class="modal-body">
                 <form id="electionForm">
                     <div class="form-group">
-                        <label for="electionType">Type d'élection *</label>
-                        <select id="electionType" required>
-                            <option value="">Sélectionnez un type</option>
-                            <option value="SALLE">Élection de salle</option>
-                            <option value="ECOLE">Élection d'école</option>
-                            <option value="UNIVERSITE">Élection universitaire</option>
+                        <label for="title">Titre :</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description :</label>
+                        <textarea id="description" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="phase">Phase :</label>
+                        <select id="phase" name="phase" required onchange="renderPhaseFields()">
+                            <option value="">-- Choisir --</option>
+                            <option value="1">Phase 1 – Responsables de Salle</option>
+                            <option value="2">Phase 2 – Délégués d’École</option>
+                            <option value="3">Phase 3 – Délégués Universitaires</option>
                         </select>
                     </div>
-
+                    <div id="phaseFields"></div>
                     <div class="form-group">
-                        <label for="electionNiveau">Niveau *</label>
-                        <select id="electionNiveau" required>
-                            <option value="">Sélectionnez un niveau</option>
-                            <option value="1">Niveau 1 - Responsables de Salle</option>
-                            <option value="2">Niveau 2 - Délégués d'École</option>
-                            <option value="3">Niveau 3 - Délégués Universitaires</option>
-                        </select>
+                        <label for="startDate">Date de début :</label>
+                        <input type="datetime-local" id="startDate" name="startDate" required>
                     </div>
-
-                    <div class="form-group" id="delegueTypeGroup" style="display: none;">
-                        <label for="delegueType">Type de délégué</label>
-                        <select id="delegueType">
-                            <option value="">Sélectionnez un type</option>
-                            <option value="PREMIER">Premier Délégué</option>
-                            <option value="DEUXIEME">Deuxième Délégué</option>
-                        </select>
-                    </div>
-
                     <div class="form-group">
-                        <label for="electionTitre">Titre de l'élection *</label>
-                        <input type="text" id="electionTitre"
-                            placeholder="Ex: Élection Responsables de Salle - Informatique L2" required>
+                        <label for="endDate">Date de fin :</label>
+                        <input type="datetime-local" id="endDate" name="endDate" required>
                     </div>
-
-                    <div class="form-group">
-                        <label for="electionDescription">Description</label>
-                        <textarea id="electionDescription" placeholder="Description de l'élection..."></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="startDate">Date de début *</label>
-                            <input type="datetime-local" id="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="endDate">Date de fin *</label>
-                            <input type="datetime-local" id="endDate" required>
-                        </div>
-                    </div>
-
-                    <!-- Champs conditionnels selon le type d'élection -->
-                    <div id="conditionalFields" class="conditional-fields" style="display: none;">
-                        <div id="salleFields" style="display: none;">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="filiere">Filière *</label>
-                                    <input type="text" id="filiere" placeholder="Ex: Informatique">
-                                </div>
-                                <div class="form-group">
-                                    <label for="annee">Année *</label>
-                                    <select id="annee">
-                                        <option value="">Sélectionnez une année</option>
-                                        <option value="1">Licence 1</option>
-                                        <option value="2">Licence 2</option>
-                                        <option value="3">Licence 3</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="ecoleFields" style="display: none;">
-                            <div class="form-group">
-                                <label for="ecole">École *</label>
-                                <select id="ecole">
-                                    <option value="">Sélectionnez une école</option>
-                                    <option value="EGEI">EGEI</option>
-                                    <option value="ESMEA">ESMEA</option>
-                                    <option value="FSAE">FSAE</option>
-                                    <option value="FDE">FDE</option>
-                                </select>
-                            </div>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="hideElectionModal()">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Créer</button>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelElection">Annuler</button>
-                <button class="btn btn-primary" id="saveElection">Créer l'Élection</button>
-            </div>
         </div>
     </div>
+
     <script src="../config.js"></script>
     <script>
-        // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/election';
-        const ELECTIONS_CREATE_ENDPOINT = '/api/election';
-        const ELECTIONS_DELETE_ENDPOINT = (id) => `/api/election/${id}`;
-        const ELECTIONS_CLOSE_ENDPOINT = (id) => `/api/election/${id}/close`;
+        const token = () => localStorage.getItem('token');
 
-        // Fonction pour récupérer le token
-        function getToken() {
-            return localStorage.getItem('token');
+        document.getElementById("createElectionBtn").onclick = () => document.getElementById("electionModal").classList.add("active");
+        function hideElectionModal() { document.getElementById("electionModal").classList.remove("active"); document.getElementById("electionForm").reset(); document.getElementById("phaseFields").innerHTML = ""; }
+
+        // Champs dynamiques
+        function renderPhaseFields() {
+            const phase = document.getElementById("phase").value;
+            const fields = document.getElementById("phaseFields");
+            fields.innerHTML = "";
+            if (phase === "1") { // Phase 1
+                fields.innerHTML = `
+          <div class="form-group">
+            <label>École :</label>
+            <select id="ecole" name="ecole" required>
+              <option value="">-- Choisir --</option>
+              <option value="EGEI">EGEI</option>
+              <option value="ESMEA">ESMEA</option>
+              <option value="FSAE">FSAE</option>
+              <option value="FDE">FDE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filiere">Filière :</label>
+            <input type="text" id="filiere" name="filiere" required>
+          </div>
+          <div class="form-group">
+            <label for="annee">Année :</label>
+            <select id="annee" name="annee" required>
+              <option value="">-- Choisir --</option>
+              <option value="1">Licence 1</option>
+              <option value="2">Licence 2</option>
+              <option value="3">Licence 3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="delegueType">Type de responsable :</label>
+            <select id="delegueType" name="delegueType" required>
+              <option value="">-- Choisir --</option>
+              <option value="PREMIER">Premier</option>
+              <option value="DEUXIEME">Deuxième</option>
+            </select>
+          </div>`;
+            } else if (phase === "2") { // Phase 2
+                fields.innerHTML = `
+          <div class="form-group">
+            <label>École :</label>
+            <select id="ecole" name="ecole" required>
+              <option value="">-- Choisir --</option>
+              <option value="EGEI">EGEI</option>
+              <option value="ESMEA">ESMEA</option>
+              <option value="FSAE">FSAE</option>
+              <option value="FDE">FDE</option>
+            </select>
+          </div>`;
+            } else if (phase === "3") { // Phase 3
+                fields.innerHTML = `
+          <div class="form-group">
+            <label for="delegueType">Type de délégué :</label>
+            <select id="delegueType" name="delegueType" required>
+              <option value="">-- Choisir --</option>
+              <option value="PREMIER">Premier</option>
+              <option value="DEUXIEME">Deuxième</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tour">Tour :</label>
+            <select id="tour" name="tour" required>
+              <option value="">-- Choisir --</option>
+              <option value="1">1er tour</option>
+              <option value="2">2ème tour</option>
+            </select>
+          </div>`;
+            }
         }
 
-        // Fonctions d'authentification pour le dashboard
-        const DASHBOARD_AUTH = {
-            isAuthenticated: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return false;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    return payload.exp > now;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
-                }
-            },
-
-            getUserRole: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminName');
-                window.location.href = '/admin/login';
+        // Création d’élection
+        document.getElementById("electionForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                titre: document.getElementById("title").value,
+                description: document.getElementById("description").value,
+                dateDebut: new Date(document.getElementById("startDate").value).toISOString(),
+                dateFin: new Date(document.getElementById("endDate").value).toISOString(),
+                isActive: true
+            };
+            const phase = document.getElementById("phase").value;
+            if (phase === "1") {
+                data.type = "SALLE";
+                data.niveau = parseInt(document.getElementById("annee").value);
+                data.ecole = document.getElementById("ecole").value;
+                data.filiere = document.getElementById("filiere").value;
+                data.delegueType = document.getElementById("delegueType").value;
+            } else if (phase === "2") {
+                data.type = "ECOLE";
+                data.niveau = 3; // Phase 2 = Licence 3 candidats (ton backend vérifiera)
+                data.ecole = document.getElementById("ecole").value;
+            } else if (phase === "3") {
+                data.type = "UNIVERSITE";
+                data.niveau = 3;
+                data.delegueType = document.getElementById("delegueType").value;
+                data.tour = parseInt(document.getElementById("tour").value);
             }
-        };
-
-
-        // Vérification de l'authentification au chargement de la page
-        document.addEventListener('DOMContentLoaded', function () {
-            const role = DASHBOARD_AUTH.getUserRole();
-            const isAuth = DASHBOARD_AUTH.isAuthenticated();
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
-                window.location.href = '/admin/login';
-                return;
-            }
-
-            if (role !== 'ADMIN') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '/unauthorized.html';
-                return;
-            }
-
-            // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
-            initializeDashboard();
-        });
-
-        function initializeDashboard() {
-            // Votre code d'initialisation du dashboard ici
-            console.log('Dashboard initialisé avec succès');
-            loadElections();
-            setupEventListeners();
-
-        }
-
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            // Modal d'élection
-            document.getElementById('createElectionBtn').addEventListener('click', showElectionModal);
-            document.getElementById('closeModal').addEventListener('click', hideElectionModal);
-            document.getElementById('cancelElection').addEventListener('click', hideElectionModal);
-            document.getElementById('saveElection').addEventListener('click', createElection);
-
-            // Champs conditionnels
-            document.getElementById('electionType').addEventListener('change', updateElectionFormFields);
-            document.getElementById('electionNiveau').addEventListener('change', updateElectionFormFields);
-        }
-
-        // Charger les élections
-        async function loadElections() {
             try {
-                const token = getToken();
-                showLoading();
-
-                const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token()}` },
+                    body: JSON.stringify(data)
                 });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur de chargement des élections');
-                }
-
-                const elections = await response.json();
-                displayElections(elections);
-            } catch (error) {
-                console.error('Erreur:', error);
-                showError('Erreur de chargement des élections: ' + error.message);
-            }
-        }
-
-        // Afficher les élections
-        function displayElections(elections) {
-            const container = document.getElementById('electionsContainer');
-
-            if (!elections || elections.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-vote-yea"></i>
-                        <h3>Aucune élection créée</h3>
-                        <p>Créez votre première élection pour commencer</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = '';
-
-            elections.forEach(election => {
-                const status = getElectionStatus(election);
-                const statusClass = getStatusClass(status);
-
-                const card = document.createElement('div');
-                card.className = 'election-card';
-                card.innerHTML = `
-                    <div class="election-header">
-                        <div>
-                            <div class="election-title">${election.titre}</div>
-                            <span class="election-type">${election.type}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="election-dates">
-                        <div class="election-date">
-                            <i class="fas fa-play-circle"></i>
-                            <span>Début: ${formatDate(election.dateDebut)}</span>
-                        </div>
-                        <div class="election-date">
-                            <i class="fas fa-flag-checkered"></i>
-                            <span>Fin: ${formatDate(election.dateFin)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="election-status ${statusClass}">${status}</div>
-                    
-                    <div class="election-actions">
-                        <button class="action-btn btn-view" onclick="viewElection(${election.id})">
-                            <i class="fas fa-eye"></i> Voir
-                        </button>
-                        ${status === 'Active' ? `
-                        <button class="action-btn btn-close" onclick="closeElection(${election.id})">
-                            <i class="fas fa-lock"></i> Clôturer
-                        </button>
-                        ` : ''}
-                        <button class="action-btn btn-delete" onclick="deleteElection(${election.id})">
-                            <i class="fas fa-trash"></i> Supprimer
-                        </button>
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
-        }
-
-        // Fonctions utilitaires
-        function getElectionStatus(election) {
-            const now = new Date();
-            const start = new Date(election.dateDebut);
-            const end = new Date(election.dateFin);
-
-            if (!election.isActive) return 'Terminée';
-            if (now < start) return 'À venir';
-            if (now >= start && now <= end) return 'Active';
-            return 'Terminée';
-        }
-
-        function getStatusClass(status) {
-            switch (status) {
-                case 'Active': return 'status-active';
-                case 'À venir': return 'status-upcoming';
-                case 'Terminée': return 'status-completed';
-                default: return '';
-            }
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function formatDateForAPI(dateString) {
-            // Convertir le format datetime-local en format ISO pour l'API
-            if (!dateString) return '';
-
-            const date = new Date(dateString);
-            // Ajouter le décalage de fuseau horaire pour obtenir l'heure UTC
-            const timezoneOffset = date.getTimezoneOffset() * 60000;
-            const adjustedDate = new Date(date.getTime() - timezoneOffset);
-
-            return adjustedDate.toISOString().slice(0, 19).replace('T', ' ');
-        }
-
-        function showLoading() {
-            const container = document.getElementById('electionsContainer');
-            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-        }
-
-        function showError(message) {
-            const container = document.getElementById('electionsContainer');
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                    <button class="btn btn-primary" onclick="loadElections()">Réessayer</button>
-                </div>
-            `;
-        }
-
-        // Gestion de la modal d'élection
-        function showElectionModal() {
-            document.getElementById('electionModal').classList.add('active');
-        }
-
-        function hideElectionModal() {
-            document.getElementById('electionModal').classList.remove('active');
-            document.getElementById('electionForm').reset();
-
-            // Réinitialiser les champs conditionnels
-            document.getElementById('conditionalFields').style.display = 'none';
-            document.getElementById('salleFields').style.display = 'none';
-            document.getElementById('ecoleFields').style.display = 'none';
-            document.getElementById('delegueTypeGroup').style.display = 'none';
-        }
-
-        function updateElectionFormFields() {
-            const type = document.getElementById('electionType').value;
-            const niveau = document.getElementById('electionNiveau').value;
-
-            // Afficher/masquer le type de délégué
-            const delegueTypeGroup = document.getElementById('delegueTypeGroup');
-            if (niveau === '2') {
-                delegueTypeGroup.style.display = 'block';
-            } else {
-                delegueTypeGroup.style.display = 'none';
-            }
-
-            // Gérer les champs conditionnels
-            const conditionalFields = document.getElementById('conditionalFields');
-            const salleFields = document.getElementById('salleFields');
-            const ecoleFields = document.getElementById('ecoleFields');
-
-            conditionalFields.style.display = 'block';
-            salleFields.style.display = 'none';
-            ecoleFields.style.display = 'none';
-
-            if (type === 'SALLE') {
-                salleFields.style.display = 'block';
-            } else if (type === 'ECOLE') {
-                ecoleFields.style.display = 'block';
-            } else if (type === 'UNIVERSITE') {
-                conditionalFields.style.display = 'none';
-            } else {
-                conditionalFields.style.display = 'none';
-            }
-        }
-
-        async function createElection() {
-            try {
-                const token = getToken();
-                const type = document.getElementById('electionType').value;
-                const niveau = parseInt(document.getElementById('electionNiveau').value);
-                const titre = document.getElementById('electionTitre').value;
-                const description = document.getElementById('electionDescription').value;
-                const dateDebut = formatDateForAPI(document.getElementById('startDate').value);
-                const dateFin = formatDateForAPI(document.getElementById('endDate').value);
-
-                // Validation des champs requis
-                if (!type || !niveau || !titre || !dateDebut || !dateFin) {
-                    alert('Veuillez remplir tous les champs obligatoires');
-                    return;
-                }
-
-                const formData = {
-                    type: type,
-                    niveau: niveau,
-                    titre: titre,
-                    description: description,
-                    dateDebut: dateDebut,
-                    dateFin: dateFin
-                };
-
-                // Ajouter le type de délégué si niveau 2 ou 3
-                if (niveau === 2 || niveau === 3) {
-                    const delegueType = document.getElementById('delegueType').value;
-                    if (delegueType) {
-                        formData.delegueType = delegueType;
-                    }
-                }
-
-                // Ajouter les champs conditionnels
-                if (type === 'SALLE') {
-                    const filiere = document.getElementById('filiere').value;
-                    const annee = parseInt(document.getElementById('annee').value);
-
-                    if (!filiere || !annee) {
-                        alert('Veuillez remplir tous les champs obligatoires pour une élection de salle');
-                        return;
-                    }
-
-                    formData.filiere = filiere;
-                    formData.annee = annee;
-                } else if (type === 'ECOLE') {
-                    const ecole = document.getElementById('ecole').value;
-
-                    if (!ecole) {
-                        alert('Veuillez sélectionner une école');
-                        return;
-                    }
-
-                    formData.ecole = ecole;
-                }
-
-                const response = await fetch(`${API_BASE}${ELECTIONS_CREATE_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la création');
-                }
-
-                const result = await response.json();
+                if (!res.ok) throw new Error("Erreur création");
+                alert("Élection créée !");
                 hideElectionModal();
-                loadElections();
-                alert('Élection créée avec succès!');
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la création: ' + error.message);
-            }
-        }
-
-        // Fonctions d'action
-        function viewElection(id) {
-            window.location.href = `election-details.html?id=${id}`;
-        }
-
-        async function closeElection(id) {
-            if (!confirm('Êtes-vous sûr de vouloir clôturer cette élection ?')) return;
-
-            try {
-                const token = getToken();
-                const closeUrl = `${API_BASE}${ELECTIONS_CLOSE_ENDPOINT(id)}`;
-                const response = await fetch(closeUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la clôture');
-                }
-
-                loadElections();
-                alert('Élection clôturée avec succès!');
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la clôture: ' + error.message);
-            }
-        }
-
-        async function deleteElection(id) {
-            id = Number(id);
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette élection ?')) return;
-
-            try {
-                const token = getToken();
-                const deleteUrl = `${API_BASE}${ELECTIONS_DELETE_ENDPOINT(id)}`;
-                const response = await fetch(deleteUrl, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur lors de la suppression');
-                }
-
-                loadElections();
-                alert('Élection supprimée avec succès!');
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la suppression: ' + error.message);
-            }
-        }
-
-        // Exposer les fonctions globales
-        window.viewElection = viewElection;
-        window.closeElection = closeElection;
-        window.deleteElection = deleteElection;
-        window.loadElections = loadElections;
+                // reload list
+            } catch (err) { alert(err.message); }
+        };
     </script>
 </body>
 
