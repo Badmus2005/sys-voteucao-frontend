@@ -658,6 +658,7 @@
                 const res = await fetch(`${API_BASE}?${query}`);
                 const data = await res.json();
 
+                populateFilters(data.data); // Remplir dynamiquement les filtres
                 renderStudents(data.data || []);
                 renderPagination(data.pagination);
             } catch (err) {
@@ -666,6 +667,7 @@
             }
         }
 
+        // --- Render functions ---
         function renderStudents(students) {
             if (!students.length) {
                 studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i> Aucun étudiant trouvé</div>`;
@@ -689,10 +691,34 @@
         </div>
     `).join('');
 
-            // Ajouter listeners pour chaque bouton reset
             document.querySelectorAll('.btn-reset').forEach(btn => {
                 btn.addEventListener('click', () => openResetModal(btn.dataset));
             });
+        }
+
+        // --- Populate filters dynamically ---
+        function populateFilters(students) {
+            const ecoles = new Set();
+            const filieres = new Set();
+            const annees = new Set();
+
+            students.forEach(s => {
+                if (s.ecole) ecoles.add(s.ecole);
+                if (s.filiere) filieres.add(s.filiere);
+                if (s.annee) annees.add(s.annee);
+            });
+
+            // Fonction helper pour remplir select
+            function fillSelect(selectEl, values) {
+                const current = selectEl.value;
+                selectEl.innerHTML = `<option value="all">Toutes les options</option>`;
+                [...values].sort().forEach(v => selectEl.innerHTML += `<option value="${v}">${v}</option>`);
+                if ([...values].includes(current)) selectEl.value = current;
+            }
+
+            fillSelect(ecoleFilter, ecoles);
+            fillSelect(filiereFilter, filieres);
+            fillSelect(anneeFilter, annees);
         }
 
         // --- Pagination ---
@@ -795,9 +821,26 @@
             fetchStats();
         });
 
+        // --- Live search ---
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchStudents(1);
+                fetchStats();
+            }, 300); // 300ms de délai pour ne pas spammer le serveur à chaque lettre
+        });
+
+        // On conserve le bouton pour déclenchement manuel
+        searchBtn.addEventListener('click', () => {
+            fetchStudents(1);
+            fetchStats();
+        });
+
         // --- Initial load ---
         fetchStudents();
         fetchStats();
+
     </script>
 
 </body>
