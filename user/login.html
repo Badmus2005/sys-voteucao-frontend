@@ -696,16 +696,18 @@
 
                 const data = await res.json();
 
+
                 if (res.ok) {
-                    localStorage.setItem('token', data.data.token);
-                    localStorage.setItem('tokenTemporary', data.data.user.temporaryToken);
+                    const token = data.data.token;
+                    localStorage.setItem('token', token);
                     localStorage.setItem('studentName', `${data.data.user.prenom} ${data.data.user.nom}`);
                     showMessage('Connexion réussie! Redirection...', 'success');
+
                     setTimeout(() => {
                         window.location.replace(data.data.requirePasswordChange ? '/user/change-password' : '/user/dashboard');
                     }, 1500);
-
-                } else {
+                }
+                else {
                     showMessage(data.message || 'Email ou mot de passe incorrect', 'error');
                 }
             } catch (err) {
