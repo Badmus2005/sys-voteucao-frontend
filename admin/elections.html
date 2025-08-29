@@ -431,15 +431,6 @@
                     </div>
                     <div id="phaseFields"></div>
                     <div class="form-group">
-                        <label for="niveau">Niveau :</label>
-                        <select id="niveau" name="niveau" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="1">Licence 1</option>
-                            <option value="2">Licence 2</option>
-                            <option value="3">Licence 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <label for="startDate">Date de début :</label>
                         <input type="datetime-local" id="startDate" name="startDate" required>
                     </div>
@@ -508,7 +499,6 @@
             document.getElementById("title").value = election.titre;
             document.getElementById("description").value = election.description || "";
             document.getElementById("phase").value = election.type;
-            document.getElementById("niveau").value = election.niveau;
 
             // Convertir les dates au format local pour les champs datetime-local
             const startDate = new Date(election.dateDebut);
@@ -763,6 +753,10 @@
                     <div class="election-status status-${status}">${statusText}</div>
                     <div class="election-details">
                         <div class="election-detail-item">
+                            <span class="election-detail-label">Phase:</span>
+                            <span>${getPhaseNumber(election.type)}</span>
+                        </div>
+                        <div class="election-detail-item">
                             <span class="election-detail-label">Début:</span>
                             <span>${formatDate(election.dateDebut)}</span>
                         </div>
@@ -819,6 +813,15 @@
             }
         }
 
+        function getPhaseNumber(type) {
+            switch (type) {
+                case 'SALLE': return 'Phase 1';
+                case 'ECOLE': return 'Phase 2';
+                case 'UNIVERSITE': return 'Phase 3';
+                default: return type;
+            }
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('fr-FR', {
@@ -841,21 +844,24 @@
                 description: document.getElementById("description").value,
                 dateDebut: new Date(document.getElementById("startDate").value).toISOString(),
                 dateFin: new Date(document.getElementById("endDate").value).toISOString(),
-                niveau: parseInt(document.getElementById("niveau").value),
                 isActive: true
             };
 
             const phase = document.getElementById("phase").value;
             data.type = phase;
 
+            // Déterminer le niveau en fonction de la phase
             if (phase === "SALLE") {
+                data.niveau = 1; // Phase 1
                 data.filiere = document.getElementById("filiere").value;
                 data.annee = parseInt(document.getElementById("annee").value);
                 data.ecole = document.getElementById("ecole").value;
                 data.delegueType = document.getElementById("delegueType").value;
             } else if (phase === "ECOLE") {
+                data.niveau = 2; // Phase 2
                 data.ecole = document.getElementById("ecole").value;
             } else if (phase === "UNIVERSITE") {
+                data.niveau = 3; // Phase 3
                 data.delegueType = document.getElementById("delegueType").value;
                 data.tour = parseInt(document.getElementById("tour").value);
             }

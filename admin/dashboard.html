@@ -443,6 +443,10 @@
             text-align: right;
         }
 
+        .activity-icon i {
+            font-size: 1rem;
+        }
+
         /* Actions rapides */
         .quick-actions {
             display: grid;
@@ -961,6 +965,7 @@
             width: 250px;
             font-family: 'Poppins', sans-serif;
         }
+
 
         /* Pagination */
         .pagination {
@@ -1914,10 +1919,12 @@
             }
         }
 
+
+
         async function loadActivity() {
             try {
                 const token = getToken();
-                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}`, {
+                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=10`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1926,8 +1933,7 @@
                     throw new Error('Erreur lors du chargement des activités');
                 }
 
-                const result = await res.json();
-                const activities = Array.isArray(result) ? result : result.data;
+                const activities = await res.json();
                 const container = document.getElementById('activityList');
                 if (!container) return;
 
@@ -1941,14 +1947,18 @@
                 activities.forEach(act => {
                     const div = document.createElement('div');
                     div.classList.add('activity-item');
+
+                    // Utiliser l'icône fournie par le backend ou une icône par défaut
+                    const iconClass = act.icon ? `fas fa-${act.icon}` : 'fas fa-check';
+
                     div.innerHTML = `
-                <div class="activity-icon"><i class="fas fa-check"></i></div>
-                <div class="activity-content">
-                    <h4>${act.title || 'Activité'}</h4>
-                    <p>${act.content || 'Aucun détail'}</p>
-                </div>
-                <div class="activity-time">${formatDate(act.timestamp || act.createdAt)}</div>
-            `;
+            <div class="activity-icon"><i class="${iconClass}"></i></div>
+            <div class="activity-content">
+                <h4>${act.title || 'Activité'}</h4>
+                <p>${act.content || 'Aucun détail'}</p>
+            </div>
+            <div class="activity-time">${act.time || formatDate(act.timestamp)}</div>
+                `;
                     container.appendChild(div);
                 });
             } catch (err) {
@@ -1956,6 +1966,8 @@
                 showToast('Erreur lors du chargement des activités', 'error');
             }
         }
+
+
 
         async function loadVoteStats() {
             try {
