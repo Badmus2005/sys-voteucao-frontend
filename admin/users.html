@@ -679,6 +679,36 @@
                 studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur serveur</div>`;
             }
         }
+        function populateFilters(students) {
+            // Utiliser Set pour éviter les doublons
+            const ecoles = new Set();
+            const filieres = new Set();
+            const annees = new Set();
+
+            students.forEach(s => {
+                if (s.ecole) ecoles.add(s.ecole);
+                if (s.filiere) filieres.add(s.filiere);
+                if (s.annee) annees.add(s.annee);
+            });
+
+            // Fonction utilitaire pour remplir un select
+            function fillSelect(selectEl, items, defaultText) {
+                const currentValue = selectEl.value;
+                selectEl.innerHTML = `<option value="all">${defaultText}</option>`;
+                [...items].sort().forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    selectEl.appendChild(option);
+                });
+                // Rester sur la valeur précédente si elle existe
+                if ([...items].includes(currentValue)) selectEl.value = currentValue;
+            }
+
+            fillSelect(ecoleFilter, ecoles, 'Toutes les écoles/facultés');
+            fillSelect(filiereFilter, filieres, 'Toutes les filières');
+            fillSelect(anneeFilter, annees, 'Toutes les années');
+        }
 
         // --- Afficher étudiants ---
         function renderStudents(students) {
