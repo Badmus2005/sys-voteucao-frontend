@@ -594,8 +594,16 @@
 
     <div id="toast" class="toast"></div>
     <script>
-        // --- Variables ---
-        const API_BASE = 'https://sys-voteucao-backend-production-311c.up.railway.app/api/students';
+        const BACKEND_URL = "https://sys-voteucao-backend-production-311c.up.railway.app/api";
+
+        // --- Variables DOM ---
+        const studentsList = document.getElementById('studentsList');
+        const paginationContainer = document.getElementById('pagination');
+
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const activeStudentsEl = document.getElementById('activeStudents');
+        const inactiveStudentsEl = document.getElementById('inactiveStudents');
+        const activationRateEl = document.getElementById('activationRate');
 
         const ecoleFilter = document.getElementById('ecoleFilter');
         const filiereFilter = document.getElementById('filiereFilter');
@@ -603,241 +611,214 @@
         const statusFilter = document.getElementById('statusFilter');
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
-        const studentsList = document.getElementById('studentsList');
-        const paginationContainer = document.getElementById('pagination');
 
-        // Stats
-        const totalStudentsEl = document.getElementById('totalStudents');
-        const activeStudentsEl = document.getElementById('activeStudents');
-        const inactiveStudentsEl = document.getElementById('inactiveStudents');
-        const activationRateEl = document.getElementById('activationRate');
-
-        // Modal elements
+        // Modal réinitialisation
         const resetModal = document.getElementById('resetModal');
         const closeResetModal = document.getElementById('closeResetModal');
         const cancelReset = document.getElementById('cancelReset');
         const confirmReset = document.getElementById('confirmReset');
+
         const resetStudentName = document.getElementById('resetStudentName');
         const resetStudentIdentifiant = document.getElementById('resetStudentIdentifiant');
         const resetStudentFiliere = document.getElementById('resetStudentFiliere');
         const resetStudentAnnee = document.getElementById('resetStudentAnnee');
-        const newIdentifiantEl = document.getElementById('newIdentifiant');
-        const newPasswordEl = document.getElementById('newPassword');
+        const newIdentifiant = document.getElementById('newIdentifiant');
+        const newPassword = document.getElementById('newPassword');
 
-        // Toast
-        const toastEl = document.getElementById('toast');
+        const toast = document.getElementById('toast');
 
+        let currentStudentId = null;
         let currentPage = 1;
-        let selectedStudentId = null;
+        let totalPages = 1;
 
-        // --- Helpers ---
+        // --- Fonction toast ---
         function showToast(message, type = 'success') {
-            toastEl.textContent = message;
-            toastEl.className = `toast ${type}`;
-            setTimeout(() => toastEl.className = 'toast', 3000);
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
         }
 
-        function buildQueryParams(page = 1) {
-            const params = new URLSearchParams();
-            params.append('page', page);
+        // --- Construire URL avec filtres ---
+        function buildURL(page = 1) {
+            const ecole = ecoleFilter.value !== 'all' ? ecoleFilter.value : undefined;
+            const filiere = filiereFilter.value !== 'all' ? filiereFilter.value : undefined;
+            const annee = anneeFilter.value !== 'all' ? anneeFilter.value : undefined;
+            const status = statusFilter.value !== 'all' ? statusFilter.value : undefined;
+            const search = searchInput.value.trim() !== '' ? searchInput.value.trim() : undefined;
 
-            if (ecoleFilter.value && ecoleFilter.value !== 'all') params.append('ecole', ecoleFilter.value);
-            if (filiereFilter.value && filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
-            if (anneeFilter.value && anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
-            if (statusFilter.value && statusFilter.value !== 'all') params.append('status', statusFilter.value);
-            if (searchInput.value.trim() !== '') params.append('search', searchInput.value.trim());
+            const params = new URLSearchParams({ page });
 
-            return params.toString();
+            if (ecole) params.append('ecole', ecole);
+            if (filiere) params.append('filiere', filiere);
+            if (annee) params.append('annee', annee);
+            if (status) params.append('status', status);
+            if (search) params.append('search', search);
+
+            return `${BACKEND_URL}/students?${params.toString()}`;
         }
 
-        // --- Fetch students ---
+        // --- Récupérer étudiants ---
         async function fetchStudents(page = 1) {
             studentsList.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
             try {
-                const query = buildQueryParams(page);
-                const res = await fetch(`${API_BASE}?${query}`);
-                const data = await res.json();
+                const response = await fetch(buildURL(page));
+                const data = await response.json();
 
-                populateFilters(data.data); // Remplir dynamiquement les filtres
-                renderStudents(data.data || []);
+                if (!data.success) {
+                    studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>${data.message}</div>`;
+                    return;
+                }
+
+                renderStudents(data.data);
                 renderPagination(data.pagination);
+                populateFilters(data.data);
             } catch (err) {
                 console.error(err);
-                studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i> Impossible de charger les étudiants</div>`;
+                studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur serveur</div>`;
             }
         }
 
-        // --- Render functions ---
+        // --- Afficher étudiants ---
         function renderStudents(students) {
-            if (!students.length) {
-                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i> Aucun étudiant trouvé</div>`;
+            if (students.length === 0) {
+                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i>Aucun étudiant trouvé</div>`;
                 return;
             }
 
-            studentsList.innerHTML = students.map(student => `
-        <div class="table-row">
+            studentsList.innerHTML = '';
+
+            students.forEach(student => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
             <div>${student.nom} ${student.prenom}</div>
             <div>${student.identifiantTemporaire || '-'}</div>
             <div>${student.email || '-'}</div>
             <div>${student.filiere || '-'} / ${student.annee || '-'}</div>
             <div><span class="status-badge ${student.status === 'Actif' ? 'status-active' : 'status-inactive'}">${student.status}</span></div>
             <div class="action-buttons">
-                <button class="btn-icon btn-reset" data-id="${student.id}" 
-                    data-nom="${student.nom}" data-prenom="${student.prenom}" 
-                    data-filiere="${student.filiere}" data-annee="${student.annee}" title="Réinitialiser">
+                <button class="btn-icon btn-reset" data-id="${student.id}" data-nom="${student.nom}" data-prenom="${student.prenom}" data-filiere="${student.filiere}" data-annee="${student.annee}">
                     <i class="fas fa-key"></i>
                 </button>
             </div>
-        </div>
-    `).join('');
-
-            document.querySelectorAll('.btn-reset').forEach(btn => {
-                btn.addEventListener('click', () => openResetModal(btn.dataset));
+        `;
+                studentsList.appendChild(row);
             });
-        }
-
-        // --- Populate filters dynamically ---
-        function populateFilters(students) {
-            const ecoles = new Set();
-            const filieres = new Set();
-            const annees = new Set();
-
-            students.forEach(s => {
-                if (s.ecole) ecoles.add(s.ecole);
-                if (s.filiere) filieres.add(s.filiere);
-                if (s.annee) annees.add(s.annee);
-            });
-
-            // Fonction helper pour remplir select
-            function fillSelect(selectEl, values) {
-                const current = selectEl.value;
-                selectEl.innerHTML = `<option value="all">Toutes les options</option>`;
-                [...values].sort().forEach(v => selectEl.innerHTML += `<option value="${v}">${v}</option>`);
-                if ([...values].includes(current)) selectEl.value = current;
-            }
-
-            fillSelect(ecoleFilter, ecoles);
-            fillSelect(filiereFilter, filieres);
-            fillSelect(anneeFilter, annees);
         }
 
         // --- Pagination ---
         function renderPagination(pagination) {
-            if (!pagination) return;
-            const { page, pages } = pagination;
-            currentPage = page;
+            currentPage = pagination.page;
+            totalPages = pagination.pages;
 
             paginationContainer.innerHTML = '';
-            for (let i = 1; i <= pages; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement('button');
+                btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
                 btn.textContent = i;
-                btn.className = 'pagination-btn' + (i === page ? ' active' : '');
                 btn.addEventListener('click', () => fetchStudents(i));
                 paginationContainer.appendChild(btn);
             }
         }
 
-        // --- Stats ---
+        // --- Récupérer statistiques ---
         async function fetchStats() {
             try {
-                const query = buildQueryParams();
-                const res = await fetch(`${API_BASE}/stats?${query}`);
-                const data = await res.json();
+                const params = new URLSearchParams();
+                if (ecoleFilter.value !== 'all') params.append('ecole', ecoleFilter.value);
+                if (filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
+                if (anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
 
-                totalStudentsEl.textContent = data.statistics?.totalStudents || 0;
-                activeStudentsEl.textContent = data.statistics?.activeStudents || 0;
-                inactiveStudentsEl.textContent = data.statistics?.inactiveStudents || 0;
-                activationRateEl.textContent = (data.statistics?.activationRate || 0) + '%';
+                const response = await fetch(`${BACKEND_URL}/students/stats?${params.toString()}`);
+                const data = await response.json();
+
+                if (!data.success) return;
+
+                totalStudentsEl.textContent = data.statistics.totalStudents || 0;
+                activeStudentsEl.textContent = data.statistics.activeStudents || 0;
+                inactiveStudentsEl.textContent = data.statistics.inactiveStudents || 0;
+                activationRateEl.textContent = `${data.statistics.activationRate || 0}%`;
             } catch (err) {
                 console.error(err);
             }
         }
 
-        // --- Reset modal ---
-        function openResetModal(studentData) {
-            selectedStudentId = studentData.id;
-            resetStudentName.textContent = `${studentData.nom} ${studentData.prenom}`;
-            resetStudentIdentifiant.textContent = studentData.id || '-';
-            resetStudentFiliere.textContent = studentData.filiere || '-';
-            resetStudentAnnee.textContent = studentData.annee || '-';
-            newIdentifiantEl.textContent = 'En attente...';
-            newPasswordEl.textContent = 'En attente...';
-            resetModal.classList.add('active');
-        }
-
-        function closeModal() {
-            resetModal.classList.remove('active');
-            selectedStudentId = null;
-        }
-
-        // Copier texte
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.dataset.copy;
-                const text = document.getElementById(targetId).textContent;
-                navigator.clipboard.writeText(text);
-                showToast('Copié dans le presse-papier', 'success');
+        // --- Filtres & recherche ---
+        [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(filter => {
+            filter.addEventListener('change', () => {
+                fetchStudents(1);
+                fetchStats();
             });
         });
 
-        // Confirm reset
-        confirmReset.addEventListener('click', async () => {
-            if (!selectedStudentId) return;
+        searchBtn.addEventListener('click', () => {
+            fetchStudents(1);
+            fetchStats();
+        });
+
+        // --- Modal réinitialisation ---
+        studentsList.addEventListener('click', async (e) => {
+            const resetBtn = e.target.closest('.btn-reset');
+            if (!resetBtn) return;
+
+            const studentId = resetBtn.dataset.id;
+            const studentNom = resetBtn.dataset.nom;
+            const studentPrenom = resetBtn.dataset.prenom;
+            const studentFiliere = resetBtn.dataset.filiere;
+            const studentAnnee = resetBtn.dataset.annee;
+
+            currentStudentId = studentId;
+
+            // Remplir infos
+            resetStudentName.textContent = `${studentNom} ${studentPrenom}`;
+            resetStudentIdentifiant.textContent = 'En attente...';
+            resetStudentFiliere.textContent = studentFiliere;
+            resetStudentAnnee.textContent = studentAnnee;
+            newIdentifiant.textContent = 'En attente...';
+            newPassword.textContent = 'En attente...';
+
+            resetModal.classList.add('active');
+
             try {
-                const res = await fetch(`${API_BASE}/${selectedStudentId}/reset-access`, {
-                    method: 'POST'
+                const response = await fetch(`${BACKEND_URL}/students/${studentId}/reset-access`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
                 });
-                const data = await res.json();
+
+                const data = await response.json();
 
                 if (data.success) {
-                    newIdentifiantEl.textContent = data.data.temporaryIdentifiant;
-                    newPasswordEl.textContent = data.data.temporaryPassword;
-                    showToast('Accès réinitialisés avec succès', 'success');
-                    fetchStudents(currentPage);
-                    fetchStats();
+                    newIdentifiant.textContent = data.data.temporaryIdentifiant;
+                    newPassword.textContent = data.data.temporaryPassword;
+                    resetStudentIdentifiant.textContent = data.data.temporaryIdentifiant;
                 } else {
-                    showToast('Échec de la réinitialisation', 'error');
+                    showToast('Erreur réinitialisation', 'error');
+                    resetModal.classList.remove('active');
                 }
             } catch (err) {
                 console.error(err);
                 showToast('Erreur serveur', 'error');
+                resetModal.classList.remove('active');
             }
         });
 
-        // Event listeners modal
-        closeResetModal.addEventListener('click', closeModal);
-        cancelReset.addEventListener('click', closeModal);
+        closeResetModal.addEventListener('click', () => resetModal.classList.remove('active'));
+        cancelReset.addEventListener('click', () => resetModal.classList.remove('active'));
 
-        // --- Filtres et recherche ---
-        [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(select =>
-            select.addEventListener('change', () => {
-                fetchStudents(1);
-                fetchStats();
-            })
-        );
-
-        searchBtn.addEventListener('click', () => {
-            fetchStudents(1);
-            fetchStats();
+        // --- Copier identifiants ---
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.copy;
+                const text = document.getElementById(targetId).textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Copié dans le presse-papier', 'success');
+                });
+            });
         });
 
-        // --- Live search ---
-        let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                fetchStudents(1);
-                fetchStats();
-            }, 300); // 300ms de délai pour ne pas spammer le serveur à chaque lettre
-        });
-
-        // On conserve le bouton pour déclenchement manuel
-        searchBtn.addEventListener('click', () => {
-            fetchStudents(1);
-            fetchStats();
-        });
-
-        // --- Initial load ---
+        // --- Initialisation ---
         fetchStudents();
         fetchStats();
 
