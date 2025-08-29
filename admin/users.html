@@ -593,11 +593,13 @@
     </div>
 
     <div id="toast" class="toast"></div>
-
+    <script src="../config.js"></script>
     <script>
 
         const API_URL = "https://sys-voteucao-backend-production-311c.up.railway.app";
-
+        const API_BASE = CONFIG.API.BASE_URL;
+        const STUDENTS_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.LIST;
+        const STUDENTS_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STUDENTS.STATS;
         // récupérer le token du stockage local (si tu l’as mis après login)
         const TOKEN = localStorage.getItem("token");
 
@@ -614,7 +616,7 @@
   `;
 
             try {
-                const res = await fetch(`${API_URL}/students`, {
+                const res = await fetch(STUDENTS_ENDPOINT, {
                     headers: {
                         "Authorization": `Bearer ${TOKEN}`,
                         "Content-Type": "application/json"
@@ -665,7 +667,7 @@
 
         async function fetchStats() {
             try {
-                const res = await fetch(`${API_URL} /students/stats`, {
+                const res = await fetch(STUDENTS_STATS_ENDPOINT, {
                     headers: {
                         "Authorization": `Bearer ${TOKEN} `,
                         "Content-Type": "application/json"
