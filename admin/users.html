@@ -593,135 +593,143 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    ript>
-    const BACKEND_URL = "https://sys-voteucao-backend-production-311c.up.railway.app/api";
+    <script>
+        // --- Configuration ---
+        const BACKEND_URL = "https://sys-voteucao-backend-production-311c.up.railway.app/api";
 
-    // --- Variables DOM ---
-    const studentsList = document.getElementById('studentsList');
-    const paginationContainer = document.getElementById('pagination');
+        // --- Variables DOM ---
+        const studentsList = document.getElementById('studentsList');
+        const paginationContainer = document.getElementById('pagination');
 
-    const totalStudentsEl = document.getElementById('totalStudents');
-    const activeStudentsEl = document.getElementById('activeStudents');
-    const inactiveStudentsEl = document.getElementById('inactiveStudents');
-    const activationRateEl = document.getElementById('activationRate');
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const activeStudentsEl = document.getElementById('activeStudents');
+        const inactiveStudentsEl = document.getElementById('inactiveStudents');
+        const activationRateEl = document.getElementById('activationRate');
 
-    const ecoleFilter = document.getElementById('ecoleFilter');
-    const filiereFilter = document.getElementById('filiereFilter');
-    const anneeFilter = document.getElementById('anneeFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
+        const ecoleFilter = document.getElementById('ecoleFilter');
+        const filiereFilter = document.getElementById('filiereFilter');
+        const anneeFilter = document.getElementById('anneeFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
 
-    // Modal réinitialisation
-    const resetModal = document.getElementById('resetModal');
-    const closeResetModal = document.getElementById('closeResetModal');
-    const cancelReset = document.getElementById('cancelReset');
-    const confirmReset = document.getElementById('confirmReset');
+        // Modal réinitialisation
+        const resetModal = document.getElementById('resetModal');
+        const closeResetModal = document.getElementById('closeResetModal');
+        const cancelReset = document.getElementById('cancelReset');
+        const confirmReset = document.getElementById('confirmReset');
 
-    const resetStudentName = document.getElementById('resetStudentName');
-    const resetStudentIdentifiant = document.getElementById('resetStudentIdentifiant');
-    const resetStudentFiliere = document.getElementById('resetStudentFiliere');
-    const resetStudentAnnee = document.getElementById('resetStudentAnnee');
-    const newIdentifiant = document.getElementById('newIdentifiant');
-    const newPassword = document.getElementById('newPassword');
+        const resetStudentName = document.getElementById('resetStudentName');
+        const resetStudentIdentifiant = document.getElementById('resetStudentIdentifiant');
+        const resetStudentFiliere = document.getElementById('resetStudentFiliere');
+        const resetStudentAnnee = document.getElementById('resetStudentAnnee');
+        const newIdentifiant = document.getElementById('newIdentifiant');
+        const newPassword = document.getElementById('newPassword');
 
-    const toast = document.getElementById('toast');
+        const toast = document.getElementById('toast');
 
-    let currentStudentId = null;
-    let currentPage = 1;
-    let totalPages = 1;
-    let latestResetData = null; // <= stocke les infos reçues // --- Fonction toast --- function showToast(message,
-        type='success' ) { toast.textContent=message; toast.className=`toast ${type}`; setTimeout(()=> {
-        toast.className = 'toast';
-        }, 3000);
+        let currentStudentId = null;
+        let currentPage = 1;
+        let totalPages = 1;
+        let latestResetData = null; // <= stocke les infos reçues // --- Fonction toast --- 
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) return console.warn('Élément #toast introuvable');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
         }
+
 
         // --- Construire URL avec filtres ---
         function buildURL(page = 1) {
-        const ecole = ecoleFilter.value !== 'all' ? ecoleFilter.value : undefined;
-        const filiere = filiereFilter.value !== 'all' ? filiereFilter.value : undefined;
-        const annee = anneeFilter.value !== 'all' ? anneeFilter.value : undefined;
-        const status = statusFilter.value !== 'all' ? statusFilter.value : undefined;
-        const search = searchInput.value.trim() !== '' ? searchInput.value.trim() : undefined;
+            const ecole = ecoleFilter.value !== 'all' ? ecoleFilter.value : undefined;
+            const filiere = filiereFilter.value !== 'all' ? filiereFilter.value : undefined;
+            const annee = anneeFilter.value !== 'all' ? anneeFilter.value : undefined;
+            const status = statusFilter.value !== 'all' ? statusFilter.value : undefined;
+            const search = searchInput.value.trim() !== '' ? searchInput.value.trim() : undefined;
 
-        const params = new URLSearchParams({ page });
+            const params = new URLSearchParams({ page });
 
-        if (ecole) params.append('ecole', ecole);
-        if (filiere) params.append('filiere', filiere);
-        if (annee) params.append('annee', annee);
-        if (status) params.append('status', status);
-        if (search) params.append('search', search);
+            if (ecole) params.append('ecole', ecole);
+            if (filiere) params.append('filiere', filiere);
+            if (annee) params.append('annee', annee);
+            if (status) params.append('status', status);
+            if (search) params.append('search', search);
 
-        return `${BACKEND_URL}/students?${params.toString()}`;
+            return `${BACKEND_URL}/students?${params.toString()}`;
         }
 
         // --- Récupérer étudiants ---
         async function fetchStudents(page = 1) {
-        studentsList.innerHTML = `<div class="loading">
+            studentsList.innerHTML = `<div class="loading">
             <div class="spinner"></div>
         </div>`;
-        try {
-        const response = await fetch(buildURL(page));
-        const data = await response.json();
+            try {
+                const response = await fetch(buildURL(page));
+                const data = await response.json();
 
-        if (!data.success) {
-        studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>${data.message}
+                if (!data.success) {
+                    studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>${data.message}
         </div>`;
-        return;
-        }
+                    return;
+                }
 
-        renderStudents(data.data);
-        renderPagination(data.pagination);
-        populateFilters(data.data);
-        } catch (err) {
-        console.error(err);
-        studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur serveur
+                renderStudents(data.data);
+                renderPagination(data.pagination);
+                populateFilters(data.data);
+            } catch (err) {
+                console.error(err);
+                studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur serveur
         </div>`;
-        }
+            }
         }
 
         function populateFilters(students) {
-        const ecoles = new Set();
-        const filieres = new Set();
-        const annees = new Set();
+            const ecoles = new Set();
+            const filieres = new Set();
+            const annees = new Set();
 
-        students.forEach(s => {
-        if (s.ecole) ecoles.add(s.ecole);
-        if (s.filiere) filieres.add(s.filiere);
-        if (s.annee) annees.add(s.annee);
-        });
+            students.forEach(s => {
+                if (s.ecole) ecoles.add(s.ecole);
+                if (s.filiere) filieres.add(s.filiere);
+                if (s.annee) annees.add(s.annee);
+            });
 
-        function fillSelect(selectEl, items, defaultText) {
-        const currentValue = selectEl.value;
-        selectEl.innerHTML = `<option value="all">${defaultText}</option>`;
-        [...items].sort().forEach(item => {
-        const option = document.createElement('option');
-        option.value = item;
-        option.textContent = item;
-        selectEl.appendChild(option);
-        });
-        if ([...items].includes(currentValue)) selectEl.value = currentValue;
-        }
+            function fillSelect(selectEl, items, defaultText) {
+                const currentValue = selectEl.value;
+                selectEl.innerHTML = `<option value="all">${defaultText}</option>`;
+                [...items].sort().forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    selectEl.appendChild(option);
+                });
+                if ([...items].includes(currentValue)) selectEl.value = currentValue;
+            }
 
-        fillSelect(ecoleFilter, ecoles, 'Toutes les écoles/facultés');
-        fillSelect(filiereFilter, filieres, 'Toutes les filières');
-        fillSelect(anneeFilter, annees, 'Toutes les années');
+            fillSelect(ecoleFilter, ecoles, 'Toutes les écoles/facultés');
+            fillSelect(filiereFilter, filieres, 'Toutes les filières');
+            fillSelect(anneeFilter, annees, 'Toutes les années');
         }
 
         // --- Afficher étudiants ---
         function renderStudents(students) {
-        if (students.length === 0) {
-        studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i>Aucun étudiant trouvé</div>
+            if (students.length === 0) {
+                studentsList.innerHTML = `<div class="empty-state"><i class="fas fa-user-slash"></i>Aucun étudiant trouvé</div>
         `;
-        return;
-        }
+                return;
+            }
 
-        studentsList.innerHTML = '';
+            studentsList.innerHTML = '';
 
-        students.forEach(student => {
-        const row = document.createElement('div');
-        row.className = 'table-row';
-        row.innerHTML = `
+            students.forEach(student => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
         <div>${student.nom} ${student.prenom}</div>
         <div>${student.identifiantTemporaire || '-'}</div>
         <div>${student.email || '-'}</div>
@@ -736,60 +744,61 @@
             </button>
         </div>
         `;
-        studentsList.appendChild(row);
-        });
+                studentsList.appendChild(row);
+            });
         }
 
         // --- Pagination ---
         function renderPagination(pagination) {
-        currentPage = pagination.page;
-        totalPages = pagination.pages;
+            currentPage = pagination.page;
+            totalPages = pagination.pages;
 
-        paginationContainer.innerHTML = '';
-        for (let i = 1; i <= totalPages; i++) { const btn=document.createElement('button');
-            btn.className=`pagination-btn ${i===currentPage ? 'active' : '' }`; btn.textContent=i;
-            btn.addEventListener('click', ()=> fetchStudents(i));
-            paginationContainer.appendChild(btn);
+            paginationContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`; btn.textContent = i;
+                btn.addEventListener('click', () => fetchStudents(i));
+                paginationContainer.appendChild(btn);
             }
-            }
+        }
 
-            // --- Récupérer statistiques ---
-            async function fetchStats() {
+        // --- Récupérer statistiques ---
+        async function fetchStats() {
             try {
-            const params = new URLSearchParams();
-            if (ecoleFilter.value !== 'all') params.append('ecole', ecoleFilter.value);
-            if (filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
-            if (anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
+                const params = new URLSearchParams();
+                if (ecoleFilter.value !== 'all') params.append('ecole', ecoleFilter.value);
+                if (filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
+                if (anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
 
-            const response = await fetch(`${BACKEND_URL}/students/stats?${params.toString()}`);
-            const data = await response.json();
+                const response = await fetch(`${BACKEND_URL}/students/stats?${params.toString()}`);
+                const data = await response.json();
 
-            if (!data.success) return;
+                if (!data.success) return;
 
-            totalStudentsEl.textContent = data.statistics.totalStudents || 0;
-            activeStudentsEl.textContent = data.statistics.activeStudents || 0;
-            inactiveStudentsEl.textContent = data.statistics.inactiveStudents || 0;
-            activationRateEl.textContent = `${data.statistics.activationRate || 0}%`;
+                totalStudentsEl.textContent = data.statistics.totalStudents || 0;
+                activeStudentsEl.textContent = data.statistics.activeStudents || 0;
+                inactiveStudentsEl.textContent = data.statistics.inactiveStudents || 0;
+                activationRateEl.textContent = `${data.statistics.activationRate || 0}%`;
             } catch (err) {
-            console.error(err);
+                console.error(err);
             }
-            }
+        }
 
-            // --- Filtres & recherche ---
-            [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(filter => {
+        // --- Filtres & recherche ---
+        [ecoleFilter, filiereFilter, anneeFilter, statusFilter].forEach(filter => {
             filter.addEventListener('change', () => {
+                fetchStudents(1);
+                fetchStats();
+            });
+        });
+
+        searchBtn.addEventListener('click', () => {
             fetchStudents(1);
             fetchStats();
-            });
-            });
+        });
 
-            searchBtn.addEventListener('click', () => {
-            fetchStudents(1);
-            fetchStats();
-            });
-
-            // --- Modal réinitialisation ---
-            studentsList.addEventListener('click', async (e) => {
+        // --- Modal réinitialisation ---
+        studentsList.addEventListener('click', async (e) => {
             const resetBtn = e.target.closest('.btn-reset');
             if (!resetBtn) return;
 
@@ -811,61 +820,60 @@
             resetModal.classList.add('active');
 
             try {
-            const response = await fetch(`${BACKEND_URL}/students/${studentId}/reset-access`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-            });
+                const response = await fetch(`${BACKEND_URL}/students/${studentId}/reset-access`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            if (data.success) {
-            latestResetData = data.data; // stocker pour le confirmer
-            newIdentifiant.textContent = data.data.temporaryIdentifiant;
-            newPassword.textContent = data.data.temporaryPassword;
-            resetStudentIdentifiant.textContent = data.data.temporaryIdentifiant;
-            } else {
-            showToast('Erreur réinitialisation', 'error');
-            resetModal.classList.remove('active');
-            }
+                if (data.success) {
+                    latestResetData = data.data; // stocker pour le confirmer
+                    newIdentifiant.textContent = data.data.temporaryIdentifiant;
+                    newPassword.textContent = data.data.temporaryPassword;
+                    resetStudentIdentifiant.textContent = data.data.temporaryIdentifiant;
+                } else {
+                    showToast('Erreur réinitialisation', 'error');
+                    resetModal.classList.remove('active');
+                }
             } catch (err) {
-            console.error(err);
-            showToast('Erreur serveur', 'error');
-            resetModal.classList.remove('active');
+                console.error(err);
+                showToast('Erreur serveur', 'error');
+                resetModal.classList.remove('active');
             }
-            });
+        });
 
-            // --- Boutons du modal ---
-            closeResetModal.addEventListener('click', () => resetModal.classList.remove('active'));
-            cancelReset.addEventListener('click', () => resetModal.classList.remove('active'));
+        // --- Boutons du modal ---
+        closeResetModal.addEventListener('click', () => resetModal.classList.remove('active'));
+        cancelReset.addEventListener('click', () => resetModal.classList.remove('active'));
 
-            // --- CONFIRMER réinitialisation ---
-            confirmReset.addEventListener('click', () => {
+        // --- CONFIRMER réinitialisation ---
+        confirmReset.addEventListener('click', () => {
             if (!latestResetData) {
-            showToast("Aucune donnée à confirmer", "error");
-            return;
+                showToast("Aucune donnée à confirmer", "error");
+                return;
             }
             showToast("Accès réinitialisé avec succès", "success");
             resetModal.classList.remove('active');
             fetchStudents(currentPage); // refresh liste
             fetchStats();
-            });
+        });
 
-            // --- Copier identifiants ---
-            document.querySelectorAll('.copy-btn').forEach(btn => {
+        // --- Copier identifiants ---
+        document.querySelectorAll('.copy-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-            const targetId = btn.dataset.copy;
-            const text = document.getElementById(targetId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-            showToast('Copié dans le presse-papier', 'success');
+                const targetId = btn.dataset.copy;
+                const text = document.getElementById(targetId).textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Copié dans le presse-papier', 'success');
+                });
             });
-            });
-            });
+        });
 
-            // --- Initialisation ---
-            fetchStudents();
-            fetchStats();
-            </script>
-
+        // --- Initialisation ---
+        fetchStudents();
+        fetchStats();
+    </script>
 
 </body>
 
