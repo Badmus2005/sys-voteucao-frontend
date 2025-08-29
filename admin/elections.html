@@ -7,7 +7,6 @@
     <title>Gestion des Élections - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ---- ton CSS d’origine (inchangé) ---- */
         :root {
             --rouge-bordeaux: #7a0026;
             --rouge-bordeaux-light: #a73354;
@@ -94,6 +93,26 @@
             color: var(--bleu-nuit);
         }
 
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--bleu-nuit);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
         .elections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -107,12 +126,16 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(15, 26, 49, .1);
             border-left: 4px solid var(--rouge-bordeaux);
+            position: relative;
         }
 
         .election-title {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
         .election-type {
@@ -122,6 +145,24 @@
             font-weight: 500;
             background: rgba(122, 0, 38, .1);
             color: var(--rouge-bordeaux);
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .election-details {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--bleu-nuit-light);
+        }
+
+        .election-detail-item {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .election-detail-label {
+            font-weight: 500;
+            min-width: 100px;
         }
 
         .election-status {
@@ -146,6 +187,47 @@
         .status-completed {
             background: rgba(108, 117, 125, .15);
             color: #6c757d;
+        }
+
+        .election-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--rouge-bordeaux);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gris-moyen);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--gris-clair);
         }
 
         /* Modal */
@@ -230,6 +312,52 @@
             min-height: 100px;
             resize: vertical;
         }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--gris-clair);
+            border-radius: 6px;
+        }
     </style>
 </head>
 
@@ -241,6 +369,31 @@
             <button class="btn btn-primary" id="createElectionBtn"><i class="fas fa-plus"></i> Nouvelle
                 Élection</button>
         </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterType">Type d'élection</label>
+                <select id="filterType">
+                    <option value="">Tous les types</option>
+                    <option value="SALLE">Responsables de Salle</option>
+                    <option value="ECOLE">Délégués d'École</option>
+                    <option value="UNIVERSITE">Délégués Universitaires</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterStatus">Statut</label>
+                <select id="filterStatus">
+                    <option value="">Tous les statuts</option>
+                    <option value="active">Actives</option>
+                    <option value="upcoming">À venir</option>
+                    <option value="closed">Clôturées</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" id="applyFilters" style="align-self: flex-end;">
+                <i class="fas fa-filter"></i> Appliquer
+            </button>
+        </div>
+
         <div id="electionsContainer">
             <div class="loading">
                 <div class="spinner"></div>
@@ -248,15 +401,17 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal de création/modification -->
     <div id="electionModal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2>Nouvelle Élection</h2>
+                <h2 id="modalTitle">Nouvelle Élection</h2>
                 <button class="btn btn-secondary" onclick="hideElectionModal()">✕</button>
             </div>
             <div class="modal-body">
+                <div id="modalMessage" class="alert" style="display: none;"></div>
                 <form id="electionForm">
+                    <input type="hidden" id="electionId" name="electionId">
                     <div class="form-group">
                         <label for="title">Titre :</label>
                         <input type="text" id="title" name="title" required>
@@ -269,12 +424,21 @@
                         <label for="phase">Phase :</label>
                         <select id="phase" name="phase" required onchange="renderPhaseFields()">
                             <option value="">-- Choisir --</option>
-                            <option value="1">Phase 1 – Responsables de Salle</option>
-                            <option value="2">Phase 2 – Délégués d’École</option>
-                            <option value="3">Phase 3 – Délégués Universitaires</option>
+                            <option value="SALLE">Phase 1 – Responsables de Salle</option>
+                            <option value="ECOLE">Phase 2 – Délégués d'École</option>
+                            <option value="UNIVERSITE">Phase 3 – Délégués Universitaires</option>
                         </select>
                     </div>
                     <div id="phaseFields"></div>
+                    <div class="form-group">
+                        <label for="niveau">Niveau :</label>
+                        <select id="niveau" name="niveau" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="1">Licence 1</option>
+                            <option value="2">Licence 2</option>
+                            <option value="3">Licence 3</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="startDate">Date de début :</label>
                         <input type="datetime-local" id="startDate" name="startDate" required>
@@ -285,9 +449,26 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="hideElectionModal()">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Créer</button>
+                        <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Créer</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="confirmTitle">Confirmation</h2>
+                <button class="btn btn-secondary" onclick="hideConfirmModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideConfirmModal()">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirmer</button>
             </div>
         </div>
     </div>
@@ -297,20 +478,112 @@
         const API_BASE = CONFIG.API.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/election';
         const token = () => localStorage.getItem('token');
+        let currentElections = [];
+        let currentAction = null;
+        let currentElectionId = null;
 
-        document.getElementById("createElectionBtn").onclick = () => document.getElementById("electionModal").classList.add("active");
-        function hideElectionModal() { document.getElementById("electionModal").classList.remove("active"); document.getElementById("electionForm").reset(); document.getElementById("phaseFields").innerHTML = ""; }
+        document.addEventListener('DOMContentLoaded', function () {
+            loadElections();
+            document.getElementById("createElectionBtn").onclick = showCreateModal;
+            document.getElementById("applyFilters").onclick = applyFilters;
+            document.getElementById("electionForm").onsubmit = handleElectionSubmit;
+        });
+
+        function showCreateModal() {
+            document.getElementById("modalTitle").textContent = "Nouvelle Élection";
+            document.getElementById("modalSubmitBtn").textContent = "Créer";
+            document.getElementById("electionForm").reset();
+            document.getElementById("electionId").value = "";
+            document.getElementById("phaseFields").innerHTML = "";
+            document.getElementById("modalMessage").style.display = "none";
+            document.getElementById("electionModal").classList.add("active");
+        }
+
+        function showEditModal(election) {
+            document.getElementById("modalTitle").textContent = "Modifier l'Élection";
+            document.getElementById("modalSubmitBtn").textContent = "Modifier";
+
+            // Remplir le formulaire avec les données de l'élection
+            document.getElementById("electionId").value = election.id;
+            document.getElementById("title").value = election.titre;
+            document.getElementById("description").value = election.description || "";
+            document.getElementById("phase").value = election.type;
+            document.getElementById("niveau").value = election.niveau;
+
+            // Convertir les dates au format local pour les champs datetime-local
+            const startDate = new Date(election.dateDebut);
+            const endDate = new Date(election.dateFin);
+
+            document.getElementById("startDate").value = formatDateForInput(startDate);
+            document.getElementById("endDate").value = formatDateForInput(endDate);
+
+            // Afficher les champs spécifiques à la phase
+            renderPhaseFields();
+
+            // Remplir les champs spécifiques si disponibles
+            if (election.type === 'SALLE') {
+                if (election.filiere) document.getElementById("filiere").value = election.filiere;
+                if (election.annee) document.getElementById("annee").value = election.annee;
+                if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
+            } else if (election.type === 'ECOLE') {
+                if (election.ecole) document.getElementById("ecole").value = election.ecole;
+            } else if (election.type === 'UNIVERSITE') {
+                if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
+                if (election.tour) document.getElementById("tour").value = election.tour;
+            }
+
+            document.getElementById("modalMessage").style.display = "none";
+            document.getElementById("electionModal").classList.add("active");
+        }
+
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function hideElectionModal() {
+            document.getElementById("electionModal").classList.remove("active");
+        }
+
+        function showConfirmModal(title, message, action, electionId = null) {
+            document.getElementById("confirmTitle").textContent = title;
+            document.getElementById("confirmMessage").textContent = message;
+            currentAction = action;
+            currentElectionId = electionId;
+            document.getElementById("confirmModal").classList.add("active");
+        }
+
+        function hideConfirmModal() {
+            document.getElementById("confirmModal").classList.remove("active");
+            currentAction = null;
+            currentElectionId = null;
+        }
+
+        document.getElementById("confirmActionBtn").onclick = function () {
+            if (currentAction === 'delete') {
+                deleteElection(currentElectionId);
+            } else if (currentAction === 'close') {
+                closeElection(currentElectionId);
+            }
+            hideConfirmModal();
+        };
 
         // Champs dynamiques
         function renderPhaseFields() {
             const phase = document.getElementById("phase").value;
             const fields = document.getElementById("phaseFields");
             fields.innerHTML = "";
-            if (phase === "1") { // Phase 1
+
+            if (phase === "SALLE") {
                 fields.innerHTML = `
           <div class="form-group">
             <label>École :</label>
-            <select id="ecole" name="ecole" required>
+            <select id="ecole" name="ecole" required onchange="updateFilieres()">
               <option value="">-- Choisir --</option>
               <option value="EGEI">EGEI</option>
               <option value="ESMEA">ESMEA</option>
@@ -320,7 +593,9 @@
           </div>
           <div class="form-group">
             <label for="filiere">Filière :</label>
-            <input type="text" id="filiere" name="filiere" required>
+            <select id="filiere" name="filiere" required>
+              <option value="">-- Choisissez d'abord une école --</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="annee">Année :</label>
@@ -339,7 +614,7 @@
               <option value="DEUXIEME">Deuxième</option>
             </select>
           </div>`;
-            } else if (phase === "2") { // Phase 2
+            } else if (phase === "ECOLE") {
                 fields.innerHTML = `
           <div class="form-group">
             <label>École :</label>
@@ -351,7 +626,7 @@
               <option value="FDE">FDE</option>
             </select>
           </div>`;
-            } else if (phase === "3") { // Phase 3
+            } else if (phase === "UNIVERSITE") {
                 fields.innerHTML = `
           <div class="form-group">
             <label for="delegueType">Type de délégué :</label>
@@ -372,45 +647,300 @@
             }
         }
 
-        // Création d’élection
-        document.getElementById("electionForm").onsubmit = async (e) => {
+        function updateFilieres() {
+            const ecoleSelect = document.getElementById("ecole");
+            const filiereSelect = document.getElementById("filiere");
+            const ecole = ecoleSelect.value;
+
+            filiereSelect.innerHTML = '<option value="">-- Choisir --</option>';
+
+            if (ecole && CONFIG.ACADEMIC.ECOLES[ecole]) {
+                CONFIG.ACADEMIC.ECOLES[ecole].filieres.forEach(filiere => {
+                    const option = document.createElement("option");
+                    option.value = filiere;
+                    option.textContent = filiere;
+                    filiereSelect.appendChild(option);
+                });
+            }
+        }
+
+        async function loadElections() {
+            try {
+                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
+                    headers: { "Authorization": `Bearer ${token()}` }
+                });
+
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        alert("Session expirée. Veuillez vous reconnecter.");
+                        window.location.href = "login.html";
+                        return;
+                    }
+                    throw new Error("Erreur lors du chargement des élections");
+                }
+
+                const elections = await res.json();
+                currentElections = elections;
+                renderElections(elections);
+            } catch (err) {
+                console.error(err);
+                document.getElementById("electionsContainer").innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Erreur lors du chargement des élections: ${err.message}
+                    </div>`;
+            }
+        }
+
+        function applyFilters() {
+            const typeFilter = document.getElementById("filterType").value;
+            const statusFilter = document.getElementById("filterStatus").value;
+
+            let filteredElections = currentElections;
+
+            if (typeFilter) {
+                filteredElections = filteredElections.filter(e => e.type === typeFilter);
+            }
+
+            if (statusFilter) {
+                const now = new Date();
+                filteredElections = filteredElections.filter(e => {
+                    const startDate = new Date(e.dateDebut);
+                    const endDate = new Date(e.dateFin);
+
+                    if (statusFilter === 'active') {
+                        return e.isActive && startDate <= now && endDate >= now;
+                    } else if (statusFilter === 'upcoming') {
+                        return e.isActive && startDate > now;
+                    } else if (statusFilter === 'closed') {
+                        return !e.isActive || endDate < now;
+                    }
+                    return true;
+                });
+            }
+
+            renderElections(filteredElections);
+        }
+
+        function renderElections(elections) {
+            const container = document.getElementById("electionsContainer");
+
+            if (!elections || elections.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>Aucune élection trouvée</h3>
+                        <p>Créez votre première élection en cliquant sur le bouton "Nouvelle Élection"</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            elections.forEach(election => {
+                const now = new Date();
+                const startDate = new Date(election.dateDebut);
+                const endDate = new Date(election.dateFin);
+
+                let status = 'completed';
+                let statusText = 'Terminée';
+
+                if (election.isActive && startDate <= now && endDate >= now) {
+                    status = 'active';
+                    statusText = 'En cours';
+                } else if (election.isActive && startDate > now) {
+                    status = 'upcoming';
+                    statusText = 'À venir';
+                }
+
+                const electionElement = document.createElement('div');
+                electionElement.className = 'election-card';
+                electionElement.innerHTML = `
+                    <div class="election-title">
+                        <span>${election.titre}</span>
+                        <span class="election-type">${getElectionTypeLabel(election.type)}</span>
+                    </div>
+                    <div class="election-status status-${status}">${statusText}</div>
+                    <div class="election-details">
+                        <div class="election-detail-item">
+                            <span class="election-detail-label">Début:</span>
+                            <span>${formatDate(election.dateDebut)}</span>
+                        </div>
+                        <div class="election-detail-item">
+                            <span class="election-detail-label">Fin:</span>
+                            <span>${formatDate(election.dateFin)}</span>
+                        </div>
+                        ${election.filiere ? `<div class="election-detail-item">
+                            <span class="election-detail-label">Filière:</span>
+                            <span>${election.filiere}</span>
+                        </div>` : ''}
+                        ${election.ecole ? `<div class="election-detail-item">
+                            <span class="election-detail-label">École:</span>
+                            <span>${election.ecole}</span>
+                        </div>` : ''}
+                        ${election.annee ? `<div class="election-detail-item">
+                            <span class="election-detail-label">Année:</span>
+                            <span>Licence ${election.annee}</span>
+                        </div>` : ''}
+                        ${election.delegueType ? `<div class="election-detail-item">
+                            <span class="election-detail-label">Type:</span>
+                            <span>${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
+                        </div>` : ''}
+                        ${election.description ? `<div class="election-detail-item">
+                            <span class="election-detail-label">Description:</span>
+                            <span>${election.description}</span>
+                        </div>` : ''}
+                    </div>
+                    <div class="election-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        ${status === 'active' ? `
+                        <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'close', ${election.id})">
+                            <i class="fas fa-lock"></i> Clôturer
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ? Cette action est irréversible.', 'delete', ${election.id})">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(electionElement);
+            });
+        }
+
+        function getElectionTypeLabel(type) {
+            switch (type) {
+                case 'SALLE': return 'Responsables de Salle';
+                case 'ECOLE': return 'Délégués d\'École';
+                case 'UNIVERSITE': return 'Délégués Universitaires';
+                default: return type;
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function handleElectionSubmit(e) {
             e.preventDefault();
+
+            const electionId = document.getElementById("electionId").value;
+            const isEdit = !!electionId;
+
             const data = {
                 titre: document.getElementById("title").value,
                 description: document.getElementById("description").value,
                 dateDebut: new Date(document.getElementById("startDate").value).toISOString(),
                 dateFin: new Date(document.getElementById("endDate").value).toISOString(),
+                niveau: parseInt(document.getElementById("niveau").value),
                 isActive: true
             };
+
             const phase = document.getElementById("phase").value;
-            if (phase === "1") {
-                data.type = "SALLE";
-                data.niveau = parseInt(document.getElementById("annee").value);
-                data.ecole = document.getElementById("ecole").value;
+            data.type = phase;
+
+            if (phase === "SALLE") {
                 data.filiere = document.getElementById("filiere").value;
-                data.delegueType = document.getElementById("delegueType").value;
-            } else if (phase === "2") {
-                data.type = "ECOLE";
-                data.niveau = 3; // Phase 2 = Licence 3 candidats (ton backend vérifiera)
+                data.annee = parseInt(document.getElementById("annee").value);
                 data.ecole = document.getElementById("ecole").value;
-            } else if (phase === "3") {
-                data.type = "UNIVERSITE";
-                data.niveau = 3;
+                data.delegueType = document.getElementById("delegueType").value;
+            } else if (phase === "ECOLE") {
+                data.ecole = document.getElementById("ecole").value;
+            } else if (phase === "UNIVERSITE") {
                 data.delegueType = document.getElementById("delegueType").value;
                 data.tour = parseInt(document.getElementById("tour").value);
             }
+
             try {
-                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token()}` },
+                const url = isEdit ?
+                    `${API_BASE}${ELECTIONS_ENDPOINT}/${electionId}` :
+                    `${API_BASE}${ELECTIONS_ENDPOINT}`;
+
+                const method = isEdit ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token()}`
+                    },
                     body: JSON.stringify(data)
                 });
-                if (!res.ok) throw new Error("Erreur création");
-                alert("Élection créée !");
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Erreur ${isEdit ? 'modification' : 'création'}`);
+                }
+
+                showMessage('success', `Élection ${isEdit ? 'modifiée' : 'créée'} avec succès !`);
                 hideElectionModal();
-                // reload list
-            } catch (err) { alert(err.message); }
-        };
+                loadElections();
+            } catch (err) {
+                showMessage('error', err.message);
+            }
+        }
+
+        async function deleteElection(id) {
+            try {
+                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${token()}` }
+                });
+
+                if (!res.ok) throw new Error("Erreur suppression");
+
+                showMessage('success', 'Élection supprimée avec succès !');
+                loadElections();
+            } catch (err) {
+                showMessage('error', err.message);
+            }
+        }
+
+        async function closeElection(id) {
+            try {
+                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}/close`, {
+                    method: "PUT",
+                    headers: { "Authorization": `Bearer ${token()}` }
+                });
+
+                if (!res.ok) throw new Error("Erreur clôture");
+
+                showMessage('success', 'Élection clôturée avec succès !');
+                loadElections();
+            } catch (err) {
+                showMessage('error', err.message);
+            }
+        }
+
+        function showMessage(type, message) {
+            const messageEl = document.getElementById("modalMessage");
+            messageEl.textContent = message;
+            messageEl.className = `alert alert-${type}`;
+            messageEl.style.display = "block";
+
+            // Pour les messages de succès, les afficher aussi en haut de page
+            if (type === 'success') {
+                const container = document.getElementById("electionsContainer");
+                const alert = document.createElement("div");
+                alert.className = `alert alert-${type}`;
+                alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+                container.insertBefore(alert, container.firstChild);
+
+                // Supprimer le message après 5 secondes
+                setTimeout(() => {
+                    alert.remove();
+                }, 5000);
+            }
+        }
     </script>
 </body>
 
