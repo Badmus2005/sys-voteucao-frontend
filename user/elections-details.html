@@ -1053,6 +1053,7 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
+
     <script src="../config.js"></script>
     <script>
         // Configuration
@@ -1061,6 +1062,7 @@
         const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id)}`;
         const PROFILE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
         const CANDIDATE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.LIST}`;
+        const IS_CANDIDATE_API = (electionId) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.IS_CANDIDATE(electionId)}`;
 
         // Éléments DOM
         const burger = document.getElementById('burger');
@@ -1084,8 +1086,9 @@
         let userProfile = null;
         let candidates = [];
         let elections = [];
+        let isUserCandidate = false;
 
-        // MENU BURGER
+        // MENU BURGER (inchangé)
         burger.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
@@ -1098,7 +1101,7 @@
             burger.classList.remove('open');
         });
 
-        // Gestion de la modale
+        // Gestion de la modale (inchangé)
         electionsLink.addEventListener('click', (e) => {
             e.preventDefault();
             showElectionsModal();
@@ -1129,7 +1132,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Fonctions d'affichage
+        // Fonctions d'affichage (inchangées)
         function showLoading() {
             loadingOverlay.style.display = 'flex';
         }
@@ -1248,7 +1251,7 @@
                         </div>
                         <div>
                             <div class="step-title">${election.titre}</div>
-                            <div class="step-date">${formatDate(election.dateDebut)} - ${formatDate(election.dateFin)}</div>
+                            <div class="step-date">${formatDate(election.dateDebutCandidature)} - ${formatDate(election.dateFinCandidature)}</div>
                         </div>
                     </div>
                     <div class="step-description">${election.description}</div>
@@ -1265,6 +1268,7 @@
                     displayElectionDetails(election);
                     checkEligibility(election);
                     loadCandidates();
+                    checkIfUserIsCandidate(election.id);
 
                     // Fermer la modale
                     hideElectionsModal();
@@ -1285,6 +1289,7 @@
                     currentElection = elections[0];
                     displayElectionDetails(elections[0]);
                     checkEligibility(elections[0]);
+                    checkIfUserIsCandidate(elections[0].id);
                     return elections[0];
                 }
                 return null;
@@ -1296,11 +1301,26 @@
                     currentElection = data;
                     displayElectionDetails(data);
                     checkEligibility(data);
+                    checkIfUserIsCandidate(data.id);
                 }
                 return data;
             } catch (error) {
                 console.error('Erreur chargement détails élection:', error);
                 return null;
+            }
+        }
+
+        async function checkIfUserIsCandidate(electionId) {
+            try {
+                const data = await fetchWithAuth(IS_CANDIDATE_API(electionId));
+                isUserCandidate = data && data.isCandidate;
+                updateCandidatureButton();
+                return data;
+            } catch (error) {
+                console.error('Erreur vérification candidature:', error);
+                isUserCandidate = false;
+                updateCandidatureButton();
+                return { isCandidate: false };
             }
         }
 
@@ -1338,8 +1358,10 @@
 
             // Mettre à jour le statut
             const now = new Date();
-            const debut = new Date(election.dateDebut);
-            const fin = new Date(election.dateFin);
+            const debutCandidature = new Date(election.dateDebutCandidature);
+            const finCandidature = new Date(election.dateFinCandidature);
+            const debutVote = new Date(election.dateDebut);
+            const finVote = new Date(election.dateFin);
 
             let statusText = '';
             let statusClass = '';
@@ -1349,18 +1371,23 @@
             document.getElementById('voteStep').className = 'timeline-step';
             document.getElementById('resultsStep').className = 'timeline-step';
 
-            if (now < debut) {
-                statusText = 'À venir';
+            if (now < debutCandidature) {
+                statusText = 'Candidatures à venir';
                 document.getElementById('candidatureStep').classList.add('upcoming');
                 document.getElementById('voteStep').classList.add('upcoming');
                 document.getElementById('resultsStep').classList.add('upcoming');
-            } else if (now > fin) {
+            } else if (now > finVote) {
                 statusText = 'Terminée';
                 document.getElementById('candidatureStep').classList.add('completed');
                 document.getElementById('voteStep').classList.add('completed');
                 document.getElementById('resultsStep').classList.add('completed');
-            } else {
-                statusText = 'En cours';
+            } else if (now >= debutCandidature && now <= finCandidature) {
+                statusText = 'Candidatures en cours';
+                document.getElementById('candidatureStep').classList.add('active');
+                document.getElementById('voteStep').classList.add('upcoming');
+                document.getElementById('resultsStep').classList.add('upcoming');
+            } else if (now >= debutVote && now <= finVote) {
+                statusText = 'Vote en cours';
                 document.getElementById('candidatureStep').classList.add('completed');
                 document.getElementById('voteStep').classList.add('active');
                 document.getElementById('resultsStep').classList.add('upcoming');
@@ -1368,13 +1395,18 @@
                 // Afficher la section de vote
                 document.getElementById('voteSection').style.display = 'block';
                 document.getElementById('voteLink').href = `vote.html?election=${election.id}`;
+            } else {
+                statusText = 'Entre deux périodes';
+                document.getElementById('candidatureStep').classList.add('completed');
+                document.getElementById('voteStep').classList.add('upcoming');
+                document.getElementById('resultsStep').classList.add('upcoming');
             }
 
             document.getElementById('electionStatus').textContent = statusText;
 
-            // Mettre à jour les dates
+            // Mettre à jour les dates de la timeline
             document.getElementById('candidatureDate').textContent =
-                `Du ${formatDate(election.dateDebut)} au ${formatDate(election.dateFin)}`;
+                `Du ${formatDate(election.dateDebutCandidature)} au ${formatDate(election.dateFinCandidature)}`;
 
             document.getElementById('voteDate').textContent =
                 `Du ${formatDate(election.dateDebut)} au ${formatDate(election.dateFin)}`;
@@ -1440,26 +1472,39 @@
             // Mettre à jour les informations d'éligibilité
             document.getElementById('eligibilityDetails').textContent = eligibilityDetails;
 
-            // Activer ou désactiver le bouton de candidature
-            const now = new Date();
-            const debut = new Date(election.dateDebut);
-            const fin = new Date(election.dateFin);
-
             // Vérifier si la période de candidature est ouverte
-            // (On suppose que les candidatures sont ouvertes jusqu'à la fin des votes)
-            const canApply = now >= debut && now <= fin;
+            const now = new Date();
+            const debutCandidature = new Date(election.dateDebutCandidature);
+            const finCandidature = new Date(election.dateFinCandidature);
+            const canApply = now >= debutCandidature && now <= finCandidature;
+
+            // Mettre à jour le bouton de candidature
+            updateCandidatureButton(isEligible, canApply);
+        }
+
+        function updateCandidatureButton(isEligible = true, canApply = true) {
+            if (isUserCandidate) {
+                candidaterBtn.disabled = true;
+                candidaterBtn.innerHTML = '<i class="fa-solid fa-check"></i> Déjà candidat';
+                candidaterBtn.title = "Vous êtes déjà candidat à cette élection";
+                return;
+            }
 
             if (isEligible && canApply) {
                 candidaterBtn.disabled = false;
+                candidaterBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Se porter candidat';
+                candidaterBtn.title = "Cliquez pour vous porter candidat";
                 candidaterBtn.onclick = () => {
-                    window.location.href = `candidature.html?election=${election.id}`;
+                    window.location.href = `candidature.html?election=${currentElection.id}`;
                 };
             } else {
                 candidaterBtn.disabled = true;
 
                 if (!isEligible) {
+                    candidaterBtn.innerHTML = '<i class="fa-solid fa-ban"></i> Non éligible';
                     candidaterBtn.title = "Vous n'êtes pas éligible pour cette élection";
                 } else if (!canApply) {
+                    candidaterBtn.innerHTML = '<i class="fa-solid fa-clock"></i> Période fermée';
                     candidaterBtn.title = "La période de candidature est fermée";
                 }
             }

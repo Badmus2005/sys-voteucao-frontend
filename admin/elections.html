@@ -910,12 +910,13 @@
             </div>
         </div>
     </div>
+    </div>
 
     <script src="../config.js"></script>
     <script>
         // Configuration des API
         const API_BASE = CONFIG.API.BASE_URL;
-        const ELECTIONS_ENDPOINT = '/api/election';
+        const ELECTIONS_ENDPOINT = '/api/elections';
         const token = () => localStorage.getItem('token');
 
         let currentElections = [];
@@ -984,18 +985,18 @@
             } catch (err) {
                 console.error(err);
                 document.getElementById("electionsContainer").innerHTML = `
-                    <div class="alert alert-error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Erreur lors du chargement des élections: ${err.message}
-                    </div>`;
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Erreur lors du chargement des élections: ${err.message}
+                        </div>`;
             }
         }
 
         function showLoading() {
             document.getElementById("electionsContainer").innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>`;
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>`;
             document.getElementById("emptyState").style.display = 'none';
         }
 
@@ -1071,15 +1072,15 @@
             // En-tête du tableau
             const thead = document.createElement('thead');
             thead.innerHTML = `
-                <tr>
-                    <th>Titre</th>
-                    <th>Type</th>
-                    <th>Statut</th>
-                    <th>Date de début</th>
-                    <th>Date de fin</th>
-                    <th>Actions</th>
-                </tr>
-            `;
+                    <tr>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Statut</th>
+                        <th>Date de début</th>
+                        <th>Date de fin</th>
+                        <th>Actions</th>
+                    </tr>
+                `;
             table.appendChild(thead);
 
             // Corps du tableau
@@ -1103,36 +1104,36 @@
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>
-                        <div>${election.titre}</div>
-                        <button class="toggle-details" onclick="toggleElectionDetails(${election.id})">
-                            <i class="fas fa-${expandedElections.has(election.id) ? 'chevron-up' : 'chevron-down'}"></i>
-                            ${expandedElections.has(election.id) ? 'Masquer' : 'Afficher'} détails
-                        </button>
-                    </td>
-                    <td><span class="election-type-badge">${getElectionTypeLabel(election.type)}</span></td>
-                    <td><span class="election-status status-${status}">${statusText}</span></td>
-                    <td>${formatDate(election.dateDebut)}</td>
-                    <td>${formatDate(election.dateFin)}</td>
-                    <td>
-                        <div class="table-actions">
-                            <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})">
-                                <i class="fas fa-eye"></i>
+                        <td>
+                            <div>${election.titre}</div>
+                            <button class="toggle-details" onclick="toggleElectionDetails(${election.id})">
+                                <i class="fas fa-${expandedElections.has(election.id) ? 'chevron-up' : 'chevron-down'}"></i>
+                                ${expandedElections.has(election.id) ? 'Masquer' : 'Afficher'} détails
                             </button>
-                            <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            ${status === 'active' ? `
-                            <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')">
-                                <i class="fas fa-lock"></i>
-                            </button>
-                            ` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
+                        </td>
+                        <td><span class="election-type-badge">${getElectionTypeLabel(election.type)}</span></td>
+                        <td><span class="election-status status-${status}">${statusText}</span></td>
+                        <td>${formatDate(election.dateDebut)}</td>
+                        <td>${formatDate(election.dateFin)}</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${status === 'active' ? `
+                                <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')">
+                                    <i class="fas fa-lock"></i>
+                                </button>
+                                ` : ''}
+                                <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
                 tbody.appendChild(row);
 
                 // Ligne de détails
@@ -1140,88 +1141,96 @@
                     const detailsRow = document.createElement('tr');
                     detailsRow.className = 'election-details-row';
                     detailsRow.innerHTML = `
-                        <td colspan="6">
-                            <div class="election-details-content">
-                                <div class="election-detail-group">
-                                    <h4>Informations générales</h4>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Phase:</span>
-                                        <span class="election-detail-value">${getPhaseNumber(election.type)}</span>
+                            <td colspan="6">
+                                <div class="election-details-content">
+                                    <div class="election-detail-group">
+                                        <h4>Informations générales</h4>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Phase:</span>
+                                            <span class="election-detail-value">${getPhaseNumber(election.type)}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Début des candidatures:</span>
+                                            <span class="election-detail-value">${formatDateTime(election.dateDebutCandidature)}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Fin des candidatures:</span>
+                                            <span class="election-detail-value">${formatDateTime(election.dateFinCandidature)}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Début des votes:</span>
+                                            <span class="election-detail-value">${formatDateTime(election.dateDebut)}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Fin des votes:</span>
+                                            <span class="election-detail-value">${formatDateTime(election.dateFin)}</span>
+                                        </div>
+                                        ${election.description ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Description:</span>
+                                            <span class="election-detail-value">${election.description}</span>
+                                        </div>
+                                        ` : ''}
                                     </div>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Début des votes:</span>
-                                        <span class="election-detail-value">${formatDateTime(election.dateDebut)}</span>
+                                    
+                                    <div class="election-detail-group">
+                                        <h4>Détails spécifiques</h4>
+                                        ${election.filiere ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Filière:</span>
+                                            <span class="election-detail-value">${election.filiere}</span>
+                                        </div>
+                                        ` : ''}
+                                        ${election.ecole ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">École:</span>
+                                            <span class="election-detail-value">${election.ecole}</span>
+                                        </div>
+                                        ` : ''}
+                                        ${election.annee ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Année:</span>
+                                            <span class="election-detail-value">Licence ${election.annee}</span>
+                                        </div>
+                                        ` : ''}
+                                        ${election.delegueType ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Type délégué:</span>
+                                            <span class="election-detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
+                                        </div>
+                                        ` : ''}
+                                        ${election.tour ? `
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Tour:</span>
+                                            <span class="election-detail-value">${election.tour}ème tour</span>
+                                        </div>
+                                        ` : ''}
                                     </div>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Fin des votes:</span>
-                                        <span class="election-detail-value">${formatDateTime(election.dateFin)}</span>
-                                    </div>
-                                    ${election.description ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Description:</span>
-                                        <span class="election-detail-value">${election.description}</span>
+                                    
+                                    ${election._count ? `
+                                    <div class="election-detail-group">
+                                        <h4>Statistiques</h4>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Taux de participation:</span>
+                                            <span class="election-detail-value">${election.stats ? election.stats.participationRate : '0%'}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Total des votes:</span>
+                                            <span class="election-detail-value">${election._count.votes || 0}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Nombre de candidats:</span>
+                                            <span class="election-detail-value">${election._count.candidates || 0}</span>
+                                        </div>
+                                        <div class="election-detail-item">
+                                            <span class="election-detail-label">Jetons générés:</span>
+                                            <span class="election-detail-value">${election._count.voteTokens || 0}</span>
+                                        </div>
                                     </div>
                                     ` : ''}
                                 </div>
-                                
-                                <div class="election-detail-group">
-                                    <h4>Détails spécifiques</h4>
-                                    ${election.filiere ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Filière:</span>
-                                        <span class="election-detail-value">${election.filiere}</span>
-                                    </div>
-                                    ` : ''}
-                                    ${election.ecole ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">École:</span>
-                                        <span class="election-detail-value">${election.ecole}</span>
-                                    </div>
-                                    ` : ''}
-                                    ${election.annee ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Année:</span>
-                                        <span class="election-detail-value">Licence ${election.annee}</span>
-                                    </div>
-                                    ` : ''}
-                                    ${election.delegueType ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Type délégué:</span>
-                                        <span class="election-detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
-                                    </div>
-                                    ` : ''}
-                                    ${election.tour ? `
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Tour:</span>
-                                        <span class="election-detail-value">${election.tour}ème tour</span>
-                                    </div>
-                                    ` : ''}
-                                </div>
-                                
-                                ${election._count ? `
-                                <div class="election-detail-group">
-                                    <h4>Statistiques</h4>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Taux de participation:</span>
-                                        <span class="election-detail-value">${election.stats ? election.stats.participationRate : '0%'}</span>
-                                    </div>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Total des votes:</span>
-                                        <span class="election-detail-value">${election._count.votes || 0}</span>
-                                    </div>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Nombre de candidats:</span>
-                                        <span class="election-detail-value">${election._count.candidates || 0}</span>
-                                    </div>
-                                    <div class="election-detail-item">
-                                        <span class="election-detail-label">Jetons générés:</span>
-                                        <span class="election-detail-value">${election._count.voteTokens || 0}</span>
-                                    </div>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </td>
-                    `;
+                            </td>
+                        `;
                     tbody.appendChild(detailsRow);
                 }
             });
@@ -1278,11 +1287,15 @@
             document.getElementById("phase").value = election.type;
 
             // Convertir les dates au format local pour les champs datetime-local
-            const startDate = new Date(election.dateDebut);
-            const endDate = new Date(election.dateFin);
+            const startCandidacyDate = new Date(election.dateDebutCandidature);
+            const endCandidacyDate = new Date(election.dateFinCandidature);
+            const startVoteDate = new Date(election.dateDebut);
+            const endVoteDate = new Date(election.dateFin);
 
-            document.getElementById("votingStart").value = formatDateForInput(startDate);
-            document.getElementById("votingEnd").value = formatDateForInput(endDate);
+            document.getElementById("candidacyStart").value = formatDateForInput(startCandidacyDate);
+            document.getElementById("candidacyEnd").value = formatDateForInput(endCandidacyDate);
+            document.getElementById("votingStart").value = formatDateForInput(startVoteDate);
+            document.getElementById("votingEnd").value = formatDateForInput(endVoteDate);
 
             // Afficher les champs spécifiques à la phase
             renderPhaseFields();
@@ -1423,69 +1436,69 @@
 
             if (phase === "SALLE") {
                 fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecole" required onchange="updateFilieres()">
-                            <option value="">-- Choisir --</option>
-                            <option value="EGEI">EGEI</option>
-                            <option value="ESMEA">ESMEA</option>
-                            <option value="FSAE">FSAE</option>
-                            <option value="FDE">FDE</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filiere">Filière :</label>
-                        <select id="filiere" name="filiere" required>
-                            <option value="">-- Choisissez d'abord une école --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="annee">Année :</label>
-                        <select id="annee" name="annee" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="1">Licence 1</option>
-                            <option value="2">Licence 2</option>
-                            <option value="3">Licence 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="delegueType">Type de responsable :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier</option>
-                            <option value="DEUXIEME">Deuxième</option>
-                        </select>
-                    </div>`;
+                        <div class="form-group">
+                            <label>École :</label>
+                            <select id="ecole" name="ecole" required onchange="updateFilieres()">
+                                <option value="">-- Choisir --</option>
+                                <option value="EGEI">EGEI</option>
+                                <option value="ESMEA">ESMEA</option>
+                                <option value="FSAE">FSAE</option>
+                                <option value="FDE">FDE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filiere">Filière :</label>
+                            <select id="filiere" name="filiere" required>
+                                <option value="">-- Choisissez d'abord une école --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annee">Année :</label>
+                            <select id="annee" name="annee" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="1">Licence 1</option>
+                                <option value="2">Licence 2</option>
+                                <option value="3">Licence 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="delegueType">Type de responsable :</label>
+                            <select id="delegueType" name="delegueType" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="PREMIER">Premier</option>
+                                <option value="DEUXIEME">Deuxième</option>
+                            </select>
+                        </div>`;
             } else if (phase === "ECOLE") {
                 fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecole" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="EGEI">EGEI</option>
-                            <option value="ESMEA">ESMEA</option>
-                            <option value="FSAE">FSAE</option>
-                            <option value="FDE">FDE</option>
-                        </select>
-                    </div>`;
+                        <div class="form-group">
+                            <label>École :</label>
+                            <select id="ecole" name="ecole" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="EGEI">EGEI</option>
+                                <option value="ESMEA">ESMEA</option>
+                                <option value="FSAE">FSAE</option>
+                                <option value="FDE">FDE</option>
+                            </select>
+                        </div>`;
             } else if (phase === "UNIVERSITE") {
                 fields.innerHTML = `
-                    <div class="form-group">
-                        <label for="delegueType">Type de délégué :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier</option>
-                            <option value="DEUXIEME">Deuxième</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tour">Tour :</label>
-                        <select id="tour" name="tour" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="1">1er tour</option>
-                            <option value="2">2ème tour</option>
-                        </select>
-                    </div>`;
+                        <div class="form-group">
+                            <label for="delegueType">Type de délégué :</label>
+                            <select id="delegueType" name="delegueType" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="PREMIER">Premier</option>
+                                <option value="DEUXIEME">Deuxième</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tour">Tour :</label>
+                            <select id="tour" name="tour" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="1">1er tour</option>
+                                <option value="2">2ème tour</option>
+                            </select>
+                        </div>`;
             }
         }
 
@@ -1512,11 +1525,36 @@
             const electionId = document.getElementById("electionId").value;
             const isEdit = !!electionId;
 
+            // Validation des dates
+            const candidacyStart = new Date(document.getElementById("candidacyStart").value);
+            const candidacyEnd = new Date(document.getElementById("candidacyEnd").value);
+            const votingStart = new Date(document.getElementById("votingStart").value);
+            const votingEnd = new Date(document.getElementById("votingEnd").value);
+
+            // Vérifier que les dates de candidature sont avant les dates de vote
+            if (candidacyEnd >= votingStart) {
+                showMessage('error', 'La fin des candidatures doit être avant le début des votes');
+                return;
+            }
+
+            // Vérifier que les dates sont cohérentes
+            if (candidacyStart >= candidacyEnd) {
+                showMessage('error', 'La date de début des candidatures doit être avant la date de fin');
+                return;
+            }
+
+            if (votingStart >= votingEnd) {
+                showMessage('error', 'La date de début des votes doit être avant la date de fin');
+                return;
+            }
+
             const data = {
                 titre: document.getElementById("title").value,
                 description: document.getElementById("description").value,
-                dateDebut: new Date(document.getElementById("votingStart").value).toISOString(),
-                dateFin: new Date(document.getElementById("votingEnd").value).toISOString(),
+                dateDebutCandidature: candidacyStart.toISOString(),
+                dateFinCandidature: candidacyEnd.toISOString(),
+                dateDebut: votingStart.toISOString(),
+                dateFin: votingEnd.toISOString(),
                 isActive: true
             };
 
@@ -1525,16 +1563,16 @@
 
             // Déterminer le niveau en fonction de la phase
             if (phase === "SALLE") {
-                data.niveau = 1; // Phase 1
+                data.niveau = document.getElementById("phase").value; // Phase 1
                 data.filiere = document.getElementById("filiere").value;
                 data.annee = parseInt(document.getElementById("annee").value);
                 data.ecole = document.getElementById("ecole").value;
                 data.delegueType = document.getElementById("delegueType").value;
             } else if (phase === "ECOLE") {
-                data.niveau = 2; // Phase 2
+                data.niveau = document.getElementById("phase").value; // Phase 2
                 data.ecole = document.getElementById("ecole").value;
             } else if (phase === "UNIVERSITE") {
-                data.niveau = 3; // Phase 3
+                data.niveau = document.getElementById("phase").value; // Phase 3
                 data.delegueType = document.getElementById("delegueType").value;
                 data.tour = parseInt(document.getElementById("tour").value);
             }
