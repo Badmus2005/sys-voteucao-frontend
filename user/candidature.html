@@ -1106,14 +1106,15 @@
                 }
 
                 if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    // NE PAS rediriger pour les autres erreurs
+                    const errorText = await response.text();
+                    throw new Error(`Erreur ${response.status}: ${errorText}`);
                 }
 
                 return await response.json();
             } catch (error) {
                 console.error('Erreur fetch:', error);
-                showToast('Erreur de connexion au serveur', 'error');
-                throw error;
+                throw error; // Propager l'erreur pour la gérer dans le code appelant
             }
         }
 
@@ -1394,6 +1395,7 @@
         async function submitCandidature(candidatureData) {
             try {
                 showLoading();
+
                 const response = await fetchWithAuth(CANDIDATE_API, {
                     method: 'POST',
                     headers: {
@@ -1402,19 +1404,113 @@
                     body: JSON.stringify(candidatureData)
                 });
 
-                if (response) {
-                    candidatureForm.style.display = 'none';
-                    candidatureHeader.style.display = 'none';
-                    statusMessage.style.display = 'block';
-                    showToast('Candidature soumise avec succès!', 'success');
+                // Si fetchWithAuth a redirigé vers login
+                if (response === null) {
+                    return;
                 }
+
+                // Vérifier le statut de la réponse
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Erreur ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Erreur lors de la soumission');
+                }
+
+                // Succès
+                candidatureForm.style.display = 'none';
+                candidatureHeader.style.display = 'none';
+                statusMessage.style.display = 'block';
+                showToast('Candidature soumise avec succès!', 'success');
+
             } catch (error) {
-                console.error('Erreur soumission candidature:', error);
-                showToast('Erreur lors de la soumission de la candidature', 'error');
+                console.error('Erreur détaillée:', error);
+
+                // Messages d'erreur personnalisés
+                let userMessage = 'Erreur lors de la soumission';
+
+                if (error.message.includes('401')) {
+                    userMessage = 'Session expirée';
+                } else if (error.message.includes('400')) {
+                    userMessage = 'Données invalides';
+                } else if (error.message.includes('409')) {
+                    userMessage = 'Candidature déjà existante';
+                } else if (error.message.includes('500')) {
+                    userMessage = 'Erreur serveur, veuillez réessayer';
+                }
+
+                showToast(userMessage, 'error');
             } finally {
                 hideLoading();
             }
         }
+
+        document.getElementById('candidatureFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            console.log('Début soumission candidature');
+            console.log('Image URL:', uploadedImageUrl);
+            console.log('Election ID:', currentElection?.id);
+
+            if (!uploadedImageUrl) {
+                showToast('Veuillez uploader une photo de profil', 'error');
+                return;
+            }
+
+            const slogan = document.getElementById('slogan').value;
+            const program = document.getElementById('program').value;
+            const motivation = document.getElementById('motivation').value;
+
+            if (!slogan || !program || !motivation) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            const candidatureData = {
+                electionId: currentElection.id,
+                slogan: slogan,
+                photo: uploadedImageUrl,
+                programme: program,
+                motivation: motivation,
+                statut: 'en_attente'
+            };
+
+            await submitCandidature(candidatureData);
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            window.location.href = `election-details.html?id=${currentElection.id}`;
+        });
+        // Test API (à utiliser uniquement en développement)
+        async function testCandidatureAPI() {
+            try {
+                const testData = {
+                    electionId: 1,
+                    slogan: "Test slogan",
+                    photo: "https://via.placeholder.com/300",
+                    programme: "Test programme",
+                    motivation: "Test motivation",
+                    statut: "en_attente"
+                };
+
+                const response = await fetchWithAuth(CANDIDATE_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+
+                console.log('Test API response:', response);
+            } catch (error) {
+                console.error('Test API error:', error);
+            }
+        }
+
+        // Décommentez pour tester
+        // testCandidatureAPI();
 
         // Gestionnaires d'événements
         uploadArea.addEventListener('click', () => {
@@ -1451,38 +1547,6 @@
             photoUpload.value = '';
         });
 
-        document.getElementById('candidatureFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!uploadedImageUrl) {
-                showToast('Veuillez uploader une photo de profil', 'error');
-                return;
-            }
-
-            const slogan = document.getElementById('slogan').value;
-            const program = document.getElementById('program').value;
-            const motivation = document.getElementById('motivation').value;
-
-            if (!slogan || !program || !motivation) {
-                showToast('Veuillez remplir tous les champs obligatoires', 'error');
-                return;
-            }
-
-            const candidatureData = {
-                electionId: currentElection.id,
-                slogan: slogan,
-                photo: uploadedImageUrl,
-                programme: program,
-                motivation: motivation,
-                statut: 'en_attente'
-            };
-
-            await submitCandidature(candidatureData);
-        });
-
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            window.location.href = `election-details.html?id=${currentElection.id}`;
-        });
 
         document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault();
