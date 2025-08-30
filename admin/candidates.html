@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Candidats - Admin UCAO</title>
+    <title>Validation des Candidatures - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -19,6 +19,7 @@
             --success: #28a745;
             --warning: #ffc107;
             --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * {
@@ -102,6 +103,11 @@
         .btn-warning {
             background: var(--warning);
             color: var(--bleu-nuit);
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
         }
 
         .stats-cards {
@@ -209,7 +215,7 @@
 
         .table-header {
             display: grid;
-            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
+            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px) minmax(150px, 150px);
             padding: 15px 20px;
             background: var(--bleu-nuit);
             color: white;
@@ -219,7 +225,7 @@
 
         .table-row {
             display: grid;
-            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px);
+            grid-template-columns: minmax(150px, 1fr) minmax(120px, 120px) minmax(180px, 1fr) minmax(150px, 1fr) minmax(100px, 100px) minmax(120px, 120px) minmax(150px, 150px);
             padding: 15px 20px;
             border-bottom: 1px solid var(--gris-clair);
             align-items: center;
@@ -239,19 +245,19 @@
             text-align: center;
         }
 
-        .status-active {
+        .status-en-attente {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        .status-approuve {
             background: rgba(40, 167, 69, 0.15);
             color: #28a745;
         }
 
-        .status-inactive {
-            background: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
-        }
-
-        .status-warning {
-            background: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
+        .status-rejete {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
         }
 
         .action-buttons {
@@ -271,19 +277,24 @@
             transition: all 0.3s ease;
         }
 
-        .btn-edit {
-            background: rgba(58, 160, 255, 0.15);
-            color: #3aa0ff;
+        .btn-view {
+            background: rgba(23, 162, 184, 0.15);
+            color: #17a2b8;
         }
 
-        .btn-reset {
-            background: rgba(255, 193, 7, 0.15);
-            color: #ffc107;
+        .btn-validate {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .btn-reject {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
         }
 
         .btn-delete {
-            background: rgba(220, 53, 69, 0.15);
-            color: #dc3545;
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
         }
 
         .pagination {
@@ -380,7 +391,7 @@
             background: white;
             border-radius: 10px;
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -412,59 +423,101 @@
             gap: 10px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--bleu-nuit);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--gris-clair);
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
+        .candidate-details {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
         }
 
         .candidate-photo {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
             object-fit: cover;
             border: 3px solid var(--gris-clair);
-            margin-bottom: 15px;
         }
 
-        .photo-upload {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
+        .candidate-info {
+            display: grid;
+            gap: 10px;
         }
 
-        .photo-placeholder {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--gris-clair);
+        .info-group {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            min-width: 120px;
+        }
+
+        .info-value {
             color: var(--gris-moyen);
-            margin-bottom: 10px;
-            border: 2px dashed var(--gris-moyen);
+        }
+
+        .program-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gris-clair);
+        }
+
+        .program-content {
+            background: var(--gris-clair);
+            padding: 15px;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .motivation-section {
+            margin-top: 15px;
+        }
+
+        .validation-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gris-clair);
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
         }
 
         /* Responsive design */
@@ -472,7 +525,7 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: minmax(120px, 1fr) minmax(100px, 100px) minmax(150px, 1fr) minmax(120px, 1fr) minmax(90px, 90px) minmax(100px, 100px);
+                grid-template-columns: minmax(120px, 1fr) minmax(100px, 100px) minmax(150px, 1fr) minmax(120px, 1fr) minmax(90px, 90px) minmax(100px, 100px) minmax(130px, 130px);
                 gap: 10px;
             }
         }
@@ -481,11 +534,11 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
                 grid-template-areas:
-                    "name name name"
-                    "id email email"
-                    "election status actions";
+                    "name name name name"
+                    "id email election election"
+                    "status status actions actions";
                 gap: 10px;
             }
 
@@ -518,6 +571,10 @@
             .table-row div:nth-child(6) {
                 grid-area: actions;
             }
+
+            .candidate-details {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
@@ -539,13 +596,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .table-header,
-            .table-row {
-                padding: 10px 15px;
-            }
-
-            .action-buttons {
-                justify-content: flex-start;
+            .validation-actions {
+                flex-direction: column;
             }
         }
 
@@ -569,6 +621,10 @@
                 gap: 15px;
                 align-items: flex-start;
             }
+
+            .action-buttons {
+                justify-content: flex-start;
+            }
         }
     </style>
 </head>
@@ -579,10 +635,7 @@
             <a href="javascript:history.back()" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Retour
             </a>
-            <h1><i class="fas fa-user-tie"></i> Gestion des Candidats</h1>
-            <button class="btn btn-primary" id="addCandidateBtn">
-                <i class="fas fa-plus"></i> Ajouter un Candidat
-            </button>
+            <h1><i class="fas fa-user-check"></i> Validation des Candidatures</h1>
         </div>
 
         <!-- Statistiques -->
@@ -592,28 +645,28 @@
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-value" id="totalCandidates">0</div>
-                <div class="stat-label">Candidats Totaux</div>
+                <div class="stat-label">Candidatures Totales</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-vote-yea"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="stat-value" id="activeElections">0</div>
-                <div class="stat-label">Élections Actives</div>
+                <div class="stat-value" id="pendingCandidates">0</div>
+                <div class="stat-label">En Attente</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stat-value" id="totalVotes">0</div>
-                <div class="stat-label">Votes Totaux</div>
+                <div class="stat-value" id="approvedCandidates">0</div>
+                <div class="stat-label">Approuvées</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">
-                    <i class="fas fa-percentage"></i>
+                    <i class="fas fa-times-circle"></i>
                 </div>
-                <div class="stat-value" id="participationRate">0%</div>
-                <div class="stat-label">Taux de Participation</div>
+                <div class="stat-value" id="rejectedCandidates">0</div>
+                <div class="stat-label">Rejetées</div>
             </div>
         </div>
 
@@ -631,8 +684,9 @@
                 <label for="statusFilter">Statut</label>
                 <select id="statusFilter">
                     <option value="all">Tous les statuts</option>
-                    <option value="active">Actifs</option>
-                    <option value="inactive">Inactifs</option>
+                    <option value="EN_ATTENTE">En attente</option>
+                    <option value="APPROUVE">Approuvé</option>
+                    <option value="REJETE">Rejeté</option>
                 </select>
             </div>
 
@@ -646,10 +700,11 @@
         <div class="table-container">
             <div class="table-header">
                 <div>Nom Complet</div>
-                <div>Identifiant</div>
+                <div>Matricule</div>
                 <div>Email</div>
                 <div>Élection</div>
                 <div>Statut</div>
+                <div>Date</div>
                 <div>Actions</div>
             </div>
             <div id="candidatesList">
@@ -663,163 +718,98 @@
         <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- Modal d'ajout/édition de candidat -->
+    <!-- Modal de détails du candidat -->
     <div class="modal-overlay" id="candidateModal">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modalTitle"><i class="fas fa-user-plus"></i> Ajouter un Candidat</h2>
+                <h2><i class="fas fa-user"></i> Détails de la Candidature</h2>
                 <button class="close-btn" id="closeCandidateModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="photo-upload">
-                    <div class="photo-placeholder" id="photoPlaceholder">
-                        <i class="fas fa-camera"></i>
+                <div class="candidate-details">
+                    <div>
+                        <img src="" alt="Photo du candidat" class="candidate-photo" id="candidatePhoto">
                     </div>
-                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-                    <button class="btn btn-secondary" onclick="document.getElementById('photoUpload').click()">
-                        <i class="fas fa-upload"></i> Choisir une photo
-                    </button>
+                    <div class="candidate-info">
+                        <div class="info-group">
+                            <span class="info-label">Nom complet:</span>
+                            <span class="info-value" id="candidateName"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Matricule:</span>
+                            <span class="info-value" id="candidateMatricule"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value" id="candidateEmail"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Filière:</span>
+                            <span class="info-value" id="candidateFiliere"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Année:</span>
+                            <span class="info-value" id="candidateAnnee"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Élection:</span>
+                            <span class="info-value" id="candidateElection"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Slogan:</span>
+                            <span class="info-value" id="candidateSlogan"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Statut:</span>
+                            <span class="info-value" id="candidateStatus"></span>
+                        </div>
+                        <div class="info-group">
+                            <span class="info-label">Date:</span>
+                            <span class="info-value" id="candidateDate"></span>
+                        </div>
+                    </div>
                 </div>
 
-                <form id="candidateForm">
-                    <input type="hidden" id="candidateId">
+                <div class="program-section">
+                    <h3><i class="fas fa-book"></i> Programme Électoral</h3>
+                    <div class="program-content" id="candidateProgram"></div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="nom">Nom *</label>
-                        <input type="text" id="nom" required>
-                    </div>
+                <div class="motivation-section">
+                    <h3><i class="fas fa-heart"></i> Lettre de Motivation</h3>
+                    <div class="program-content" id="candidateMotivation"></div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="prenom">Prénom *</label>
-                        <input type="text" id="prenom" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="election">Élection *</label>
-                        <select id="election" required>
-                            <option value="">Sélectionner une élection</option>
-                            <!-- Options chargées dynamiquement -->
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="programme">Programme</label>
-                        <textarea id="programme" placeholder="Décrivez le programme du candidat..."></textarea>
-                    </div>
-                </form>
+                <div class="validation-actions" id="validationActions">
+                    <button class="btn btn-success" onclick="validateCandidate()">
+                        <i class="fas fa-check"></i> Valider la Candidature
+                    </button>
+                    <button class="btn btn-danger" onclick="rejectCandidate()">
+                        <i class="fas fa-times"></i> Rejeter la Candidature
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelCandidate">Annuler</button>
-                <button class="btn btn-primary" id="saveCandidate">Enregistrer</button>
+                <button class="btn btn-secondary" id="closeModalBtn">Fermer</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de confirmation de suppression -->
-    <div class="modal-overlay" id="deleteModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-exclamation-triangle"></i> Confirmation</h2>
-                <button class="close-btn" id="closeDeleteModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer ce candidat ? Cette action est irréversible.</p>
-                <p><strong>Nom:</strong> <span id="deleteCandidateName"></span></p>
-                <p><strong>Élection:</strong> <span id="deleteCandidateElection"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelDelete">Annuler</button>
-                <button class="btn btn-danger" id="confirmDelete">Supprimer</button>
-            </div>
-        </div>
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-info-circle" id="toastIcon"></i>
+        <span id="toastMessage"></span>
     </div>
+
     <script src="../config.js"></script>
     <script>
         // Configuration
         const API_BASE = CONFIG.API.BASE_URL;
-        const CANDIDATES_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
-        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
-        const UPLOAD_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
-
-        // Fonction pour récupérer le token
-        function getToken() {
-            return localStorage.getItem('token');
-        }
-
-        // Fonctions d'authentification pour le dashboard
-        const DASHBOARD_AUTH = {
-            isAuthenticated: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return false;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    return payload.exp > now;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
-                }
-            },
-
-            getUserRole: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminName');
-                window.location.href = '/admin/login';
-            }
-        };
-
-        // Vérification de l'authentification au chargement de la page
-        document.addEventListener('DOMContentLoaded', function () {
-            const role = DASHBOARD_AUTH.getUserRole();
-            const isAuth = DASHBOARD_AUTH.isAuthenticated();
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
-                window.location.href = '/admin/login';
-                return;
-            }
-
-            if (role !== 'ADMIN') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '/unauthorized.html';
-                return;
-            }
-
-            // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
-            initializeDashboard();
-        });
-
-        function initializeDashboard() {
-            // Votre code d'initialisation du dashboard ici
-            console.log('Dashboard initialisé avec succès');
-
-            loadElections();
-            loadDashboardData();
-            setupEventListeners();
-        }
+        const CANDIDATES_ENDPOINT = '/api/candidats';
+        const CANDIDATE_UPDATE_ENDPOINT = (id) => `${CANDIDATES_ENDPOINT}/${id}/status`;
+        const ELECTIONS_ENDPOINT = '/api/elections';
 
         // Variables globales
         let currentPage = 1;
@@ -829,6 +819,29 @@
         let currentCandidateId = null;
         let elections = [];
 
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Vérification de l'authentification
+        function checkAuth() {
+            const token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!checkAuth()) return;
+
+            setupEventListeners();
+            loadElections();
+            loadDashboardData();
+        });
 
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
@@ -837,19 +850,9 @@
             document.getElementById('statusFilter').addEventListener('change', () => loadDashboardData(1));
             document.getElementById('searchInput').addEventListener('input', debounce(() => loadDashboardData(1), 300));
 
-            // Modal candidat
-            document.getElementById('addCandidateBtn').addEventListener('click', showCandidateModal);
+            // Modal
             document.getElementById('closeCandidateModal').addEventListener('click', hideCandidateModal);
-            document.getElementById('cancelCandidate').addEventListener('click', hideCandidateModal);
-            document.getElementById('saveCandidate').addEventListener('click', saveCandidate);
-
-            // Modal suppression
-            document.getElementById('closeDeleteModal').addEventListener('click', hideDeleteModal);
-            document.getElementById('cancelDelete').addEventListener('click', hideDeleteModal);
-            document.getElementById('confirmDelete').addEventListener('click', deleteCandidate);
-
-            // Upload photo
-            document.getElementById('photoUpload').addEventListener('change', handlePhotoUpload);
+            document.getElementById('closeModalBtn').addEventListener('click', hideCandidateModal);
         }
 
         // Charger la liste des élections
@@ -857,7 +860,6 @@
             try {
                 const token = getToken();
                 const response = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
-                    method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -867,30 +869,26 @@
                 if (!response.ok) throw new Error('Erreur de chargement des élections');
 
                 const data = await response.json();
-                elections = data.elections || [];
+                elections = data;
 
                 // Remplir le filtre des élections
                 const electionFilter = document.getElementById('electionFilter');
                 electionFilter.innerHTML = '<option value="all">Toutes les élections</option>';
 
-                // Remplir le select du modal
-                const electionSelect = document.getElementById('election');
-                electionSelect.innerHTML = '<option value="">Sélectionner une élection</option>';
-
                 elections.forEach(election => {
                     const option = document.createElement('option');
                     option.value = election.id;
                     option.textContent = election.titre;
-
-                    electionFilter.appendChild(option.cloneNode(true));
-                    electionSelect.appendChild(option);
+                    electionFilter.appendChild(option);
                 });
 
             } catch (error) {
                 console.error('Erreur:', error);
+                showToast('Erreur de chargement des élections', 'error');
             }
         }
 
+        // Charger les données du dashboard
         async function loadDashboardData(page = 1) {
             try {
                 const token = getToken();
@@ -905,7 +903,7 @@
                 // Construction URL
                 let url = `${API_BASE}${CANDIDATES_ENDPOINT}?page=${page}&limit=${candidatesPerPage}`;
                 if (electionFilter !== 'all') url += `&electionId=${electionFilter}`;
-                if (statusFilter !== 'all') url += `&status=${statusFilter}`;
+                if (statusFilter !== 'all') url += `&statut=${statusFilter}`;
                 if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
 
                 const response = await fetch(url, {
@@ -920,7 +918,7 @@
                 const data = await response.json();
                 displayCandidates(data.candidates);
                 updatePagination(data.pagination.totalCandidates, data.pagination.totalPages);
-                updateStats(data.pagination.totalCandidates);
+                updateStats(data.candidates);
 
             } catch (error) {
                 console.error('Erreur dashboard:', error);
@@ -936,8 +934,8 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-user-tie"></i>
-                        <h3>Aucun candidat trouvé</h3>
-                        <p>Aucun candidat ne correspond à vos critères de recherche</p>
+                        <h3>Aucune candidature trouvée</h3>
+                        <p>Aucune candidature ne correspond à vos critères de recherche</p>
                     </div>
                 `;
                 return;
@@ -949,6 +947,21 @@
                 const row = document.createElement('div');
                 row.className = 'table-row';
 
+                // Formater la date
+                const date = new Date(candidate.createdAt).toLocaleDateString('fr-FR');
+
+                // Déterminer la classe du statut
+                let statusClass = 'status-en-attente';
+                let statusText = 'En attente';
+
+                if (candidate.statut === 'APPROUVE') {
+                    statusClass = 'status-approuve';
+                    statusText = 'Approuvé';
+                } else if (candidate.statut === 'REJETE') {
+                    statusClass = 'status-rejete';
+                    statusText = 'Rejeté';
+                }
+
                 row.innerHTML = `
                     <div>
                         <strong>${candidate.prenom} ${candidate.nom}</strong>
@@ -957,17 +970,23 @@
                     <div>${candidate.user?.email || 'N/A'}</div>
                     <div>${candidate.election?.titre || 'N/A'}</div>
                     <div>
-                        <span class="status-badge status-active">
-                            Actif
+                        <span class="status-badge ${statusClass}">
+                            ${statusText}
                         </span>
                     </div>
+                    <div>${date}</div>
                     <div class="action-buttons">
-                        <div class="btn-icon btn-edit" title="Modifier" onclick="editCandidate(${candidate.id}, '${candidate.prenom}', '${candidate.nom}', '${candidate.user?.email}', ${candidate.electionId}, '${candidate.programme || ''}')">
-                            <i class="fas fa-edit"></i>
+                        <div class="btn-icon btn-view" title="Voir détails" onclick="viewCandidate(${candidate.id})">
+                            <i class="fas fa-eye"></i>
                         </div>
-                        <div class="btn-icon btn-delete" title="Supprimer" onclick="showDeleteModal(${candidate.id}, '${candidate.prenom} ${candidate.nom}', '${candidate.election?.titre || 'N/A'}')">
-                            <i class="fas fa-trash"></i>
+                        ${candidate.statut === 'EN_ATTENTE' ? `
+                        <div class="btn-icon btn-validate" title="Valider" onclick="validateCandidate(${candidate.id})">
+                            <i class="fas fa-check"></i>
                         </div>
+                        <div class="btn-icon btn-reject" title="Rejeter" onclick="rejectCandidate(${candidate.id})">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
 
@@ -976,12 +995,130 @@
         }
 
         // Mettre à jour les statistiques
-        function updateStats(total) {
-            document.getElementById('totalCandidates').textContent = total || 0;
-            document.getElementById('activeElections').textContent = elections.filter(e => e.statut === 'active').length;
-            // Ces valeurs seraient normalement récupérées d'une API de statistiques
-            document.getElementById('totalVotes').textContent = '0';
-            document.getElementById('participationRate').textContent = '0%';
+        function updateStats(candidates) {
+            const total = candidates.length;
+            const pending = candidates.filter(c => c.statut === 'EN_ATTENTE').length;
+            const approved = candidates.filter(c => c.statut === 'APPROUVE').length;
+            const rejected = candidates.filter(c => c.statut === 'REJETE').length;
+
+            document.getElementById('totalCandidates').textContent = total;
+            document.getElementById('pendingCandidates').textContent = pending;
+            document.getElementById('approvedCandidates').textContent = approved;
+            document.getElementById('rejectedCandidates').textContent = rejected;
+        }
+
+        // Voir les détails d'un candidat
+        async function viewCandidate(id) {
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${CANDIDATES_ENDPOINT}/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur de chargement des détails');
+
+                const candidate = await response.json();
+
+                // Remplir le modal avec les informations du candidat
+                document.getElementById('candidatePhoto').src = candidate.photoUrl || 'https://via.placeholder.com/150';
+                document.getElementById('candidateName').textContent = `${candidate.prenom} ${candidate.nom}`;
+                document.getElementById('candidateMatricule').textContent = candidate.user?.etudiant?.matricule || 'N/A';
+                document.getElementById('candidateEmail').textContent = candidate.user?.email || 'N/A';
+                document.getElementById('candidateFiliere').textContent = candidate.user?.etudiant?.filiere || 'N/A';
+                document.getElementById('candidateAnnee').textContent = candidate.user?.etudiant?.annee || 'N/A';
+                document.getElementById('candidateElection').textContent = candidate.election?.titre || 'N/A';
+                document.getElementById('candidateSlogan').textContent = candidate.slogan || 'N/A';
+                document.getElementById('candidateProgram').textContent = candidate.programme || 'Aucun programme';
+                document.getElementById('candidateMotivation').textContent = candidate.motivation || 'Aucune motivation';
+
+                // Statut
+                let statusText = 'En attente';
+                if (candidate.statut === 'APPROUVE') statusText = 'Approuvé';
+                else if (candidate.statut === 'REJETE') statusText = 'Rejeté';
+                document.getElementById('candidateStatus').textContent = statusText;
+
+                // Date
+                document.getElementById('candidateDate').textContent = new Date(candidate.createdAt).toLocaleDateString('fr-FR');
+
+                // Afficher/masquer les boutons de validation
+                const validationActions = document.getElementById('validationActions');
+                validationActions.style.display = candidate.statut === 'EN_ATTENTE' ? 'flex' : 'none';
+
+                currentCandidateId = id;
+                showCandidateModal();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('Erreur de chargement des détails', 'error');
+            }
+        }
+
+        // Valider une candidature
+        async function validateCandidate(id = null) {
+            const candidateId = id || currentCandidateId;
+            if (!candidateId) return;
+
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${CANDIDATE_UPDATE_ENDPOINT(candidateId)}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ statut: 'APPROUVE' })
+                });
+
+                if (!response.ok) throw new Error('Erreur de validation');
+
+                showToast('Candidature validée avec succès!', 'success');
+                hideCandidateModal();
+                loadDashboardData();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('Erreur lors de la validation', 'error');
+            }
+        }
+
+        // Rejeter une candidature
+        async function rejectCandidate(id = null) {
+            const candidateId = id || currentCandidateId;
+            if (!candidateId) return;
+
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${CANDIDATE_UPDATE_ENDPOINT(candidateId)}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ statut: 'REJETE' })
+                });
+
+                if (!response.ok) throw new Error('Erreur de rejet');
+
+                showToast('Candidature rejetée avec succès!', 'success');
+                hideCandidateModal();
+                loadDashboardData();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showToast('Erreur lors du rejet', 'error');
+            }
+        }
+
+        // Gestion des modals
+        function showCandidateModal() {
+            document.getElementById('candidateModal').classList.add('active');
+        }
+
+        function hideCandidateModal() {
+            document.getElementById('candidateModal').classList.remove('active');
         }
 
         // Fonctions utilitaires
@@ -1011,6 +1148,38 @@
                     <button class="btn btn-primary" onclick="loadDashboardData()">Réessayer</button>
                 </div>
             `;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toast.className = 'toast';
+            toastMessage.textContent = message;
+
+            switch (type) {
+                case 'success':
+                    toast.classList.add('success');
+                    toastIcon.className = 'fas fa-check-circle';
+                    break;
+                case 'error':
+                    toast.classList.add('error');
+                    toastIcon.className = 'fas fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    toast.classList.add('warning');
+                    toastIcon.className = 'fas fa-exclamation-triangle';
+                    break;
+                default:
+                    toastIcon.className = 'fas fa-info-circle';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         // Mise à jour de la pagination
@@ -1048,134 +1217,10 @@
             }
         }
 
-        // Gestion des modals
-        function showCandidateModal() {
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> Ajouter un Candidat';
-            document.getElementById('candidateForm').reset();
-            document.getElementById('candidateId').value = '';
-            document.getElementById('photoPlaceholder').innerHTML = '<i class="fas fa-camera"></i>';
-            document.getElementById('candidateModal').classList.add('active');
-        }
-
-        function hideCandidateModal() {
-            document.getElementById('candidateModal').classList.remove('active');
-        }
-
-        function editCandidate(id, prenom, nom, email, electionId, programme) {
-            currentCandidateId = id;
-
-            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Modifier le Candidat';
-            document.getElementById('candidateId').value = id;
-            document.getElementById('prenom').value = prenom;
-            document.getElementById('nom').value = nom;
-            document.getElementById('email').value = email;
-            document.getElementById('election').value = electionId;
-            document.getElementById('programme').value = programme || '';
-
-            document.getElementById('candidateModal').classList.add('active');
-        }
-
-        async function saveCandidate() {
-            const form = document.getElementById('candidateForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            try {
-                const token = getToken();
-
-                // Préparer les données
-
-                const candidateData = {
-                    nom: document.getElementById('nom').value,
-                    prenom: document.getElementById('prenom').value,
-                    email: document.getElementById('email').value,
-                    electionId: parseInt(document.getElementById('election').value),
-                    programme: document.getElementById('programme').value
-                };
-
-                const candidateId = document.getElementById('candidateId').value;
-                const url = candidateId ?
-                    `${API_BASE}${CANDIDATES_ENDPOINT}/${candidateId}` :
-                    `${API_BASE}${CANDIDATES_ENDPOINT}`;
-
-                const method = candidateId ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(candidateData)
-                });
-
-                if (!response.ok) throw new Error('Erreur lors de la sauvegarde');
-
-                const result = await response.json();
-                alert(candidateId ? 'Candidat modifié avec succès!' : 'Candidat ajouté avec succès!');
-                hideCandidateModal();
-                loadDashboardData();
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la sauvegarde: ' + error.message);
-            }
-        }
-
-        function showDeleteModal(id, name, election) {
-            currentCandidateId = id;
-            document.getElementById('deleteCandidateName').textContent = name;
-            document.getElementById('deleteCandidateElection').textContent = election;
-            document.getElementById('deleteModal').classList.add('active');
-        }
-
-        function hideDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('active');
-        }
-
-        async function deleteCandidate() {
-            if (!currentCandidateId) return;
-
-            try {
-                const token = getToken();
-                const response = await fetch(`${API_BASE}${CANDIDATES_ENDPOINT}/${currentCandidateId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Erreur lors de la suppression');
-
-                alert('Candidat supprimé avec succès!');
-                hideDeleteModal();
-                loadDashboardData();
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de la suppression: ' + error.message);
-            }
-        }
-
-        function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('photoPlaceholder').innerHTML = `
-                        <img src="${e.target.result}" class="candidate-photo" alt="Photo du candidat">
-                    `;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
         // Exposer les fonctions globales
-        window.editCandidate = editCandidate;
-        window.showDeleteModal = showDeleteModal;
+        window.viewCandidate = viewCandidate;
+        window.validateCandidate = validateCandidate;
+        window.rejectCandidate = rejectCandidate;
         window.loadDashboardData = loadDashboardData;
     </script>
 </body>
