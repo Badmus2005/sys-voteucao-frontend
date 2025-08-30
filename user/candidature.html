@@ -1489,17 +1489,48 @@
             photoUpload.value = '';
         });
 
+
+        // Testez immédiatement la normalisation
+        function testNormalization() {
+            const testNames = [
+                'Image 30 août 2025, 06_37_21.png',
+                'Photo@de#profil.jpg',
+                'Candidature_Élection2025.jpeg',
+                'Image avec espaces et accentséàè.png'
+            ];
+
+            testNames.forEach(name => {
+                console.log('Avant:', name);
+                console.log('Après:', normalizeFileName(name));
+                console.log('---');
+            });
+        }
+
+        testNormalization();
+
         async function handleImageUpload(file) {
             console.log('Début du traitement image:', file.name, file.size, file.type);
 
+            // Normaliser le nom du fichier
+            const originalFile = file;
+            const cleanFileName = normalizeFileName(file.name);
+
+            // Créer un nouveau File avec le nom normalisé
+            const cleanFile = new File([file], cleanFileName, {
+                type: file.type,
+                lastModified: file.lastModified
+            });
+
+            console.log('Fichier normalisé:', cleanFile.name);
+
             // Vérifications initiales
             const allowedTypes = ['image/jpeg', 'image/png'];
-            if (!allowedTypes.includes(file.type)) {
+            if (!allowedTypes.includes(cleanFile.type)) {
                 showToast('Format de fichier non supporté. Utilisez JPG ou PNG.', 'error');
                 return false;
             }
 
-            if (file.size > 2 * 1024 * 1024) {
+            if (cleanFile.size > 2 * 1024 * 1024) {
                 showToast('L\'image ne doit pas dépasser 2MB.', 'error');
                 return false;
             }
@@ -1509,14 +1540,14 @@
 
             try {
                 // 1. D'abord afficher un aperçu local
-                const previewUrl = await createImagePreview(file);
+                const previewUrl = await createImagePreview(cleanFile);
                 previewImage.src = previewUrl;
                 uploadPreview.style.display = 'block';
                 uploadArea.style.display = 'none';
 
                 // 2. Ensuite uploader vers le serveur
                 console.log('Début upload vers le serveur...');
-                uploadedImageUrl = await uploadImage(file);
+                uploadedImageUrl = await uploadImage(cleanFile); // Utiliser le fichier normalisé
 
                 if (!uploadedImageUrl) {
                     throw new Error('Échec de l\'upload');
@@ -1533,8 +1564,8 @@
                 resetUploadArea();
 
                 // Message d'erreur spécifique
-                if (error.message.includes('400')) {
-                    showToast('Format d\'image invalide', 'error');
+                if (error.message.includes('400') || error.message.includes('Format d\'image invalide')) {
+                    showToast('Problème avec le nom ou le format de l\'image', 'error');
                 } else if (error.message.includes('401')) {
                     showToast('Session expirée, veuillez vous reconnecter', 'error');
                     setTimeout(() => window.location.href = 'login.html', 2000);
@@ -1547,6 +1578,25 @@
                 return false;
             }
         }
+
+        // Fonction pour normaliser le nom du fichier
+        function normalizeFileName(fileName) {
+            // Remplacer les caractères spéciaux et accents
+            return fileName
+                .normalize('NFD') // Décomposer les accents
+                .replace(/[\u0300-\u036f]/g, '') // Supprimer les diacritiques
+                .replace(/[^a-zA-Z0-9._-]/g, '_') // Remplacer les caractères non alphanumériques
+                .replace(/_+/g, '_') // Éviter les underscores multiples
+                .replace(/^_+|_+$/g, '') // Supprimer les underscores en début/fin
+                .toLowerCase(); // Tout en minuscules
+        }
+
+        // Test de la fonction de normalisation
+        console.log('Test normalisation:', normalizeFileName('Image 30 août 2025, 06_37_21.png'));
+        // Devrait donner: image_30_aout_2025_06_37_21.png
+
+
+
 
         // Fonction pour créer un aperçu local
         function createImagePreview(file) {
