@@ -975,7 +975,7 @@
         const API_BASE_URL = CONFIG.API.BASE_URL;
         const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
         const UPLOAD_API = `${API_BASE_URL}/api/upload/image`;
-        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/elections/${id}`;
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/election/${id}`;
         const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
         const IS_CANDIDATE_API = (electionId) => `${API_BASE_URL}/api/candidats/is-candidate/${electionId}`;
 
@@ -1272,15 +1272,19 @@
         }
 
 
+        // === CORRECTION DE L'UPLOAD ===
         async function uploadImage(file) {
             const formData = new FormData();
             formData.append('image', file);
 
             try {
                 showLoading();
-                const response = await fetch(UPLOAD_API, {
+
+                // Utilisez fetchWithAuth pour inclure le token
+                const response = await fetchWithAuth(UPLOAD_API, {
                     method: 'POST',
                     body: formData
+                    // Note: Ne pas mettre Content-Type header pour FormData, le navigateur le fait automatiquement
                 });
 
                 if (!response.ok) {
@@ -1288,7 +1292,7 @@
                 }
 
                 const data = await response.json();
-                return data.url; // URL de l'image sur ImgBB
+                return data.url; // URL de l'image
             } catch (error) {
                 console.error('Erreur upload image:', error);
                 showToast('Erreur lors du téléchargement de l\'image', 'error');
