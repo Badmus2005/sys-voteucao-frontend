@@ -75,6 +75,7 @@
             align-items: center;
             gap: 1.5rem;
             font-size: .9rem;
+            margin-right: 20px;
         }
 
         .user-nav a,
@@ -212,6 +213,7 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transition: var(--transition-slow);
+            z-index: 1;
         }
 
         .sidebar-menu a:hover::before {
@@ -308,6 +310,43 @@
             position: relative;
             z-index: 2;
             opacity: 0.9;
+        }
+
+        /* STATE MESSAGE */
+        .state-message {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+
+        .state-icon {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .state-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--bleu-nuit);
+        }
+
+        .state-description {
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .state-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         /* FORM SECTION */
@@ -553,6 +592,7 @@
             font-size: 4rem;
             color: var(--or);
             margin-bottom: 1.5rem;
+            display: none;
         }
 
         .status-title {
@@ -583,6 +623,7 @@
             padding: 1.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
+            display: none;
         }
 
         .alert-title {
@@ -706,7 +747,8 @@
 
             .form-actions,
             .status-actions,
-            .alert-actions {
+            .alert-actions,
+            .state-actions {
                 flex-direction: column;
             }
         }
@@ -721,6 +763,10 @@
             }
 
             .form-section {
+                padding: 1.5rem;
+            }
+
+            .state-message {
                 padding: 1.5rem;
             }
         }
@@ -749,33 +795,54 @@
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="/user/dashboard"><i class="fa-solid fa-house"></i> Accueil</a></li>
-                <li><a href="/user/candidature" class="active"><i class="fa-solid fa-file-signature"></i>
-                        Candidature</a>
+                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html" class="active"><i class="fa-solid fa-file-signature"></i> Candidature</a>
                 </li>
-                <li><a href="/user/elections-details"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
-                <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
-                <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+                <li><a href="electionsdetail.html"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
+                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
         </aside>
 
         <main class="main-content">
             <!-- Breadcrumb -->
             <div class="breadcrumb">
-                <a href="/user/candidature"><i class="fa-solid fa-house"></i> Accueil</a>
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
                 <i class="fa-solid fa-chevron-right"></i>
                 <span>Candidature</span>
             </div>
 
+            <!-- Message d'état quand aucune élection n'est spécifiée -->
+            <div class="state-message" id="noElectionMessage">
+                <div class="state-icon">
+                    <i class="fa-solid fa-hand-point-right"></i>
+                </div>
+                <h2 class="state-title">Aucune élection sélectionnée</h2>
+                <p class="state-description">
+                    Pour soumettre une candidature, vous devez d'abord sélectionner une élection.
+                    Veuillez choisir une élection dans la liste disponible.
+                </p>
+                <div class="state-actions">
+                    <a href="electionsdetail.html" class="btn btn-primary">
+                        <i class="fa-solid fa-list"></i>
+                        Voir les élections
+                    </a>
+                    <a href="dashboard.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-house"></i>
+                        Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+
             <!-- Candidature Header -->
-            <div class="candidature-header">
+            <div class="candidature-header" id="candidatureHeader">
                 <h1 class="candidature-title" id="electionTitle">Déposer sa candidature</h1>
                 <p class="candidature-subtitle" id="electionSubtitle">Remplissez le formulaire pour soumettre votre
                     candidature</p>
             </div>
 
             <!-- Eligibility Alert (shown if not eligible) -->
-            <div class="eligibility-alert" id="eligibilityAlert" style="display: none;">
+            <div class="eligibility-alert" id="eligibilityAlert">
                 <div class="alert-title">
                     <i class="fa-solid fa-exclamation-triangle"></i>
                     Non éligible
@@ -784,7 +851,7 @@
                     Vous n'êtes pas éligible pour cette élection.
                 </div>
                 <div class="alert-actions">
-                    <a href="/user/elections-details" class="btn btn-secondary">
+                    <a href="electionsdetail.html" class="btn btn-secondary">
                         <i class="fa-solid fa-arrow-left"></i>
                         Retour aux élections
                     </a>
@@ -871,11 +938,11 @@
                     Vous serez notifié par email une fois que votre candidature aura été examinée.
                 </p>
                 <div class="status-actions">
-                    <a href="/user/dashboard" class="btn btn-primary">
+                    <a href="dashboard.html" class="btn btn-primary">
                         <i class="fa-solid fa-house"></i>
                         Retour à l'accueil
                     </a>
-                    <a href="/user/elections-details" class="btn btn-secondary">
+                    <a href="electionsdetail.html" class="btn btn-secondary">
                         <i class="fa-solid fa-list"></i>
                         Voir les autres élections
                     </a>
@@ -888,14 +955,14 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
-    <script src="../config.js"></script>
+
     <script>
         // Configuration
-        const API_BASE_URL = CONFIG.API.BASE_URL;
-        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id)}`;
-        const PROFILE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
-        const CANDIDATE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.CREATE}`;
-        const UPLOAD_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.UPLOAD.IMAGE}`;
+        const API_BASE_URL = window.CONFIG?.API?.BASE_URL || 'http://localhost:3000';
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/election/${id}`;
+        const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
+        const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
+        const UPLOAD_API = `${API_BASE_URL}/api/upload/image`;
 
         // Éléments DOM
         const burger = document.getElementById('burger');
@@ -907,8 +974,10 @@
         const toastIcon = document.getElementById('toastIcon');
         const toastMessage = document.getElementById('toastMessage');
         const candidatureForm = document.getElementById('candidatureForm');
+        const candidatureHeader = document.getElementById('candidatureHeader');
         const statusMessage = document.getElementById('statusMessage');
         const eligibilityAlert = document.getElementById('eligibilityAlert');
+        const noElectionMessage = document.getElementById('noElectionMessage');
         const uploadArea = document.getElementById('uploadArea');
         const photoUpload = document.getElementById('photoUpload');
         const uploadPreview = document.getElementById('uploadPreview');
@@ -978,6 +1047,7 @@
 
             const defaultOptions = {
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
                 ...options
@@ -1004,6 +1074,36 @@
             }
         }
 
+        // Fonction pour obtenir les paramètres de l'URL
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const params = {};
+            for (const [key, value] of urlParams) {
+                params[key] = value;
+            }
+            return params;
+        }
+
+        // Fonction pour vérifier si on peut rester sur cette page
+        function checkPageConditions() {
+            const params = getUrlParams();
+
+            // Vérifier si un paramètre election est présent
+            if (!params.election) {
+                // Afficher le message d'état et masquer le formulaire
+                noElectionMessage.style.display = 'block';
+                candidatureHeader.style.display = 'none';
+                candidatureForm.style.display = 'none';
+                eligibilityAlert.style.display = 'none';
+                return false;
+            }
+
+            // Si tout est ok, masquer le message et afficher le contenu
+            noElectionMessage.style.display = 'none';
+            candidatureHeader.style.display = 'block';
+            return true;
+        }
+
         async function loadUserProfile() {
             try {
                 const data = await fetchWithAuth(PROFILE_API);
@@ -1019,16 +1119,13 @@
         }
 
         async function loadElectionDetails() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const electionId = urlParams.get('election');
-
-            if (!electionId) {
-                showToast('Aucune élection spécifiée', 'error');
-                setTimeout(() => {
-                    window.location.href = 'elections-details.html';
-                }, 2000);
-                return;
+            // Vérifier d'abord les conditions de la page
+            if (!checkPageConditions()) {
+                return; // Arrêter le chargement si les conditions ne sont pas remplies
             }
+
+            const params = getUrlParams();
+            const electionId = params.election;
 
             try {
                 const data = await fetchWithAuth(ELECTION_DETAILS_API(electionId));
@@ -1053,12 +1150,16 @@
         function checkEligibility(election) {
             if (!userProfile) return;
 
+            let isEligible = false;
+            let eligibilityDetails = '';
+
             // Vérification des conditions d'éligibilité selon le type d'élection
             switch (election.type) {
                 case 'SALLE':
                     // Éligible si même filière et même année
                     isEligible = userProfile.filiere === election.filiere &&
                         userProfile.annee === election.annee;
+                    eligibilityDetails = `Réservé aux étudiants de ${election.filiere}, année ${election.annee}`;
                     break;
 
                 case 'ECOLE':
@@ -1068,8 +1169,10 @@
 
                     if (election.delegueType === '1er') {
                         isEligible = isResponsable && userProfile.annee === 3;
+                        eligibilityDetails = `Réservé aux responsables de salle de 3ème année`;
                     } else {
                         isEligible = isResponsable && userProfile.annee === 2;
+                        eligibilityDetails = `Réservé aux responsables de salle de 2ème année`;
                     }
                     break;
 
@@ -1079,8 +1182,10 @@
 
                     if (election.delegueType === '1er') {
                         isEligible = isDelegueEcole && userProfile.positionDelegue === '1er';
+                        eligibilityDetails = `Réservé aux 1ers délégués d'école`;
                     } else {
                         isEligible = isDelegueEcole && userProfile.positionDelegue === '2ème';
+                        eligibilityDetails = `Réservé aux 2èmes délégués d'école`;
                     }
                     break;
             }
@@ -1091,7 +1196,15 @@
             const fin = new Date(election.dateFin);
             const canApply = now >= debut && now <= fin;
 
-            if (!isEligible || !canApply) {
+            // Mettre à jour les informations d'éligibilité
+            document.getElementById('eligibilityMessage').textContent = eligibilityDetails;
+
+            // Activer ou désactiver le bouton de candidature
+            if (isEligible && canApply) {
+                candidatureForm.style.display = 'block';
+                eligibilityAlert.style.display = 'none';
+                submitBtn.disabled = false;
+            } else {
                 candidatureForm.style.display = 'none';
                 eligibilityAlert.style.display = 'block';
 
@@ -1145,6 +1258,7 @@
                 if (response) {
                     // Masquer le formulaire et afficher le message de statut
                     candidatureForm.style.display = 'none';
+                    candidatureHeader.style.display = 'none';
                     statusMessage.style.display = 'block';
 
                     showToast('Candidature soumise avec succès!', 'success');
@@ -1265,7 +1379,7 @@
             localStorage.removeItem('token');
             showToast('Déconnexion réussie', 'success');
             setTimeout(() => {
-                window.location.href = '/user/login';
+                window.location.href = 'login.html';
             }, 1500);
         });
 
@@ -1273,7 +1387,7 @@
         document.addEventListener('DOMContentLoaded', async function () {
             const token = localStorage.getItem('token');
             if (!token) {
-                window.location.href = '/user/login';
+                window.location.href = 'login.html';
                 return;
             }
 
