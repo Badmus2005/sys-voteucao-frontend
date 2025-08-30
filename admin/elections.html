@@ -919,6 +919,26 @@
         const ELECTIONS_ENDPOINT = '/api/election';
         const token = () => localStorage.getItem('token');
 
+        // Mapping des phases d'élection
+        const ELECTION_PHASES = {
+            PHASE1: "Phase 1 - Responsables de Salle",
+            PHASE2: "Phase 2 - Délégués d'École",
+            PHASE3: "Phase 3 - Délégués Universitaires"
+        };
+
+        // Mapping des types d'élection vers les phases
+        const ELECTION_TYPE_TO_PHASE = {
+            'SALLE': 'PHASE1',
+            'ECOLE': 'PHASE2',
+            'UNIVERSITE': 'PHASE3'
+        };
+
+        const PHASE_TO_ELECTION_TYPE = {
+            'PHASE1': 'SALLE',
+            'PHASE2': 'ECOLE',
+            'PHASE3': 'UNIVERSITE'
+        };
+
         let currentElections = [];
         let currentAction = null;
         let currentElectionId = null;
@@ -926,21 +946,36 @@
         const sections = ['config', 'candidacy', 'voting', 'results'];
         let expandedElections = new Set();
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialiser les écouteurs d'événements
-            initEventListeners();
+        // Fonctions helpers pour les phases
+        function getPhaseLabel(phase) {
+            return ELECTION_PHASES[phase] || phase;
+        }
 
-            // Charger les élections
+        function getPhaseFromElectionType(type) {
+            return ELECTION_TYPE_TO_PHASE[type] || 'PHASE1';
+        }
+
+        function getElectionTypeFromPhase(phase) {
+            return PHASE_TO_ELECTION_TYPE[phase] || 'SALLE';
+        }
+
+        function getPhaseOptions() {
+            return Object.entries(ELECTION_PHASES).map(([value, label]) => ({
+                value,
+                label
+            }));
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initEventListeners();
             loadElections();
         });
 
         function initEventListeners() {
-            // Événements pour les boutons
             document.getElementById("createElectionBtn").addEventListener('click', showCreateModal);
             document.getElementById("applyFilters").addEventListener('click', applyFilters);
             document.getElementById("electionForm").addEventListener('submit', handleElectionSubmit);
 
-            // Navigation entre les sections
             document.querySelectorAll('.timeline-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const section = item.getAttribute('data-section');
@@ -948,18 +983,15 @@
                 });
             });
 
-            // Navigation formulaire
             document.getElementById("nextBtn").addEventListener('click', nextSection);
             document.getElementById("prevBtn").addEventListener('click', prevSection);
 
-            // Modales
             document.getElementById("closeModalBtn").addEventListener('click', hideElectionModal);
             document.getElementById("closeConfirmModalBtn").addEventListener('click', hideConfirmModal);
             document.getElementById("cancelConfirmBtn").addEventListener('click', hideConfirmModal);
             document.getElementById("confirmActionBtn").addEventListener('click', executeConfirmedAction);
         }
 
-        // Fonction pour charger les élections depuis l'API
         async function loadElections() {
             try {
                 showLoading();
@@ -985,18 +1017,18 @@
             } catch (err) {
                 console.error(err);
                 document.getElementById("electionsContainer").innerHTML = `
-                        <div class="alert alert-error">
-                            <i class="fas fa-exclamation-circle"></i>
-                            Erreur lors du chargement des élections: ${err.message}
-                        </div>`;
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Erreur lors du chargement des élections: ${err.message}
+                </div>`;
             }
         }
 
         function showLoading() {
             document.getElementById("electionsContainer").innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                    </div>`;
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>`;
             document.getElementById("emptyState").style.display = 'none';
         }
 
@@ -1008,6 +1040,21 @@
             document.getElementById("modalMessage").style.display = "none";
             showSection('config');
             document.getElementById("electionModal").classList.add("active");
+
+            // Ajouter les options de phase
+            renderPhaseOptions();
+        }
+
+        function renderPhaseOptions() {
+            const phaseSelect = document.getElementById("phase");
+            phaseSelect.innerHTML = '<option value="">-- Choisir la phase --</option>';
+
+            getPhaseOptions().forEach(option => {
+                const optionElement = document.createElement("option");
+                optionElement.value = option.value;
+                optionElement.textContent = option.label;
+                phaseSelect.appendChild(optionElement);
+            });
         }
 
         function toggleElectionDetails(electionId) {
@@ -1062,28 +1109,25 @@
             container.innerHTML = '';
             emptyState.style.display = 'none';
 
-            // Création du tableau
             const tableContainer = document.createElement('div');
             tableContainer.className = 'elections-table-container';
 
             const table = document.createElement('table');
             table.className = 'elections-table';
 
-            // En-tête du tableau
             const thead = document.createElement('thead');
             thead.innerHTML = `
-                    <tr>
-                        <th>Titre</th>
-                        <th>Type</th>
-                        <th>Statut</th>
-                        <th>Date de début</th>
-                        <th>Date de fin</th>
-                        <th>Actions</th>
-                    </tr>
-                `;
+            <tr>
+                <th>Titre</th>
+                <th>Phase</th>
+                <th>Statut</th>
+                <th>Date de début</th>
+                <th>Date de fin</th>
+                <th>Actions</th>
+            </tr>
+        `;
             table.appendChild(thead);
 
-            // Corps du tableau
             const tbody = document.createElement('tbody');
 
             elections.forEach(election => {
@@ -1104,133 +1148,108 @@
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                        <td>
-                            <div>${election.titre}</div>
-                            <button class="toggle-details" onclick="toggleElectionDetails(${election.id})">
-                                <i class="fas fa-${expandedElections.has(election.id) ? 'chevron-up' : 'chevron-down'}"></i>
-                                ${expandedElections.has(election.id) ? 'Masquer' : 'Afficher'} détails
-                            </button>
-                        </td>
-                        <td><span class="election-type-badge">${getElectionTypeLabel(election.type)}</span></td>
-                        <td><span class="election-status status-${status}">${statusText}</span></td>
-                        <td>${formatDate(election.dateDebut)}</td>
-                        <td>${formatDate(election.dateFin)}</td>
-                        <td>
-                            <div class="table-actions">
-                                <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                ${status === 'active' ? `
-                                <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')">
-                                    <i class="fas fa-lock"></i>
-                                </button>
-                                ` : ''}
-                                <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
+                <td>
+                    <div>${election.titre}</div>
+                    <button class="toggle-details" onclick="toggleElectionDetails(${election.id})">
+                        <i class="fas fa-${expandedElections.has(election.id) ? 'chevron-up' : 'chevron-down'}"></i>
+                        ${expandedElections.has(election.id) ? 'Masquer' : 'Afficher'} détails
+                    </button>
+                </td>
+                <td><span class="election-type-badge">${getPhaseLabel(election.niveau)}</span></td>
+                <td><span class="election-status status-${status}">${statusText}</span></td>
+                <td>${formatDate(election.dateDebut)}</td>
+                <td>${formatDate(election.dateFin)}</td>
+                <td>
+                    <div class="table-actions">
+                        <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${status === 'active' ? `
+                        <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')">
+                            <i class="fas fa-lock"></i>
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
                 tbody.appendChild(row);
 
-                // Ligne de détails
                 if (expandedElections.has(election.id)) {
                     const detailsRow = document.createElement('tr');
                     detailsRow.className = 'election-details-row';
                     detailsRow.innerHTML = `
-                            <td colspan="6">
-                                <div class="election-details-content">
-                                    <div class="election-detail-group">
-                                        <h4>Informations générales</h4>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Phase:</span>
-                                            <span class="election-detail-value">${getPhaseNumber(election.type)}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Début des candidatures:</span>
-                                            <span class="election-detail-value">${formatDateTime(election.dateDebutCandidature)}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Fin des candidatures:</span>
-                                            <span class="election-detail-value">${formatDateTime(election.dateFinCandidature)}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Début des votes:</span>
-                                            <span class="election-detail-value">${formatDateTime(election.dateDebut)}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Fin des votes:</span>
-                                            <span class="election-detail-value">${formatDateTime(election.dateFin)}</span>
-                                        </div>
-                                        ${election.description ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Description:</span>
-                                            <span class="election-detail-value">${election.description}</span>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-                                    
-                                    <div class="election-detail-group">
-                                        <h4>Détails spécifiques</h4>
-                                        ${election.filiere ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Filière:</span>
-                                            <span class="election-detail-value">${election.filiere}</span>
-                                        </div>
-                                        ` : ''}
-                                        ${election.ecole ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">École:</span>
-                                            <span class="election-detail-value">${election.ecole}</span>
-                                        </div>
-                                        ` : ''}
-                                        ${election.annee ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Année:</span>
-                                            <span class="election-detail-value">Licence ${election.annee}</span>
-                                        </div>
-                                        ` : ''}
-                                        ${election.delegueType ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Type délégué:</span>
-                                            <span class="election-detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
-                                        </div>
-                                        ` : ''}
-                                        ${election.tour ? `
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Tour:</span>
-                                            <span class="election-detail-value">${election.tour}ème tour</span>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-                                    
-                                    ${election._count ? `
-                                    <div class="election-detail-group">
-                                        <h4>Statistiques</h4>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Taux de participation:</span>
-                                            <span class="election-detail-value">${election.stats ? election.stats.participationRate : '0%'}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Total des votes:</span>
-                                            <span class="election-detail-value">${election._count.votes || 0}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Nombre de candidats:</span>
-                                            <span class="election-detail-value">${election._count.candidates || 0}</span>
-                                        </div>
-                                        <div class="election-detail-item">
-                                            <span class="election-detail-label">Jetons générés:</span>
-                                            <span class="election-detail-value">${election._count.voteTokens || 0}</span>
-                                        </div>
-                                    </div>
-                                    ` : ''}
+                    <td colspan="6">
+                        <div class="election-details-content">
+                            <div class="election-detail-group">
+                                <h4>Informations générales</h4>
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Phase:</span>
+                                    <span class="election-detail-value">${getPhaseLabel(election.niveau)}</span>
                                 </div>
-                            </td>
-                        `;
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Type:</span>
+                                    <span class="election-detail-value">${getElectionTypeLabel(election.type)}</span>
+                                </div>
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Début des candidatures:</span>
+                                    <span class="election-detail-value">${formatDateTime(election.dateDebutCandidature)}</span>
+                                </div>
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Fin des candidatures:</span>
+                                    <span class="election-detail-value">${formatDateTime(election.dateFinCandidature)}</span>
+                                </div>
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Début des votes:</span>
+                                    <span class="election-detail-value">${formatDateTime(election.dateDebut)}</span>
+                                </div>
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Fin des votes:</span>
+                                    <span class="election-detail-value">${formatDateTime(election.dateFin)}</span>
+                                </div>
+                                ${election.description ? `
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Description:</span>
+                                    <span class="election-detail-value">${election.description}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="election-detail-group">
+                                <h4>Détails spécifiques</h4>
+                                ${election.filiere ? `
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Filière:</span>
+                                    <span class="election-detail-value">${election.filiere}</span>
+                                </div>
+                                ` : ''}
+                                ${election.ecole ? `
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">École:</span>
+                                    <span class="election-detail-value">${election.ecole}</span>
+                                </div>
+                                ` : ''}
+                                ${election.annee ? `
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Année:</span>
+                                    <span class="election-detail-value">Licence ${election.annee}</span>
+                                </div>
+                                ` : ''}
+                                ${election.delegueType ? `
+                                <div class="election-detail-item">
+                                    <span class="election-detail-label">Type délégué:</span>
+                                    <span class="election-detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </td>
+                `;
                     tbody.appendChild(detailsRow);
                 }
             });
@@ -1245,15 +1264,6 @@
                 case 'SALLE': return 'Responsables de Salle';
                 case 'ECOLE': return 'Délégués d\'École';
                 case 'UNIVERSITE': return 'Délégués Universitaires';
-                default: return type;
-            }
-        }
-
-        function getPhaseNumber(type) {
-            switch (type) {
-                case 'SALLE': return 'Phase 1';
-                case 'ECOLE': return 'Phase 2';
-                case 'UNIVERSITE': return 'Phase 3';
                 default: return type;
             }
         }
@@ -1279,37 +1289,28 @@
         }
 
         function disableValidationForHiddenFields() {
-            // Désactiver la validation required pour les champs des sections non actives
             document.querySelectorAll('.form-section:not(.active) [required]').forEach(input => {
                 input.removeAttribute('required');
             });
 
-            // Réactiver la validation pour la section active
             document.querySelectorAll('.form-section.active [required]').forEach(input => {
                 input.setAttribute('required', 'required');
             });
         }
 
-        // Appeler cette fonction à chaque changement de section
         function showSection(section) {
-            // Masquer toutes les sections
             document.querySelectorAll('.form-section').forEach(sec => {
                 sec.classList.remove('active');
             });
 
-            // Afficher la section demandée
             document.getElementById(`${section}-section`).classList.add('active');
 
-            // Mettre à jour la timeline
             document.querySelectorAll('.timeline-item').forEach(item => {
                 item.classList.remove('active');
             });
             document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
 
-            // Désactiver la validation pour les champs cachés
             disableValidationForHiddenFields();
-
-            // Mettre à jour les boutons de navigation
             currentSection = section;
             updateNavigationButtons();
         }
@@ -1320,9 +1321,12 @@
             document.getElementById("electionId").value = election.id;
             document.getElementById("title").value = election.titre;
             document.getElementById("description").value = election.description || "";
-            document.getElementById("phase").value = election.type;
 
-            // Convertir les dates au format local pour les champs datetime-local
+            // Sélectionner la phase correspondante
+            const phase = election.niveau || getPhaseFromElectionType(election.type);
+            document.getElementById("phase").value = phase;
+
+            // Convertir les dates
             const startCandidacyDate = new Date(election.dateDebutCandidature);
             const endCandidacyDate = new Date(election.dateFinCandidature);
             const startVoteDate = new Date(election.dateDebut);
@@ -1334,20 +1338,14 @@
             document.getElementById("votingEnd").value = formatDateForInput(endVoteDate);
 
             // Afficher les champs spécifiques à la phase
-            renderPhaseFields();
+            renderPhaseFields(phase);
 
-            // Remplir les champs spécifiques si disponibles
-            if (election.type === 'SALLE') {
-                if (election.filiere) document.getElementById("filiere").value = election.filiere;
-                if (election.annee) document.getElementById("annee").value = election.annee;
-                if (election.ecole) document.getElementById("ecole").value = election.ecole;
-                if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
-            } else if (election.type === 'ECOLE') {
-                if (election.ecole) document.getElementById("ecole").value = election.ecole;
-            } else if (election.type === 'UNIVERSITE') {
-                if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
-                if (election.tour) document.getElementById("tour").value = election.tour;
-            }
+            // Remplir les champs spécifiques
+            if (election.filiere) document.getElementById("filiere").value = election.filiere;
+            if (election.annee) document.getElementById("annee").value = election.annee;
+            if (election.ecole) document.getElementById("ecole").value = election.ecole;
+            if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
+            if (election.tour) document.getElementById("tour").value = election.tour;
 
             document.getElementById("modalMessage").style.display = "none";
             document.getElementById("electionModal").classList.add("active");
@@ -1355,7 +1353,7 @@
 
         function formatDateForInput(date) {
             if (!(date instanceof Date) || isNaN(date)) {
-                return ''; // Retourner vide si date invalide
+                return '';
             }
 
             const year = date.getFullYear();
@@ -1369,26 +1367,6 @@
 
         function hideElectionModal() {
             document.getElementById("electionModal").classList.remove("active");
-        }
-
-        function showSection(section) {
-            // Masquer toutes les sections
-            document.querySelectorAll('.form-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-
-            // Afficher la section demandée
-            document.getElementById(`${section}-section`).classList.add('active');
-
-            // Mettre à jour la timeline
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
-
-            // Mettre à jour les boutons de navigation
-            currentSection = section;
-            updateNavigationButtons();
         }
 
         function nextSection() {
@@ -1408,28 +1386,17 @@
         function updateNavigationButtons() {
             const currentIndex = sections.indexOf(currentSection);
 
-            // Bouton Précédent
             const prevBtn = document.getElementById("prevBtn");
             if (prevBtn) {
-                if (currentIndex > 0) {
-                    prevBtn.style.display = 'flex';
-                } else {
-                    prevBtn.style.display = 'none';
-                }
+                prevBtn.style.display = currentIndex > 0 ? 'flex' : 'none';
             }
 
-            // Bouton Suivant/Soumettre
             const nextBtn = document.getElementById("nextBtn");
             const submitBtn = document.getElementById("submitBtn");
 
             if (nextBtn && submitBtn) {
-                if (currentIndex < sections.length - 1) {
-                    nextBtn.style.display = 'flex';
-                    submitBtn.style.display = 'none';
-                } else {
-                    nextBtn.style.display = 'none';
-                    submitBtn.style.display = 'flex';
-                }
+                nextBtn.style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
+                submitBtn.style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
             }
         }
 
@@ -1469,76 +1436,78 @@
             hideConfirmModal();
         }
 
-        function renderPhaseFields() {
-            const phase = document.getElementById("phase").value;
+        function renderPhaseFields(selectedPhase = '') {
             const fields = document.getElementById("phaseFields");
             fields.innerHTML = "";
 
-            if (phase === "SALLE") {
+            const phase = selectedPhase || document.getElementById("phase").value;
+            const electionType = getElectionTypeFromPhase(phase);
+
+            if (electionType === "SALLE") {
                 fields.innerHTML = `
-                        <div class="form-group">
-                            <label>École :</label>
-                            <select id="ecole" name="ecole" required onchange="updateFilieres()">
-                                <option value="">-- Choisir --</option>
-                                <option value="EGEI">EGEI</option>
-                                <option value="ESMEA">ESMEA</option>
-                                <option value="FSAE">FSAE</option>
-                                <option value="FDE">FDE</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="filiere">Filière :</label>
-                            <select id="filiere" name="filiere" required>
-                                <option value="">-- Choisissez d'abord une école --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="annee">Année :</label>
-                            <select id="annee" name="annee" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="1">Licence 1</option>
-                                <option value="2">Licence 2</option>
-                                <option value="3">Licence 3</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="delegueType">Type de responsable :</label>
-                            <select id="delegueType" name="delegueType" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="PREMIER">Premier</option>
-                                <option value="DEUXIEME">Deuxième</option>
-                            </select>
-                        </div>`;
-            } else if (phase === "ECOLE") {
+                <div class="form-group">
+                    <label>École :</label>
+                    <select id="ecole" name="ecole" required onchange="updateFilieres()">
+                        <option value="">-- Choisir --</option>
+                        <option value="EGEI">EGEI</option>
+                        <option value="ESMEA">ESMEA</option>
+                        <option value="FSAE">FSAE</option>
+                        <option value="FDE">FDE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filiere">Filière :</label>
+                    <select id="filiere" name="filiere" required>
+                        <option value="">-- Choisissez d'abord une école --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="annee">Année :</label>
+                    <select id="annee" name="annee" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="1">Licence 1</option>
+                        <option value="2">Licence 2</option>
+                        <option value="3">Licence 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="delegueType">Type de responsable :</label>
+                    <select id="delegueType" name="delegueType" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="PREMIER">Premier</option>
+                        <option value="DEUXIEME">Deuxième</option>
+                    </select>
+                </div>`;
+            } else if (electionType === "ECOLE") {
                 fields.innerHTML = `
-                        <div class="form-group">
-                            <label>École :</label>
-                            <select id="ecole" name="ecole" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="EGEI">EGEI</option>
-                                <option value="ESMEA">ESMEA</option>
-                                <option value="FSAE">FSAE</option>
-                                <option value="FDE">FDE</option>
-                            </select>
-                        </div>`;
-            } else if (phase === "UNIVERSITE") {
+                <div class="form-group">
+                    <label>École :</label>
+                    <select id="ecole" name="ecole" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="EGEI">EGEI</option>
+                        <option value="ESMEA">ESMEA</option>
+                        <option value="FSAE">FSAE</option>
+                        <option value="FDE">FDE</option>
+                    </select>
+                </div>`;
+            } else if (electionType === "UNIVERSITE") {
                 fields.innerHTML = `
-                        <div class="form-group">
-                            <label for="delegueType">Type de délégué :</label>
-                            <select id="delegueType" name="delegueType" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="PREMIER">Premier</option>
-                                <option value="DEUXIEME">Deuxième</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="tour">Tour :</label>
-                            <select id="tour" name="tour" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="1">1er tour</option>
-                                <option value="2">2ème tour</option>
-                            </select>
-                        </div>`;
+                <div class="form-group">
+                    <label for="delegueType">Type de délégué :</label>
+                    <select id="delegueType" name="delegueType" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="PREMIER">Premier</option>
+                        <option value="DEUXIEME">Deuxième</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tour">Tour :</label>
+                    <select id="tour" name="tour">
+                        <option value="">-- Choisir --</option>
+                        <option value="1">1er tour</option>
+                        <option value="2">2ème tour</option>
+                    </select>
+                </div>`;
             }
         }
 
@@ -1571,13 +1540,11 @@
             const votingStart = new Date(document.getElementById("votingStart").value);
             const votingEnd = new Date(document.getElementById("votingEnd").value);
 
-            // Vérifier que les dates de candidature sont avant les dates de vote
             if (candidacyEnd >= votingStart) {
                 showMessage('error', 'La fin des candidatures doit être avant le début des votes');
                 return;
             }
 
-            // Vérifier que les dates sont cohérentes
             if (candidacyStart >= candidacyEnd) {
                 showMessage('error', 'La date de début des candidatures doit être avant la date de fin');
                 return;
@@ -1598,21 +1565,21 @@
                 isActive: true
             };
 
+            // Utiliser la phase sélectionnée
             const phase = document.getElementById("phase").value;
-            data.type = phase;
+            data.niveau = phase;
+            data.type = getElectionTypeFromPhase(phase);
 
-            // Déterminer le niveau en fonction de la phase
-            if (phase === "SALLE") {
-                data.niveau = document.getElementById("phase").value; // Phase 1
+            // Ajouter les champs spécifiques
+            if (phase === "PHASE1") {
                 data.filiere = document.getElementById("filiere").value;
                 data.annee = parseInt(document.getElementById("annee").value);
                 data.ecole = document.getElementById("ecole").value;
                 data.delegueType = document.getElementById("delegueType").value;
-            } else if (phase === "ECOLE") {
-                data.niveau = document.getElementById("phase").value; // Phase 2
+            } else if (phase === "PHASE2") {
                 data.ecole = document.getElementById("ecole").value;
-            } else if (phase === "UNIVERSITE") {
-                data.niveau = document.getElementById("phase").value; // Phase 3
+                data.delegueType = document.getElementById("delegueType").value;
+            } else if (phase === "PHASE3") {
                 data.delegueType = document.getElementById("delegueType").value;
                 data.tour = parseInt(document.getElementById("tour").value);
             }
@@ -1679,7 +1646,6 @@
         }
 
         function viewElection(id) {
-            // Redirection vers la page de détails de l'élection
             window.location.href = `election-details.html?id=${id}`;
         }
 
@@ -1689,7 +1655,6 @@
             messageEl.className = `alert alert-${type}`;
             messageEl.style.display = "block";
 
-            // Pour les messages de succès, les afficher aussi en haut de page
             if (type === 'success') {
                 const container = document.getElementById("electionsContainer");
                 const alert = document.createElement("div");
@@ -1697,7 +1662,6 @@
                 alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
                 container.insertBefore(alert, container.firstChild);
 
-                // Supprimer le message après 5 secondes
                 setTimeout(() => {
                     alert.remove();
                 }, 5000);
