@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic - Système de Vote UCAO</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #2c3e50;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .success {
+            border-left-color: #2ecc71;
+        }
+
+        .error {
+            border-left-color: #e74c3c;
+        }
+
+        .warning {
+            border-left-color: #f39c12;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .log-entry {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Diagnostic du Système de Vote UCAO</h1>
+        <p>Cet outil vous aide à identifier les problèmes d'accès aux pages.</p>
+
+        <div class="test-section">
+            <h2>1. Test d'authentification</h2>
+            <button onclick="testAuthentication()">Tester l'authentification</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Test de configuration API</h2>
+            <button onclick="testApiConfig()">Tester la configuration API</button>
+            <div id="config-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Test des endpoints API</h2>
+            <button onclick="testElectionsEndpoint()">Tester /api/election</button>
+            <button onclick="testCandidatesEndpoint()">Tester /api/candidats</button>
+            <div id="endpoint-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Journal des erreurs</h2>
+            <button onclick="clearLog()">Effacer le journal</button>
+            <div id="error-log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Solutions possibles</h2>
+            <div id="solutions">
+                <p>En fonction des résultats des tests, les solutions apparaîtront ici.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Journal des erreurs
+        const errorLog = [];
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            errorLog.push({ timestamp, message, type });
+
+            const logElement = document.getElementById('error-log');
+            logElement.innerHTML = errorLog.map(entry =>
+                `<div class="log-entry" style="color: ${entry.type === 'error' ? '#e74c3c' :
+                    entry.type === 'success' ? '#2ecc71' : '#3498db'
+                }">
+                    <strong>[${entry.timestamp}]</strong> ${entry.message}
+                </div>`
+            ).join('');
+        }
+
+        function clearLog() {
+            errorLog.length = 0;
+            document.getElementById('error-log').innerHTML = '';
+        }
+
+        // Test d'authentification
+        async function testAuthentication() {
+            const resultElement = document.getElementById('auth-result');
+            resultElement.innerHTML = '<p>Test en cours...</p>';
+
+            try {
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    resultElement.innerHTML = '<p class="error">❌ Aucun token JWT trouvé. Vous n\'êtes pas connecté.</p>';
+                    addLog('Aucun token JWT trouvé dans le localStorage', 'error');
+                    return;
+                }
+
+                // Vérifier si le token est expiré
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const expirationTime = payload.exp * 1000;
+                const currentTime = Date.now();
+
+                if (currentTime > expirationTime) {
+                    resultElement.innerHTML = '<p class="error">❌ Token JWT expiré. Veuillez vous reconnecter.</p>';
+                    addLog('Token JWT expiré', 'error');
+                } else {
+                    resultElement.innerHTML = '<p class="success">✅ Token JWT valide trouvé.</p>';
+                    addLog('Token JWT valide', 'success');
+                }
+
+            } catch (error) {
+                resultElement.innerHTML = `<p class="error">❌ Erreur lors du test d'authentification: ${error.message}</p>`;
+                addLog(`Erreur d'authentification: ${error.message}`, 'error');
+            }
+        }
+
+        // Test de configuration API
+        async function testApiConfig() {
+            const resultElement = document.getElementById('config-result');
+            resultElement.innerHTML = '<p>Test en cours...</p>';
+
+            try {
+                // Vérifier si config.js est chargé
+                if (typeof CONFIG === 'undefined') {
+                    resultElement.innerHTML = '<p class="error">❌ Le fichier config.js n\'est pas chargé correctement.</p>';
+                    addLog('Fichier config.js non chargé', 'error');
+                    return;
+                }
+
+                // Tester l'URL de base
+                const response = await fetch(`${CONFIG.API.BASE_URL}/api/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    resultElement.innerHTML = '<p class="success">✅ Configuration API correcte. Le serveur répond.</p>';
+                    addLog('Configuration API correcte', 'success');
+                } else {
+                    resultElement.innerHTML = `<p class="error">❌ L'API ne répond pas correctement. Status: ${response.status}</p>`;
+                    addLog(`API ne répond pas. Status: ${response.status}`, 'error');
+                }
+
+            } catch (error) {
+                resultElement.innerHTML = `<p class="error">❌ Impossible de joindre l'API: ${error.message}</p>`;
+                addLog(`Impossible de joindre l'API: ${error.message}`, 'error');
+
+                // Afficher des solutions
+                document.getElementById('solutions').innerHTML = `
+                    <div class="warning">
+                        <h3>Problème de connexion API</h3>
+                        <p>Solutions possibles :</p>
+                        <ul>
+                            <li>Vérifiez que le serveur backend est démarré</li>
+                            <li>Vérifiez l'URL dans config.js: <code>${CONFIG.API.BASE_URL}</code></li>
+                            <li>Vérifiez les éventuels problèmes CORS</li>
+                            <li>Vérifiez votre connexion internet</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
+        // Test des endpoints
+        async function testElectionsEndpoint() {
+            const resultElement = document.getElementById('endpoint-result');
+            resultElement.innerHTML = '<p>Test en cours...</p>';
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultElement.innerHTML = '<p class="error">❌ Veuillez d\'abord vous connecter.</p>';
+                    return;
+                }
+
+                const response = await fetch(`${CONFIG.API.BASE_URL}/api/election`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.length === 0) {
+                        resultElement.innerHTML = '<p class="warning">✅ Endpoint accessible mais aucune élection trouvée.</p>';
+                        addLog('Endpoint /api/election accessible mais aucune élection trouvée', 'warning');
+
+                        document.getElementById('solutions').innerHTML += `
+                            <div class="warning">
+                                <h3>Aucune élection trouvée</h3>
+                                <p>Solutions possibles :</p>
+                                <ul>
+                                    <li>Aucune élection n'a été créée par l'administrateur</li>
+                                    <li>Les élections existantes ne sont pas actives</li>
+                                    <li>Vos filtres sont trop restrictifs</li>
+                                </ul>
+                            </div>
+                        `;
+                    } else {
+                        resultElement.innerHTML = `<p class="success">✅ Endpoint accessible. ${data.length} élection(s) trouvée(s).</p>`;
+                        addLog(`Endpoint /api/election accessible. ${data.length} élection(s) trouvée(s)`, 'success');
+                    }
+                } else if (response.status === 401) {
+                    resultElement.innerHTML = '<p class="error">❌ Accès non autorisé. Token peut être invalide.</p>';
+                    addLog('Accès non autorisé à /api/election. Token invalide?', 'error');
+                } else {
+                    resultElement.innerHTML = `<p class="error">❌ Erreur API: Status ${response.status}</p>`;
+                    addLog(`Erreur API /api/election: Status ${response.status}`, 'error');
+                }
+
+            } catch (error) {
+                resultElement.innerHTML = `<p class="error">❌ Erreur: ${error.message}</p>`;
+                addLog(`Erreur /api/election: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCandidatesEndpoint() {
+            const resultElement = document.getElementById('endpoint-result');
+            resultElement.innerHTML = '<p>Test en cours...</p>';
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultElement.innerHTML = '<p class="error">❌ Veuillez d\'abord vous connecter.</p>';
+                    return;
+                }
+
+                const response = await fetch(`${CONFIG.API.BASE_URL}/api/candidats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.length === 0) {
+                        resultElement.innerHTML = '<p class="warning">✅ Endpoint accessible mais aucun candidat trouvé.</p>';
+                        addLog('Endpoint /api/candidats accessible mais aucun candidat trouvé', 'warning');
+                    } else {
+                        resultElement.innerHTML = `<p class="success">✅ Endpoint accessible. ${data.length} candidat(s) trouvé(s).</p>`;
+                        addLog(`Endpoint /api/candidats accessible. ${data.length} candidat(s) trouvé(s)`, 'success');
+                    }
+                } else if (response.status === 401) {
+                    resultElement.innerHTML = '<p class="error">❌ Accès non autorisé. Token peut être invalide.</p>';
+                    addLog('Accès non autorisé à /api/candidats. Token invalide?', 'error');
+                } else {
+                    resultElement.innerHTML = `<p class="error">❌ Erreur API: Status ${response.status}</p>`;
+                    addLog(`Erreur API /api/candidats: Status ${response.status}`, 'error');
+                }
+
+            } catch (error) {
+                resultElement.innerHTML = `<p class="error">❌ Erreur: ${error.message}</p>`;
+                addLog(`Erreur /api/candidats: ${error.message}`, 'error');
+            }
+        }
+
+        // Exécuter quelques tests au chargement
+        window.onload = function () {
+            addLog('Diagnostic démarré');
+            testAuthentication();
+        };
+    </script>
+</body>
+
+</html>
