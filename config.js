@@ -37,6 +37,7 @@ const CONFIG = {
                 LIST: '/api/candidats',
                 CREATE: '/api/candidats',
                 IS_CANDIDATE: (electionId) => `/api/candidats/is-candidate/${electionId}`,
+                BY_ELECTION: (electionId) => `/api/candidats/election/${electionId}`
             },
             UPLOAD: {
                 IMAGE: '/api/upload/image'
