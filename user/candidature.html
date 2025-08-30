@@ -1340,6 +1340,35 @@
             }
         }
 
+
+        // Fonction de test
+        async function testUpload() {
+            console.log('=== TEST UPLOAD SIMPLE ===');
+
+            // Créer une image de test très simple
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(0, 0, 100, 100);
+
+            canvas.toBlob(async (blob) => {
+                const testFile = new File([blob], 'test.png', { type: 'image/png' });
+                console.log('Fichier de test créé:', testFile);
+
+                try {
+                    const result = await uploadImage(testFile);
+                    console.log('Test upload réussi:', result);
+                } catch (error) {
+                    console.error('Test upload échoué:', error);
+                }
+            });
+        }
+
+        // Décommentez pour tester
+        testUpload();
+
         async function uploadImage(file) {
             console.log('Début upload image:', file.name, file.size, file.type);
 
