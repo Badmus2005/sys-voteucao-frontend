@@ -7,7 +7,6 @@
     <title>Vote - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
         :root {
             --rouge-bordeaux: #650624;
@@ -76,7 +75,6 @@
             align-items: center;
             gap: 1.5rem;
             font-size: .9rem;
-            flex-wrap: wrap;
         }
 
         .user-nav a,
@@ -99,7 +97,6 @@
             height: 2px;
             background: var(--or);
             transition: var(--transition);
-            transform-origin: center;
         }
 
         .user-nav a:hover::after {
@@ -260,7 +257,6 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
-            flex-wrap: wrap;
         }
 
         .breadcrumb a {
@@ -430,6 +426,7 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 1rem;
+            cursor: pointer;
         }
 
         .candidate-avatar {
@@ -476,12 +473,12 @@
 
         .program-excerpt {
             display: -webkit-box;
-            display: box;
             line-clamp: 3;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
 
 
         .view-program {
@@ -580,7 +577,7 @@
             animation: none;
         }
 
-        /* VOTE CONFIRMATION MODAL */
+        /* MODALS */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -606,7 +603,7 @@
             background: white;
             border-radius: 12px;
             padding: 2rem;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             box-shadow: var(--box-shadow-hover);
             transform: translateY(20px);
@@ -701,6 +698,44 @@
             justify-content: center;
         }
 
+        /* ELECTIONS MODAL */
+        .elections-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+
+        .election-item {
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--gris-clair);
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .election-item:hover {
+            background: #e8e8e8;
+            transform: translateX(5px);
+        }
+
+        .election-item h3 {
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+        }
+
+        .election-item p {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .election-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
         /* ALREADY VOTED SECTION */
         .voted-section {
             background: #fff;
@@ -739,87 +774,9 @@
         }
 
         /* PROGRAM MODAL */
-        .program-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition-slow);
-        }
-
-        .program-modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
         .program-modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 80vh;
+            max-height: 70vh;
             overflow-y: auto;
-            box-shadow: var(--box-shadow-hover);
-            position: relative;
-            transform: translateY(20px);
-            transition: var(--transition-slow);
-        }
-
-        .program-modal.active .program-modal-content {
-            transform: translateY(0);
-        }
-
-        .program-modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--rouge-bordeaux);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .program-modal-close:hover {
-            background: var(--bleu-nuit);
-            transform: scale(1.1);
-        }
-
-        .program-modal-header {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            padding-right: 2rem;
-        }
-
-        .program-modal-title {
-            font-size: 1.5rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 0.5rem;
-        }
-
-        .program-modal-candidate {
-            color: var(--or);
-            font-weight: 600;
-        }
-
-        .program-modal-body {
-            line-height: 1.6;
         }
 
         .program-section {
@@ -877,22 +834,6 @@
         }
 
         /* Loading spinner */
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -914,6 +855,12 @@
             border-radius: 50%;
             border-top-color: var(--or);
             animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* RESPONSIVE */
@@ -969,10 +916,6 @@
             }
 
             .modal {
-                padding: 1.5rem;
-            }
-
-            .program-modal-content {
                 padding: 1.5rem;
             }
         }
@@ -1138,15 +1081,37 @@
         </div>
     </div>
 
-    <!-- Program Modal -->
-    <div class="program-modal" id="programModal">
-        <div class="program-modal-content">
-            <button class="program-modal-close" id="programModalClose">&times;</button>
-            <div class="program-modal-header">
-                <h2 class="program-modal-title">Programme Électoral</h2>
-                <div class="program-modal-candidate" id="programCandidateName"></div>
+    <!-- Elections Modal -->
+    <div class="modal-overlay" id="electionsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" id="electionsModalClose">&times;</button>
+                <div class="modal-icon">
+                    <i class="fa-solid fa-vote-yea"></i>
+                </div>
+                <h2 class="modal-title">Sélectionner une élection</h2>
+                <p class="modal-description">Choisissez l'élection pour laquelle vous souhaitez voter</p>
             </div>
-            <div class="program-modal-body" id="programContent">
+
+            <div class="elections-list" id="electionsList">
+                <!-- La liste des élections sera chargée ici -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Program Modal -->
+    <div class="modal-overlay" id="programModal">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" id="programModalClose">&times;</button>
+                <div class="modal-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+                <h2 class="modal-title">Programme Électoral</h2>
+                <div class="modal-candidate" id="programCandidateName"></div>
+            </div>
+
+            <div class="program-modal-content" id="programContent">
                 <!-- Le contenu du programme sera chargé ici -->
             </div>
         </div>
@@ -1160,11 +1125,12 @@
     <script>
         // Configuration
         const API_BASE_URL = CONFIG.API.BASE_URL;
-        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id)}`;
-        const PROFILE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
-        const CANDIDATE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.LIST}`;
-        const VOTE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.VOTE.SUBMIT}`;
-        const VOTE_STATUS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.VOTE.STATUS(id)}`;
+        const ELECTION_API = `${API_BASE_URL}/elections`;
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/elections/${id}`;
+        const PROFILE_API = `${API_BASE_URL}/users/profile`;
+        const CANDIDATE_API = `${API_BASE_URL}/candidates`;
+        const VOTE_API = `${API_BASE_URL}/votes`;
+        const VOTE_STATUS_API = (id) => `${API_BASE_URL}/votes/status/${id}`;
 
         // Éléments DOM
         const burger = document.getElementById('burger');
@@ -1185,6 +1151,9 @@
         const programCandidateName = document.getElementById('programCandidateName');
         const programContent = document.getElementById('programContent');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const electionsModal = document.getElementById('electionsModal');
+        const electionsModalClose = document.getElementById('electionsModalClose');
+        const electionsList = document.getElementById('electionsList');
 
         // Variables globales
         let currentElection = null;
@@ -1194,6 +1163,7 @@
         let hasVoted = false;
         let voteEndTime = null;
         let timerInterval = null;
+        let elections = [];
 
         // MENU BURGER
         burger.addEventListener('click', () => {
@@ -1292,15 +1262,30 @@
             }
         }
 
+        async function loadElections() {
+            try {
+                const data = await fetchWithAuth(ELECTION_API);
+                if (data) {
+                    elections = data;
+                    return data;
+                }
+                return [];
+            } catch (error) {
+                console.error('Erreur chargement des élections:', error);
+                return [];
+            }
+        }
+
         async function loadElectionDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             const electionId = urlParams.get('election');
 
             if (!electionId) {
                 showToast('Aucune élection spécifiée', 'error');
+                // Au lieu de rediriger, on affiche une modal avec la liste des élections
                 setTimeout(() => {
-                    window.location.href = '/user/elections-details';
-                }, 2000);
+                    showElectionsModal();
+                }, 1500);
                 return;
             }
 
@@ -1316,6 +1301,60 @@
                 console.error('Erreur chargement détails élection:', error);
                 return null;
             }
+        }
+
+        async function showElectionsModal() {
+            showLoading();
+            try {
+                await loadElections();
+                displayElectionsList();
+                electionsModal.classList.add('active');
+            } catch (error) {
+                console.error('Erreur lors du chargement des élections:', error);
+                showToast('Erreur lors du chargement des élections', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayElectionsList() {
+            electionsList.innerHTML = '';
+
+            if (elections.length === 0) {
+                electionsList.innerHTML = '<p class="text-center">Aucune élection disponible</p>';
+                return;
+            }
+
+            elections.forEach(election => {
+                const electionItem = document.createElement('div');
+                electionItem.className = 'election-item';
+                electionItem.innerHTML = `
+                    <h3>${election.titre}</h3>
+                    <p>${election.description}</p>
+                    <div class="election-meta">
+                        <span><i class="fa-solid fa-layer-group"></i> ${election.type}</span>
+                        <span><i class="fa-solid fa-user-tie"></i> ${election.delegueType || 'Représentant'}</span>
+                        <span><i class="fa-solid fa-graduation-cap"></i> ${election.niveau}</span>
+                    </div>
+                `;
+
+                electionItem.addEventListener('click', () => {
+                    // Mettre à jour l'URL sans recharger la page
+                    const url = new URL(window.location);
+                    url.searchParams.set('election', election.id);
+                    window.history.replaceState({}, '', url);
+
+                    // Charger les détails de l'élection sélectionnée
+                    currentElection = election;
+                    displayElectionDetails(election);
+                    checkVoteStatus(election.id);
+
+                    // Fermer la modal
+                    electionsModal.classList.remove('active');
+                });
+
+                electionsList.appendChild(electionItem);
+            });
         }
 
         async function checkVoteStatus(electionId) {
@@ -1579,6 +1618,10 @@
             programModal.classList.remove('active');
         });
 
+        electionsModalClose.addEventListener('click', () => {
+            electionsModal.classList.remove('active');
+        });
+
         // Fermer les modals en cliquant à l'extérieur
         confirmationModal.addEventListener('click', (e) => {
             if (e.target === confirmationModal) {
@@ -1589,6 +1632,12 @@
         programModal.addEventListener('click', (e) => {
             if (e.target === programModal) {
                 programModal.classList.remove('active');
+            }
+        });
+
+        electionsModal.addEventListener('click', (e) => {
+            if (e.target === electionsModal) {
+                electionsModal.classList.remove('active');
             }
         });
 
