@@ -1300,26 +1300,80 @@
             }
         }
 
+        // === FONCTIONS MANQUANTES À AJOUTER ===
+
+        function showUploadLoading() {
+            uploadArea.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: #666;">
+            <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--or); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+            <div>Téléchargement en cours...</div>
+            <div style="font-size: 0.8rem; margin-top: 0.5rem;">Veuillez patienter</div>
+        </div>
+    `;
+        }
+
+        function hideUploadLoading() {
+            // Réinitialiser à l'état original
+            resetUploadArea();
+        }
+
+        function resetUploadArea() {
+            uploadArea.innerHTML = `
+        <div class="upload-icon">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+        </div>
+        <div class="upload-text">Glissez-déposez votre photo ici ou cliquez pour sélectionner</div>
+        <div class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</div>
+        <input type="file" id="photoUpload" accept="image/jpeg,image/png" style="display: none;">
+    `;
+            uploadArea.style.display = 'block';
+            uploadPreview.style.display = 'none';
+
+            // Réattacher les événements
+            const photoUpload = document.getElementById('photoUpload');
+            if (photoUpload) {
+                photoUpload.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleImageUpload(e.target.files[0]);
+                    }
+                });
+            }
+        }
 
         async function uploadImage(file) {
             console.log('Début upload image:', file.name, file.size, file.type);
 
             const formData = new FormData();
-            formData.append('image', file); // Le nom doit correspondre à upload.single('image')
+            formData.append('image', file);
+
+            // Debug: voir le contenu de FormData
+            for (let [key, value] of formData.entries()) {
+                console.log('FormData entry:', key, value);
+            }
 
             try {
                 const response = await fetchWithAuth(UPLOAD_API, {
                     method: 'POST',
                     body: formData
-                    // Pas de Content-Type header pour FormData!
                 });
 
                 console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error('Error response:', errorData);
-                    throw new Error(errorData.message || `Erreur ${response.status}`);
+                    let errorText;
+                    try {
+                        errorText = await response.text();
+                        console.error('Error response text:', errorText);
+
+                        // Essayer de parser comme JSON
+                        const errorData = JSON.parse(errorText);
+                        console.error('Error response JSON:', errorData);
+                        throw new Error(errorData.message || errorData.error || `Erreur ${response.status}`);
+                    } catch (e) {
+                        console.error('Cannot parse error response:', e);
+                        throw new Error(errorText || `Erreur HTTP: ${response.status}`);
+                    }
                 }
 
                 const data = await response.json();
@@ -1327,10 +1381,8 @@
                 return data.url;
 
             } catch (error) {
-                console.error('Upload error:', error);
-                throw new Error(error.message || 'Erreur lors du téléchargement');
-            } finally {
-                hideUploadLoading();
+                console.error('Upload error details:', error);
+                throw error;
             }
         }
 
