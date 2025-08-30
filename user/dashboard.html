@@ -7,6 +7,7 @@
     <title>Dashboard Étudiant - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/config.js"></script>
     <style>
         :root {
             --rouge-bordeaux: #650624;
@@ -16,7 +17,9 @@
             --gris-clair: #f5f6fa;
             --gris-texte: #444;
             --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
             --transition: all .3s ease;
+            --transition-slow: all .5s ease;
         }
 
         * {
@@ -32,6 +35,18 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* HEADER */
@@ -71,6 +86,22 @@
             gap: .4rem;
             align-items: center;
             transition: var(--transition);
+            position: relative;
+        }
+
+        .user-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--or);
+            transition: var(--transition);
+        }
+
+        .user-nav a:hover::after {
+            width: 100%;
         }
 
         .user-nav a:hover {
@@ -85,6 +116,7 @@
             width: 2rem;
             height: 2rem;
             cursor: pointer;
+            z-index: 1001;
         }
 
         .burger div {
@@ -126,6 +158,39 @@
             list-style: none;
         }
 
+        .sidebar-menu li {
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        .sidebar-menu li:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .sidebar-menu li:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .sidebar-menu li:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .sidebar-menu li:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .sidebar-menu li:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         .sidebar-menu li a {
             display: flex;
             align-items: center;
@@ -135,12 +200,30 @@
             text-decoration: none;
             transition: var(--transition);
             border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: var(--transition-slow);
+        }
+
+        .sidebar-menu a:hover::before {
+            left: 100%;
         }
 
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
             background: var(--rouge-bordeaux);
             border-left: 4px solid var(--or);
+            padding-left: 2rem;
         }
 
         .main-content {
@@ -159,6 +242,13 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 998;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
         }
 
         /* WELCOME */
@@ -172,6 +262,30 @@
             align-items: center;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .welcome-banner h2 {
@@ -189,6 +303,38 @@
             display: inline-flex;
             align-items: center;
             gap: .5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:hover::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(30, 30);
+                opacity: 0;
+            }
         }
 
         .btn-vote {
@@ -198,39 +344,142 @@
 
         .btn-vote:hover {
             background: var(--or-clair);
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-2px);
         }
 
-        /* STATS */
-        .stats-cards {
+        .btn-result {
+            background: var(--bleu-nuit);
+            color: white;
+        }
+
+        .btn-result:hover {
+            background: var(--rouge-bordeaux);
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        /* ACTIVITY TIMELINE */
+        .activity-timeline {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 0.2s;
+        }
+
+        .activity-timeline h3 {
+            margin-bottom: 1rem;
+            color: var(--bleu-nuit);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 25px;
+            bottom: -15px;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--or);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-content h4 {
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-time {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
-        .stat-card {
+        .action-card {
             background: #fff;
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
             box-shadow: var(--box-shadow);
             transition: var(--transition);
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease forwards;
         }
 
-        .stat-card:nth-child(odd) {
-            border-top: 4px solid var(--bleu-nuit);
+        .action-card:nth-child(1) {
+            animation-delay: 0.1s;
         }
 
-        .stat-card:nth-child(even) {
-            border-top: 4px solid var(--rouge-bordeaux);
+        .action-card:nth-child(2) {
+            animation-delay: 0.2s;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-top: 4px solid var(--or);
+        .action-card:nth-child(3) {
+            animation-delay: 0.3s;
         }
 
-        .stat-icon {
+        .action-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .action-icon {
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -241,17 +490,120 @@
             justify-content: center;
             margin: 0 auto 1rem;
             font-size: 1.2rem;
+            transition: var(--transition);
         }
 
-        .stat-number {
-            font-size: 1.6rem;
-            font-weight: 700;
+        .action-card:hover .action-icon {
+            transform: scale(1.1) rotate(5deg);
+            background: var(--or-clair);
+        }
+
+        .action-title {
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
         }
 
-        .stat-title {
-            font-size: .9rem;
+        .action-description {
+            font-size: .85rem;
             color: #666;
+        }
+
+        /* CALENDAR WIDGET */
+        .calendar-widget {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-header h3 {
+            color: var(--bleu-nuit);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav button {
+            background: var(--gris-clair);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .calendar-nav button:hover {
+            background: var(--or);
+            color: white;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--bleu-nuit);
+            padding: 0.5rem 0;
+        }
+
+        .calendar-date {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .calendar-date:hover {
+            background: var(--gris-clair);
+        }
+
+        .calendar-date.current {
+            background: var(--or);
+            color: white;
+        }
+
+        .calendar-date.event {
+            position: relative;
+        }
+
+        .calendar-date.event::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--rouge-bordeaux);
         }
 
         /* SECTION HEADER */
@@ -260,6 +612,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
         }
 
         .page-header h2 {
@@ -277,6 +631,11 @@
             height: 3px;
             background: var(--or);
             border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        .page-header h2:hover::after {
+            width: 100%;
         }
 
         .refresh-btn {
@@ -286,10 +645,15 @@
             padding: .6rem 1rem;
             border-radius: 6px;
             cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .refresh-btn:hover {
             background: var(--bleu-nuit);
+            transform: rotate(180deg);
         }
 
         /* ELECTION CARDS */
@@ -307,11 +671,27 @@
             display: flex;
             flex-direction: column;
             gap: .8rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1.01);
             border-left: 5px solid var(--or);
+            box-shadow: var(--box-shadow-hover);
         }
 
         .card-header {
@@ -320,120 +700,72 @@
             align-items: center;
         }
 
-        .card-badge {
-            background: var(--or);
-            color: white;
-            padding: .3rem .8rem;
-            border-radius: 12px;
-            font-size: .75rem;
-            font-weight: 600;
+        .card-header h3 {
+            font-size: 1.1rem;
+            color: var(--bleu-nuit);
         }
 
-        .card-footer {
+        .card-body p {
+            font-size: .9rem;
+            color: #555;
+        }
+
+        .card-actions {
+            margin-top: 1rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: .8rem;
+            flex-wrap: wrap;
         }
 
-        .btn-result {
+        .card-actions .btn {
+            font-size: .85rem;
+        }
+
+        /* Notification toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background: var(--bleu-nuit);
             color: white;
-            padding: .5rem 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 8px;
-        }
-
-        .btn-result:hover {
-            background: var(--rouge-bordeaux);
-        }
-
-        /* SECTIONS */
-        .section {
-            display: none;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 10000;
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
+            transform: translateY(100px);
+            transition: var(--transition);
         }
 
-        .section.active {
-            display: block;
+        .toast.show {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* RESPONSIVE */
-        @media(max-width:768px) {
-            header {
-                padding: 1rem;
-            }
-
-            .burger {
-                display: flex;
-            }
-
-            .user-nav a span,
-            .user-nav span span {
-                display: none;
-            }
-
-            .dashboard-container {
-                position: relative;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 70px;
-                left: -230px;
-                height: calc(100vh - 70px);
-                z-index: 999;
-                overflow-y: auto;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .overlay.active {
-                display: block;
-            }
-
-            .main-content {
-                padding: 1rem;
-                width: 100%;
-            }
-
-            .welcome-banner {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .stats-cards {
-                grid-template-columns: 1fr 1fr;
-            }
+        .toast.success {
+            background: #2ecc71;
         }
 
-        @media(max-width:480px) {
-            .stats-cards {
-                grid-template-columns: 1fr;
-            }
+        .toast.error {
+            background: #e74c3c;
         }
 
-        /* Styles pour l'état de chargement */
-        .loading {
-            display: flex;
-            justify-content: center;
-            padding: 2rem;
+        .toast.warning {
+            background: #f39c12;
         }
 
+        /* Loading spinner */
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--or);
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
         }
 
         @keyframes spin {
@@ -442,631 +774,604 @@
             }
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
         }
 
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #ccc;
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--or);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100%;
+                z-index: 999;
+                width: 70%;
+                max-width: 280px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .burger {
+                display: flex;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .welcome-banner {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 576px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                gap: 0.2rem;
+            }
+
+            .calendar-date {
+                padding: 0.3rem;
+            }
         }
     </style>
 </head>
 
 <body>
     <header>
-        <div class="logo"><i class="fas fa-vote-yea"></i> Dashboard Étudiant</div>
-        <div class="burger">
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+        <div class="burger" id="burger">
             <div></div>
             <div></div>
             <div></div>
         </div>
-        <nav class="user-nav">
-            <span id="studentName"><i class="fas fa-user"></i> <span>Étudiant</span></span>
-            <a href="/user/profile"><i class="fas fa-user-cog"></i> <span>Profil</span></a>
-            <a href="/user/login"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a>
-        </nav>
     </header>
 
     <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
 
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="#dashboard" class="active" data-section="dashboard"><i class="fas fa-home"></i> Tableau de
-                        bord</a></li>
-                <li><a href="#elections" data-section="elections"><i class="fas fa-vote-yea"></i> Élections</a></li>
-                <li><a href="#results" data-section="results"><i class="fas fa-poll"></i> Résultats</a></li>
-                <li><a href="#history" data-section="history"><i class="fas fa-history"></i> Historique</a></li>
-                <li><a href="#info" data-section="info"><i class="fas fa-info-circle"></i> Infos</a></li>
+                <li><a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="electionsdetail.html"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
+                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
         </aside>
 
-        <!-- Main content -->
         <main class="main-content">
-            <!-- Section Tableau de bord -->
-            <section id="dashboard-section" class="section active">
-                <div class="welcome-banner">
-                    <div>
-                        <h2>Bonjour, <span id="welcomeStudentName">Étudiant</span> !</h2>
-                        <p>Bienvenue sur votre tableau de bord électoral.</p>
+            <div class="welcome-banner">
+                <div>
+                    <h2 id="welcomeTitle">Bienvenue, Étudiant !</h2>
+                    <p id="welcomeSubtitle">Gérez vos candidatures et participez aux élections.</p>
+                </div>
+                <div>
+                    <button class="btn btn-vote" id="btnVote">Voter maintenant</button>
+                    <button class="btn btn-result" id="btnResult">Voir résultats</button>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="quick-actions">
+                <div class="action-card" onclick="location.href='candidature.html'">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-file-signature"></i>
                     </div>
-                    <button class="btn btn-vote"><i class="fas fa-user-check"></i> Se porter Candidat</button>
+                    <div class="action-title">Déposer candidature</div>
+                    <div class="action-description">Postuler pour une élection</div>
                 </div>
 
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-vote-yea"></i></div>
-                        <div class="stat-number" id="electionsCount">3</div>
-                        <div class="stat-title">Élections en cours</div>
+                <div class="action-card" onclick="location.href='vote.html'">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-check-to-slot"></i>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                        <div class="stat-number" id="votedCount">1</div>
-                        <div class="stat-title">Votes effectués</div>
+                    <div class="action-title">Voter maintenant</div>
+                    <div class="action-description">Participer aux élections</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='resultats.html'">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-chart-simple"></i>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                        <div class="stat-number" id="upcomingCount">2</div>
-                        <div class="stat-title">À venir</div>
+                    <div class="action-title">Voir résultats</div>
+                    <div class="action-description">Consulter les résultats</div>
+                </div>
+
+                <div class="action-card" onclick="location.href='electionsdetail.html'">
+                    <div class="action-icon">
+                        <i class="fa-solid fa-circle-info"></i>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-calendar"></i></div>
-                        <div class="stat-number" id="daysLeft">15</div>
-                        <div class="stat-title">Jours restants</div>
+                    <div class="action-title">Informations</div>
+                    <div class="action-description">Détails des élections</div>
+                </div>
+            </div>
+
+            <!-- Timeline d'activité -->
+            <div class="activity-timeline">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Activité récente</h3>
+
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fa-solid fa-vote-yea"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Vote enregistré</h4>
+                        <p>Vous avez voté pour l'élection "Président des étudiants"</p>
+                        <div class="timeline-time">Il y a 2 heures</div>
                     </div>
                 </div>
 
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Candidature soumise</h4>
+                        <p>Votre candidature pour "Délégué de classe" a été approuvée</p>
+                        <div class="timeline-time">Hier, 14:32</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h4>Nouvelle élection</h4>
+                        <p>Une nouvelle élection "Trésorier" a été créée</p>
+                        <div class="timeline-time">12 Octobre, 10:15</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendrier des élections -->
+            <div class="calendar-widget">
+                <div class="calendar-header">
+                    <h3><i class="fa-solid fa-calendar-days"></i> Calendrier des élections</h3>
+                    <div class="calendar-nav">
+                        <button id="prevMonth"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button id="nextMonth"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarDays">
+                    <!-- Les jours seront générés par JavaScript -->
+                </div>
+            </div>
+
+            <!-- Élections en cours -->
+            <section>
                 <div class="page-header">
-                    <h2>Vos élections disponibles</h2>
-                    <button class="refresh-btn" onclick="loadElections()"><i class="fas fa-sync-alt"></i>
-                        Actualiser</button>
+                    <h2>Élections en cours</h2>
+                    <button class="refresh-btn" id="refreshElections">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span class="spinner" id="refreshSpinner"></span>
+                        Actualiser
+                    </button>
                 </div>
 
                 <div class="election-list" id="electionList">
-                    <!-- Les élections seront chargées dynamiquement ici -->
-                </div>
-            </section>
-
-            <!-- Section Élections -->
-            <section id="elections-section" class="section">
-                <div class="page-header">
-                    <h2>Toutes les élections</h2>
-                    <button class="refresh-btn" onclick="loadAllElections()"><i class="fas fa-sync-alt"></i>
-                        Actualiser</button>
-                </div>
-                <div class="election-list" id="allElectionsList">
-                    <!-- Toutes les élections seront chargées ici -->
-                </div>
-            </section>
-
-            <!-- Section Résultats -->
-            <section id="results-section" class="section">
-                <div class="page-header">
-                    <h2>Résultats des élections</h2>
-                </div>
-                <div class="election-list" id="resultsList">
-                    <!-- Les résultats seront chargés ici -->
-                </div>
-            </section>
-
-            <!-- Section Historique -->
-            <section id="history-section" class="section">
-                <div class="page-header">
-                    <h2>Historique de vos votes</h2>
-                </div>
-                <div class="election-list" id="historyList">
-                    <!-- L'historique sera chargé ici -->
-                </div>
-            </section>
-
-            <!-- Section Infos -->
-            <section id="info-section" class="section">
-                <div class="page-header">
-                    <h2>Informations importantes</h2>
-                </div>
-                <div id="info-content">
-                    <!-- Les informations seront affichées ici -->
+                    <div class="card" id="electionsLoading">
+                        <div class="card-body">
+                            <p>Chargement des élections en cours...</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
     <script src="../config.js"></script>
     <script>
-        // Fonctions utilitaires manquantes
-        UTILS.formatDate = UTILS.formatDate || function (date, options = {}) {
-            const defaultOptions = {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
+        // Configuration
+        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const ELECTION_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`;
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id)}`;
+        const PROFILE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
 
-            return new Date(date).toLocaleDateString('fr-FR', {
-                ...defaultOptions,
-                ...options
-            });
-        };
+        // Éléments DOM
+        const burger = document.getElementById('burger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const welcomeSubtitle = document.getElementById('welcomeSubtitle');
+        const userName = document.getElementById('userName');
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+        const calendarDays = document.getElementById('calendarDays');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
 
-        UTILS.formatNumber = UTILS.formatNumber || function (number) {
-            return new Intl.NumberFormat('fr-FR').format(number);
-        };
+        // Variables globales
+        let currentDate = new Date();
+        let electionDates = [];
 
-        const STUDENT_AUTH = {
-            isAuthenticated: () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    console.log('Token found:', !!token);
-                    if (!token) return false;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    const isExpired = payload.exp <= now;
-
-                    console.log('Token expiration:', new Date(payload.exp * 1000), 'Current time:', new Date(now * 1000));
-                    console.log('Token is expired:', isExpired);
-
-                    return !isExpired;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
-                }
-            },
-
-            getUserRole: () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('studentName');
-                window.location.href = '/user/login';
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Vérification de l'authentification et du rôle
-            const role = STUDENT_AUTH.getUserRole();
-            const isAuth = STUDENT_AUTH.isAuthenticated();
-
-            console.log('Authentication status:', isAuth);
-            console.log('User role:', role);
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /user/login');
-                window.location.href = '/user/login';
-                return;
-            }
-
-            if (role !== 'ETUDIANT') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '/unauthorized.html';
-                return;
-            }
-
-            // Nom étudiant connecté
-            const studentName = localStorage.getItem('studentName') || 'Étudiant';
-            document.getElementById('studentName').innerHTML = `<i class="fas fa-user"></i> <span>${studentName}</span>`;
-            document.getElementById('welcomeStudentName').textContent = studentName;
-
-            initEvents();
-            initRouting();
-            loadElections();
-            updateStats();
+        // MENU BURGER
+        burger.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            burger.classList.toggle('open');
         });
 
-        function initEvents() {
-            const burger = document.querySelector(".burger");
-            const sidebar = document.querySelector(".sidebar");
-            const overlay = document.getElementById("overlay");
-            const mainContent = document.querySelector(".main-content");
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            burger.classList.remove('open');
+        });
 
-            burger.addEventListener('click', function (e) {
-                e.stopPropagation();
-                burger.classList.toggle('open');
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
+        // Fonctions d'affichage
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
 
-            overlay.addEventListener('click', function () {
-                burger.classList.remove('open');
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
 
-            if (window.innerWidth <= 768) {
-                mainContent.addEventListener('click', function () {
-                    if (sidebar.classList.contains('active')) {
-                        burger.classList.remove('open');
-                        sidebar.classList.remove('active');
-                        overlay.classList.remove('active');
+        function showToast(message, type = '') {
+            toastMessage.textContent = message;
+            toast.className = 'toast';
+
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    toast.classList.add('success');
+                    break;
+                case 'error':
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    toast.classList.add('error');
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    toast.classList.add('warning');
+                    break;
+                default:
+                    toastIcon.className = 'fa-solid fa-circle-info';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Fonctions API
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('token');
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            };
+
+            try {
+                const response = await fetch(url, defaultOptions);
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/user/login';
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur fetch:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+                throw error;
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const data = await fetchWithAuth(PROFILE_API);
+                if (data) {
+                    userName.textContent = data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                    welcomeTitle.textContent = `Bienvenue, ${data.prenom || 'Étudiant'} !`;
+
+                    if (data.filiere && data.annee) {
+                        welcomeSubtitle.textContent = `${data.filiere} - Année ${data.annee}`;
                     }
-                });
-            }
-
-            window.addEventListener('resize', function () {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                    burger.classList.remove('open');
                 }
-            });
-        }
-
-        function initRouting() {
-            const navLinks = document.querySelectorAll('.sidebar-menu a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const sectionId = this.getAttribute('data-section');
-                    navigateToSection(sectionId);
-
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            window.addEventListener('hashchange', function () {
-                const hash = window.location.hash.substring(1) || 'dashboard';
-                navigateToSection(hash);
-
-                const activeLink = document.querySelector(`.sidebar-menu a[data-section="${hash}"]`);
-                if (activeLink) {
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    activeLink.classList.add('active');
-                }
-            });
-
-            const initialHash = window.location.hash.substring(1) || 'dashboard';
-            navigateToSection(initialHash);
-
-            const initialLink = document.querySelector(`.sidebar-menu a[data-section="${initialHash}"]`);
-            if (initialLink) {
-                navLinks.forEach(l => l.classList.remove('active'));
-                initialLink.classList.add('active');
-            }
-        }
-
-        function navigateToSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            const targetSection = document.getElementById(`${sectionId}-section`);
-            if (targetSection) {
-                targetSection.classList.add('active');
-                switch (sectionId) {
-                    case 'elections': loadAllElections(); break;
-                    case 'results': loadResults(); break;
-                    case 'history': loadHistory(); break;
-                    case 'calendar': loadCalendar(); break;
-                    case 'info': loadInfo(); break;
-                }
-            }
-
-            window.location.hash = sectionId;
-
-            if (window.innerWidth <= 768) {
-                document.querySelector('.burger').classList.remove('open');
-                document.querySelector('.sidebar').classList.remove('active');
-                document.getElementById('overlay').classList.remove('active');
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
             }
         }
 
         async function loadElections() {
             const list = document.getElementById('electionList');
-            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+            const loadingElement = document.getElementById('electionsLoading');
+
+            if (loadingElement) {
+                loadingElement.remove();
+            } else {
+                list.innerHTML = '<div class="card"><div class="card-body"><p>Chargement des élections en cours...</p></div></div>';
+            }
 
             try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const elections = await fetchWithAuth(ELECTION_API);
 
-                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
+                // Extraire les dates d'élections pour le calendrier
+                electionDates = elections ? elections.map(e => new Date(e.dateDebut)) : [];
 
-                const elections = await response.json();
-                list.innerHTML = '';
+                if (elections && elections.length > 0) {
+                    list.innerHTML = '';
 
-                if (!elections || elections.length === 0) {
+                    elections.forEach((election, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.style.animationDelay = `${0.1 * index}s`;
+
+                        const dateDebut = UTILS.formatDate(election.dateDebut, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+
+                        const dateFin = UTILS.formatDate(election.dateFin, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+
+                        const now = new Date();
+                        const debut = new Date(election.dateDebut);
+                        const fin = new Date(election.dateFin);
+
+                        let statusText = '';
+                        let statusClass = '';
+
+                        if (now < debut) {
+                            statusText = 'À venir';
+                            statusClass = 'btn-result';
+                        } else if (now > fin) {
+                            statusText = 'Terminée';
+                            statusClass = 'btn-result';
+                        } else {
+                            statusText = 'En cours';
+                            statusClass = 'btn-vote';
+                        }
+
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <h3>${election.titre}</h3>
+                                <span>${dateDebut} → ${dateFin}</span>
+                            </div>
+                            <div class="card-body">
+                                <p>${election.description}</p>
+                                <p><strong>Type:</strong> ${election.type} | <strong>Niveau:</strong> ${election.niveau}</p>
+                            </div>
+                            <div class="card-actions">
+                                <span class="btn ${statusClass}">${statusText}</span>
+                                <a href="electionsdetail.html?id=${election.id}" class="btn btn-result">Détails</a>
+                                ${statusText === 'En cours' ?
+                                `<a href="vote.html?election=${election.id}" class="btn btn-vote">Voter</a>` : ''}
+                            </div>
+                        `;
+                        list.appendChild(card);
+                    });
+                } else {
                     list.innerHTML = `
-                        <div class="empty-state">
-                            <i class="far fa-calendar-times"></i>
-                            <p>Aucune élection disponible.</p>
-                        </div>`;
-                    return;
+                        <div class="card">
+                            <div class="card-body">
+                                <p>Aucune élection en cours pour le moment.</p>
+                            </div>
+                        </div>
+                    `;
                 }
 
-                elections.forEach((election, index) => {
-                    const card = document.createElement('div');
-                    card.classList.add('card');
-                    card.style.animationDelay = `${0.2 + index * 0.1}s`;
-
-                    const now = new Date();
-                    const endDate = new Date(election.dateFin);
-                    const isEnded = now > endDate;
-
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <h3>${election.nom}</h3>
-                            <span class="card-badge">
-                                ${election.ouvert ? (isEnded ? 'Terminée' : 'En cours') : 'À venir'}
-                            </span>
-                        </div>
-                        <div class="card-content">
-                            <p><strong>Description :</strong> ${election.description}</p>
-                            <p class="date-info">
-                                <i class="far fa-calendar-alt"></i> 
-                                <strong>Fin du vote :</strong> ${UTILS.formatDate(endDate)}
-                            </p>
-                        </div>
-                        <div class="card-footer">
-                            ${election.ouvert && !election.dejaVote && !isEnded
-                            ? `<button class="btn btn-vote" onclick="vote(${election.id})">
-                                        <i class="fas fa-vote-yea"></i> Voter
-                                   </button>`
-                            : election.dejaVote || isEnded
-                                ? `<button class="btn btn-result" onclick="result(${election.id})">
-                                            <i class="fas fa-poll"></i> Résultats
-                                       </button>`
-                                : `<span class="date-info">
-                                            <i class="far fa-clock"></i> Élection non ouverte
-                                       </span>`}
-                            <span class="date-info">
-                                <i class="fas fa-users"></i> ${election.candidats || 0} candidat(s)
-                            </span>
-                        </div>`;
-                    list.appendChild(card);
-                });
-
+                // Mettre à jour le calendrier après le chargement des élections
+                renderCalendar();
             } catch (error) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>${error.message}</p>
-                        <button class="btn btn-vote" onclick="loadElections()">
-                            <i class="fas fa-sync-alt"></i> Réessayer
-                        </button>
-                    </div>`;
-            }
-        }
-
-        async function loadAllElections() {
-            const list = document.getElementById('allElectionsList');
-            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
-
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
-
-                const elections = await response.json();
-                list.innerHTML = '';
-
-                if (!elections || elections.length === 0) {
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <i class="far fa-calendar-times"></i>
-                            <p>Aucune élection disponible.</p>
-                        </div>`;
-                    return;
-                }
-
-                elections.forEach((election, index) => {
-                    const card = document.createElement('div');
-                    card.classList.add('card');
-                    card.style.animationDelay = `${0.2 + index * 0.1}s`;
-
-                    const now = new Date();
-                    const endDate = new Date(election.dateFin);
-                    const isEnded = now > endDate;
-
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <h3>${election.nom}</h3>
-                            <span class="card-badge">
-                                ${election.ouvert ? (isEnded ? 'Terminée' : 'En cours') : 'À venir'}
-                            </span>
-                        </div>
-                        <div class="card-content">
-                            <p><strong>Description :</strong> ${election.description}</p>
-                            <p class="date-info">
-                                <i class="far fa-calendar-alt"></i> 
-                                <strong>Fin du vote :</strong> ${UTILS.formatDate(endDate)}
-                            </p>
-                        </div>
-                        <div class="card-footer">
-                            ${election.ouvert && !election.dejaVote && !isEnded
-                            ? `<button class="btn btn-vote" onclick="vote(${election.id})">
-                                        <i class="fas fa-vote-yea"></i> Voter
-                                   </button>`
-                            : election.dejaVote || isEnded
-                                ? `<button class="btn btn-result" onclick="result(${election.id})">
-                                            <i class="fas fa-poll"></i> Résultats
-                                       </button>`
-                                : `<span class="date-info">
-                                            <i class="far fa-clock"></i> Élection non ouverte
-                                       </span>`}
-                            <span class="date-info">
-                                <i class="fas fa-users"></i> ${election.candidats || 0} candidat(s)
-                            </span>
-                        </div>`;
-                    list.appendChild(card);
-                });
-            } catch (error) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>${error.message}</p>
-                    </div>`;
-            }
-        }
-
-        async function loadResults() {
-            const list = document.getElementById('resultsList');
-            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
-
-            try {
-                const token = localStorage.getItem('token');
-                // Utiliser l'endpoint des statistiques générales comme fallback
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.STATS.GENERAL}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
-
-                const stats = await response.json();
+                console.error('Erreur chargement élections:', error);
                 list.innerHTML = `
                     <div class="card">
-                        <h3>Statistiques de vote</h3>
-                        <p>Total des élections: ${stats.elections || 0}</p>
-                        <p>Votes effectués: ${stats.votes || 0}</p>
-                        <p>Élections à venir: ${stats.upcoming || 0}</p>
-                    </div>`;
-
-            } catch (error) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>${error.message}</p>
-                    </div>`;
+                        <div class="card-body">
+                            <p>Erreur lors du chargement des élections.</p>
+                        </div>
+                    </div>
+                `;
+                showToast('Erreur lors du chargement des élections', 'error');
             }
         }
 
-        async function loadHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = `<div class="loading"><div class="spinner"></div></div>`;
+        // Fonctions pour le calendrier
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
 
-            try {
-                const token = localStorage.getItem('token');
-                // Utiliser l'endpoint des élections comme fallback
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.LIST}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            // Premier jour du mois
+            const firstDay = new Date(year, month, 1);
+            // Dernier jour du mois
+            const lastDay = new Date(year, month + 1, 0);
 
-                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
+            // Jours de la semaine
+            const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
-                const elections = await response.json();
-                list.innerHTML = '';
+            // Vider le calendrier
+            calendarDays.innerHTML = '';
 
-                if (!elections || elections.length === 0) {
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <i class="far fa-calendar-times"></i>
-                            <p>Aucun historique de vote disponible.</p>
-                        </div>`;
-                    return;
+            // Ajouter les en-têtes des jours
+            daysOfWeek.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                calendarDays.appendChild(dayElement);
+            });
+
+            // Ajouter les cases vides avant le premier jour
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyElement = document.createElement('div');
+                emptyElement.className = 'calendar-date';
+                calendarDays.appendChild(emptyElement);
+            }
+
+            // Ajouter les jours du mois
+            const today = new Date();
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateElement = document.createElement('div');
+                dateElement.className = 'calendar-date';
+                dateElement.textContent = day;
+
+                // Vérifier si c'est aujourd'hui
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dateElement.classList.add('current');
                 }
 
-                // Filtrer les élections où l'utilisateur a déjà voté
-                const votedElections = elections.filter(election => election.dejaVote);
+                // Vérifier si ce jour a une élection
+                const currentDateObj = new Date(year, month, day);
+                const hasElection = electionDates.some(electionDate =>
+                    electionDate.getDate() === currentDateObj.getDate() &&
+                    electionDate.getMonth() === currentDateObj.getMonth() &&
+                    electionDate.getFullYear() === currentDateObj.getFullYear()
+                );
 
-                if (votedElections.length === 0) {
-                    list.innerHTML = `
-                        <div class="empty-state">
-                            <i class="far fa-calendar-times"></i>
-                            <p>Vous n'avez participé à aucune élection.</p>
-                        </div>`;
-                    return;
+                if (hasElection) {
+                    dateElement.classList.add('event');
+                    dateElement.title = 'Élection prévue ce jour';
                 }
 
-                votedElections.forEach((election, index) => {
-                    const card = document.createElement('div');
-                    card.classList.add('card');
-                    card.style.animationDelay = `${0.2 + index * 0.1}s`;
-
-                    const endDate = new Date(election.dateFin);
-                    const isEnded = new Date() > endDate;
-
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <h3>${election.nom}</h3>
-                            <span class="card-badge">
-                                ${isEnded ? 'Terminée' : 'En cours'}
-                            </span>
-                        </div>
-                        <div class="card-content">
-                            <p><strong>Description :</strong> ${election.description}</p>
-                            <p class="date-info">
-                                <i class="far fa-calendar-alt"></i> 
-                                <strong>Fin du vote :</strong> ${UTILS.formatDate(endDate)}
-                            </p>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-result" onclick="result(${election.id})">
-                                <i class="fas fa-poll"></i> Voir les résultats
-                            </button>
-                            <span class="date-info">
-                                <i class="fas fa-users"></i> ${election.candidats || 0} candidat(s)
-                            </span>
-                        </div>`;
-                    list.appendChild(card);
-                });
-
-            } catch (error) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>${error.message}</p>
-                    </div>`;
+                calendarDays.appendChild(dateElement);
             }
         }
 
+        // Gestionnaire d'événements
+        document.getElementById('refreshElections').addEventListener('click', function () {
+            const spinner = document.getElementById('refreshSpinner');
+            const button = this;
 
-        function loadInfo() {
-            document.getElementById('info-content').innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-info-circle"></i>
-                    <p>Aucune information disponible</p>
-                </div>`;
-        }
+            spinner.style.display = 'block';
+            button.disabled = true;
 
-        async function updateStats() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.STATS.GENERAL}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+            loadElections().then(() => {
+                spinner.style.display = 'none';
+                button.disabled = false;
 
-                if (!response.ok) throw new Error(CONFIG.MESSAGES.ERROR.SERVER_ERROR);
+                button.style.transition = 'transform 0.5s ease';
+                button.style.transform = 'rotate(360deg)';
 
-                const stats = await response.json();
+                setTimeout(() => {
+                    button.style.transform = 'rotate(0deg)';
+                }, 500);
 
-                document.getElementById('electionsCount').textContent = UTILS.formatNumber(stats.elections || 0);
-                document.getElementById('votedCount').textContent = UTILS.formatNumber(stats.votes || 0);
-                document.getElementById('upcomingCount').textContent = UTILS.formatNumber(stats.upcoming || 0);
-                document.getElementById('daysLeft').textContent = stats.daysLeft || '-';
-            } catch (error) {
-                console.error("Erreur chargement stats:", error.message);
+                showToast('Liste des élections actualisée', 'success');
+            });
+        });
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        document.getElementById('btnVote').addEventListener('click', function () {
+            showToast('Redirection vers la page de vote...');
+            setTimeout(() => {
+                window.location.href = 'vote.html';
+            }, 1000);
+        });
+
+        document.getElementById('btnResult').addEventListener('click', function () {
+            showToast('Redirection vers les résultats...');
+            setTimeout(() => {
+                window.location.href = 'resultats.html';
+            }, 1000);
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            showToast('Déconnexion réussie', 'success');
+            setTimeout(() => {
+                window.location.href = '/user/login';
+            }, 1500);
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/user/login';
+                return;
             }
-        }
 
-        function vote(id) {
-            window.location.href = `vote.html?id=${id}`;
-        }
+            showLoading();
 
-        function result(id) {
-            window.location.href = `resultats.html?id=${id}`;
-        }
+            Promise.all([
+                loadUserProfile(),
+                loadElections()
+            ]).finally(() => {
+                hideLoading();
+            });
+
+            // Effet de vague sur la bannière de bienvenue
+            const welcomeBanner = document.querySelector('.welcome-banner');
+            setInterval(() => {
+                welcomeBanner.style.backgroundPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
+            }, 10000);
+        });
     </script>
-
 </body>
 
 </html>
