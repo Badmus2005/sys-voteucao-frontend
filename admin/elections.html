@@ -453,7 +453,7 @@
             background: white;
         }
 
-        /* Styles pour les modales (inchangés) */
+        /* Styles pour les modales */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -746,14 +746,169 @@
         </div>
     </div>
 
-    <!-- Modal de création/modification (inchangé) -->
+    <!-- Modal de création/modification -->
     <div id="electionModal" class="modal-overlay">
-        <!-- Contenu de la modale inchangé -->
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouvelle Élection</h2>
+                <button class="btn btn-secondary" id="closeModalBtn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalMessage" class="alert" style="display: none;"></div>
+
+                <div class="form-timeline">
+                    <div class="timeline-item active" data-section="config">
+                        <i class="fas fa-cog"></i> Configuration
+                    </div>
+                    <div class="timeline-item" data-section="candidacy">
+                        <i class="fas fa-user-check"></i> Candidatures
+                    </div>
+                    <div class="timeline-item" data-section="voting">
+                        <i class="fas fa-vote-yea"></i> Votes
+                    </div>
+                    <div class="timeline-item" data-section="results">
+                        <i class="fas fa-chart-bar"></i> Résultats
+                    </div>
+                </div>
+
+                <form id="electionForm">
+                    <input type="hidden" id="electionId" name="electionId">
+
+                    <!-- Section Configuration -->
+                    <div class="form-section active" id="config-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-cog"></i> Configuration de base
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title">Titre de l'élection :</label>
+                            <input type="text" id="title" name="title" required
+                                placeholder="Ex: Élection des délégués de classe">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description :</label>
+                            <textarea id="description" name="description"
+                                placeholder="Décrivez le contexte et l'objectif de cette élection..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phase">Type d'élection :</label>
+                            <select id="phase" name="phase" required onchange="renderPhaseFields()">
+                                <option value="">-- Choisir le type --</option>
+                                <option value="SALLE">Phase 1 – Responsables de Salle</option>
+                                <option value="ECOLE">Phase 2 – Délégués d'École</option>
+                                <option value="UNIVERSITE">Phase 3 – Délégués Universitaires</option>
+                            </select>
+                        </div>
+
+                        <div id="phaseFields"></div>
+                    </div>
+
+                    <!-- Section Candidatures -->
+                    <div class="form-section" id="candidacy-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-user-check"></i> Période de candidature
+                        </div>
+
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="candidacyStart">Début des candidatures :</label>
+                                <input type="datetime-local" id="candidacyStart" name="candidacyStart" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="candidacyEnd">Fin des candidatures :</label>
+                                <input type="datetime-local" id="candidacyEnd" name="candidacyEnd" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidacyRequirements">Conditions de candidature :</label>
+                            <textarea id="candidacyRequirements" name="candidacyRequirements"
+                                placeholder="Précisez les conditions requises pour pouvoir se porter candidat..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section Votes -->
+                    <div class="form-section" id="voting-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-vote-yea"></i> Période de vote
+                        </div>
+
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="votingStart">Début des votes :</label>
+                                <input type="datetime-local" id="votingStart" name="votingStart" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="votingEnd">Fin des votes :</label>
+                                <input type="datetime-local" id="votingEnd" name="votingEnd" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="votingInstructions">Instructions de vote :</label>
+                            <textarea id="votingInstructions" name="votingInstructions"
+                                placeholder="Instructions spécifiques pour les électeurs..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section Résultats -->
+                    <div class="form-section" id="results-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-chart-bar"></i> Gestion des résultats
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resultsVisibility">Visibilité des résultats :</label>
+                            <select id="resultsVisibility" name="resultsVisibility">
+                                <option value="IMMEDIATE">Publication immédiate après clôture</option>
+                                <option value="MANUAL">Publication manuelle par l'administrateur</option>
+                                <option value="RESTRICTED">Résultats restreints (administrateurs seulement)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resultsMessage">Message accompagnant les résultats :</label>
+                            <textarea id="resultsMessage" name="resultsMessage"
+                                placeholder="Message à afficher avec les résultats..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button type="button" class="btn btn-primary" id="nextBtn">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                            <i class="fas fa-check"></i> Créer l'élection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <!-- Modal de confirmation (inchangé) -->
+    <!-- Modal de confirmation -->
     <div id="confirmModal" class="modal-overlay">
-        <!-- Contenu de la modale inchangé -->
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="confirmTitle">Confirmation</h2>
+                <button class="btn btn-secondary" id="closeConfirmModalBtn">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+                <p id="confirmDetails" style="font-size: 0.9rem; color: #666; margin-top: 10px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelConfirmBtn">Annuler</button>
+                <button type="button" class="btn" id="confirmActionBtn">Confirmer</button>
+            </div>
+        </div>
     </div>
 
     <script src="../config.js"></script>
@@ -771,10 +926,18 @@
         let expandedElections = new Set();
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialiser les écouteurs d'événements
+            initEventListeners();
+
+            // Charger les élections
             loadElections();
-            document.getElementById("createElectionBtn").onclick = showCreateModal;
-            document.getElementById("applyFilters").onclick = applyFilters;
-            document.getElementById("electionForm").onsubmit = handleElectionSubmit;
+        });
+
+        function initEventListeners() {
+            // Événements pour les boutons
+            document.getElementById("createElectionBtn").addEventListener('click', showCreateModal);
+            document.getElementById("applyFilters").addEventListener('click', applyFilters);
+            document.getElementById("electionForm").addEventListener('submit', handleElectionSubmit);
 
             // Navigation entre les sections
             document.querySelectorAll('.timeline-item').forEach(item => {
@@ -784,18 +947,16 @@
                 });
             });
 
+            // Navigation formulaire
             document.getElementById("nextBtn").addEventListener('click', nextSection);
             document.getElementById("prevBtn").addEventListener('click', prevSection);
 
-            document.getElementById("confirmActionBtn").onclick = function () {
-                if (currentAction === 'delete') {
-                    deleteElection(currentElectionId);
-                } else if (currentAction === 'close') {
-                    closeElection(currentElectionId);
-                }
-                hideConfirmModal();
-            };
-        });
+            // Modales
+            document.getElementById("closeModalBtn").addEventListener('click', hideElectionModal);
+            document.getElementById("closeConfirmModalBtn").addEventListener('click', hideConfirmModal);
+            document.getElementById("cancelConfirmBtn").addEventListener('click', hideConfirmModal);
+            document.getElementById("confirmActionBtn").addEventListener('click', executeConfirmedAction);
+        }
 
         // Fonction pour charger les élections depuis l'API
         async function loadElections() {
@@ -987,6 +1148,14 @@
                                         <span class="election-detail-label">Phase:</span>
                                         <span class="election-detail-value">${getPhaseNumber(election.type)}</span>
                                     </div>
+                                    <div class="election-detail-item">
+                                        <span class="election-detail-label">Début des votes:</span>
+                                        <span class="election-detail-value">${formatDateTime(election.dateDebut)}</span>
+                                    </div>
+                                    <div class="election-detail-item">
+                                        <span class="election-detail-label">Fin des votes:</span>
+                                        <span class="election-detail-value">${formatDateTime(election.dateFin)}</span>
+                                    </div>
                                     ${election.description ? `
                                     <div class="election-detail-item">
                                         <span class="election-detail-label">Description:</span>
@@ -1021,6 +1190,12 @@
                                         <span class="election-detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
                                     </div>
                                     ` : ''}
+                                    ${election.tour ? `
+                                    <div class="election-detail-item">
+                                        <span class="election-detail-label">Tour:</span>
+                                        <span class="election-detail-value">${election.tour}ème tour</span>
+                                    </div>
+                                    ` : ''}
                                 </div>
                                 
                                 ${election._count ? `
@@ -1038,6 +1213,10 @@
                                         <span class="election-detail-label">Nombre de candidats:</span>
                                         <span class="election-detail-value">${election._count.candidates || 0}</span>
                                     </div>
+                                    <div class="election-detail-item">
+                                        <span class="election-detail-label">Jetons générés:</span>
+                                        <span class="election-detail-value">${election._count.voteTokens || 0}</span>
+                                    </div>
                                 </div>
                                 ` : ''}
                             </div>
@@ -1052,7 +1231,6 @@
             container.appendChild(tableContainer);
         }
 
-        // Les autres fonctions restent inchangées...
         function getElectionTypeLabel(type) {
             switch (type) {
                 case 'SALLE': return 'Responsables de Salle';
@@ -1076,13 +1254,20 @@
             return date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
                 month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
             });
         }
-
-        // FONCTIONS MANQUANTES À AJOUTER:
 
         function showEditModal(election) {
             document.getElementById("modalTitle").textContent = "Modifier l'Élection";
@@ -1171,19 +1356,27 @@
             const currentIndex = sections.indexOf(currentSection);
 
             // Bouton Précédent
-            if (currentIndex > 0) {
-                document.getElementById("prevBtn").style.display = 'flex';
-            } else {
-                document.getElementById("prevBtn").style.display = 'none';
+            const prevBtn = document.getElementById("prevBtn");
+            if (prevBtn) {
+                if (currentIndex > 0) {
+                    prevBtn.style.display = 'flex';
+                } else {
+                    prevBtn.style.display = 'none';
+                }
             }
 
             // Bouton Suivant/Soumettre
-            if (currentIndex < sections.length - 1) {
-                document.getElementById("nextBtn").style.display = 'flex';
-                document.getElementById("submitBtn").style.display = 'none';
-            } else {
-                document.getElementById("nextBtn").style.display = 'none';
-                document.getElementById("submitBtn").style.display = 'flex';
+            const nextBtn = document.getElementById("nextBtn");
+            const submitBtn = document.getElementById("submitBtn");
+
+            if (nextBtn && submitBtn) {
+                if (currentIndex < sections.length - 1) {
+                    nextBtn.style.display = 'flex';
+                    submitBtn.style.display = 'none';
+                } else {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'flex';
+                }
             }
         }
 
@@ -1214,6 +1407,15 @@
             currentElectionId = null;
         }
 
+        function executeConfirmedAction() {
+            if (currentAction === 'delete') {
+                deleteElection(currentElectionId);
+            } else if (currentAction === 'close') {
+                closeElection(currentElectionId);
+            }
+            hideConfirmModal();
+        }
+
         function renderPhaseFields() {
             const phase = document.getElementById("phase").value;
             const fields = document.getElementById("phaseFields");
@@ -1221,69 +1423,69 @@
 
             if (phase === "SALLE") {
                 fields.innerHTML = `
-                <div class="form-group">
-                    <label>École :</label>
-                    <select id="ecole" name="ecole" required onchange="updateFilieres()">
-                        <option value="">-- Choisir --</option>
-                        <option value="EGEI">EGEI</option>
-                        <option value="ESMEA">ESMEA</option>
-                        <option value="FSAE">FSAE</option>
-                        <option value="FDE">FDE</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="filiere">Filière :</label>
-                    <select id="filiere" name="filiere" required>
-                        <option value="">-- Choisissez d'abord une école --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="annee">Année :</label>
-                    <select id="annee" name="annee" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="1">Licence 1</option>
-                        <option value="2">Licence 2</option>
-                        <option value="3">Licence 3</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="delegueType">Type de responsable :</label>
-                    <select id="delegueType" name="delegueType" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="PREMIER">Premier</option>
-                        <option value="DEUXIEME">Deuxième</option>
-                    </select>
-                </div>`;
+                    <div class="form-group">
+                        <label>École :</label>
+                        <select id="ecole" name="ecole" required onchange="updateFilieres()">
+                            <option value="">-- Choisir --</option>
+                            <option value="EGEI">EGEI</option>
+                            <option value="ESMEA">ESMEA</option>
+                            <option value="FSAE">FSAE</option>
+                            <option value="FDE">FDE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filiere">Filière :</label>
+                        <select id="filiere" name="filiere" required>
+                            <option value="">-- Choisissez d'abord une école --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="annee">Année :</label>
+                        <select id="annee" name="annee" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="1">Licence 1</option>
+                            <option value="2">Licence 2</option>
+                            <option value="3">Licence 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="delegueType">Type de responsable :</label>
+                        <select id="delegueType" name="delegueType" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="PREMIER">Premier</option>
+                            <option value="DEUXIEME">Deuxième</option>
+                        </select>
+                    </div>`;
             } else if (phase === "ECOLE") {
                 fields.innerHTML = `
-                <div class="form-group">
-                    <label>École :</label>
-                    <select id="ecole" name="ecole" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="EGEI">EGEI</option>
-                        <option value="ESMEA">ESMEA</option>
-                        <option value="FSAE">FSAE</option>
-                        <option value="FDE">FDE</option>
-                    </select>
-                </div>`;
+                    <div class="form-group">
+                        <label>École :</label>
+                        <select id="ecole" name="ecole" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="EGEI">EGEI</option>
+                            <option value="ESMEA">ESMEA</option>
+                            <option value="FSAE">FSAE</option>
+                            <option value="FDE">FDE</option>
+                        </select>
+                    </div>`;
             } else if (phase === "UNIVERSITE") {
                 fields.innerHTML = `
-                <div class="form-group">
-                    <label for="delegueType">Type de délégué :</label>
-                    <select id="delegueType" name="delegueType" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="PREMIER">Premier</option>
-                        <option value="DEUXIEME">Deuxième</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="tour">Tour :</label>
-                    <select id="tour" name="tour" required>
-                        <option value="">-- Choisir --</option>
-                        <option value="1">1er tour</option>
-                        <option value="2">2ème tour</option>
-                    </select>
-                </div>`;
+                    <div class="form-group">
+                        <label for="delegueType">Type de délégué :</label>
+                        <select id="delegueType" name="delegueType" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="PREMIER">Premier</option>
+                            <option value="DEUXIEME">Deuxième</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tour">Tour :</label>
+                        <select id="tour" name="tour" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="1">1er tour</option>
+                            <option value="2">2ème tour</option>
+                        </select>
+                    </div>`;
             }
         }
 
@@ -1426,7 +1628,6 @@
 
         // Initialiser la modale au chargement
         updateNavigationButtons();
-
     </script>
 </body>
 

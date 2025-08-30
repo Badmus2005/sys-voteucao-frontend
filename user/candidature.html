@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidature - UCAO-UUC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/config.js"></script>
+    <style>
+        :root {
+            --rouge-bordeaux: #650624;
+            --bleu-nuit: #041946;
+            --or: #a76d21;
+            --or-clair: #dea739;
+            --gris-clair: #f5f6fa;
+            --gris-texte: #444;
+            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
+            --transition: all .3s ease;
+            --transition-slow: all .5s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: var(--gris-texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* HEADER */
+        header {
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: .9rem;
+        }
+
+        .user-nav a,
+        .user-nav span {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            gap: .4rem;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .user-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--or);
+            transition: var(--transition);
+        }
+
+        .user-nav a:hover::after {
+            width: 100%;
+        }
+
+        .user-nav a:hover {
+            color: var(--or);
+        }
+
+        /* Menu burger */
+        .burger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 2rem;
+            height: 2rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .burger div {
+            width: 2rem;
+            height: 0.25rem;
+            background-color: #fff;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .burger.open div:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .burger.open div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.open div:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* LAYOUT */
+        .dashboard-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 230px;
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 0;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        .sidebar-menu li:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .sidebar-menu li:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .sidebar-menu li:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .sidebar-menu li:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .sidebar-menu li:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            padding: .9rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-menu a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: var(--transition-slow);
+        }
+
+        .sidebar-menu a:hover::before {
+            left: 100%;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: var(--rouge-bordeaux);
+            border-left: 4px solid var(--or);
+            padding-left: 2rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        /* Overlay pour mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--bleu-nuit);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            color: var(--or);
+        }
+
+        .breadcrumb span {
+            color: var(--gris-texte);
+        }
+
+        /* CANDIDATURE HEADER */
+        .candidature-header {
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
+            color: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidature-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        .candidature-title {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .candidature-subtitle {
+            position: relative;
+            z-index: 2;
+            opacity: 0.9;
+        }
+
+        /* FORM SECTION */
+        .form-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--bleu-nuit);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--bleu-nuit);
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: #e74c3c;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            padding: 0.8rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--or);
+            box-shadow: 0 0 0 3px rgba(167, 109, 33, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* IMAGE UPLOAD */
+        .image-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--or);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--or);
+            background-color: rgba(167, 109, 33, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .upload-preview {
+            display: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .remove-image {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .remove-image:hover {
+            text-decoration: underline;
+        }
+
+        /* BUTTONS */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: .8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:hover::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(30, 30);
+                opacity: 0;
+            }
+        }
+
+        .btn-primary {
+            background: var(--or);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--or-clair);
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bleu-nuit);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--rouge-bordeaux);
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .btn-disabled:hover::after {
+            animation: none;
+        }
+
+        /* STATUS MESSAGE */
+        .status-message {
+            display: none;
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            color: var(--or);
+            margin-bottom: 1.5rem;
+        }
+
+        .status-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--bleu-nuit);
+        }
+
+        .status-description {
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* ELIGIBILITY ALERT */
+        .eligibility-alert {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--bleu-nuit);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Notification toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bleu-nuit);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: var(--transition);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: #2ecc71;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .toast.warning {
+            background: #f39c12;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--or);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100%;
+                z-index: 999;
+                width: 70%;
+                max-width: 280px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .burger {
+                display: flex;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .form-actions,
+            .status-actions,
+            .alert-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media(max-width: 576px) {
+            .candidature-header {
+                padding: 1.5rem;
+            }
+
+            .candidature-title {
+                font-size: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+        <div class="burger" id="burger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html" class="active"><i class="fa-solid fa-file-signature"></i> Candidature</a>
+                </li>
+                <li><a href="electionsdetail.html"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
+                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Candidature</span>
+            </div>
+
+            <!-- Candidature Header -->
+            <div class="candidature-header">
+                <h1 class="candidature-title" id="electionTitle">Déposer sa candidature</h1>
+                <p class="candidature-subtitle" id="electionSubtitle">Remplissez le formulaire pour soumettre votre
+                    candidature</p>
+            </div>
+
+            <!-- Eligibility Alert (shown if not eligible) -->
+            <div class="eligibility-alert" id="eligibilityAlert" style="display: none;">
+                <div class="alert-title">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    Non éligible
+                </div>
+                <div class="alert-description" id="eligibilityMessage">
+                    Vous n'êtes pas éligible pour cette élection.
+                </div>
+                <div class="alert-actions">
+                    <a href="electionsdetail.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Retour aux élections
+                    </a>
+                </div>
+            </div>
+
+            <!-- Candidature Form -->
+            <div class="form-section" id="candidatureForm">
+                <h2 class="form-title"><i class="fa-solid fa-pen-to-square"></i> Formulaire de candidature</h2>
+
+                <form id="candidatureFormElement">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">Élection</label>
+                            <input type="text" class="form-input" id="electionName" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="slogan" class="form-label required">Slogan de campagne</label>
+                            <input type="text" id="slogan" class="form-input" placeholder="Votre slogan accrocheur"
+                                required maxlength="100">
+                            <div class="form-help">Maximum 100 caractères</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Photo de profil</label>
+                            <div class="image-upload">
+                                <div class="upload-area" id="uploadArea">
+                                    <div class="upload-icon">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    </div>
+                                    <div class="upload-text">Glissez-déposez votre photo ici ou cliquez pour
+                                        sélectionner</div>
+                                    <div class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</div>
+                                    <input type="file" id="photoUpload" accept="image/jpeg,image/png"
+                                        style="display: none;">
+                                </div>
+                                <div class="upload-preview" id="uploadPreview">
+                                    <img src="" alt="Aperçu" class="preview-image" id="previewImage">
+                                    <div class="remove-image" id="removeImage">Supprimer l'image</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="program" class="form-label required">Programme électoral</label>
+                            <textarea id="program" class="form-textarea"
+                                placeholder="Décrivez votre programme, vos propositions et vos engagements..." required
+                                minlength="50" maxlength="2000"></textarea>
+                            <div class="form-help">Minimum 50 caractères, maximum 2000 caractères</div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="motivation" class="form-label required">Lettre de motivation</label>
+                            <textarea id="motivation" class="form-textarea"
+                                placeholder="Expliquez pourquoi vous êtes le meilleur candidat pour ce poste..."
+                                required minlength="100" maxlength="1000"></textarea>
+                            <div class="form-help">Minimum 100 caractères, maximum 1000 caractères</div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">
+                            <i class="fa-solid fa-xmark"></i>
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            Soumettre ma candidature
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Status Message (shown after submission) -->
+            <div class="status-message" id="statusMessage">
+                <div class="status-icon">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                </div>
+                <h2 class="status-title">Candidature en attente de validation</h2>
+                <p class="status-description">
+                    Votre candidature a été soumise avec succès et est maintenant en attente de validation par
+                    l'administration.
+                    Vous serez notifié par email une fois que votre candidature aura été examinée.
+                </p>
+                <div class="status-actions">
+                    <a href="dashboard.html" class="btn btn-primary">
+                        <i class="fa-solid fa-house"></i>
+                        Retour à l'accueil
+                    </a>
+                    <a href="electionsdetail.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-list"></i>
+                        Voir les autres élections
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
+    <script src="../config.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}${CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id)}`;
+        const PROFILE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
+        const CANDIDATE_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.CANDIDATE.CREATE}`;
+        const UPLOAD_API = `${API_BASE_URL}${CONFIG.API.ENDPOINTS.UPLOAD.IMAGE}`;
+
+        // Éléments DOM
+        const burger = document.getElementById('burger');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const userName = document.getElementById('userName');
+        const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toastIcon');
+        const toastMessage = document.getElementById('toastMessage');
+        const candidatureForm = document.getElementById('candidatureForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const eligibilityAlert = document.getElementById('eligibilityAlert');
+        const uploadArea = document.getElementById('uploadArea');
+        const photoUpload = document.getElementById('photoUpload');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const previewImage = document.getElementById('previewImage');
+        const removeImage = document.getElementById('removeImage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Variables globales
+        let currentElection = null;
+        let userProfile = null;
+        let uploadedImageUrl = null;
+        let isEligible = false;
+
+        // MENU BURGER
+        burger.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            burger.classList.toggle('open');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            burger.classList.remove('open');
+        });
+
+        // Fonctions d'affichage
+        function showLoading() {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loadingOverlay.style.display = 'none';
+        }
+
+        function showToast(message, type = '') {
+            toastMessage.textContent = message;
+            toast.className = 'toast';
+
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    toast.classList.add('success');
+                    break;
+                case 'error':
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    toast.classList.add('error');
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    toast.classList.add('warning');
+                    break;
+                default:
+                    toastIcon.className = 'fa-solid fa-circle-info';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Fonctions API
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('token');
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                ...options
+            };
+
+            try {
+                const response = await fetch(url, defaultOptions);
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur fetch:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+                throw error;
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const data = await fetchWithAuth(PROFILE_API);
+                if (data) {
+                    userProfile = data;
+                    userName.textContent = data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                }
+                return data;
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+                return null;
+            }
+        }
+
+        async function loadElectionDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const electionId = urlParams.get('election');
+
+            if (!electionId) {
+                showToast('Aucune élection spécifiée', 'error');
+                setTimeout(() => {
+                    window.location.href = 'electionsdetail.html';
+                }, 2000);
+                return;
+            }
+
+            try {
+                const data = await fetchWithAuth(ELECTION_DETAILS_API(electionId));
+                if (data) {
+                    currentElection = data;
+                    displayElectionDetails(data);
+                    checkEligibility(data);
+                }
+                return data;
+            } catch (error) {
+                console.error('Erreur chargement détails élection:', error);
+                return null;
+            }
+        }
+
+        function displayElectionDetails(election) {
+            document.getElementById('electionTitle').textContent = `Candidature: ${election.titre}`;
+            document.getElementById('electionSubtitle').textContent = `Poste de ${election.delegueType || 'représentant'} - ${election.type}`;
+            document.getElementById('electionName').value = election.titre;
+        }
+
+        function checkEligibility(election) {
+            if (!userProfile) return;
+
+            // Vérification des conditions d'éligibilité selon le type d'élection
+            switch (election.type) {
+                case 'SALLE':
+                    // Éligible si même filière et même année
+                    isEligible = userProfile.filiere === election.filiere &&
+                        userProfile.annee === election.annee;
+                    break;
+
+                case 'ECOLE':
+                    // Pour délégué d'école, l'étudiant doit être responsable de salle
+                    // et selon le type de délégué (1er ou 2ème), l'année d'étude change
+                    const isResponsable = userProfile.estResponsableSalle;
+
+                    if (election.delegueType === '1er') {
+                        isEligible = isResponsable && userProfile.annee === 3;
+                    } else {
+                        isEligible = isResponsable && userProfile.annee === 2;
+                    }
+                    break;
+
+                case 'UNIVERSITE':
+                    // Pour délégué universitaire, l'étudiant doit être délégué d'école
+                    const isDelegueEcole = userProfile.estDelegueEcole;
+
+                    if (election.delegueType === '1er') {
+                        isEligible = isDelegueEcole && userProfile.positionDelegue === '1er';
+                    } else {
+                        isEligible = isDelegueEcole && userProfile.positionDelegue === '2ème';
+                    }
+                    break;
+            }
+
+            // Vérifier aussi si la période de candidature est ouverte
+            const now = new Date();
+            const debut = new Date(election.dateDebut);
+            const fin = new Date(election.dateFin);
+            const canApply = now >= debut && now <= fin;
+
+            if (!isEligible || !canApply) {
+                candidatureForm.style.display = 'none';
+                eligibilityAlert.style.display = 'block';
+
+                if (!isEligible) {
+                    document.getElementById('eligibilityMessage').textContent =
+                        "Vous n'êtes pas éligible pour cette élection selon les critères définis.";
+                } else if (!canApply) {
+                    document.getElementById('eligibilityMessage').textContent =
+                        "La période de candidature pour cette élection est fermée.";
+                }
+            }
+        }
+
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                showLoading();
+                const response = await fetch(UPLOAD_API, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors du téléchargement de l\'image');
+                }
+
+                const data = await response.json();
+                return data.url; // URL de l'image sur ImgBB
+            } catch (error) {
+                console.error('Erreur upload image:', error);
+                showToast('Erreur lors du téléchargement de l\'image', 'error');
+                return null;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function submitCandidature(candidatureData) {
+            try {
+                showLoading();
+                const response = await fetchWithAuth(CANDIDATE_API, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(candidatureData)
+                });
+
+                if (response) {
+                    // Masquer le formulaire et afficher le message de statut
+                    candidatureForm.style.display = 'none';
+                    statusMessage.style.display = 'block';
+
+                    showToast('Candidature soumise avec succès!', 'success');
+                }
+            } catch (error) {
+                console.error('Erreur soumission candidature:', error);
+                showToast('Erreur lors de la soumission de la candidature', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Gestionnaires d'événements
+        uploadArea.addEventListener('click', () => {
+            photoUpload.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length > 0) {
+                handleImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+
+        photoUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        removeImage.addEventListener('click', () => {
+            uploadPreview.style.display = 'none';
+            uploadArea.style.display = 'block';
+            uploadedImageUrl = null;
+            photoUpload.value = '';
+        });
+
+        async function handleImageUpload(file) {
+            // Vérifier le type de fichier
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+                showToast('Format de fichier non supporté. Utilisez JPG ou PNG.', 'error');
+                return;
+            }
+
+            // Vérifier la taille du fichier (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('L\'image ne doit pas dépasser 2MB.', 'error');
+                return;
+            }
+
+            // Afficher un aperçu de l'image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+
+            // Uploader l'image sur ImgBB
+            uploadedImageUrl = await uploadImage(file);
+
+            if (!uploadedImageUrl) {
+                uploadPreview.style.display = 'none';
+                uploadArea.style.display = 'block';
+            }
+        }
+
+        document.getElementById('candidatureFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validation
+            if (!uploadedImageUrl) {
+                showToast('Veuillez uploader une photo de profil', 'error');
+                return;
+            }
+
+            const slogan = document.getElementById('slogan').value;
+            const program = document.getElementById('program').value;
+            const motivation = document.getElementById('motivation').value;
+
+            if (!slogan || !program || !motivation) {
+                showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            // Préparer les données de candidature
+            const candidatureData = {
+                electionId: currentElection.id,
+                slogan: slogan,
+                photo: uploadedImageUrl,
+                programme: program,
+                motivation: motivation,
+                statut: 'en_attente' // Statut initial
+            };
+
+            // Soumettre la candidature
+            await submitCandidature(candidatureData);
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            window.location.href = `election-details.html?id=${currentElection.id}`;
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            showToast('Déconnexion réussie', 'success');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            showLoading();
+
+            try {
+                await loadUserProfile();
+                await loadElectionDetails();
+            } catch (error) {
+                console.error('Erreur lors du chargement:', error);
+                showToast('Erreur lors du chargement des données', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+    </script>
+</body>
+
+</html>
