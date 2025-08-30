@@ -349,6 +349,187 @@
             opacity: 0.9;
         }
 
+
+        /* Styles pour la liste des candidats */
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .candidate-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .candidate-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .candidate-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--or);
+        }
+
+        .candidate-info {
+            flex: 1;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.25rem;
+        }
+
+        .candidate-slogan {
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .candidate-program {
+            margin-top: 1rem;
+        }
+
+        .candidate-program-preview {
+            background: var(--gris-clair);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .candidate-program-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(transparent, var(--gris-clair));
+        }
+
+        .view-details-btn {
+            margin-top: 1rem;
+            width: 100%;
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bleu-nuit);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-details-btn:hover {
+            background: var(--rouge-bordeaux);
+        }
+
+        /* Modal pour les détails du candidat */
+        .candidate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .candidate-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .candidate-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .candidate-modal-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--or);
+        }
+
+        .candidate-modal-info {
+            flex: 1;
+        }
+
+        .candidate-modal-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-modal-slogan {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .candidate-modal-section h4 {
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .candidate-modal-content-text {
+            background: var(--gris-clair);
+            padding: 1rem;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
         /* STATE MESSAGE */
         .state-message {
             background: #fff;
@@ -837,6 +1018,7 @@
                 </li>
                 <li><a href="elections-details.html"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
                 <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="mes-candidatures.html"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
                 <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
         </aside>
@@ -969,6 +1151,26 @@
                 </form>
             </div>
 
+
+
+            <!-- Section Liste des Candidats -->
+            <div class="form-section" id="candidatesSection">
+                <h2 class="form-title"><i class="fa-solid fa-users"></i> Candidats à cette élection</h2>
+
+                <div id="candidatesList">
+                    <div class="loading" id="candidatesLoading">
+                        <div class="spinner"></div>
+                        <p>Chargement des candidats...</p>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="noCandidatesMessage" style="display: none;">
+                    <i class="fa-solid fa-user-slash"></i>
+                    <h3>Aucun candidat pour le moment</h3>
+                    <p>Soyez le premier à postuler pour cette élection !</p>
+                </div>
+            </div>
+
             <!-- Status Message (shown after submission) -->
             <div class="status-message" id="statusMessage">
                 <div class="status-icon">
@@ -977,13 +1179,16 @@
                 <h2 class="status-title">Candidature en attente de validation</h2>
                 <p class="status-description">
                     Votre candidature a été soumise avec succès et est maintenant en attente de validation par
-                    l'administration.
-                    Vous serez notifié par email une fois que votre candidature aura été examinée.
+                    l'administration. Vous serez notifié par email une fois que votre candidature aura été examinée.
                 </p>
                 <div class="status-actions">
                     <a href="dashboard.html" class="btn btn-primary">
                         <i class="fa-solid fa-house"></i>
                         Retour à l'accueil
+                    </a>
+                    <a href="mes-candidatures.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-list"></i>
+                        Voir mes candidatures
                     </a>
                     <a href="elections-details.html" class="btn btn-secondary">
                         <i class="fa-solid fa-list"></i>
@@ -991,303 +1196,306 @@
                     </a>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <div class="toast" id="toast">
-        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
-        <span id="toastMessage"></span>
-    </div>
-    <script src="../config.js"></script>
-    <script>
-        // Configuration
-        const API_BASE_URL = CONFIG.API.BASE_URL;
-        const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
-        const UPLOAD_API = `${API_BASE_URL}/api/upload/image`;
-        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/election/${id}`;
-        const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
-        const IS_CANDIDATE_API = (electionId) => `${API_BASE_URL}/api/candidats/is-candidate/${electionId}`;
+            <div class="toast" id="toast">
+                <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+                <span id="toastMessage"></span>
+            </div>
+            <script src="../config.js"></script>
+            <script>
+                // Configuration
+                const API_BASE_URL = CONFIG.API.BASE_URL;
+                const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
+                const UPLOAD_API = `${API_BASE_URL}/api/upload/image`;
+                const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/election/${id}`;
+                const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
+                const IS_CANDIDATE_API = (electionId) => `${API_BASE_URL}/api/candidats/is-candidate/${electionId}`;
+                const ELECTION_CANDIDATES_API = (electionId) => `${API_BASE_URL}/api/candidats/election/${electionId}`;
 
-        // Éléments DOM
-        const burger = document.getElementById('burger');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const userName = document.getElementById('userName');
-        const toast = document.getElementById('toast');
-        const toastIcon = document.getElementById('toastIcon');
-        const toastMessage = document.getElementById('toastMessage');
-        const candidatureForm = document.getElementById('candidatureForm');
-        const candidatureHeader = document.getElementById('candidatureHeader');
-        const statusMessage = document.getElementById('statusMessage');
-        const eligibilityAlert = document.getElementById('eligibilityAlert');
-        const noElectionMessage = document.getElementById('noElectionMessage');
-        const uploadArea = document.getElementById('uploadArea');
-        const photoUpload = document.getElementById('photoUpload');
-        const uploadPreview = document.getElementById('uploadPreview');
-        const previewImage = document.getElementById('previewImage');
-        const removeImage = document.getElementById('removeImage');
-        const submitBtn = document.getElementById('submitBtn');
+                // Éléments DOM
+                const burger = document.getElementById('burger');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const userName = document.getElementById('userName');
+                const toast = document.getElementById('toast');
+                const toastIcon = document.getElementById('toastIcon');
+                const toastMessage = document.getElementById('toastMessage');
+                const candidatureForm = document.getElementById('candidatureForm');
+                const candidatureHeader = document.getElementById('candidatureHeader');
+                const statusMessage = document.getElementById('statusMessage');
+                const eligibilityAlert = document.getElementById('eligibilityAlert');
+                const noElectionMessage = document.getElementById('noElectionMessage');
+                const uploadArea = document.getElementById('uploadArea');
+                const photoUpload = document.getElementById('photoUpload');
+                const uploadPreview = document.getElementById('uploadPreview');
+                const previewImage = document.getElementById('previewImage');
+                const removeImage = document.getElementById('removeImage');
+                const submitBtn = document.getElementById('submitBtn');
 
-        // Variables globales
-        let currentElection = null;
-        let userProfile = null;
-        let uploadedImageUrl = null;
+                // Variables globales
+                let currentElection = null;
+                let userProfile = null;
+                let uploadedImageUrl = null;
 
-        // MENU BURGER
-        burger.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            burger.classList.toggle('open');
-        });
+                // MENU BURGER
+                burger.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                    burger.classList.toggle('open');
+                });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            burger.classList.remove('open');
-        });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    burger.classList.remove('open');
+                });
 
-        // Fonctions d'affichage
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        function showToast(message, type = '') {
-            toastMessage.textContent = message;
-            toast.className = 'toast';
-
-            switch (type) {
-                case 'success':
-                    toastIcon.className = 'fa-solid fa-circle-check';
-                    toast.classList.add('success');
-                    break;
-                case 'error':
-                    toastIcon.className = 'fa-solid fa-circle-exclamation';
-                    toast.classList.add('error');
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
-                    toast.classList.add('warning');
-                    break;
-                default:
-                    toastIcon.className = 'fa-solid fa-circle-info';
-            }
-
-            toast.classList.add('show');
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-
-        // Fonctions API
-        async function fetchWithAuth(url, options = {}) {
-            const token = localStorage.getItem('token');
-
-            // Si pas de token, rediriger immédiatement
-            if (!token) {
-                window.location.href = 'login.html';
-                return null;
-            }
-
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                ...options
-            };
-
-            try {
-                const response = await fetch(url, defaultOptions);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erreur ${response.status}: ${errorText}`);
+                // Fonctions d'affichage
+                function showLoading() {
+                    loadingOverlay.style.display = 'flex';
                 }
 
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur fetch:', error);
-                throw error;
-            }
-        }
-
-        // Fonction pour obtenir les paramètres de l'URL
-        function getUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const params = {};
-            for (const [key, value] of urlParams) {
-                params[key] = value;
-            }
-            return params;
-        }
-
-        // Fonction pour vérifier si l'utilisateur est déjà candidat
-        async function checkIfAlreadyCandidate(electionId) {
-            try {
-                const response = await fetchWithAuth(IS_CANDIDATE_API(electionId));
-                return response ? response.isCandidate : false;
-            } catch (error) {
-                console.error('Erreur vérification candidature:', error);
-                return false;
-            }
-        }
-
-        // Fonction pour vérifier si on peut rester sur cette page
-        function checkPageConditions() {
-            const params = getUrlParams();
-            const electionId = params.election || params.electionId;
-
-            if (!electionId) {
-                noElectionMessage.style.display = 'block';
-                candidatureHeader.style.display = 'none';
-                candidatureForm.style.display = 'none';
-                eligibilityAlert.style.display = 'none';
-                return false;
-            }
-
-            noElectionMessage.style.display = 'none';
-            candidatureHeader.style.display = 'block';
-            return true;
-        }
-
-        async function loadUserProfile() {
-            try {
-                const data = await fetchWithAuth(PROFILE_API);
-                if (data) {
-                    userProfile = data;
-                    userName.textContent = data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                function hideLoading() {
+                    loadingOverlay.style.display = 'none';
                 }
-                return data;
-            } catch (error) {
-                console.error('Erreur chargement profil:', error);
-                return null;
-            }
-        }
 
-        async function loadElectionDetails() {
-            if (!checkPageConditions()) {
-                return;
-            }
+                function showToast(message, type = '') {
+                    toastMessage.textContent = message;
+                    toast.className = 'toast';
 
-            const params = getUrlParams();
-            const electionId = params.election || params.electionId;
+                    switch (type) {
+                        case 'success':
+                            toastIcon.className = 'fa-solid fa-circle-check';
+                            toast.classList.add('success');
+                            break;
+                        case 'error':
+                            toastIcon.className = 'fa-solid fa-circle-exclamation';
+                            toast.classList.add('error');
+                            break;
+                        case 'warning':
+                            toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                            toast.classList.add('warning');
+                            break;
+                        default:
+                            toastIcon.className = 'fa-solid fa-circle-info';
+                    }
 
-            try {
-                const data = await fetchWithAuth(ELECTION_DETAILS_API(electionId));
-                if (data) {
-                    currentElection = data;
-                    displayElectionDetails(data);
-                    await checkEligibility(data);
+                    toast.classList.add('show');
+
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
                 }
-                return data;
-            } catch (error) {
-                console.error('Erreur chargement détails élection:', error);
-                showToast('Impossible de charger les détails de l\'élection', 'error');
-                return null;
-            }
-        }
 
-        function displayElectionDetails(election) {
-            document.getElementById('electionTitle').textContent = `Candidature: ${election.titre}`;
-            document.getElementById('electionSubtitle').textContent = `Poste de ${election.delegueType || 'représentant'} - ${election.type}`;
-            document.getElementById('electionName').value = election.titre;
-        }
 
-        async function checkEligibility(election) {
-            if (!userProfile) return;
+                // Fonctions API
+                async function fetchWithAuth(url, options = {}) {
+                    const token = localStorage.getItem('token');
 
-            let isEligible = false;
-            let eligibilityDetails = '';
+                    // Si pas de token, rediriger immédiatement
+                    if (!token) {
+                        window.location.href = 'login.html';
+                        return null;
+                    }
 
-            // Vérifier d'abord si l'utilisateur est déjà candidat
-            const isAlreadyCandidate = await checkIfAlreadyCandidate(election.id);
-            if (isAlreadyCandidate) {
-                document.getElementById('eligibilityMessage').innerHTML = `
+                    const defaultOptions = {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        ...options
+                    };
+
+                    try {
+                        const response = await fetch(url, defaultOptions);
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Erreur ${response.status}: ${errorText}`);
+                        }
+
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Erreur fetch:', error);
+                        throw error;
+                    }
+                }
+
+                // Fonction pour obtenir les paramètres de l'URL
+                function getUrlParams() {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const params = {};
+                    for (const [key, value] of urlParams) {
+                        params[key] = value;
+                    }
+                    return params;
+                }
+
+                // Fonction pour vérifier si l'utilisateur est déjà candidat
+                async function checkIfAlreadyCandidate(electionId) {
+                    try {
+                        const response = await fetchWithAuth(IS_CANDIDATE_API(electionId));
+                        return response ? response.isCandidate : false;
+                    } catch (error) {
+                        console.error('Erreur vérification candidature:', error);
+                        return false;
+                    }
+                }
+
+                // Fonction pour vérifier si on peut rester sur cette page
+                function checkPageConditions() {
+                    const params = getUrlParams();
+                    const electionId = params.election || params.electionId;
+
+                    if (!electionId) {
+                        noElectionMessage.style.display = 'block';
+                        candidatureHeader.style.display = 'none';
+                        candidatureForm.style.display = 'none';
+                        eligibilityAlert.style.display = 'none';
+                        return false;
+                    }
+
+                    noElectionMessage.style.display = 'none';
+                    candidatureHeader.style.display = 'block';
+                    return true;
+                }
+
+                async function loadUserProfile() {
+                    try {
+                        const data = await fetchWithAuth(PROFILE_API);
+                        if (data) {
+                            userProfile = data;
+                            userName.textContent = data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                        }
+                        return data;
+                    } catch (error) {
+                        console.error('Erreur chargement profil:', error);
+                        return null;
+                    }
+                }
+
+                async function loadElectionDetails() {
+                    if (!checkPageConditions()) {
+                        return;
+                    }
+
+                    const params = getUrlParams();
+                    const electionId = params.election || params.electionId;
+
+                    try {
+                        const data = await fetchWithAuth(ELECTION_DETAILS_API(electionId));
+                        if (data) {
+                            currentElection = data;
+                            displayElectionDetails(data);
+                            await checkEligibility(data);
+
+                            // Charger les candidats de cette élection
+                            await loadElectionCandidates(electionId);
+                        }
+                        return data;
+                    } catch (error) {
+                        console.error('Erreur chargement détails élection:', error);
+                        showToast('Impossible de charger les détails de l\'élection', 'error');
+                        return null;
+                    }
+                }
+
+
+                function displayElectionDetails(election) {
+                    document.getElementById('electionTitle').textContent = `Candidature: ${election.titre}`;
+                    document.getElementById('electionSubtitle').textContent = `Poste de ${election.delegueType || 'représentant'} - ${election.type}`;
+                    document.getElementById('electionName').value = election.titre;
+                }
+
+                async function checkEligibility(election) {
+                    if (!userProfile) return;
+
+                    let isEligible = false;
+                    let eligibilityDetails = '';
+
+                    // Vérifier d'abord si l'utilisateur est déjà candidat
+                    const isAlreadyCandidate = await checkIfAlreadyCandidate(election.id);
+                    if (isAlreadyCandidate) {
+                        document.getElementById('eligibilityMessage').innerHTML = `
             <strong>Vous êtes déjà candidat à cette élection.</strong><br>
             Vous ne pouvez pas soumettre plusieurs candidatures.
         `;
-                candidatureForm.style.display = 'none';
-                eligibilityAlert.style.display = 'block';
-                return;
-            }
-
-            // Vérification des conditions d'éligibilité
-            switch (election.type) {
-                case 'SALLE':
-                    isEligible = userProfile.filiere === election.filiere &&
-                        userProfile.annee === election.annee;
-                    eligibilityDetails = `Réservé aux étudiants de ${election.filiere}, année ${election.annee}`;
-                    break;
-
-                case 'ECOLE':
-                    const isResponsable = userProfile.estResponsableSalle;
-                    if (election.delegueType === 'PREMIER') {
-                        isEligible = isResponsable && userProfile.annee === 3;
-                        eligibilityDetails = `Réservé aux responsables de salle de 3ème année`;
-                    } else {
-                        isEligible = isResponsable && userProfile.annee === 2;
-                        eligibilityDetails = `Réservé aux responsables de salle de 2ème année`;
+                        candidatureForm.style.display = 'none';
+                        eligibilityAlert.style.display = 'block';
+                        return;
                     }
-                    break;
 
-                case 'UNIVERSITE':
-                    const isDelegueEcole = userProfile.estDelegueEcole;
-                    if (election.delegueType === 'PREMIER') {
-                        isEligible = isDelegueEcole && userProfile.positionDelegue === '1er';
-                        eligibilityDetails = `Réservé aux 1ers délégués d'école`;
-                    } else {
-                        isEligible = isDelegueEcole && userProfile.positionDelegue === '2ème';
-                        eligibilityDetails = `Réservé aux 2èmes délégués d'école`;
+                    // Vérification des conditions d'éligibilité
+                    switch (election.type) {
+                        case 'SALLE':
+                            isEligible = userProfile.filiere === election.filiere &&
+                                userProfile.annee === election.annee;
+                            eligibilityDetails = `Réservé aux étudiants de ${election.filiere}, année ${election.annee}`;
+                            break;
+
+                        case 'ECOLE':
+                            const isResponsable = userProfile.estResponsableSalle;
+                            if (election.delegueType === 'PREMIER') {
+                                isEligible = isResponsable && userProfile.annee === 3;
+                                eligibilityDetails = `Réservé aux responsables de salle de 3ème année`;
+                            } else {
+                                isEligible = isResponsable && userProfile.annee === 2;
+                                eligibilityDetails = `Réservé aux responsables de salle de 2ème année`;
+                            }
+                            break;
+
+                        case 'UNIVERSITE':
+                            const isDelegueEcole = userProfile.estDelegueEcole;
+                            if (election.delegueType === 'PREMIER') {
+                                isEligible = isDelegueEcole && userProfile.positionDelegue === '1er';
+                                eligibilityDetails = `Réservé aux 1ers délégués d'école`;
+                            } else {
+                                isEligible = isDelegueEcole && userProfile.positionDelegue === '2ème';
+                                eligibilityDetails = `Réservé aux 2èmes délégués d'école`;
+                            }
+                            break;
                     }
-                    break;
-            }
 
-            // Vérifier la période de candidature
-            const now = new Date();
-            const debutCandidature = new Date(election.dateDebutCandidature);
-            const finCandidature = new Date(election.dateFinCandidature);
-            const isCandidaturePeriod = now >= debutCandidature && now <= finCandidature;
+                    // Vérifier la période de candidature
+                    const now = new Date();
+                    const debutCandidature = new Date(election.dateDebutCandidature);
+                    const finCandidature = new Date(election.dateFinCandidature);
+                    const isCandidaturePeriod = now >= debutCandidature && now <= finCandidature;
 
-            document.getElementById('eligibilityMessage').textContent = eligibilityDetails;
+                    document.getElementById('eligibilityMessage').textContent = eligibilityDetails;
 
-            // Gérer l'affichage
-            if (isEligible && isCandidaturePeriod) {
-                candidatureForm.style.display = 'block';
-                eligibilityAlert.style.display = 'none';
-                submitBtn.disabled = false;
-            } else {
-                candidatureForm.style.display = 'none';
-                eligibilityAlert.style.display = 'block';
+                    // Gérer l'affichage
+                    if (isEligible && isCandidaturePeriod) {
+                        candidatureForm.style.display = 'block';
+                        eligibilityAlert.style.display = 'none';
+                        submitBtn.disabled = false;
+                    } else {
+                        candidatureForm.style.display = 'none';
+                        eligibilityAlert.style.display = 'block';
 
-                if (!isEligible) {
-                    document.getElementById('eligibilityMessage').textContent =
-                        "Vous n'êtes pas éligible pour cette élection.";
-                } else if (!isCandidaturePeriod) {
-                    document.getElementById('eligibilityMessage').textContent =
-                        "La période de candidature est fermée.";
+                        if (!isEligible) {
+                            document.getElementById('eligibilityMessage').textContent =
+                                "Vous n'êtes pas éligible pour cette élection.";
+                        } else if (!isCandidaturePeriod) {
+                            document.getElementById('eligibilityMessage').textContent =
+                                "La période de candidature est fermée.";
+                        }
+                    }
                 }
-            }
-        }
 
-        // Fonctions pour l'upload d'image
-        function showUploadLoading() {
-            uploadArea.innerHTML = `
+                // Fonctions pour l'upload d'image
+                function showUploadLoading() {
+                    uploadArea.innerHTML = `
         <div style="text-align: center; padding: 2rem; color: #666;">
             <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--or); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
             <div>Téléchargement en cours...</div>
         </div>
     `;
-        }
+                }
 
-        function resetUploadArea() {
-            uploadArea.innerHTML = `
+                function resetUploadArea() {
+                    uploadArea.innerHTML = `
         <div class="upload-icon">
             <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
@@ -1295,277 +1503,401 @@
         <div class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</div>
         <input type="file" id="photoUpload" accept="image/jpeg,image/png" style="display: none;">
     `;
-            uploadArea.style.display = 'block';
-            uploadPreview.style.display = 'none';
+                    uploadArea.style.display = 'block';
+                    uploadPreview.style.display = 'none';
 
-            // Réattacher les événements
-            document.getElementById('photoUpload').addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleImageUpload(e.target.files[0]);
-                }
-            });
-        }
-
-        async function uploadImage(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(UPLOAD_API, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    showToast('Session expirée. Veuillez vous reconnecter.', 'error');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                    return null;
+                    // Réattacher les événements
+                    document.getElementById('photoUpload').addEventListener('change', (e) => {
+                        if (e.target.files.length > 0) {
+                            handleImageUpload(e.target.files[0]);
+                        }
+                    });
                 }
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || `Erreur ${response.status}`);
+                async function uploadImage(file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const token = localStorage.getItem('token');
+                        const response = await fetch(UPLOAD_API, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: formData
+                        });
+
+                        if (response.status === 401) {
+                            localStorage.removeItem('token');
+                            showToast('Session expirée. Veuillez vous reconnecter.', 'error');
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 2000);
+                            return null;
+                        }
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(errorText || `Erreur ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        return data.url;
+                    } catch (error) {
+                        console.error('Erreur upload:', error);
+                        throw new Error('Erreur lors du téléchargement de l\'image');
+                    }
+                }
+                function createImagePreview(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+                        reader.readAsDataURL(file);
+                    });
                 }
 
-                const data = await response.json();
-                return data.url;
-            } catch (error) {
-                console.error('Erreur upload:', error);
-                throw new Error('Erreur lors du téléchargement de l\'image');
-            }
-        }
-        function createImagePreview(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('Erreur lecture fichier'));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function normalizeFileName(fileName) {
-            return fileName
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-zA-Z0-9._-]/g, '_')
-                .replace(/_+/g, '_')
-                .replace(/^_+|_+$/g, '')
-                .toLowerCase();
-        }
-
-        async function handleImageUpload(file) {
-            // Vérifications initiales
-            const allowedTypes = ['image/jpeg', 'image/png'];
-            if (!allowedTypes.includes(file.type)) {
-                showToast('Format de fichier non supporté. Utilisez JPG ou PNG.', 'error');
-                return false;
-            }
-
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('L\'image ne doit pas dépasser 2MB.', 'error');
-                return false;
-            }
-
-            showUploadLoading();
-
-            try {
-                // Afficher un aperçu local
-                const previewUrl = await createImagePreview(file);
-                previewImage.src = previewUrl;
-                uploadPreview.style.display = 'block';
-                uploadArea.style.display = 'none';
-
-                // Uploader vers le serveur
-                uploadedImageUrl = await uploadImage(file);
-
-                if (!uploadedImageUrl) {
-                    throw new Error('Échec de l\'upload');
+                function normalizeFileName(fileName) {
+                    return fileName
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^a-zA-Z0-9._-]/g, '_')
+                        .replace(/_+/g, '_')
+                        .replace(/^_+|_+$/g, '')
+                        .toLowerCase();
                 }
 
-                showToast('Image téléchargée avec succès', 'success');
-                return true;
+                async function handleImageUpload(file) {
+                    // Vérifications initiales
+                    const allowedTypes = ['image/jpeg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        showToast('Format de fichier non supporté. Utilisez JPG ou PNG.', 'error');
+                        return false;
+                    }
 
-            } catch (error) {
-                console.error('Erreur upload:', error);
-                resetUploadArea();
-                showToast('Erreur lors du téléchargement de l\'image', 'error');
-                return false;
-            }
-        }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showToast('L\'image ne doit pas dépasser 2MB.', 'error');
+                        return false;
+                    }
 
-        async function submitCandidature(candidatureData) {
-            try {
-                showLoading();
+                    showUploadLoading();
 
-                const response = await fetch(CANDIDATE_API, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify(candidatureData)
-                });
+                    try {
+                        // Afficher un aperçu local
+                        const previewUrl = await createImagePreview(file);
+                        previewImage.src = previewUrl;
+                        uploadPreview.style.display = 'block';
+                        uploadArea.style.display = 'none';
 
-                // Gérer les réponses d'erreur sans redirection automatique
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // Token expiré, déconnecter l'utilisateur
-                        localStorage.removeItem('token');
-                        showToast('Session expirée. Veuillez vous reconnecter.', 'error');
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
+                        // Uploader vers le serveur
+                        uploadedImageUrl = await uploadImage(file);
+
+                        if (!uploadedImageUrl) {
+                            throw new Error('Échec de l\'upload');
+                        }
+
+                        showToast('Image téléchargée avec succès', 'success');
+                        return true;
+
+                    } catch (error) {
+                        console.error('Erreur upload:', error);
+                        resetUploadArea();
+                        showToast('Erreur lors du téléchargement de l\'image', 'error');
+                        return false;
+                    }
+                }
+
+                async function submitCandidature(candidatureData) {
+                    try {
+                        showLoading();
+
+                        const response = await fetch(CANDIDATE_API, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify(candidatureData)
+                        });
+
+                        // Gérer les réponses d'erreur sans redirection automatique
+                        if (!response.ok) {
+                            if (response.status === 401) {
+                                // Token expiré, déconnecter l'utilisateur
+                                localStorage.removeItem('token');
+                                showToast('Session expirée. Veuillez vous reconnecter.', 'error');
+                                setTimeout(() => {
+                                    window.location.href = 'login.html';
+                                }, 2000);
+                                return;
+                            }
+
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.message || `Erreur ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (!result.success) {
+                            throw new Error(result.message || 'Erreur lors de la soumission');
+                        }
+
+                        // Succès
+                        candidatureForm.style.display = 'none';
+                        candidatureHeader.style.display = 'none';
+                        statusMessage.style.display = 'block';
+                        showToast('Candidature soumise avec succès!', 'success');
+
+                    } catch (error) {
+                        console.error('Erreur détaillée:', error);
+
+                        // Messages d'erreur personnalisés
+                        let userMessage = 'Erreur lors de la soumission';
+
+                        if (error.message.includes('401')) {
+                            userMessage = 'Session expirée';
+                        } else if (error.message.includes('400')) {
+                            userMessage = 'Données invalides';
+                        } else if (error.message.includes('409')) {
+                            userMessage = 'Candidature déjà existante';
+                        } else if (error.message.includes('500')) {
+                            userMessage = 'Erreur serveur, veuillez réessayer';
+                        }
+
+                        showToast(userMessage, 'error');
+                    } finally {
+                        hideLoading();
+                    }
+                }
+                // Gestionnaire de soumission du formulaire
+                document.getElementById('candidatureFormElement').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    console.log('Début soumission candidature');
+                    console.log('Image URL:', uploadedImageUrl);
+                    console.log('Election ID:', currentElection?.id);
+
+                    if (!uploadedImageUrl) {
+                        showToast('Veuillez uploader une photo de profil', 'error');
                         return;
                     }
 
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Erreur ${response.status}`);
+                    const slogan = document.getElementById('slogan').value;
+                    const program = document.getElementById('program').value;
+                    const motivation = document.getElementById('motivation').value;
+
+                    if (!slogan || !program || !motivation) {
+                        showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                        return;
+                    }
+
+                    const candidatureData = {
+                        electionId: currentElection.id,
+                        slogan: slogan,
+                        photo: uploadedImageUrl,
+                        programme: program,
+                        motivation: motivation,
+                        statut: 'en_attente'
+                    };
+
+                    await submitCandidature(candidatureData);
+                });
+
+                document.getElementById('cancelBtn').addEventListener('click', () => {
+                    window.location.href = `election-details.html?id=${currentElection.id}`;
+                });
+
+                // Gestionnaires d'événements
+                uploadArea.addEventListener('click', () => {
+                    photoUpload.click();
+                });
+
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    if (e.dataTransfer.files.length > 0) {
+                        handleImageUpload(e.dataTransfer.files[0]);
+                    }
+                });
+
+                photoUpload.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleImageUpload(e.target.files[0]);
+                    }
+                });
+
+                removeImage.addEventListener('click', () => {
+                    uploadPreview.style.display = 'none';
+                    uploadArea.style.display = 'block';
+                    uploadedImageUrl = null;
+                    photoUpload.value = '';
+                });
+
+
+                document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                    e.preventDefault();
+                    localStorage.removeItem('token');
+                    showToast('Déconnexion réussie', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+                });
+
+
+
+                // Fonctions pour les candidats
+                async function loadElectionCandidates(electionId) {
+                    try {
+                        document.getElementById('candidatesLoading').style.display = 'flex';
+                        document.getElementById('noCandidatesMessage').style.display = 'none';
+
+                        const data = await fetchWithAuth(ELECTION_CANDIDATES_API(electionId));
+
+                        if (data && data.candidates && data.candidates.length > 0) {
+                            renderCandidatesList(data.candidates);
+                        } else {
+                            showNoCandidatesMessage();
+                        }
+                    } catch (error) {
+                        console.error('Erreur chargement candidats:', error);
+                        showNoCandidatesMessage();
+                    } finally {
+                        document.getElementById('candidatesLoading').style.display = 'none';
+                    }
                 }
 
-                const result = await response.json();
+                function renderCandidatesList(candidates) {
+                    const candidatesList = document.getElementById('candidatesList');
 
-                if (!result.success) {
-                    throw new Error(result.message || 'Erreur lors de la soumission');
+                    candidatesList.innerHTML = `
+        <div class="candidates-grid">
+            ${candidates.map(candidate => `
+                <div class="candidate-card" onclick="showCandidateDetails(${JSON.stringify(candidate).replace(/"/g, '&quot;')})">
+                    <div class="candidate-header">
+                        <img src="${candidate.photoUrl || candidate.userDetails?.photoUrl || 'https://via.placeholder.com/60'}" 
+                             alt="${candidate.prenom} ${candidate.nom}" 
+                             class="candidate-image"
+                             onerror="this.src='https://via.placeholder.com/60'">
+                        <div class="candidate-info">
+                            <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                            <div class="candidate-slogan">"${candidate.slogan}"</div>
+                        </div>
+                    </div>
+                    
+                    <div class="candidate-program">
+                        <div class="candidate-program-preview">
+                            ${candidate.programme.substring(0, 150)}...
+                        </div>
+                    </div>
+                    
+                    <button class="view-details-btn" onclick="event.stopPropagation();showCandidateDetails(${JSON.stringify(candidate).replace(/"/g, '&quot;')})">
+                        Voir les détails
+                    </button>
+                </div>
+            `).join('')}
+        </div>
+    `;
                 }
 
-                // Succès
-                candidatureForm.style.display = 'none';
-                candidatureHeader.style.display = 'none';
-                statusMessage.style.display = 'block';
-                showToast('Candidature soumise avec succès!', 'success');
-
-            } catch (error) {
-                console.error('Erreur détaillée:', error);
-
-                // Messages d'erreur personnalisés
-                let userMessage = 'Erreur lors de la soumission';
-
-                if (error.message.includes('401')) {
-                    userMessage = 'Session expirée';
-                } else if (error.message.includes('400')) {
-                    userMessage = 'Données invalides';
-                } else if (error.message.includes('409')) {
-                    userMessage = 'Candidature déjà existante';
-                } else if (error.message.includes('500')) {
-                    userMessage = 'Erreur serveur, veuillez réessayer';
+                function showNoCandidatesMessage() {
+                    document.getElementById('candidatesList').innerHTML = '';
+                    document.getElementById('noCandidatesMessage').style.display = 'block';
                 }
 
-                showToast(userMessage, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-        // Gestionnaire de soumission du formulaire
-        document.getElementById('candidatureFormElement').addEventListener('submit', async (e) => {
-            e.preventDefault();
+                function showCandidateDetails(candidate) {
+                    const modal = document.getElementById('candidateModal');
+                    const modalContent = document.getElementById('candidateModalContent');
 
-            console.log('Début soumission candidature');
-            console.log('Image URL:', uploadedImageUrl);
-            console.log('Election ID:', currentElection?.id);
+                    modalContent.innerHTML = `
+        <span class="close-modal" onclick="closeCandidateModal()">&times;</span>
+        
+        <div class="candidate-modal-header">
+            <img src="${candidate.photoUrl || 'https://via.placeholder.com/100'}" 
+                 alt="${candidate.prenom} ${candidate.nom}" 
+                 class="candidate-modal-image"
+                 onerror="this.src='https://via.placeholder.com/100'">
+            <div class="candidate-modal-info">
+                <h2 class="candidate-modal-name">${candidate.prenom} ${candidate.nom}</h2>
+                <div class="candidate-modal-slogan">"${candidate.slogan}"</div>
+                ${candidate.userDetails ? `
+                <div>
+                    <strong>${candidate.userDetails.filiere}</strong> - 
+                    Licence ${candidate.userDetails.annee}
+                </div>
+                ` : ''}
+            </div>
+        </div>
 
-            if (!uploadedImageUrl) {
-                showToast('Veuillez uploader une photo de profil', 'error');
-                return;
-            }
+        <div class="candidate-modal-section">
+            <h4><i class="fa-solid fa-book"></i> Programme électoral</h4>
+            <div class="candidate-modal-content-text">${candidate.programme}</div>
+        </div>
 
-            const slogan = document.getElementById('slogan').value;
-            const program = document.getElementById('program').value;
-            const motivation = document.getElementById('motivation').value;
+        <div class="candidate-modal-section">
+            <h4><i class="fa-solid fa-heart"></i> Motivation</h4>
+            <div class="candidate-modal-content-text">${candidate.motivation}</div>
+        </div>
 
-            if (!slogan || !program || !motivation) {
-                showToast('Veuillez remplir tous les champs obligatoires', 'error');
-                return;
-            }
+        ${candidate.votesCount !== undefined ? `
+        <div class="candidate-modal-section">
+            <h4><i class="fa-solid fa-chart-bar"></i> Statistiques</h4>
+            <div>${candidate.votesCount} vote(s)</div>
+        </div>
+        ` : ''}
+    `;
 
-            const candidatureData = {
-                electionId: currentElection.id,
-                slogan: slogan,
-                photo: uploadedImageUrl,
-                programme: program,
-                motivation: motivation,
-                statut: 'en_attente'
-            };
+                    modal.style.display = 'flex';
+                }
 
-            await submitCandidature(candidatureData);
-        });
+                function closeCandidateModal() {
+                    document.getElementById('candidateModal').style.display = 'none';
+                }
 
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            window.location.href = `election-details.html?id=${currentElection.id}`;
-        });
+                // Ajoutez le modal HTML à la fin du body
+                document.body.innerHTML += `
+    <div class="candidate-modal" id="candidateModal">
+        <div class="candidate-modal-content" id="candidateModalContent"></div>
+    </div>
+`;
 
-        // Gestionnaires d'événements
-        uploadArea.addEventListener('click', () => {
-            photoUpload.click();
-        });
+                // Fermer le modal en cliquant à l'extérieur
+                document.getElementById('candidateModal').addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        closeCandidateModal();
+                    }
+                });
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+                // Initialisation
+                document.addEventListener('DOMContentLoaded', async function () {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+                    showLoading();
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                handleImageUpload(e.dataTransfer.files[0]);
-            }
-        });
-
-        photoUpload.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleImageUpload(e.target.files[0]);
-            }
-        });
-
-        removeImage.addEventListener('click', () => {
-            uploadPreview.style.display = 'none';
-            uploadArea.style.display = 'block';
-            uploadedImageUrl = null;
-            photoUpload.value = '';
-        });
-
-
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            showToast('Déconnexion réussie', 'success');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
-        });
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', async function () {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            showLoading();
-
-            try {
-                await loadUserProfile();
-                await loadElectionDetails();
-            } catch (error) {
-                console.error('Erreur lors du chargement:', error);
-                showToast('Erreur lors du chargement des données', 'error');
-            } finally {
-                hideLoading();
-            }
-        });
-    </script>
+                    try {
+                        await loadUserProfile();
+                        await loadElectionDetails();
+                    } catch (error) {
+                        console.error('Erreur lors du chargement:', error);
+                        showToast('Erreur lors du chargement des données', 'error');
+                    } finally {
+                        hideLoading();
+                    }
+                });
+            </script>
 </body>
 
 </html>

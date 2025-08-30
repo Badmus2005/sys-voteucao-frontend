@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Candidatures - UCAO-UUC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reprenez le même style que candidature.html */
+        :root {
+            --rouge-bordeaux: #650624;
+            --bleu-nuit: #041946;
+            --or: #a76d21;
+            --or-clair: #dea739;
+            --gris-clair: #f5f6fa;
+            --gris-texte: #444;
+            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
+            --transition: all .3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: var(--gris-texte);
+            min-height: 100vh;
+        }
+
+        /* HEADER et SIDEBAR - Même style que candidature.html */
+        header {
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 230px;
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            padding: .9rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: var(--rouge-bordeaux);
+            border-left: 4px solid var(--or);
+            padding-left: 2rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--bleu-nuit);
+            text-decoration: none;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
+            color: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* CANDIDATURES LIST */
+        .candidatures-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .candidature-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .candidature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .candidature-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .candidature-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .candidature-info {
+            flex: 1;
+        }
+
+        .candidature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+        }
+
+        .candidature-election {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidature-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-en_attente {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-approuve {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejete {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .candidature-dates {
+            display: flex;
+            gap: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .candidature-content {
+            margin-top: 1rem;
+        }
+
+        .candidature-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-content {
+            background: var(--gris-clair);
+            padding: 1rem;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--or);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .candidature-header {
+                flex-direction: column;
+            }
+
+            .candidature-dates {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="mes-candidatures.html" class="active"><i class="fa-solid fa-list"></i> Mes Candidatures</a>
+                </li>
+                <li><a href="elections-details.html"><i class="fa-solid fa-vote-yea"></i> Élections</a></li>
+                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="breadcrumb">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Mes Candidatures</span>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">Mes Candidatures</h1>
+                <p>Retrouvez ici l'historique de toutes vos candidatures</p>
+            </div>
+
+            <div id="candidaturesContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fa-solid fa-file-lines"></i>
+                <h3>Aucune candidature</h3>
+                <p>Vous n'avez pas encore soumis de candidature.</p>
+                <a href="elections-details.html" class="btn btn-primary">
+                    <i class="fa-solid fa-vote-yea"></i>
+                    Voir les élections
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="../config.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
+        const MY_CANDIDATURES_API = `${API_BASE_URL}/api/candidats/mes-candidatures`;
+
+        // Éléments DOM
+        const userName = document.getElementById('userName');
+        const candidaturesContainer = document.getElementById('candidaturesContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        // Fonctions
+        async function fetchWithAuth(url) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return null;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur fetch:', error);
+                throw error;
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const data = await fetchWithAuth(PROFILE_API);
+                if (data) {
+                    userName.textContent = data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                }
+                return data;
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+                return null;
+            }
+        }
+
+        async function loadMyCandidatures() {
+            try {
+                const data = await fetchWithAuth(MY_CANDIDATURES_API);
+
+                if (data && data.candidatures && data.candidatures.length > 0) {
+                    renderCandidatures(data.candidatures);
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Erreur chargement candidatures:', error);
+                candidaturesContainer.innerHTML = `
+                    <div class="error-message">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        Erreur lors du chargement des candidatures
+                    </div>
+                `;
+            }
+        }
+
+        function renderCandidatures(candidatures) {
+            candidaturesContainer.innerHTML = candidatures.map(candidature => `
+                <div class="candidature-card">
+                    <div class="candidature-header">
+                        <img src="${candidature.photoUrl || 'https://via.placeholder.com/80'}" 
+                             alt="${candidature.prenom} ${candidature.nom}" 
+                             class="candidature-image"
+                             onerror="this.src='https://via.placeholder.com/80'">
+                        <div class="candidature-info">
+                            <h3 class="candidature-title">${candidature.prenom} ${candidature.nom}</h3>
+                            <div class="candidature-election">
+                                ${candidature.election.titre} - ${getElectionTypeLabel(candidature.election.type)}
+                            </div>
+                            <span class="candidature-status status-${candidature.statut.toLowerCase()}">
+                                ${getStatusLabel(candidature.statut)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="candidature-dates">
+                        <div>
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            Déposée le: ${formatDate(candidature.createdAt)}
+                        </div>
+                        <div>
+                            <i class="fa-solid fa-clock"></i>
+                            Statut: ${getStatusLabel(candidature.statut)}
+                        </div>
+                    </div>
+
+                    <div class="candidature-content">
+                        <div class="candidature-section">
+                            <h4 class="section-title">
+                                <i class="fa-solid fa-quote-left"></i>
+                                Slogan de campagne
+                            </h4>
+                            <div class="section-content">${candidature.slogan}</div>
+                        </div>
+
+                        <div class="candidature-section">
+                            <h4 class="section-title">
+                                <i class="fa-solid fa-book"></i>
+                                Programme électoral
+                            </h4>
+                            <div class="section-content">${candidature.programme}</div>
+                        </div>
+
+                        <div class="candidature-section">
+                            <h4 class="section-title">
+                                <i class="fa-solid fa-heart"></i>
+                                Motivation
+                            </h4>
+                            <div class="section-content">${candidature.motivation}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getElectionTypeLabel(type) {
+            const types = {
+                'SALLE': 'Responsable de Salle',
+                'ECOLE': 'Délégué d\'École',
+                'UNIVERSITE': 'Délégué Universitaire'
+            };
+            return types[type] || type;
+        }
+
+        function getStatusLabel(status) {
+            const statuses = {
+                'EN_ATTENTE': 'En attente',
+                'APPROUVE': 'Approuvé',
+                'REJETE': 'Rejeté'
+            };
+            return statuses[status] || status;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showEmptyState() {
+            candidaturesContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                await loadUserProfile();
+                await loadMyCandidatures();
+            } catch (error) {
+                console.error('Erreur initialisation:', error);
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>
