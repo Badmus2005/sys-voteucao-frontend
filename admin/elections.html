@@ -2,8 +2,8 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Élections - Admin UCAO</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -19,25 +19,31 @@
             --success: #28a745;
             --warning: #ffc107;
             --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--blanc-casse);
+            background: linear-gradient(135deg, #f8f4e9 0%, #e5e5e5 100%);
             color: var(--bleu-nuit);
             line-height: 1.6;
             padding: 20px;
+            min-height: 100vh;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
         }
 
         .header {
@@ -45,14 +51,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--gris-clair);
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--gris-clair);
             position: relative;
         }
 
         .header h1 {
             color: var(--bleu-nuit);
-            font-size: 1.8rem;
+            font-size: 2rem;
             display: flex;
             align-items: center;
             position: absolute;
@@ -63,29 +69,33 @@
         .header h1 i {
             color: var(--rouge-bordeaux);
             margin-right: 15px;
+            font-size: 1.8rem;
         }
 
         .btn {
             padding: 12px 20px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: .3s;
+            transition: all 0.3s ease;
             border: none;
             text-decoration: none;
+            font-size: 0.95rem;
         }
 
         .btn-primary {
             background: linear-gradient(90deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
             color: #fff;
+            box-shadow: 0 4px 6px rgba(122, 0, 38, 0.2);
         }
 
         .btn-primary:hover {
             background: linear-gradient(90deg, var(--rouge-bordeaux-light), var(--rouge-bordeaux));
             transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(122, 0, 38, 0.3);
         }
 
         .btn-secondary {
@@ -93,84 +103,276 @@
             color: var(--bleu-nuit);
         }
 
+        .btn-secondary:hover {
+            background: #d5d5d5;
+            transform: translateY(-2px);
+        }
+
         .btn-danger {
             background: var(--danger);
             color: white;
+            box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(220, 53, 69, 0.3);
         }
 
         .btn-warning {
             background: var(--warning);
             color: var(--bleu-nuit);
+            box-shadow: 0 4px 6px rgba(255, 193, 7, 0.2);
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(255, 193, 7, 0.3);
         }
 
         .btn-success {
             background: var(--success);
             color: white;
+            box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+            box-shadow: 0 4px 6px rgba(23, 162, 184, 0.2);
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(23, 162, 184, 0.3);
         }
 
         .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.875rem;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        .workflow-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .workflow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-1 .step-icon {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .step-2 .step-icon {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .step-3 .step-icon {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .step-4 .step-icon {
+            background: #f3e5f5;
+            color: #4a148c;
+        }
+
+        .step-5 .step-icon {
+            background: #e8eaf6;
+            color: #311b92;
+        }
+
+        .step-6 .step-icon {
+            background: #e0f2f1;
+            color: #004d40;
+        }
+
+        .step-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--bleu-nuit);
+        }
+
+        .step-description {
+            font-size: 0.8rem;
+            color: var(--gris-moyen);
+            max-width: 120px;
+        }
+
+        .workflow-connector {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gris-clair);
+            z-index: 1;
+        }
+
+        .workflow-arrow {
+            position: absolute;
+            top: 28px;
+            color: var(--gris-moyen);
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .form-timeline {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--gris-clair);
+            padding-bottom: 15px;
+        }
+
+        .timeline-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-weight: 600;
+            color: var(--gris-moyen);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .timeline-item.active {
+            color: var(--rouge-bordeaux);
+            border-bottom: 3px solid var(--rouge-bordeaux);
+        }
+
+        .timeline-item i {
+            margin-right: 8px;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
         }
 
         .elections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 30px;
         }
 
         .election-card {
             background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(15, 26, 49, .1);
-            border-left: 4px solid var(--rouge-bordeaux);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(15, 26, 49, .1);
+            border-left: 5px solid var(--rouge-bordeaux);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
+            overflow: hidden;
+        }
+
+        .election-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(15, 26, 49, .15);
         }
 
         .election-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            color: var(--bleu-nuit);
         }
 
         .election-type {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: .75rem;
-            font-weight: 500;
-            background: rgba(122, 0, 38, .1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(122, 0, 38, .12);
             color: var(--rouge-bordeaux);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: inline-block;
         }
 
         .election-details {
-            margin-bottom: 15px;
-            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
             color: var(--bleu-nuit-light);
         }
 
         .election-detail-item {
             display: flex;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .election-detail-label {
-            font-weight: 500;
-            min-width: 100px;
+            font-weight: 600;
+            min-width: 110px;
+            color: var(--bleu-nuit);
         }
 
         .election-status {
             display: inline-block;
-            padding: 5px 10px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: .8rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
             margin-bottom: 15px;
         }
 
@@ -192,8 +394,20 @@
         .election-actions {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
             flex-wrap: wrap;
+        }
+
+        .stats-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--bleu-nuit-light);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
         .loading {
@@ -220,17 +434,21 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 40px;
             color: var(--gris-moyen);
         }
 
         .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 4rem;
+            margin-bottom: 20px;
             color: var(--gris-clair);
         }
 
-        /* Modal */
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -254,12 +472,12 @@
 
         .modal {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             transform: scale(.9);
             transition: .3s;
         }
@@ -269,23 +487,30 @@
         }
 
         .modal-header {
-            padding: 20px;
+            padding: 20px 25px;
             border-bottom: 1px solid var(--gris-clair);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--bleu-nuit);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 25px;
         }
 
         .modal-footer {
-            padding: 15px 20px;
+            padding: 20px 25px;
             border-top: 1px solid var(--gris-clair);
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 12px;
         }
 
         .form-group {
@@ -295,31 +520,41 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--bleu-nuit);
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             border: 1px solid var(--gris-clair);
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--rouge-bordeaux);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(122, 0, 38, 0.1);
         }
 
         .form-group textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
 
         .alert {
-            padding: 12px 15px;
-            border-radius: 6px;
+            padding: 14px 18px;
+            border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .alert-error {
@@ -337,26 +572,51 @@
         .filters {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
             align-items: center;
+            padding: 18px;
+            background: rgba(15, 26, 49, 0.03);
+            border-radius: 10px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
         }
 
         .filter-group label {
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--bleu-nuit);
         }
 
         .filter-group select {
-            padding: 8px 12px;
+            padding: 10px 14px;
             border: 1px solid var(--gris-clair);
-            border-radius: 6px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .date-row .form-group {
+            flex: 1;
+        }
+
+        .form-section-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gris-clair);
+            color: var(--bleu-nuit);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
     </style>
 </head>
@@ -368,6 +628,56 @@
             <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
             <button class="btn btn-primary" id="createElectionBtn"><i class="fas fa-plus"></i> Nouvelle
                 Élection</button>
+        </div>
+
+        <div class="workflow-diagram">
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step step-1">
+                <div class="step-icon"><i class="fas fa-plus-circle"></i></div>
+                <div class="step-label">Création</div>
+                <div class="step-description">Admin crée l'élection</div>
+            </div>
+
+            <div class="workflow-arrow" style="left: 16.5%;"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="workflow-step step-2">
+                <div class="step-icon"><i class="fas fa-user-check"></i></div>
+                <div class="step-label">Candidatures</div>
+                <div class="step-description">Étudiants postulent</div>
+            </div>
+
+            <div class="workflow-arrow" style="left: 33%;"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="workflow-step step-3">
+                <div class="step-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="step-label">Validation</div>
+                <div class="step-description">Admin valide les candidats</div>
+            </div>
+
+            <div class="workflow-arrow" style="left: 49.5%;"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="workflow-step step-4">
+                <div class="step-icon"><i class="fas fa-vote-yea"></i></div>
+                <div class="step-label">Votes</div>
+                <div class="step-description">Électeurs votent</div>
+            </div>
+
+            <div class="workflow-arrow" style="left: 66%;"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="workflow-step step-5">
+                <div class="step-icon"><i class="fas fa-lock"></i></div>
+                <div class="step-label">Clôture</div>
+                <div class="step-description">Votes terminés</div>
+            </div>
+
+            <div class="workflow-arrow" style="left: 82.5%;"><i class="fas fa-chevron-right"></i></div>
+
+            <div class="workflow-step step-6">
+                <div class="step-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="step-label">Résultats</div>
+                <div class="step-description">Publication des résultats</div>
+            </div>
         </div>
 
         <div class="filters">
@@ -410,37 +720,138 @@
             </div>
             <div class="modal-body">
                 <div id="modalMessage" class="alert" style="display: none;"></div>
+
+                <div class="form-timeline">
+                    <div class="timeline-item active" data-section="config">
+                        <i class="fas fa-cog"></i> Configuration
+                    </div>
+                    <div class="timeline-item" data-section="candidacy">
+                        <i class="fas fa-user-check"></i> Candidatures
+                    </div>
+                    <div class="timeline-item" data-section="voting">
+                        <i class="fas fa-vote-yea"></i> Votes
+                    </div>
+                    <div class="timeline-item" data-section="results">
+                        <i class="fas fa-chart-bar"></i> Résultats
+                    </div>
+                </div>
+
                 <form id="electionForm">
                     <input type="hidden" id="electionId" name="electionId">
-                    <div class="form-group">
-                        <label for="title">Titre :</label>
-                        <input type="text" id="title" name="title" required>
+
+                    <!-- Section Configuration -->
+                    <div class="form-section active" id="config-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-cog"></i> Configuration de base
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title">Titre de l'élection :</label>
+                            <input type="text" id="title" name="title" required
+                                placeholder="Ex: Élection des délégués de classe">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description :</label>
+                            <textarea id="description" name="description"
+                                placeholder="Décrivez le contexte et l'objectif de cette élection..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phase">Type d'élection :</label>
+                            <select id="phase" name="phase" required onchange="renderPhaseFields()">
+                                <option value="">-- Choisir le type --</option>
+                                <option value="SALLE">Phase 1 – Responsables de Salle</option>
+                                <option value="ECOLE">Phase 2 – Délégués d'École</option>
+                                <option value="UNIVERSITE">Phase 3 – Délégués Universitaires</option>
+                            </select>
+                        </div>
+
+                        <div id="phaseFields"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="description">Description :</label>
-                        <textarea id="description" name="description"></textarea>
+
+                    <!-- Section Candidatures -->
+                    <div class="form-section" id="candidacy-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-user-check"></i> Période de candidature
+                        </div>
+
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="candidacyStart">Début des candidatures :</label>
+                                <input type="datetime-local" id="candidacyStart" name="candidacyStart" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="candidacyEnd">Fin des candidatures :</label>
+                                <input type="datetime-local" id="candidacyEnd" name="candidacyEnd" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="candidacyRequirements">Conditions de candidature :</label>
+                            <textarea id="candidacyRequirements" name="candidacyRequirements"
+                                placeholder="Précisez les conditions requises pour pouvoir se porter candidat..."></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="phase">Phase :</label>
-                        <select id="phase" name="phase" required onchange="renderPhaseFields()">
-                            <option value="">-- Choisir --</option>
-                            <option value="SALLE">Phase 1 – Responsables de Salle</option>
-                            <option value="ECOLE">Phase 2 – Délégués d'École</option>
-                            <option value="UNIVERSITE">Phase 3 – Délégués Universitaires</option>
-                        </select>
+
+                    <!-- Section Votes -->
+                    <div class="form-section" id="voting-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-vote-yea"></i> Période de vote
+                        </div>
+
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="votingStart">Début des votes :</label>
+                                <input type="datetime-local" id="votingStart" name="votingStart" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="votingEnd">Fin des votes :</label>
+                                <input type="datetime-local" id="votingEnd" name="votingEnd" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="votingInstructions">Instructions de vote :</label>
+                            <textarea id="votingInstructions" name="votingInstructions"
+                                placeholder="Instructions spécifiques pour les électeurs..."></textarea>
+                        </div>
                     </div>
-                    <div id="phaseFields"></div>
-                    <div class="form-group">
-                        <label for="startDate">Date de début :</label>
-                        <input type="datetime-local" id="startDate" name="startDate" required>
+
+                    <!-- Section Résultats -->
+                    <div class="form-section" id="results-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-chart-bar"></i> Gestion des résultats
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resultsVisibility">Visibilité des résultats :</label>
+                            <select id="resultsVisibility" name="resultsVisibility">
+                                <option value="IMMEDIATE">Publication immédiate après clôture</option>
+                                <option value="MANUAL">Publication manuelle par l'administrateur</option>
+                                <option value="RESTRICTED">Résultats restreints (administrateurs seulement)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resultsMessage">Message accompagnant les résultats :</label>
+                            <textarea id="resultsMessage" name="resultsMessage"
+                                placeholder="Message à afficher avec les résultats..."></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="endDate">Date de fin :</label>
-                        <input type="datetime-local" id="endDate" name="endDate" required>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="hideElectionModal()">Annuler</button>
-                        <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Créer</button>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button type="button" class="btn btn-primary" id="nextBtn">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                            <i class="fas fa-check"></i> Créer l'élection
+                        </button>
                     </div>
                 </form>
             </div>
@@ -456,29 +867,94 @@
             </div>
             <div class="modal-body">
                 <p id="confirmMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+                <p id="confirmDetails" style="font-size: 0.9rem; color: #666; margin-top: 10px;"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="hideConfirmModal()">Annuler</button>
-                <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirmer</button>
+                <button type="button" class="btn" id="confirmActionBtn">Confirmer</button>
             </div>
         </div>
     </div>
 
     <script src="../config.js"></script>
     <script>
+        // Configuration des API
         const API_BASE = CONFIG.API.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/election';
         const token = () => localStorage.getItem('token');
+
         let currentElections = [];
         let currentAction = null;
         let currentElectionId = null;
+        let currentSection = 'config';
+        const sections = ['config', 'candidacy', 'voting', 'results'];
 
         document.addEventListener('DOMContentLoaded', function () {
             loadElections();
             document.getElementById("createElectionBtn").onclick = showCreateModal;
             document.getElementById("applyFilters").onclick = applyFilters;
             document.getElementById("electionForm").onsubmit = handleElectionSubmit;
+
+            // Navigation entre les sections
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const section = item.getAttribute('data-section');
+                    showSection(section);
+                });
+            });
+
+            document.getElementById("nextBtn").addEventListener('click', nextSection);
+            document.getElementById("prevBtn").addEventListener('click', prevSection);
+
+            document.getElementById("confirmActionBtn").onclick = function () {
+                if (currentAction === 'delete') {
+                    deleteElection(currentElectionId);
+                } else if (currentAction === 'close') {
+                    closeElection(currentElectionId);
+                }
+                hideConfirmModal();
+            };
         });
+
+        // Fonction pour charger les élections depuis l'API
+        async function loadElections() {
+            try {
+                showLoading();
+                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token()}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        alert("Session expirée. Veuillez vous reconnecter.");
+                        window.location.href = "login.html";
+                        return;
+                    }
+                    throw new Error("Erreur lors du chargement des élections");
+                }
+
+                const elections = await res.json();
+                currentElections = elections;
+                renderElections(elections);
+            } catch (err) {
+                console.error(err);
+                document.getElementById("electionsContainer").innerHTML = `
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Erreur lors du chargement des élections: ${err.message}
+                    </div>`;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById("electionsContainer").innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>`;
+        }
 
         function showCreateModal() {
             document.getElementById("modalTitle").textContent = "Nouvelle Élection";
@@ -487,6 +963,7 @@
             document.getElementById("electionId").value = "";
             document.getElementById("phaseFields").innerHTML = "";
             document.getElementById("modalMessage").style.display = "none";
+            showSection('config');
             document.getElementById("electionModal").classList.add("active");
         }
 
@@ -514,6 +991,7 @@
             if (election.type === 'SALLE') {
                 if (election.filiere) document.getElementById("filiere").value = election.filiere;
                 if (election.annee) document.getElementById("annee").value = election.annee;
+                if (election.ecole) document.getElementById("ecole").value = election.ecole;
                 if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
             } else if (election.type === 'ECOLE') {
                 if (election.ecole) document.getElementById("ecole").value = election.ecole;
@@ -540,9 +1018,76 @@
             document.getElementById("electionModal").classList.remove("active");
         }
 
-        function showConfirmModal(title, message, action, electionId = null) {
+        function showSection(section) {
+            // Masquer toutes les sections
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Afficher la section demandée
+            document.getElementById(`${section}-section`).classList.add('active');
+
+            // Mettre à jour la timeline
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
+
+            // Mettre à jour les boutons de navigation
+            currentSection = section;
+            updateNavigationButtons();
+        }
+
+        function nextSection() {
+            const currentIndex = sections.indexOf(currentSection);
+            if (currentIndex < sections.length - 1) {
+                showSection(sections[currentIndex + 1]);
+            }
+        }
+
+        function prevSection() {
+            const currentIndex = sections.indexOf(currentSection);
+            if (currentIndex > 0) {
+                showSection(sections[currentIndex - 1]);
+            }
+        }
+
+        function updateNavigationButtons() {
+            const currentIndex = sections.indexOf(currentSection);
+
+            // Bouton Précédent
+            if (currentIndex > 0) {
+                document.getElementById("prevBtn").style.display = 'flex';
+            } else {
+                document.getElementById("prevBtn").style.display = 'none';
+            }
+
+            // Bouton Suivant/Soumettre
+            if (currentIndex < sections.length - 1) {
+                document.getElementById("nextBtn").style.display = 'flex';
+                document.getElementById("submitBtn").style.display = 'none';
+            } else {
+                document.getElementById("nextBtn").style.display = 'none';
+                document.getElementById("submitBtn").style.display = 'flex';
+            }
+        }
+
+        function showConfirmModal(title, message, details, action, electionId = null, actionType = 'danger') {
             document.getElementById("confirmTitle").textContent = title;
             document.getElementById("confirmMessage").textContent = message;
+            document.getElementById("confirmDetails").textContent = details;
+
+            const confirmBtn = document.getElementById("confirmActionBtn");
+            confirmBtn.className = 'btn';
+
+            if (actionType === 'danger') {
+                confirmBtn.classList.add('btn-danger');
+            } else if (actionType === 'warning') {
+                confirmBtn.classList.add('btn-warning');
+            }
+
+            confirmBtn.textContent = actionType === 'danger' ? 'Supprimer' : 'Clôturer';
+
             currentAction = action;
             currentElectionId = electionId;
             document.getElementById("confirmModal").classList.add("active");
@@ -553,15 +1098,6 @@
             currentAction = null;
             currentElectionId = null;
         }
-
-        document.getElementById("confirmActionBtn").onclick = function () {
-            if (currentAction === 'delete') {
-                deleteElection(currentElectionId);
-            } else if (currentAction === 'close') {
-                closeElection(currentElectionId);
-            }
-            hideConfirmModal();
-        };
 
         // Champs dynamiques
         function renderPhaseFields() {
@@ -651,34 +1187,6 @@
                     option.textContent = filiere;
                     filiereSelect.appendChild(option);
                 });
-            }
-        }
-
-        async function loadElections() {
-            try {
-                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
-                    headers: { "Authorization": `Bearer ${token()}` }
-                });
-
-                if (!res.ok) {
-                    if (res.status === 401) {
-                        alert("Session expirée. Veuillez vous reconnecter.");
-                        window.location.href = "login.html";
-                        return;
-                    }
-                    throw new Error("Erreur lors du chargement des élections");
-                }
-
-                const elections = await res.json();
-                currentElections = elections;
-                renderElections(elections);
-            } catch (err) {
-                console.error(err);
-                document.getElementById("electionsContainer").innerHTML = `
-                    <div class="alert alert-error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        Erreur lors du chargement des élections: ${err.message}
-                    </div>`;
             }
         }
 
@@ -785,16 +1293,22 @@
                             <span>${election.description}</span>
                         </div>` : ''}
                     </div>
+                    ${election._count ? `<div class="stats-badge">
+                        <i class="fas fa-chart-pie"></i> ${election.stats ? election.stats.participationRate : '0%'}
+                    </div>` : ''}
                     <div class="election-actions">
+                        <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})">
+                            <i class="fas fa-eye"></i> Voir
+                        </button>
                         <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
                         ${status === 'active' ? `
-                        <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'close', ${election.id})">
+                        <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')">
                             <i class="fas fa-lock"></i> Clôturer
                         </button>
                         ` : ''}
-                        <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ? Cette action est irréversible.', 'delete', ${election.id})">
+                        <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')">
                             <i class="fas fa-trash"></i> Supprimer
                         </button>
                     </div>
@@ -842,8 +1356,8 @@
             const data = {
                 titre: document.getElementById("title").value,
                 description: document.getElementById("description").value,
-                dateDebut: new Date(document.getElementById("startDate").value).toISOString(),
-                dateFin: new Date(document.getElementById("endDate").value).toISOString(),
+                dateDebut: new Date(document.getElementById("votingStart").value).toISOString(),
+                dateFin: new Date(document.getElementById("votingEnd").value).toISOString(),
                 isActive: true
             };
 
@@ -902,7 +1416,7 @@
                     headers: { "Authorization": `Bearer ${token()}` }
                 });
 
-                if (!res.ok) throw new Error("Erreur suppression");
+                if (!res.ok) throw new Error("Erreur lors de la suppression");
 
                 showMessage('success', 'Élection supprimée avec succès !');
                 loadElections();
@@ -918,13 +1432,18 @@
                     headers: { "Authorization": `Bearer ${token()}` }
                 });
 
-                if (!res.ok) throw new Error("Erreur clôture");
+                if (!res.ok) throw new Error("Erreur lors de la clôture");
 
                 showMessage('success', 'Élection clôturée avec succès !');
                 loadElections();
             } catch (err) {
                 showMessage('error', err.message);
             }
+        }
+
+        function viewElection(id) {
+            // Redirection vers la page de détails de l'élection
+            window.location.href = `election-details.html?id=${id}`;
         }
 
         function showMessage(type, message) {
@@ -947,6 +1466,9 @@
                 }, 5000);
             }
         }
+
+        // Initialiser la modale au chargement
+        updateNavigationButtons();
     </script>
 </body>
 
