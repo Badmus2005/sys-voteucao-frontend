@@ -975,6 +975,7 @@
             document.getElementById("createElectionBtn").addEventListener('click', showCreateModal);
             document.getElementById("applyFilters").addEventListener('click', applyFilters);
             document.getElementById("electionForm").addEventListener('submit', handleElectionSubmit);
+            document.getElementById("resetFilters").addEventListener('click', resetFilters);
 
             document.querySelectorAll('.timeline-item').forEach(item => {
                 item.addEventListener('click', () => {
@@ -990,6 +991,26 @@
             document.getElementById("closeConfirmModalBtn").addEventListener('click', hideConfirmModal);
             document.getElementById("cancelConfirmBtn").addEventListener('click', hideConfirmModal);
             document.getElementById("confirmActionBtn").addEventListener('click', executeConfirmedAction);
+        }
+
+        function resetFilters() {
+            document.getElementById("filterType").value = "";
+            document.getElementById("filterStatus").value = "";
+            applyFilters(); // Réapplique les filtres (vides)
+        }
+
+        function debugElectionDates(elections) {
+            elections.forEach(election => {
+                console.log(`Election ${election.id}:`, {
+                    titre: election.titre,
+                    dateDebut: election.dateDebut,
+                    dateFin: election.dateFin,
+                    isActive: election.isActive,
+                    parsedDebut: new Date(election.dateDebut),
+                    parsedFin: new Date(election.dateFin),
+                    now: new Date()
+                });
+            });
         }
 
         async function loadElections() {
@@ -1012,15 +1033,17 @@
                 }
 
                 const elections = await res.json();
+                console.log('Élections reçues:', elections);
+                debugElectionDates(elections);
                 currentElections = elections;
-                renderElections(elections);
+                applyFilters(); // Applique les filtres après chargement
             } catch (err) {
                 console.error(err);
                 document.getElementById("electionsContainer").innerHTML = `
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i>
-                    Erreur lors du chargement des élections: ${err.message}
-                </div>`;
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            Erreur lors du chargement des élections: ${err.message}
+        </div>`;
             }
         }
 
@@ -1072,10 +1095,12 @@
 
             let filteredElections = currentElections;
 
+            // Filtrage par type
             if (typeFilter) {
                 filteredElections = filteredElections.filter(e => e.type === typeFilter);
             }
 
+            // Filtrage par statut
             if (statusFilter) {
                 const now = new Date();
                 filteredElections = filteredElections.filter(e => {
@@ -1083,13 +1108,16 @@
                     const endDate = new Date(e.dateFin);
 
                     if (statusFilter === 'active') {
+                        // Élections actives: isActive = true ET date actuelle entre début et fin
                         return e.isActive && startDate <= now && endDate >= now;
                     } else if (statusFilter === 'upcoming') {
+                        // Élections à venir: isActive = true ET date début dans le futur
                         return e.isActive && startDate > now;
                     } else if (statusFilter === 'closed') {
+                        // Élections clôturées: isActive = false OU date fin passée
                         return !e.isActive || endDate < now;
                     }
-                    return true;
+                    return true; // Aucun filtre de statut
                 });
             }
 
