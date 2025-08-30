@@ -405,7 +405,7 @@
             background: var(--bleu-nuit-light);
             color: white;
             padding: 4px 10px;
-            border-radius: 12px;
+            border-Radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
         }
@@ -436,6 +436,7 @@
             text-align: center;
             padding: 60px 40px;
             color: var(--gris-moyen);
+            display: none;
         }
 
         .empty-state i {
@@ -590,6 +591,7 @@
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--bleu-nuit);
+            display: block;
         }
 
         .filter-group select {
@@ -708,6 +710,12 @@
             <div class="loading">
                 <div class="spinner"></div>
             </div>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <i class="fas fa-box-open"></i>
+            <h3>Aucune élection trouvée</h3>
+            <p>Créez votre première élection en cliquant sur le bouton "Nouvelle Élection"</p>
         </div>
     </div>
 
@@ -954,11 +962,13 @@
                 <div class="loading">
                     <div class="spinner"></div>
                 </div>`;
+            document.getElementById("emptyState").style.display = 'none';
         }
 
         function showCreateModal() {
             document.getElementById("modalTitle").textContent = "Nouvelle Élection";
-            document.getElementById("modalSubmitBtn").textContent = "Créer";
+            // CORRECTION: Suppression de la ligne qui causait l'erreur
+            // document.getElementById("modalSubmitBtn").textContent = "Créer";
             document.getElementById("electionForm").reset();
             document.getElementById("electionId").value = "";
             document.getElementById("phaseFields").innerHTML = "";
@@ -969,7 +979,8 @@
 
         function showEditModal(election) {
             document.getElementById("modalTitle").textContent = "Modifier l'Élection";
-            document.getElementById("modalSubmitBtn").textContent = "Modifier";
+            // CORRECTION: Suppression de la ligne qui causait l'erreur
+            // document.getElementById("modalSubmitBtn").textContent = "Modifier";
 
             // Remplir le formulaire avec les données de l'élection
             document.getElementById("electionId").value = election.id;
@@ -981,8 +992,8 @@
             const startDate = new Date(election.dateDebut);
             const endDate = new Date(election.dateFin);
 
-            document.getElementById("startDate").value = formatDateForInput(startDate);
-            document.getElementById("endDate").value = formatDateForInput(endDate);
+            document.getElementById("votingStart").value = formatDateForInput(startDate);
+            document.getElementById("votingEnd").value = formatDateForInput(endDate);
 
             // Afficher les champs spécifiques à la phase
             renderPhaseFields();
@@ -1222,18 +1233,16 @@
 
         function renderElections(elections) {
             const container = document.getElementById("electionsContainer");
+            const emptyState = document.getElementById("emptyState");
 
             if (!elections || elections.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-box-open"></i>
-                        <h3>Aucune élection trouvée</h3>
-                        <p>Créez votre première élection en cliquant sur le bouton "Nouvelle Élection"</p>
-                    </div>`;
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
                 return;
             }
 
             container.innerHTML = '';
+            emptyState.style.display = 'none';
 
             elections.forEach(election => {
                 const now = new Date();
