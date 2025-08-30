@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <input type="file" id="testFile">
+    <button onclick="testUpload()">Test Upload</button>
+    <script>
+        async function testUpload() {
+            const fileInput = document.getElementById('testFile');
+            if (!fileInput.files.length) return alert('Sélectionnez un fichier');
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const response = await fetch('https://sys-voteucao-backend-production-311c.up.railway.app/api/upload/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                console.log('Status:', response.status);
+                console.log('Response:', await response.text());
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
