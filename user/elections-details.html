@@ -746,6 +746,84 @@
             animation: spin 1s ease-in-out infinite;
         }
 
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--bleu-nuit);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--rouge-bordeaux);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
         /* RESPONSIVE */
         @media(max-width: 992px) {
             .sidebar {
@@ -798,6 +876,11 @@
                 align-items: flex-start;
                 gap: 1rem;
             }
+
+            .modal {
+                width: 95%;
+                margin: 1rem;
+            }
         }
     </style>
 </head>
@@ -826,8 +909,7 @@
             <ul class="sidebar-menu">
                 <li><a href="/user/dashboard"><i class="fa-solid fa-house"></i> Accueil</a></li>
                 <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
-                <li><a href="/user/elections-details" class="active"><i class="fa-solid fa-list"></i> Détails des
-                        élections</a></li>
+                <li><a href="#" id="electionsLink"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
                 <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
                 <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
@@ -838,7 +920,7 @@
             <div class="breadcrumb">
                 <a href="/user/dashboard"><i class="fa-solid fa-house"></i> Accueil</a>
                 <i class="fa-solid fa-chevron-right"></i>
-                <a href="/user/elections-details">Élections</a>
+                <a href="#" id="electionsBreadcrumb">Élections</a>
                 <i class="fa-solid fa-chevron-right"></i>
                 <span id="electionBreadcrumb">Détails de l'élection</span>
             </div>
@@ -949,6 +1031,24 @@
         </main>
     </div>
 
+    <!-- Modal pour les élections -->
+    <div class="modal-overlay" id="electionsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Liste des élections</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="electionsList">
+                    <!-- La liste des élections sera chargée ici -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelModal">Fermer</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast">
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
@@ -972,11 +1072,18 @@
         const toastIcon = document.getElementById('toastIcon');
         const toastMessage = document.getElementById('toastMessage');
         const candidaterBtn = document.getElementById('candidaterBtn');
+        const electionsLink = document.getElementById('electionsLink');
+        const electionsBreadcrumb = document.getElementById('electionsBreadcrumb');
+        const electionsModal = document.getElementById('electionsModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelModal = document.getElementById('cancelModal');
+        const electionsList = document.getElementById('electionsList');
 
         // Variables globales
         let currentElection = null;
         let userProfile = null;
         let candidates = [];
+        let elections = [];
 
         // MENU BURGER
         burger.addEventListener('click', () => {
@@ -990,6 +1097,37 @@
             overlay.classList.remove('active');
             burger.classList.remove('open');
         });
+
+        // Gestion de la modale
+        electionsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showElectionsModal();
+        });
+
+        electionsBreadcrumb.addEventListener('click', (e) => {
+            e.preventDefault();
+            showElectionsModal();
+        });
+
+        closeModal.addEventListener('click', hideElectionsModal);
+        cancelModal.addEventListener('click', hideElectionsModal);
+
+        electionsModal.addEventListener('click', (e) => {
+            if (e.target === electionsModal) {
+                hideElectionsModal();
+            }
+        });
+
+        function showElectionsModal() {
+            loadElectionsList();
+            electionsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideElectionsModal() {
+            electionsModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
 
         // Fonctions d'affichage
         function showLoading() {
@@ -1075,16 +1213,81 @@
             }
         }
 
+        async function loadElectionsList() {
+            try {
+                const data = await fetchWithAuth(ELECTION_API);
+                if (data) {
+                    elections = data;
+                    displayElectionsList(data);
+                }
+                return data;
+            } catch (error) {
+                console.error('Erreur chargement liste des élections:', error);
+                return null;
+            }
+        }
+
+        function displayElectionsList(elections) {
+            electionsList.innerHTML = '';
+
+            if (elections.length === 0) {
+                electionsList.innerHTML = '<p class="no-candidates">Aucune élection disponible</p>';
+                return;
+            }
+
+            elections.forEach(election => {
+                const electionItem = document.createElement('div');
+                electionItem.className = 'timeline-step';
+                electionItem.style.cursor = 'pointer';
+                electionItem.style.marginBottom = '1rem';
+
+                electionItem.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-icon">
+                            <i class="fa-solid fa-vote-yea"></i>
+                        </div>
+                        <div>
+                            <div class="step-title">${election.titre}</div>
+                            <div class="step-date">${formatDate(election.dateDebut)} - ${formatDate(election.dateFin)}</div>
+                        </div>
+                    </div>
+                    <div class="step-description">${election.description}</div>
+                `;
+
+                electionItem.addEventListener('click', () => {
+                    // Mettre à jour l'URL sans recharger la page
+                    const url = new URL(window.location);
+                    url.searchParams.set('id', election.id);
+                    window.history.replaceState({}, '', url);
+
+                    // Charger les détails de l'élection sélectionnée
+                    currentElection = election;
+                    displayElectionDetails(election);
+                    checkEligibility(election);
+                    loadCandidates();
+
+                    // Fermer la modale
+                    hideElectionsModal();
+                });
+
+                electionsList.appendChild(electionItem);
+            });
+        }
+
         async function loadElectionDetails() {
             const urlParams = new URLSearchParams(window.location.search);
             const electionId = urlParams.get('id');
 
             if (!electionId) {
-                showToast('Aucune élection spécifiée', 'error');
-                setTimeout(() => {
-                    window.location.href = 'elections-details.html';
-                }, 2000);
-                return;
+                // Aucune élection spécifique demandée, on affiche la première disponible
+                await loadElectionsList();
+                if (elections.length > 0) {
+                    currentElection = elections[0];
+                    displayElectionDetails(elections[0]);
+                    checkEligibility(elections[0]);
+                    return elections[0];
+                }
+                return null;
             }
 
             try {
@@ -1140,6 +1343,11 @@
 
             let statusText = '';
             let statusClass = '';
+
+            // Réinitialiser les classes
+            document.getElementById('candidatureStep').className = 'timeline-step';
+            document.getElementById('voteStep').className = 'timeline-step';
+            document.getElementById('resultsStep').className = 'timeline-step';
 
             if (now < debut) {
                 statusText = 'À venir';
