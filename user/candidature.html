@@ -139,6 +139,14 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+
         /* LAYOUT */
         .dashboard-container {
             display: flex;
@@ -841,6 +849,12 @@
                     candidature</p>
             </div>
 
+            <!-- Ajouter un indicateur de chargement -->
+            <div class="loading-state" id="loadingState" style="display: none;">
+                <div class="spinner"></div>
+                <p>Chargement des informations de l'élection...</p>
+            </div>
+
             <!-- Eligibility Alert (shown if not eligible) -->
             <div class="eligibility-alert" id="eligibilityAlert">
                 <div class="alert-title">
@@ -851,7 +865,7 @@
                     Vous n'êtes pas éligible pour cette élection.
                 </div>
                 <div class="alert-actions">
-                    <a href="electionsdetail.html" class="btn btn-secondary">
+                    <a href="elections-details.html" class="btn btn-secondary">
                         <i class="fa-solid fa-arrow-left"></i>
                         Retour aux élections
                     </a>
@@ -942,7 +956,7 @@
                         <i class="fa-solid fa-house"></i>
                         Retour à l'accueil
                     </a>
-                    <a href="electionsdetail.html" class="btn btn-secondary">
+                    <a href="elections-details.html" class="btn btn-secondary">
                         <i class="fa-solid fa-list"></i>
                         Voir les autres élections
                     </a>
@@ -959,10 +973,11 @@
     <script>
         // Configuration
         const API_BASE_URL = CONFIG.API.BASE_URL;
-        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/election/${id}`;
         const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
-        const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
         const UPLOAD_API = `${API_BASE_URL}/api/upload/image`;
+        const ELECTION_DETAILS_API = (id) => `${API_BASE_URL}/api/elections/${id}`;
+        const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
+        const IS_CANDIDATE_API = (electionId) => `${API_BASE_URL}/api/candidats/is-candidate/${electionId}`;
 
         // Éléments DOM
         const burger = document.getElementById('burger');
@@ -1004,14 +1019,17 @@
             burger.classList.remove('open');
         });
 
-        // Fonctions d'affichage
+        // Fonction d'affichage du chargement
         function showLoading() {
             loadingOverlay.style.display = 'flex';
+            document.getElementById('loadingState').style.display = 'block';
         }
 
         function hideLoading() {
             loadingOverlay.style.display = 'none';
+            document.getElementById('loadingState').style.display = 'none';
         }
+
 
         function showToast(message, type = '') {
             toastMessage.textContent = message;
@@ -1084,13 +1102,24 @@
             return params;
         }
 
+        // Fonction pour vérifier si l'utilisateur est déjà candidat à cette élection
+        async function checkIfAlreadyCandidate(electionId) {
+            try {
+                const response = await fetchWithAuth(IS_CANDIDATE_API(electionId));
+                return response ? response.isCandidate : false;
+            } catch (error) {
+                console.error('Erreur vérification candidature existante:', error);
+                return false;
+            }
+        }
+
         // Fonction pour vérifier si on peut rester sur cette page
         function checkPageConditions() {
             const params = getUrlParams();
+            const electionId = params.election || params.electionId; // Support both parameters
 
             // Vérifier si un paramètre election est présent
-            if (!params.election) {
-                // Afficher le message d'état et masquer le formulaire
+            if (!electionId) {
                 noElectionMessage.style.display = 'block';
                 candidatureHeader.style.display = 'none';
                 candidatureForm.style.display = 'none';
@@ -1119,26 +1148,35 @@
         }
 
         async function loadElectionDetails() {
-            // Vérifier d'abord les conditions de la page
+
+            console.log('Début du chargement des détails de l\'élection');
+
             if (!checkPageConditions()) {
-                return; // Arrêter le chargement si les conditions ne sont pas remplies
+                console.log('Conditions de page non remplies');
+                return;
             }
 
             const params = getUrlParams();
-            const electionId = params.election;
+            const electionId = params.election || params.electionId;
+            console.log('ID de l\'élection:', electionId);
 
             try {
                 const data = await fetchWithAuth(ELECTION_DETAILS_API(electionId));
+                console.log('Données de l\'élection reçues:', data);
+
                 if (data) {
                     currentElection = data;
                     displayElectionDetails(data);
-                    checkEligibility(data);
+                    await checkEligibility(data);
                 }
                 return data;
             } catch (error) {
                 console.error('Erreur chargement détails élection:', error);
+                showToast('Impossible de charger les détails de l\'élection', 'error');
                 return null;
             }
+
+
         }
 
         function displayElectionDetails(election) {
@@ -1147,27 +1185,38 @@
             document.getElementById('electionName').value = election.titre;
         }
 
-        function checkEligibility(election) {
+
+        async function checkEligibility(election) {
             if (!userProfile) return;
 
             let isEligible = false;
             let eligibilityDetails = '';
+            let isAlreadyCandidate = false;
+
+            // Vérifier d'abord si l'utilisateur est déjà candidat
+            isAlreadyCandidate = await checkIfAlreadyCandidate(election.id);
+
+            if (isAlreadyCandidate) {
+                document.getElementById('eligibilityMessage').innerHTML = `
+            <strong>Vous êtes déjà candidat à cette élection.</strong><br>
+            Vous ne pouvez pas soumettre plusieurs candidatures pour la même élection.
+        `;
+                candidatureForm.style.display = 'none';
+                eligibilityAlert.style.display = 'block';
+                return;
+            }
 
             // Vérification des conditions d'éligibilité selon le type d'élection
             switch (election.type) {
                 case 'SALLE':
-                    // Éligible si même filière et même année
                     isEligible = userProfile.filiere === election.filiere &&
                         userProfile.annee === election.annee;
                     eligibilityDetails = `Réservé aux étudiants de ${election.filiere}, année ${election.annee}`;
                     break;
 
                 case 'ECOLE':
-                    // Pour délégué d'école, l'étudiant doit être responsable de salle
-                    // et selon le type de délégué (1er ou 2ème), l'année d'étude change
                     const isResponsable = userProfile.estResponsableSalle;
-
-                    if (election.delegueType === '1er') {
+                    if (election.delegueType === 'PREMIER') {
                         isEligible = isResponsable && userProfile.annee === 3;
                         eligibilityDetails = `Réservé aux responsables de salle de 3ème année`;
                     } else {
@@ -1177,10 +1226,8 @@
                     break;
 
                 case 'UNIVERSITE':
-                    // Pour délégué universitaire, l'étudiant doit être délégué d'école
                     const isDelegueEcole = userProfile.estDelegueEcole;
-
-                    if (election.delegueType === '1er') {
+                    if (election.delegueType === 'PREMIER') {
                         isEligible = isDelegueEcole && userProfile.positionDelegue === '1er';
                         eligibilityDetails = `Réservé aux 1ers délégués d'école`;
                     } else {
@@ -1190,17 +1237,17 @@
                     break;
             }
 
-            // Vérifier aussi si la période de candidature est ouverte
+            // Vérifier si la période de candidature est ouverte (CORRIGÉ)
             const now = new Date();
-            const debut = new Date(election.dateDebut);
-            const fin = new Date(election.dateFin);
-            const canApply = now >= debut && now <= fin;
+            const debutCandidature = new Date(election.dateDebutCandidature);
+            const finCandidature = new Date(election.dateFinCandidature);
+            const isCandidaturePeriod = now >= debutCandidature && now <= finCandidature;
 
             // Mettre à jour les informations d'éligibilité
-            document.getElementById('eligibilityMessage').textContent = eligibilityDetails;
+            document.getElementById('eligibilityMessage').innerHTML = eligibilityDetails;
 
-            // Activer ou désactiver le bouton de candidature
-            if (isEligible && canApply) {
+            // Gérer l'affichage en fonction de l'éligibilité et de la période
+            if (isEligible && isCandidaturePeriod) {
                 candidatureForm.style.display = 'block';
                 eligibilityAlert.style.display = 'none';
                 submitBtn.disabled = false;
@@ -1209,14 +1256,21 @@
                 eligibilityAlert.style.display = 'block';
 
                 if (!isEligible) {
-                    document.getElementById('eligibilityMessage').textContent =
-                        "Vous n'êtes pas éligible pour cette élection selon les critères définis.";
-                } else if (!canApply) {
-                    document.getElementById('eligibilityMessage').textContent =
-                        "La période de candidature pour cette élection est fermée.";
+                    document.getElementById('eligibilityMessage').innerHTML = `
+                <strong>Vous n'êtes pas éligible pour cette élection.</strong><br>
+                ${eligibilityDetails}
+            `;
+                } else if (!isCandidaturePeriod) {
+                    const debutStr = formatDateTime(election.dateDebutCandidature);
+                    const finStr = formatDateTime(election.dateFinCandidature);
+                    document.getElementById('eligibilityMessage').innerHTML = `
+                <strong>La période de candidature est fermée.</strong><br>
+                Période de candidature: du ${debutStr} au ${finStr}
+            `;
                 }
             }
         }
+
 
         async function uploadImage(file) {
             const formData = new FormData();
@@ -1269,6 +1323,17 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         // Gestionnaires d'événements
