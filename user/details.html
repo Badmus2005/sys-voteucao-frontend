@@ -439,8 +439,8 @@
     <script>
         // Configuration de l'API
         const API_BASE_URL = CONFIG.API.BASE_URL;
-        const BY_ELECTION_ENDPOINT = CONFIG.API.ENDPOINTS.CANDIDATE.BY_ELECTION(electionId);
-        const ELECTIONS_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.DETAILS(electionId);
+        const BY_ELECTION_ENDPOINT = `${API_BASE_URL}/api/candidats`;
+        const ELECTIONS_ENDPOINT = `${API_BASE_URL}/api/election`;
 
         // Variables globales
         let electionId = null;
@@ -462,7 +462,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}${ELECTIONS_ENDPOINT}`);
+                const response = await fetch(`${ELECTIONS_ENDPOINT}/${electionId}`);
 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
@@ -481,7 +481,7 @@
             if (!electionId) return [];
 
             try {
-                const response = await fetch(`${API_BASE_URL}${BY_ELECTION_ENDPOINT}`);
+                const response = await fetch(`${BY_ELECTION_ENDPOINT}/${electionId}`);
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
