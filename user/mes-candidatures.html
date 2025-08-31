@@ -41,6 +41,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: var(--box-shadow);
         }
 
         .logo {
@@ -49,6 +50,25 @@
             gap: .6rem;
             font-size: 1.2rem;
             font-weight: 600;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-nav a {
+            color: #fff;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav a:hover {
+            color: var(--or-clair);
         }
 
         .dashboard-container {
@@ -88,6 +108,7 @@
         .main-content {
             flex: 1;
             padding: 2rem;
+            background: #f4f6fb;
         }
 
         /* BREADCRUMB */
@@ -145,16 +166,18 @@
             padding: 1.5rem;
             box-shadow: var(--box-shadow);
             transition: var(--transition);
+            border-left: 4px solid var(--bleu-nuit);
         }
 
         .candidature-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--box-shadow-hover);
+            border-left-color: var(--or);
         }
 
         .candidature-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 1rem;
             gap: 1rem;
@@ -165,6 +188,7 @@
             height: 80px;
             border-radius: 8px;
             object-fit: cover;
+            border: 2px solid var(--gris-clair);
         }
 
         .candidature-info {
@@ -213,6 +237,7 @@
             color: #666;
             font-size: 0.9rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
         .candidature-content {
@@ -243,12 +268,32 @@
             text-align: center;
             padding: 3rem;
             color: #666;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
         }
 
         .empty-state i {
             font-size: 4rem;
             margin-bottom: 1rem;
             color: #ccc;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
         }
 
         .loading {
@@ -277,8 +322,37 @@
             }
         }
 
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+
+            .main-content {
+                order: 1;
+                padding: 1rem;
+            }
+
             .candidature-header {
                 flex-direction: column;
             }
@@ -296,7 +370,7 @@
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
         <div class="user-nav">
             <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="/user/profile"><i class="fa-solid fa-solid fa-user"></i> Profil</a>
+            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
             <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
         </div>
     </header>
@@ -305,10 +379,10 @@
         <aside class="sidebar" id="sidebar">
             <ul class="sidebar-menu">
                 <li><a href="/user/dashboard"><i class="fa-solid fa-house"></i> Accueil</a></li>
-                <li><a href="/user/candidature" class="active"><i class="fa-solid fa-file-signature"></i>Candidature</a>
-                </li>
+                <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
                 <li><a href="/user/elections-details"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
-                <li><a href="/user/mes-candidatures"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
+                <li><a href="/user/mes-candidatures" class="active"><i class="fa-solid fa-list"></i> Mes
+                        Candidatures</a></li>
                 <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
                 <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
@@ -316,7 +390,7 @@
 
         <main class="main-content">
             <div class="breadcrumb">
-                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <a href="/user/dashboard"><i class="fa-solid fa-house"></i> Accueil</a>
                 <i class="fa-solid fa-chevron-right"></i>
                 <span>Mes Candidatures</span>
             </div>
@@ -336,7 +410,7 @@
                 <i class="fa-solid fa-file-lines"></i>
                 <h3>Aucune candidature</h3>
                 <p>Vous n'avez pas encore soumis de candidature.</p>
-                <a href="elections-details.html" class="btn btn-primary">
+                <a href="/user/elections-details" class="btn">
                     <i class="fa-solid fa-vote-yea"></i>
                     Voir les élections
                 </a>
@@ -360,7 +434,7 @@
         async function fetchWithAuth(url) {
             const token = localStorage.getItem('token');
             if (!token) {
-                window.location.href = 'login.html';
+                window.location.href = '/user/login';
                 return null;
             }
 
@@ -374,7 +448,7 @@
 
                 if (response.status === 401) {
                     localStorage.removeItem('token');
-                    window.location.href = 'login.html';
+                    window.location.href = '/user/login';
                     return null;
                 }
 
@@ -426,10 +500,10 @@
             candidaturesContainer.innerHTML = candidatures.map(candidature => `
                 <div class="candidature-card">
                     <div class="candidature-header">
-                        <img src="${candidature.photoUrl || 'https://via.placeholder.com/80'}" 
+                        <img src="${candidature.photoUrl || 'https://via.placeholder.com/80?text=Photo'}" 
                              alt="${candidature.prenom} ${candidature.nom}" 
                              class="candidature-image"
-                             onerror="this.src='https://via.placeholder.com/80'">
+                             onerror="this.src='https://via.placeholder.com/80?text=Photo'">
                         <div class="candidature-info">
                             <h3 class="candidature-title">${candidature.prenom} ${candidature.nom}</h3>
                             <div class="candidature-election">
@@ -450,6 +524,12 @@
                             <i class="fa-solid fa-clock"></i>
                             Statut: ${getStatusLabel(candidature.statut)}
                         </div>
+                        ${candidature.votesCount > 0 ? `
+                        <div>
+                            <i class="fa-solid fa-heart"></i>
+                            Votes: ${candidature.votesCount}
+                        </div>
+                        ` : ''}
                     </div>
 
                     <div class="candidature-content">
@@ -458,7 +538,7 @@
                                 <i class="fa-solid fa-quote-left"></i>
                                 Slogan de campagne
                             </h4>
-                            <div class="section-content">${candidature.slogan}</div>
+                            <div class="section-content">${candidature.slogan || 'Aucun slogan'}</div>
                         </div>
 
                         <div class="candidature-section">
@@ -466,7 +546,7 @@
                                 <i class="fa-solid fa-book"></i>
                                 Programme électoral
                             </h4>
-                            <div class="section-content">${candidature.programme}</div>
+                            <div class="section-content">${candidature.programme || 'Aucun programme'}</div>
                         </div>
 
                         <div class="candidature-section">
@@ -474,7 +554,7 @@
                                 <i class="fa-solid fa-heart"></i>
                                 Motivation
                             </h4>
-                            <div class="section-content">${candidature.motivation}</div>
+                            <div class="section-content">${candidature.motivation || 'Aucune motivation'}</div>
                         </div>
                     </div>
                 </div>
@@ -519,7 +599,7 @@
         document.addEventListener('DOMContentLoaded', async function () {
             const token = localStorage.getItem('token');
             if (!token) {
-                window.location.href = 'login.html';
+                window.location.href = '/user/login';
                 return;
             }
 
@@ -535,7 +615,7 @@
         document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault();
             localStorage.removeItem('token');
-            window.location.href = 'login.html';
+            window.location.href = '/user/login';
         });
     </script>
 </body>

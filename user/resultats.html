@@ -1089,29 +1089,42 @@
         async function loadElectionsWithResults() {
             try {
                 const data = await fetchWithAuth(ELECTION_API);
-                if (data) {
-                    // Filtrer pour n'avoir que les élections terminées
-                    const now = new Date();
-                    elections = data.filter(election => {
-                        const endDate = new Date(election.dateFin);
-                        return now > endDate;
-                    });
+                if (!data || !Array.isArray(data)) {
+                    console.warn("Données d'élections invalides ou non disponibles");
+                    showNoResults();
+                    return null;
+                }
 
-                    if (elections.length > 0) {
-                        // Charger les résultats de la première élection par défaut
-                        await loadElectionResults(elections[0].id);
-                        populateElectionFilters(elections);
+                const now = new Date();
+
+                //  Filtrage sécurisé des élections terminées
+                const electionsTerminees = data.filter(election => {
+                    if (!election?.dateFin || !election?.id) return false;
+                    const endDate = new Date(election.dateFin);
+                    return endDate instanceof Date && !isNaN(endDate) && now > endDate;
+                });
+
+                if (electionsTerminees.length > 0) {
+                    const firstElectionId = electionsTerminees[0].id;
+                    if (firstElectionId) {
+                        await loadElectionResults(firstElectionId);
+                        populateElectionFilters(electionsTerminees);
                     } else {
+                        console.warn("ID d'élection manquant");
                         showNoResults();
                     }
+                } else {
+                    showNoResults();
                 }
+
                 return data;
             } catch (error) {
-                console.error('Erreur chargement élections:', error);
+                console.error("Erreur chargement élections:", error);
                 showNoResults();
                 return null;
             }
         }
+
 
         async function loadElectionResults(electionId) {
             try {
