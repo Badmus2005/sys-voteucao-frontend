@@ -805,17 +805,35 @@
         function displayStudentElections(elections) {
             const container = document.getElementById('studentElectionsGrid');
 
+            // Si le profil utilisateur n'est pas encore chargé, afficher un message
+            if (!userProfile) {
+                container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+                return;
+            }
+
             // Filtrer en fonction du profil utilisateur
             const studentElections = elections.filter(election => {
-                return (
-                    (!election.ecole || election.ecole === userProfile.ecole) &&
-                    (!election.filiere || election.filiere === userProfile.filiere) &&
-                    (!election.annee || election.annee === userProfile.annee)
-                );
+                // Vérifier si l'élection correspond au profil de l'utilisateur
+                const ecoleMatch = !election.ecole || election.ecole === userProfile.ecole;
+                const filiereMatch = !election.filiere || election.filiere === userProfile.filiere;
+                const anneeMatch = !election.annee || election.annee === userProfile.annee;
+
+                // Vérifier également le statut de l'élection (doit être active ou à venir)
+                const status = getElectionStatus(election);
+                const statusMatch = status === 'active' || status === 'upcoming';
+
+                return ecoleMatch && filiereMatch && anneeMatch && statusMatch;
             });
 
             if (studentElections.length === 0) {
-                container.innerHTML = '<div class="no-candidates">Aucune élection disponible pour vous</div>';
+                container.innerHTML = `
+                    <div class="no-candidates">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <h3>Aucune élection disponible pour vous actuellement</h3>
+                        <p>Vérifiez que vous êtes bien inscrit dans une filière et une année, 
+                        ou qu'il y a des élections en cours pour votre profil.</p>
+                    </div>
+                `;
                 return;
             }
 
