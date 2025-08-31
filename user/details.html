@@ -10,13 +10,17 @@
     <style>
         :root {
             --rouge-bordeaux: #650624;
+            --rouge-bordeaux-light: #8a0a30;
+            --rouge-bordeaux-dark: #4a031a;
             --bleu-nuit: #041946;
-            --or: #a76d21;
-            --or-clair: #dea739;
+            --bleu-nuit-light: #0a2a6b;
+            --or: #c9a227;
+            --or-clair: #e0b941;
+            --blanc-casse: #f8f4e9;
             --gris-clair: #f5f6fa;
             --gris-texte: #444;
-            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
+            --box-shadow: 0 8px 18px rgba(101, 6, 36, 0.12);
+            --box-shadow-hover: 0 12px 24px rgba(101, 6, 36, 0.18);
             --transition: all .3s ease;
         }
 
@@ -28,14 +32,14 @@
         }
 
         body {
-            background: #f4f6fb;
+            background: linear-gradient(135deg, var(--blanc-casse) 0%, #f0ece1 100%);
             color: var(--gris-texte);
             min-height: 100vh;
         }
 
         /* HEADER */
         header {
-            background: var(--bleu-nuit);
+            background: linear-gradient(135deg, var(--rouge-bordeaux), var(--rouge-bordeaux-dark));
             color: #fff;
             padding: 1rem 2rem;
             display: flex;
@@ -86,8 +90,13 @@
         }
 
         .breadcrumb a {
-            color: var(--bleu-nuit);
+            color: var(--rouge-bordeaux);
             text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
         }
 
         .breadcrumb span {
@@ -102,60 +111,80 @@
         }
 
         .election-header {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
+            background: linear-gradient(135deg, var(--rouge-bordeaux-light), var(--rouge-bordeaux));
+            color: white;
+            border-radius: 16px;
+            padding: 2.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
             position: relative;
+            overflow: hidden;
+        }
+
+        .election-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .election-badge {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
             font-size: 0.8rem;
             font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .badge-active {
-            background: rgba(40, 167, 69, 0.15);
-            color: #28a745;
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
         }
 
         .badge-upcoming {
-            background: rgba(23, 162, 184, 0.15);
-            color: #17a2b8;
+            background: rgba(23, 162, 184, 0.3);
+            color: #fff;
         }
 
         .badge-completed {
-            background: rgba(108, 117, 125, 0.15);
-            color: #6c757d;
+            background: rgba(108, 117, 125, 0.3);
+            color: #fff;
         }
 
         .election-title {
-            font-size: 2rem;
-            color: var(--bleu-nuit);
+            font-size: 2.2rem;
+            color: white;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .election-type {
             display: inline-block;
-            padding: 0.5rem 1rem;
-            background: var(--bleu-nuit);
-            color: white;
-            border-radius: 20px;
+            padding: 0.6rem 1.2rem;
+            background: var(--or);
+            color: var(--rouge-bordeaux-dark);
+            border-radius: 25px;
             font-size: 0.9rem;
+            font-weight: 600;
             margin-bottom: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .election-description {
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 2rem;
-            color: #555;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
         }
 
         .election-meta {
@@ -166,74 +195,103 @@
         }
 
         .meta-card {
-            background: var(--gris-clair);
+            background: rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
-            border-radius: 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+
+        .meta-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
         }
 
         .meta-title {
             font-weight: 600;
-            color: var(--bleu-nuit);
-            margin-bottom: 0.5rem;
+            color: var(--or);
+            margin-bottom: 0.8rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .meta-value {
             font-size: 1.1rem;
+            color: white;
+            font-weight: 500;
         }
 
         /* CANDIDATES SECTION */
         .candidates-section {
             background: white;
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 2.5rem;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
+            border: 1px solid rgba(101, 6, 36, 0.1);
         }
 
         .section-title {
-            font-size: 1.5rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 1.5rem;
+            font-size: 1.7rem;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--rouge-bordeaux-light);
         }
 
         .candidates-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
         }
 
         .candidate-card {
-            background: var(--gris-clair);
-            border-radius: 12px;
-            padding: 1.5rem;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
             transition: var(--transition);
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(101, 6, 36, 0.1);
+            border: 1px solid rgba(101, 6, 36, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--rouge-bordeaux), var(--or));
         }
 
         .candidate-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             box-shadow: var(--box-shadow-hover);
         }
 
         .candidate-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
         }
 
         .candidate-avatar {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--or);
+            border: 3px solid var(--rouge-bordeaux);
+            box-shadow: 0 4px 8px rgba(101, 6, 36, 0.2);
         }
 
         .candidate-info {
@@ -242,84 +300,98 @@
 
         .candidate-name {
             font-weight: 700;
-            color: var(--bleu-nuit);
-            margin-bottom: 0.25rem;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 0.3rem;
+            font-size: 1.2rem;
         }
 
         .candidate-details {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #666;
         }
 
         .candidate-slogan {
             font-style: italic;
             color: var(--rouge-bordeaux);
-            margin-bottom: 1rem;
-            padding-left: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
             border-left: 3px solid var(--or);
+            line-height: 1.5;
         }
 
         .view-profile-btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: var(--or);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
             color: white;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: 600;
             transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(101, 6, 36, 0.2);
         }
 
         .view-profile-btn:hover {
-            background: var(--or-clair);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(101, 6, 36, 0.3);
+            color: white;
         }
 
         .no-candidates {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem;
             color: #666;
             font-style: italic;
             grid-column: 1 / -1;
+            background: var(--gris-clair);
+            border-radius: 12px;
         }
 
         /* ACTION BUTTONS */
         .action-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
+            padding: 1rem 2rem;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.8rem;
             text-decoration: none;
             border: none;
+            font-size: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .btn-primary {
-            background: var(--or);
-            color: white;
+            background: linear-gradient(135deg, var(--or), var(--or-clair));
+            color: var(--rouge-bordeaux-dark);
         }
 
         .btn-primary:hover {
-            background: var(--or-clair);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(169, 126, 33, 0.3);
         }
 
         .btn-secondary {
             background: white;
-            color: var(--bleu-nuit);
-            border: 2px solid var(--bleu-nuit);
+            color: var(--rouge-bordeaux);
+            border: 2px solid var(--rouge-bordeaux);
         }
 
         .btn-secondary:hover {
-            background: var(--bleu-nuit);
+            background: var(--rouge-bordeaux);
             color: white;
+            transform: translateY(-3px);
         }
 
         /* LOADING */
@@ -327,14 +399,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 3rem;
+            padding: 4rem;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--gris-clair);
-            border-top: 4px solid var(--or);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(101, 6, 36, 0.1);
+            border-top: 4px solid var(--rouge-bordeaux);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -352,22 +424,23 @@
         /* ERROR MESSAGE */
         .error-message {
             background: white;
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 3rem;
             text-align: center;
             box-shadow: var(--box-shadow);
             margin: 2rem;
+            border: 1px solid rgba(101, 6, 36, 0.1);
         }
 
         .error-icon {
-            font-size: 3rem;
-            color: #dc3545;
-            margin-bottom: 1rem;
+            font-size: 4rem;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 1.5rem;
         }
 
         .error-title {
-            font-size: 1.5rem;
-            color: var(--bleu-nuit);
+            font-size: 1.8rem;
+            color: var(--rouge-bordeaux);
             margin-bottom: 1rem;
         }
 
@@ -386,8 +459,49 @@
             }
 
             .election-title {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
             }
+
+            .election-header {
+                padding: 1.5rem;
+            }
+
+            .candidates-section {
+                padding: 1.5rem;
+            }
+
+            .candidate-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Animation d'entrée */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
         }
     </style>
 </head>
@@ -519,42 +633,42 @@
                 <p class="election-description">${election.description || 'Aucune description disponible'}</p>
                 
                 <div class="election-meta">
-                    <div class="meta-card">
+                    <div class="meta-card animate-in">
                         <div class="meta-title"><i class="fa-solid fa-graduation-cap"></i> École/Faculté</div>
                         <div class="meta-value">${election.ecole || 'Toutes écoles'}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-1">
                         <div class="meta-title"><i class="fa-solid fa-layer-group"></i> Filière</div>
                         <div class="meta-value">${election.filiere || 'Toutes filières'}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-2">
                         <div class="meta-title"><i class="fa-solid fa-calendar"></i> Année</div>
                         <div class="meta-value">${election.annee || 'Toutes années'}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-3">
                         <div class="meta-title"><i class="fa-solid fa-user-tie"></i> Poste</div>
                         <div class="meta-value">${getDelegueTypeLabel(election.delegueType)}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in">
                         <div class="meta-title"><i class="fa-solid fa-hourglass-start"></i> Début des candidatures</div>
                         <div class="meta-value">${formatDate(election.dateDebutCandidature)}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-1">
                         <div class="meta-title"><i class="fa-solid fa-hourglass-end"></i> Fin des candidatures</div>
                         <div class="meta-value">${formatDate(election.dateFinCandidature)}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-2">
                         <div class="meta-title"><i class="fa-solid fa-vote-yea"></i> Début du vote</div>
                         <div class="meta-value">${formatDate(election.dateDebut)}</div>
                     </div>
                     
-                    <div class="meta-card">
+                    <div class="meta-card animate-in delay-3">
                         <div class="meta-title"><i class="fa-solid fa-check-to-slot"></i> Fin du vote</div>
                         <div class="meta-value">${formatDate(election.dateFin)}</div>
                     </div>
@@ -580,13 +694,13 @@
             section.innerHTML = `
                 <h2 class="section-title"><i class="fa-solid fa-users"></i> Candidats (${candidates.length})</h2>
                 <div class="candidates-grid">
-                    ${candidates.map(candidate => `
-                        <div class="candidate-card">
+                    ${candidates.map((candidate, index) => `
+                        <div class="candidate-card animate-in" style="animation-delay: ${index * 0.1}s">
                             <div class="candidate-header">
-                                <img src="${candidate.photoUrl || 'https://via.placeholder.com/70'}" 
+                                <img src="${candidate.photoUrl || 'https://via.placeholder.com/80'}" 
                                      alt="${candidate.prenom} ${candidate.nom}" 
                                      class="candidate-avatar"
-                                     onerror="this.src='https://via.placeholder.com/70'">
+                                     onerror="this.src='https://via.placeholder.com/80'">
                                 <div class="candidate-info">
                                     <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
                                     <div class="candidate-details">
