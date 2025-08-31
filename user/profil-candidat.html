@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Candidat - UCAO-UUC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --rouge-bordeaux: #650624;
+            --bleu-nuit: #041946;
+            --or: #a76d21;
+            --or-clair: #dea739;
+            --gris-clair: #f5f6fa;
+            --gris-texte: #444;
+            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
+            --transition: all .3s ease;
+            --transition-slow: all .5s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background: #f4f6fb;
+            color: var(--gris-texte);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            font-size: .9rem;
+        }
+
+        .user-nav a,
+        .user-nav span {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            gap: .4rem;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .user-nav a:hover {
+            color: var(--or);
+        }
+
+        /* LAYOUT */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            width: 230px;
+            background: var(--bleu-nuit);
+            color: #fff;
+            padding: 1rem 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            padding: .9rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: var(--rouge-bordeaux);
+            border-left: 4px solid var(--or);
+            padding-left: 2rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--bleu-nuit);
+            text-decoration: none;
+        }
+
+        .breadcrumb span {
+            color: var(--gris-texte);
+        }
+
+        /* CANDIDAT PROFILE */
+        .candidate-profile {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-profile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--or), var(--rouge-bordeaux));
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        .candidate-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--or);
+            box-shadow: var(--box-shadow);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .candidate-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gris-clair);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .candidate-slogan {
+            font-style: italic;
+            color: var(--rouge-bordeaux);
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--or);
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .election-info {
+            background: var(--gris-clair);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .election-title {
+            font-size: 1.3rem;
+            color: var(--bleu-nuit);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .election-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .election-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .election-detail i {
+            color: var(--or);
+            font-size: 1.2rem;
+        }
+
+        /* PROGRAMME SECTION */
+        .program-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--bleu-nuit);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gris-clair);
+        }
+
+        .program-content {
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .program-points {
+            margin-top: 1.5rem;
+        }
+
+        .program-point {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .program-point::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--or);
+            font-size: 1.5rem;
+        }
+
+        /* QUALITIES SECTION */
+        .qualities-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .qualities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quality-card {
+            background: var(--gris-clair);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .quality-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .quality-icon {
+            font-size: 2rem;
+            color: var(--or);
+            margin-bottom: 1rem;
+        }
+
+        .quality-title {
+            font-weight: 600;
+            color: var(--bleu-nuit);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--or);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--or-clair);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--bleu-nuit);
+            border: 2px solid var(--bleu-nuit);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bleu-nuit);
+            color: white;
+        }
+
+        /* LOADING */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gris-clair);
+            border-top: 4px solid var(--or);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .candidate-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .election-details {
+                grid-template-columns: 1fr;
+            }
+
+            .qualities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="elections-details.html"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
+                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="mes-candidatures.html"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <a href="elections-details.html">Détails des Élections</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Profil Candidat</span>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="candidate-profile" id="candidateProfile">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Election Info Section -->
+            <div class="election-info" id="electionInfo">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Program Section -->
+            <div class="program-section" id="programSection">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Qualities Section -->
+            <div class="qualities-section" id="qualitiesSection">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../config.js"></script>
+    <script>
+        // Configuration
+        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const CANDIDATE_API = `${API_BASE_URL}/api/candidats`;
+        const ELECTION_API = `${API_BASE_URL}/api/election`;
+        const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
+
+        // Variables globales
+        let candidateId = null;
+        let candidateData = null;
+        let electionData = null;
+        let userProfile = null;
+
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Fonctions API
+        async function fetchWithAuth(url, options = {}) {
+            const token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return null;
+            }
+
+            const defaultOptions = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                ...options
+            };
+
+            try {
+                const response = await fetch(url, { ...defaultOptions, ...options });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur fetch:', error);
+                throw error;
+            }
+        }
+
+        // Récupérer l'ID du candidat depuis l'URL
+        function getCandidateIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Charger le profil utilisateur
+        async function loadUserProfile() {
+            try {
+                const data = await fetchWithAuth(PROFILE_API);
+                if (data) {
+                    userProfile = data;
+                    document.getElementById('userName').textContent =
+                        data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
+                }
+                return data;
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+                return null;
+            }
+        }
+
+        // Charger les données du candidat
+        async function loadCandidateData() {
+            candidateId = getCandidateIdFromURL();
+            if (!candidateId) {
+                showError('ID candidat manquant');
+                return null;
+            }
+
+            try {
+                const data = await fetchWithAuth(`${CANDIDATE_API}/${candidateId}`);
+                if (data) {
+                    candidateData = data;
+                    return data;
+                }
+                return null;
+            } catch (error) {
+                console.error('Erreur chargement candidat:', error);
+                showError('Impossible de charger les données du candidat');
+                return null;
+            }
+        }
+
+        // Charger les données de l'élection
+        async function loadElectionData() {
+            if (!candidateData || !candidateData.electionId) {
+                return null;
+            }
+
+            try {
+                const data = await fetchWithAuth(`${ELECTION_API}/${candidateData.electionId}`);
+                if (data) {
+                    electionData = data;
+                    return data;
+                }
+                return null;
+            } catch (error) {
+                console.error('Erreur chargement élection:', error);
+                return null;
+            }
+        }
+
+        // Afficher le profil du candidat
+        function displayCandidateProfile() {
+            const container = document.getElementById('candidateProfile');
+
+            if (!candidateData) {
+                container.innerHTML = '<div class="no-candidates">Données candidat non disponibles</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="profile-header">
+                    <img src="${candidateData.photoUrl || 'https://via.placeholder.com/150'}" 
+                         alt="${candidateData.prenom} ${candidateData.nom}" 
+                         class="candidate-avatar"
+                         onerror="this.src='https://via.placeholder.com/150'">
+                    <div class="profile-info">
+                        <h1 class="candidate-name">${candidateData.prenom} ${candidateData.nom}</h1>
+                        <div class="candidate-meta">
+                            <div class="meta-item">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>${candidateData.userDetails?.filiere || 'Non spécifié'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fa-solid fa-calendar"></i>
+                                <span>Année ${candidateData.userDetails?.annee || 'N/A'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fa-solid fa-envelope"></i>
+                                <span>${candidateData.userDetails?.email || 'Non spécifié'}</span>
+                            </div>
+                        </div>
+                        ${candidateData.slogan ? `<div class="candidate-slogan">"${candidateData.slogan}"</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Afficher les informations de l'élection
+        function displayElectionInfo() {
+            const container = document.getElementById('electionInfo');
+
+            if (!electionData) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const status = getElectionStatus(electionData);
+            const statusClass = `status-${status}`;
+            const statusText = getStatusText(status);
+
+            container.innerHTML = `
+                <h2 class="election-title">
+                    <i class="fa-solid fa-vote-yea"></i>
+                    Élection: ${electionData.titre}
+                </h2>
+                <div class="election-details">
+                    <div class="election-detail">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <div>
+                            <strong>École/Faculté:</strong>
+                            <div>${electionData.ecole || 'Non spécifié'}</div>
+                        </div>
+                    </div>
+                    <div class="election-detail">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <div>
+                            <strong>Filière:</strong>
+                            <div>${electionData.filiere || 'Non spécifié'}</div>
+                        </div>
+                    </div>
+                    <div class="election-detail">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <div>
+                            <strong>Poste:</strong>
+                            <div>${getDelegueTypeLabel(electionData.delegueType)}</div>
+                        </div>
+                    </div>
+                    <div class="election-detail">
+                        <i class="fa-solid fa-hourglass-half"></i>
+                        <div>
+                            <strong>Statut:</strong>
+                            <div class="election-status ${statusClass}">${statusText}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Afficher le programme du candidat
+        function displayProgram() {
+            const container = document.getElementById('programSection');
+
+            if (!candidateData) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = `
+                <h2 class="section-title">
+                    <i class="fa-solid fa-book-open"></i>
+                    Programme électoral
+                </h2>
+                <div class="program-content">
+                    ${candidateData.programme || 'Aucun programme disponible pour le moment.'}
+                </div>
+            `;
+        }
+
+        // Afficher les qualités du candidat
+        function displayQualities() {
+            const container = document.getElementById('qualitiesSection');
+
+            if (!candidateData) {
+                container.innerHTML = '';
+                return;
+            }
+
+            // Générer des qualités basées sur les données du candidat (simulé)
+            const qualities = [
+                {
+                    icon: 'fa-solid fa-people-group',
+                    title: 'Leadership',
+                    description: 'Capacité à mener et inspirer les autres'
+                },
+                {
+                    icon: 'fa-solid fa-comments',
+                    title: 'Communication',
+                    description: 'Excellentes compétences en communication'
+                },
+                {
+                    icon: 'fa-solid lightbulb',
+                    title: 'Innovation',
+                    description: 'Esprit créatif et propositions novatrices'
+                },
+                {
+                    icon: 'fa-solid fa-handshake',
+                    title: 'Collaboration',
+                    description: 'Capacité à travailler en équipe efficacement'
+                }
+            ];
+
+            container.innerHTML = `
+                <h2 class="section-title">
+                    <i class="fa-solid fa-star"></i>
+                    Qualités et Atouts
+                </h2>
+                <div class="qualities-grid">
+                    ${qualities.map(quality => `
+                        <div class="quality-card">
+                            <div class="quality-icon">
+                                <i class="${quality.icon}"></i>
+                            </div>
+                            <h3 class="quality-title">${quality.title}</h3>
+                            <p>${quality.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="action-buttons">
+                    <a href="elections-details.html" class="btn btn-secondary">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Retour aux élections
+                    </a>
+                    ${getElectionStatus(electionData) === 'active' ? `
+                    <button class="btn btn-primary" onclick="voteForCandidate()">
+                        <i class="fa-solid fa-check"></i>
+                        Voter pour ce candidat
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Fonctions utilitaires
+        function getElectionStatus(election) {
+            if (!election) return 'unknown';
+
+            const now = new Date();
+            const debutCandidature = new Date(election.dateDebutCandidature);
+            const finCandidature = new Date(election.dateFinCandidature);
+            const debutVote = new Date(election.dateDebut);
+            const finVote = new Date(election.dateFin);
+
+            if (now < debutCandidature) return 'upcoming';
+            if (now > finVote) return 'completed';
+            if (now >= debutVote && now <= finVote) return 'active';
+            if (now >= debutCandidature && now <= finCandidature) return 'active';
+            return 'upcoming';
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'active': 'En cours',
+                'upcoming': 'À venir',
+                'completed': 'Terminée',
+                'unknown': 'Inconnu'
+            };
+            return statuses[status] || status;
+        }
+
+        function getDelegueTypeLabel(type) {
+            if (!type) return 'Non spécifié';
+
+            const types = {
+                'PREMIER': 'Premier Responsable',
+                'DEUXIEME': 'Deuxième Responsable',
+                'DELEGUE': 'Délégué'
+            };
+
+            return types[type] || type;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('candidateProfile');
+            container.innerHTML = `
+                <div class="no-candidates">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="loadData()">
+                        <i class="fa-solid fa-refresh"></i>
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+
+        // Voter pour ce candidat
+        function voteForCandidate() {
+            alert(`Fonctionnalité de vote à implémenter. Vous voteriez pour ${candidateData.prenom} ${candidateData.nom}`);
+            // Redirection vers la page de vote avec pré-sélection du candidat
+            // window.location.href = `vote.html?election=${electionData.id}&candidate=${candidateData.id}`;
+        }
+
+        // Charger toutes les données
+        async function loadData() {
+            try {
+                await loadUserProfile();
+                await loadCandidateData();
+                await loadElectionData();
+
+                displayCandidateProfile();
+                displayElectionInfo();
+                displayProgram();
+                displayQualities();
+            } catch (error) {
+                console.error('Erreur chargement données:', error);
+            }
+        }
+
+        // Déconnexion
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+
+</html>
