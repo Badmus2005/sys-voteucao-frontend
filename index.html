@@ -74,6 +74,34 @@
             }
         }
 
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
         /* Layout */
         .container {
             width: 100%;
@@ -165,6 +193,7 @@
             justify-content: center;
             color: white;
             font-size: 1.2rem;
+            animation: pulse 2s infinite;
         }
 
         .nav-menu {
@@ -347,6 +376,7 @@
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
             border-top: 4px solid var(--rouge-bordeaux);
+            animation: fadeIn 1s ease-out;
         }
 
         .feature-card:hover {
@@ -378,17 +408,68 @@
             line-height: 1.6;
         }
 
-        /* Elections Section */
+        /* Elections Section - MODIFIÉ POUR DÉFILEMENT HORIZONTAL */
         .elections {
             padding: 80px 0;
             background: linear-gradient(135deg, #f8f4e9 0%, #f0ece1 100%);
+            position: relative;
+            overflow: hidden;
         }
 
-        .elections-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        .elections-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .elections-navigation {
+            display: flex;
+            gap: 10px;
+        }
+
+        .elections-nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bleu-nuit);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .elections-nav-btn:hover {
+            background: var(--rouge-bordeaux);
+            transform: scale(1.1);
+        }
+
+        .elections-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .elections-scroll {
+            display: flex;
             gap: 30px;
-            margin-top: 50px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 20px 10px;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scroll-snap-type: x mandatory;
+        }
+
+        .elections-scroll::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         .election-card {
@@ -397,10 +478,14 @@
             overflow: hidden;
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
+            min-width: 350px;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            animation: fadeIn 0.8s ease-out;
         }
 
         .election-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1.02);
             box-shadow: var(--shadow-lg);
         }
 
@@ -418,12 +503,30 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
+            z-index: 2;
         }
 
         .election-image {
             height: 200px;
             background-size: cover;
             background-position: center;
+            position: relative;
+        }
+
+        .election-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .election-card:hover .election-image::after {
+            opacity: 1;
         }
 
         .election-content {
@@ -471,6 +574,7 @@
         .step {
             text-align: center;
             position: relative;
+            animation: fadeIn 1s ease-out;
         }
 
         .step-number {
@@ -487,6 +591,7 @@
             margin: 0 auto 20px;
             position: relative;
             z-index: 2;
+            animation: pulse 2s infinite;
         }
 
         .step:not(:last-child)::after {
@@ -528,6 +633,12 @@
             overflow: hidden;
             background: white;
             box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .faq-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
         }
 
         .faq-question {
@@ -584,6 +695,7 @@
         .cta-title {
             font-size: 2.5rem;
             margin-bottom: 20px;
+            animation: fadeIn 1s ease-out;
         }
 
         .cta-description {
@@ -650,6 +762,7 @@
 
         .footer-links a:hover {
             color: var(--or);
+            transform: translateX(5px);
         }
 
         .contact-item {
@@ -669,6 +782,18 @@
         .copyright {
             opacity: 0.7;
             font-size: 0.9rem;
+        }
+
+        /* Animations pour éléments au défilement */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Responsive Design */
@@ -731,13 +856,25 @@
             }
 
             .features-grid,
-            .elections-grid,
             .steps {
                 grid-template-columns: 1fr;
             }
 
             .step:not(:last-child)::after {
                 display: none;
+            }
+
+            .elections-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .election-card {
+                min-width: 300px;
+            }
+
+            .election-actions {
+                flex-direction: column;
             }
 
             .footer-grid {
@@ -768,8 +905,8 @@
                 font-size: 0.9rem;
             }
 
-            .election-actions {
-                flex-direction: column;
+            .election-card {
+                min-width: 280px;
             }
         }
 
@@ -887,12 +1024,13 @@
     <!-- Features Section -->
     <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">Une plateforme de confiance</h2>
-            <p class="section-subtitle">Découvrez les fonctionnalités qui font de notre système de vote la référence en
+            <h2 class="section-title animate-on-scroll">Une plateforme de confiance</h2>
+            <p class="section-subtitle animate-on-scroll">Découvrez les fonctionnalités qui font de notre système de
+                vote la référence en
                 matière de sécurité et de transparence</p>
 
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-lock"></i>
                     </div>
@@ -901,7 +1039,7 @@
                         garantir l'intégrité du vote.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-user-shield"></i>
                     </div>
@@ -910,7 +1048,7 @@
                         secret.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-mobile-alt"></i>
                     </div>
@@ -919,7 +1057,7 @@
                         internet.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-chart-pie"></i>
                     </div>
@@ -928,7 +1066,7 @@
                         détaillées.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-gavel"></i>
                     </div>
@@ -937,7 +1075,7 @@
                         universitaires.</p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card animate-on-scroll">
                     <div class="feature-icon">
                         <i class="fas fa-headset"></i>
                     </div>
@@ -952,12 +1090,25 @@
     <!-- Elections Section -->
     <section class="elections" id="elections">
         <div class="container">
-            <h2 class="section-title">Élections en Cours</h2>
-            <p class="section-subtitle">Participez aux scrutins ouverts et faites entendre votre voix</p>
+            <div class="elections-header">
+                <h2 class="section-title animate-on-scroll">Élections en Cours</h2>
+                <p class="section-subtitle animate-on-scroll">Participez aux scrutins ouverts et faites entendre votre
+                    voix</p>
+                <div class="elections-navigation">
+                    <button class="elections-nav-btn" id="scrollLeft">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="elections-nav-btn" id="scrollRight">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
 
             <div class="loading" id="loading-elections"></div>
-            <div class="elections-grid" id="elections-container">
-                <!-- Élections chargées dynamiquement -->
+            <div class="elections-container">
+                <div class="elections-scroll" id="elections-scroll">
+                    <!-- Élections chargées dynamiquement -->
+                </div>
             </div>
         </div>
     </section>
@@ -965,25 +1116,26 @@
     <!-- How it Works -->
     <section class="how-it-works" id="how-it-works">
         <div class="container">
-            <h2 class="section-title">Comment voter en 3 étapes</h2>
-            <p class="section-subtitle">Un processus simple et sécurisé pour exercer votre droit de vote</p>
+            <h2 class="section-title animate-on-scroll">Comment voter en 3 étapes</h2>
+            <p class="section-subtitle animate-on-scroll">Un processus simple et sécurisé pour exercer votre droit de
+                vote</p>
 
             <div class="steps">
-                <div class="step">
+                <div class="step animate-on-scroll">
                     <div class="step-number">1</div>
                     <h3 class="step-title">Authentification</h3>
                     <p class="step-description">Connectez-vous avec vos identifiants universitaires pour accéder à la
                         plateforme.</p>
                 </div>
 
-                <div class="step">
+                <div class="step animate-on-scroll">
                     <div class="step-number">2</div>
                     <h3 class="step-title">Sélection</h3>
                     <p class="step-description">Consultez les programmes des candidats et faites votre choix en toute
                         connaissance.</p>
                 </div>
 
-                <div class="step">
+                <div class="step animate-on-scroll">
                     <div class="step-number">3</div>
                     <h3 class="step-title">Confirmation</h3>
                     <p class="step-description">Validez définitivement votre vote qui sera enregistré de manière
@@ -996,12 +1148,13 @@
     <!-- FAQ Section -->
     <section class="faq" id="faq">
         <div class="container">
-            <h2 class="section-title">Questions Fréquentes</h2>
-            <p class="section-subtitle">Trouvez les réponses aux questions les plus courantes sur notre plateforme de
+            <h2 class="section-title animate-on-scroll">Questions Fréquentes</h2>
+            <p class="section-subtitle animate-on-scroll">Trouvez les réponses aux questions les plus courantes sur
+                notre plateforme de
                 vote</p>
 
             <div class="faq-container">
-                <div class="faq-item">
+                <div class="faq-item animate-on-scroll">
                     <div class="faq-question">Comment m'inscrire pour voter ?</div>
                     <div class="faq-answer">
                         <p>Pour vous inscrire, cliquez sur le bouton "S'inscrire" en haut de la page, puis remplissez le
@@ -1010,7 +1163,7 @@
                     </div>
                 </div>
 
-                <div class="faq-item">
+                <div class="faq-item animate-on-scroll">
                     <div class="faq-question">Puis-je modifier mon vote après confirmation ?</div>
                     <div class="faq-answer">
                         <p>Non, pour garantir l'intégrité du scrutin, un vote confirmé est définitif et ne peut être
@@ -1018,7 +1171,7 @@
                     </div>
                 </div>
 
-                <div class="faq-item">
+                <div class="faq-item animate-on-scroll">
                     <div class="faq-question">Comment vérifier que mon vote a bien été pris en compte ?</div>
                     <div class="faq-answer">
                         <p>Vous recevez immédiatement un accusé de réception avec un code de vérification anonyme. Ce
@@ -1027,7 +1180,7 @@
                     </div>
                 </div>
 
-                <div class="faq-item">
+                <div class="faq-item animate-on-scroll">
                     <div class="faq-question">Quelles sont les mesures contre la fraude ?</div>
                     <div class="faq-answer">
                         <p>Notre système utilise plusieurs couches de sécurité : chiffrement de bout en bout, limitation
@@ -1042,10 +1195,11 @@
     <!-- CTA Section -->
     <section class="cta" id="cta">
         <div class="container">
-            <h2 class="cta-title">Prêt à exercer votre droit de vote ?</h2>
-            <p class="cta-description">Rejoignez les milliers d'étudiants qui font confiance à notre plateforme
+            <h2 class="cta-title animate-on-scroll">Prêt à exercer votre droit de vote ?</h2>
+            <p class="cta-description animate-on-scroll">Rejoignez les milliers d'étudiants qui font confiance à notre
+                plateforme
                 sécurisée pour participer à la vie démocratique de l'université.</p>
-            <a href="/user/register" class="btn btn-primary">
+            <a href="/user/register" class="btn btn-primary animate-on-scroll">
                 <i class="fas fa-user-plus"></i> Créer mon compte
             </a>
         </div>
@@ -1121,13 +1275,16 @@
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const navMenu = document.getElementById('navMenu');
         const navLinks = document.querySelectorAll('.nav-link');
-        const electionsContainer = document.getElementById('elections-container');
+        const electionsScroll = document.getElementById('elections-scroll');
         const loadingElement = document.getElementById('loading-elections');
+        const scrollLeftBtn = document.getElementById('scrollLeft');
+        const scrollRightBtn = document.getElementById('scrollRight');
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
             initializeApp();
             setupEventListeners();
+            setupScrollAnimations();
         });
 
         // Initialisation de l'application
@@ -1148,6 +1305,62 @@
             navLinks.forEach(link => {
                 link.addEventListener('click', closeMobileMenu);
             });
+
+            // Navigation des élections
+            if (scrollLeftBtn && scrollRightBtn && electionsScroll) {
+                scrollLeftBtn.addEventListener('click', () => {
+                    electionsScroll.scrollBy({ left: -350, behavior: 'smooth' });
+                });
+
+                scrollRightBtn.addEventListener('click', () => {
+                    electionsScroll.scrollBy({ left: 350, behavior: 'smooth' });
+                });
+            }
+
+            // Navigation tactile pour mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            if (electionsScroll) {
+                electionsScroll.addEventListener('touchstart', e => {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+
+                electionsScroll.addEventListener('touchend', e => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                });
+            }
+
+            function handleSwipe() {
+                const minSwipeDistance = 50;
+                const distance = touchStartX - touchEndX;
+
+                if (Math.abs(distance) < minSwipeDistance) return;
+
+                if (distance > 0) {
+                    // Swipe gauche
+                    electionsScroll.scrollBy({ left: 350, behavior: 'smooth' });
+                } else {
+                    // Swipe droite
+                    electionsScroll.scrollBy({ left: -350, behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Configuration des animations au défilement
+        function setupScrollAnimations() {
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            animatedElements.forEach(el => observer.observe(el));
         }
 
         // Menu mobile
@@ -1190,17 +1403,57 @@
                     loadingElement.style.display = 'block';
                 }
 
-                // Appel à l'API pour récupérer les élections actives
-                const response = await fetch(`${API_BASE_URL}${ENDPOINTS.ELECTIONS}`);
+                // Simulation d'élections (à remplacer par l'appel API réel)
+                const mockElections = [
+                    {
+                        id: 1,
+                        titre: "Élection des Délégués de Promotion",
+                        description: "Élection des représentants étudiants pour l'année académique 2024-2025",
+                        dateDebut: "2024-09-01",
+                        dateFin: "2024-09-15",
+                        type: "SALLE",
+                        imageUrl: "https://images.unsplash.com/photo-1541336032412-2048a678540d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                    },
+                    {
+                        id: 2,
+                        titre: "Conseil de Faculté",
+                        description: "Élection des représentants étudiants au conseil de faculté",
+                        dateDebut: "2024-09-10",
+                        dateFin: "2024-09-20",
+                        type: "ECOLE",
+                        imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                    },
+                    {
+                        id: 3,
+                        titre: "Bureau des Étudiants",
+                        description: "Élection du bureau des étudiants de l'UCAO-UUC",
+                        dateDebut: "2024-10-01",
+                        dateFin: "2024-10-10",
+                        type: "UNIVERSITE",
+                        imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                    },
+                    {
+                        id: 4,
+                        titre: "Représentants Conseil d'Administration",
+                        description: "Élection des étudiants siégeant au conseil d'administration",
+                        dateDebut: "2024-10-15",
+                        dateFin: "2024-10-25",
+                        type: "UNIVERSITE"
+                    }
+                ];
 
+                // Afficher les élections
+                displayElections(mockElections);
+
+                // Pour l'appel API réel, décommentez ceci:
+                /*
+                const response = await fetch(`${API_BASE_URL}${ENDPOINTS.ELECTIONS}`);
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
-
                 const elections = await response.json();
-
-                // Afficher les élections
                 displayElections(elections);
+                */
 
             } catch (error) {
                 console.error('Erreur lors du chargement des élections:', error);
@@ -1215,11 +1468,11 @@
 
         // Afficher les élections
         function displayElections(elections) {
-            if (!electionsContainer) return;
+            if (!electionsScroll) return;
 
             if (!elections || elections.length === 0) {
-                electionsContainer.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                electionsScroll.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; min-width: 100%;">
                         <i class="fas fa-calendar-times" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
                         <h3 style="color: var(--bleu-nuit); margin-bottom: 15px;">Aucune élection en cours</h3>
                         <p>Les prochaines élections seront annoncées par voie officielle. Consultez régulièrement la plateforme.</p>
@@ -1228,7 +1481,7 @@
                 return;
             }
 
-            electionsContainer.innerHTML = elections.map(election => `
+            electionsScroll.innerHTML = elections.map(election => `
                 <div class="election-card">
                     <div class="election-header">
                         <span class="election-badge">${getElectionStatusBadge(election)}</span>
@@ -1258,10 +1511,10 @@
 
         // Afficher une erreur de chargement des élections
         function showElectionsError() {
-            if (!electionsContainer) return;
+            if (!electionsScroll) return;
 
-            electionsContainer.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--rouge-bordeaux);">
+            electionsScroll.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--rouge-bordeaux); min-width: 100%;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                     <h3 style="margin-bottom: 15px;">Service temporairement indisponible</h3>
                     <p>Nous rencontrons des difficultés techniques. Veuillez réessayer plus tard.</p>
