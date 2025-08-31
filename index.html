@@ -6,14 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Plateforme sécurisée de vote électronique de l'UCAO-UUC">
     <title>UCAO-UUC - Vote Électronique Sécurisé</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --rouge-bordeaux: #650624;
             --rouge-bordeaux-light: #800526;
             --bleu-nuit: #041946;
-            --bleu-nuit-light: #041645;
+            --bleu-nuit-light: #0d2a5d;
             --blanc-casse: #f8f4e9;
             --or: #c9a227;
+            --or-light: #e0b941;
             --text-dark: #2d3748;
             --text-light: #718096;
             --success: #38a169;
@@ -21,20 +25,24 @@
             --error: #e53e3e;
             --shadow-sm: 0 2px 8px rgba(15, 26, 49, 0.1);
             --shadow-md: 0 4px 12px rgba(15, 26, 49, 0.15);
+            --shadow-lg: 0 10px 25px rgba(15, 26, 49, 0.2);
             --transition: all 0.3s ease;
+            --radius: 8px;
+            --radius-lg: 12px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
             background-color: var(--blanc-casse);
             color: var(--text-dark);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Animations */
@@ -47,6 +55,16 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+            }
+
+            to {
+                transform: translateX(0);
             }
         }
 
@@ -64,200 +82,255 @@
             padding: 0 20px;
         }
 
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-
-        /* Header */
-        .university-header {
+        /* Header Top Bar */
+        .header-top {
             background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
             color: white;
-            padding: 15px 0;
-            text-align: center;
-            border-bottom: 4px solid var(--rouge-bordeaux);
+            padding: 8px 0;
+            font-size: 0.9rem;
         }
 
-        .university-header h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .header-top-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .university-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .university-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .university-info i {
+            color: var(--or);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
             color: white;
+            transition: var(--transition);
         }
 
-        .university-header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            color: rgba(255, 255, 255, 0.9);
+        .social-links a:hover {
+            color: var(--or);
+            transform: translateY(-2px);
         }
 
-        /* Navigation */
-        .academic-nav {
-            background-color: var(--bleu-nuit);
-            padding: 12px 0;
+        /* Main Navigation */
+        .main-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             box-shadow: var(--shadow-sm);
+            border-bottom: 2px solid var(--bleu-nuit);
         }
 
         .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            padding: 15px 0;
         }
 
-        .university-logo {
+        .logo {
             display: flex;
             align-items: center;
-            color: white;
+            gap: 10px;
             text-decoration: none;
-            font-weight: 600;
+            color: var(--bleu-nuit);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .logo-img {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-size: 1.2rem;
         }
 
-        .university-logo img {
-            height: 40px;
-            margin-right: 10px;
-            alt: "Logo UCAO-UUC";
-        }
-
-        .academic-links {
+        .nav-menu {
             display: flex;
             list-style: none;
-            gap: 25px;
-            margin: 0;
-            padding: 0;
+            gap: 30px;
+            align-items: center;
         }
 
-        .academic-links li a {
-            color: white;
+        .nav-link {
+            color: var(--bleu-nuit);
             text-decoration: none;
             font-weight: 500;
-            padding: 5px 0;
+            padding: 8px 0;
             position: relative;
             transition: var(--transition);
         }
 
-        .academic-links li a::after {
+        .nav-link::after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
             width: 0;
             height: 2px;
-            background-color: var(--or);
+            background: linear-gradient(90deg, var(--rouge-bordeaux), var(--or));
             transition: var(--transition);
         }
 
-        .academic-links li a:hover::after {
+        .nav-link:hover::after {
             width: 100%;
         }
 
-        .academic-links li a:hover {
-            color: var(--or);
+        .nav-link:hover {
+            color: var(--rouge-bordeaux);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rouge-bordeaux), var(--rouge-bordeaux-light));
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--bleu-nuit);
+            border: 2px solid var(--bleu-nuit);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bleu-nuit);
+            color: white;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: var(--bleu-nuit);
+            border-radius: 2px;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
         }
 
         /* Hero Section */
-        .academic-hero {
-            background: linear-gradient(rgba(15, 26, 49, 0.9), rgba(15, 26, 49, 0.9)),
+        .hero {
+            background: linear-gradient(rgba(4, 25, 70, 0.9), rgba(4, 25, 70, 0.9)),
                 url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
             background-size: cover;
             background-position: center;
             color: white;
+            padding: 100px 0;
             text-align: center;
-            padding: 80px 20px;
-            margin-bottom: 40px;
         }
 
-        .academic-hero h2 {
-            font-size: 2.5rem;
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
             margin-bottom: 20px;
             animation: fadeIn 1s ease-out;
-            color: white;
         }
 
-        .academic-hero p {
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto 30px;
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
             opacity: 0.9;
-            color: rgba(255, 255, 255, 0.9);
         }
 
-        /* Buttons */
-        .academic-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            text-align: center;
-            border: none;
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            font-size: 1rem;
+        .hero-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .btn-primary {
-            background-color: var(--rouge-bordeaux);
-            color: white;
-        }
-
-        .btn-primary:hover,
-        .btn-primary:focus {
-            background-color: var(--rouge-bordeaux-light);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-            outline: none;
-            color: white;
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover,
-        .btn-secondary:focus {
-            background-color: white;
-            color: var(--bleu-nuit);
-            transform: translateY(-3px);
-            outline: none;
-        }
-
-        /* Features */
-        .academic-features {
-            padding: 60px 0;
-            background-color: white;
+        /* Features Grid */
+        .features {
+            padding: 80px 0;
+            background: white;
         }
 
         .section-title {
             text-align: center;
-            font-size: 2rem;
-            margin-bottom: 50px;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
             color: var(--bleu-nuit);
-            position: relative;
         }
 
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background: linear-gradient(to right, var(--rouge-bordeaux), var(--or));
-            margin: 15px auto 0;
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 60px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .features-grid {
@@ -268,7 +341,7 @@
 
         .feature-card {
             background: white;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             padding: 30px;
             text-align: center;
             box-shadow: var(--shadow-sm);
@@ -278,99 +351,92 @@
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-lg);
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            color: var(--rouge-bordeaux);
-            margin-bottom: 20px;
-            transition: var(--transition);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--rouge-bordeaux), var(--or));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 1.8rem;
         }
 
-        .feature-card:hover .feature-icon {
-            color: var(--or);
-        }
-
-        .feature-card h3 {
-            font-size: 1.3rem;
+        .feature-title {
+            font-size: 1.4rem;
             margin-bottom: 15px;
             color: var(--bleu-nuit);
         }
 
-        .feature-card p {
+        .feature-description {
             color: var(--text-light);
-            line-height: 1.7;
+            line-height: 1.6;
         }
 
-        .step-number {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background: var(--rouge-bordeaux);
-            color: white;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: bold;
-            line-height: 50px;
-            text-align: center;
-        }
-
-        /* Elections */
-        .elections-section {
-            padding: 60px 0;
-            background-color: #f5f7fa;
+        /* Elections Section */
+        .elections {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8f4e9 0%, #f0ece1 100%);
         }
 
         .elections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
+            gap: 30px;
+            margin-top: 50px;
         }
 
         .election-card {
             background: white;
-            border-radius: 8px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
-            border-left: 4px solid var(--rouge-bordeaux);
         }
 
         .election-card:hover {
             transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .election-header {
+            position: relative;
         }
 
         .election-badge {
-            background-color: var(--rouge-bordeaux);
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--rouge-bordeaux);
             color: white;
             padding: 5px 15px;
-            display: inline-block;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            border-radius: 0 0 4px 0;
         }
 
         .election-image {
-            height: 180px;
+            height: 200px;
             background-size: cover;
             background-position: center;
-            background-color: var(--bleu-nuit-light);
         }
 
         .election-content {
-            padding: 20px;
+            padding: 25px;
         }
 
-        .election-content h3 {
+        .election-title {
             font-size: 1.3rem;
             margin-bottom: 10px;
             color: var(--bleu-nuit);
         }
 
-        .election-content p {
+        .election-description {
             color: var(--text-light);
             margin-bottom: 20px;
             line-height: 1.6;
@@ -384,27 +450,71 @@
             font-size: 0.9rem;
         }
 
-        .election-meta i {
-            color: var(--rouge-bordeaux);
-            margin-right: 5px;
-        }
-
         .election-actions {
             display: flex;
             gap: 15px;
         }
 
-        .btn-small {
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            flex: 1;
-            text-align: center;
+        /* How it Works */
+        .how-it-works {
+            padding: 80px 0;
+            background: white;
         }
 
-        /* FAQ Section */
-        .faq-section {
-            padding: 60px 0;
-            background-color: white;
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-nuit-light));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--bleu-nuit), transparent);
+            z-index: 1;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--bleu-nuit);
+        }
+
+        .step-description {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8f4e9 0%, #f0ece1 100%);
         }
 
         .faq-container {
@@ -414,15 +524,15 @@
 
         .faq-item {
             margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: var(--radius);
             overflow: hidden;
             background: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .faq-question {
-            padding: 15px 20px;
-            background-color: var(--blanc-casse);
+            padding: 20px;
+            background: white;
             color: var(--bleu-nuit);
             font-weight: 600;
             cursor: pointer;
@@ -433,13 +543,14 @@
         }
 
         .faq-question:hover {
-            background-color: #f0ece1;
+            background: #f8f9fa;
         }
 
         .faq-question::after {
             content: '+';
             font-size: 1.5rem;
             color: var(--rouge-bordeaux);
+            transition: var(--transition);
         }
 
         .faq-item.active .faq-question::after {
@@ -459,266 +570,210 @@
             max-height: 500px;
         }
 
-        .faq-answer p {
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-
         /* CTA */
-        .academic-cta {
-            padding: 80px 20px;
-            text-align: center;
-            background: linear-gradient(rgba(122, 0, 38, 0.9), rgba(122, 0, 38, 0.9)),
+        .cta {
+            padding: 100px 0;
+            background: linear-gradient(rgba(101, 6, 36, 0.9), rgba(101, 6, 36, 0.9)),
                 url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
             background-size: cover;
             background-position: center;
             color: white;
+            text-align: center;
         }
 
-        .academic-cta h2 {
-            font-size: 2.2rem;
+        .cta-title {
+            font-size: 2.5rem;
             margin-bottom: 20px;
-            color: white;
         }
 
-        .academic-cta p {
+        .cta-description {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
             max-width: 700px;
-            margin: 0 auto 30px;
-            font-size: 1.1rem;
+            margin-left: auto;
+            margin-right: auto;
             opacity: 0.9;
-            color: rgba(255, 255, 255, 0.9);
         }
 
         /* Footer */
-        .university-footer {
+        .footer {
             background: var(--bleu-nuit);
             color: white;
-            padding: 3rem 0 1rem;
-            margin-top: 3rem;
-            border-top: 3px solid var(--or);
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+            padding: 60px 0 20px;
         }
 
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
         }
 
-        .footer-column {
-            display: flex;
-            flex-direction: column;
+        .footer-column h4 {
+            color: var(--or);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
         }
 
         .footer-logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 10px;
+            margin-bottom: 20px;
             font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--or);
-        }
-
-        .footer-logo i {
-            font-size: 2rem;
+            font-weight: 700;
+            color: white;
         }
 
         .footer-description {
             line-height: 1.6;
-            margin-bottom: 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .footer-column h4 {
-            color: var(--or);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
+            margin-bottom: 20px;
+            opacity: 0.8;
         }
 
         .footer-links {
             list-style: none;
-            padding: 0;
         }
 
         .footer-links li {
-            margin-bottom: 0.75rem;
+            margin-bottom: 10px;
         }
 
         .footer-links a {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s ease;
+            gap: 10px;
         }
 
         .footer-links a:hover {
             color: var(--or);
         }
 
-        .footer-links i {
-            width: 16px;
-            color: var(--or);
-        }
-
-        .footer-contact {
-            margin-top: auto;
-        }
-
         .contact-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 0.5rem;
-        }
-
-        .contact-item i {
-            color: var(--or);
+            gap: 10px;
+            margin-bottom: 15px;
+            opacity: 0.8;
         }
 
         .footer-bottom {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1.5rem;
+            padding-top: 20px;
             text-align: center;
         }
 
-        .footer-copyright p {
-            margin: 0.25rem 0;
-            color: rgba(255, 255, 255, 0.6);
+        .copyright {
+            opacity: 0.7;
             font-size: 0.9rem;
         }
 
-        /* Loading State */
-        .loading {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(122, 0, 38, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--rouge-bordeaux);
-            animation: spin 1s ease-in-out infinite;
-            margin: 30px auto;
-            display: none;
-        }
-
-        /* Empty States */
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-light);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #cbd5e0;
-        }
-
-        .empty-state h3 {
-            color: var(--bleu-nuit);
-            margin-bottom: 1rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 992px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 20px;
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 2.5rem;
             }
 
-            .academic-hero h2 {
+            .section-title {
                 font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-top-content {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                padding: 80px 30px 30px;
+                box-shadow: var(--shadow-lg);
+                transition: var(--transition);
+                z-index: 999;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                z-index: 1000;
+            }
+
+            .nav-actions {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid,
+            .elections-grid,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .step:not(:last-child)::after {
+                display: none;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-links a {
+                justify-content: center;
+            }
+
+            .contact-item {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.8rem;
             }
 
             .section-title {
                 font-size: 1.8rem;
             }
-        }
 
-        @media (max-width: 768px) {
-            .academic-links {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .features-grid,
-            .elections-grid {
-                grid-template-columns: 1fr;
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
             }
 
             .election-actions {
                 flex-direction: column;
             }
-
-            .academic-hero {
-                padding: 60px 20px;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .footer-container {
-                padding: 0 1rem;
-            }
-
-            .footer-logo {
-                justify-content: center;
-                text-align: center;
-            }
-
-            .footer-description {
-                text-align: center;
-            }
         }
 
-        @media (max-width: 576px) {
-            .university-header h1 {
-                font-size: 1.8rem;
-            }
-
-            .academic-hero h2 {
-                font-size: 1.8rem;
-            }
-
-            .section-title {
-                font-size: 1.6rem;
-            }
-
-            .feature-card,
-            .election-card {
-                padding: 20px;
-            }
-
-            .academic-btn {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Focus styles for accessibility */
-        button:focus,
-        a:focus,
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: 2px solid var(--or);
-            outline-offset: 2px;
-        }
-
-        /* Utility classes */
+        /* Utility Classes */
         .text-center {
             text-align: center;
         }
@@ -746,373 +801,367 @@
         .mb-3 {
             margin-bottom: 1.5rem;
         }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(122, 0, 38, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--rouge-bordeaux);
+            animation: spin 1s ease-in-out infinite;
+            margin: 30px auto;
+            display: none;
+        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- University Header -->
-    <header class="university-header">
-        <div class="container">
-            <h1>Université Catholique de l'Afrique de l'Ouest</h1>
-            <p>Unité Universitaire de Cotonou - Plateforme de Vote Sécurisée</p>
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container header-top-content">
+            <div class="university-info">
+                <span><i class="fas fa-map-marker-alt"></i> Cotonou, Bénin</span>
+                <span><i class="fas fa-phone"></i> +229 01 00 00 00</span>
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <div class="logo-img">
+                    <i class="fas fa-vote-yea"></i>
+                </div>
+                <span>UCAO-Vote</span>
+            </a>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#features" class="nav-link">Fonctionnalités</a></li>
+                    <li><a href="#elections" class="nav-link">Élections</a></li>
+                    <li><a href="#how-it-works" class="nav-link">Comment voter</a></li>
+                    <li><a href="#faq" class="nav-link">FAQ</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="/user/login" class="btn btn-secondary">Connexion</a>
+                <a href="/user/register" class="btn btn-primary">S'inscrire</a>
+            </div>
         </div>
     </header>
 
-    <!-- Navigation -->
-    <nav class="academic-nav">
-        <div class="container nav-container">
-            <a href="#" class="university-logo">
-                <img src="https://www.ucaobenin.org/img/logo_ucao-uuc-benin.png" alt="Logo UCAO-UUC">
-                <span>UCAO-Vote</span>
-            </a>
-            <ul class="academic-links">
-                <li><a href="#features">Fonctionnalités</a></li>
-                <li><a href="#elections">Élections</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div>
-                <a href="/user/login" class="academic-btn btn-secondary">Connexion</a>
-                <a href="/user/register" class="academic-btn btn-primary">S'inscrire</a>
-            </div>
-        </div>
-    </nav>
-
     <!-- Hero Section -->
-    <section class="academic-hero">
-        <div class="container">
-            <h2>Votez en toute sécurité</h2>
-            <p>Plateforme officielle de vote électronique sécurisé de l'UCAO-UUC pour les élections universitaires.</p>
-            <div style="margin-top: 30px;">
-                <a href="/user/register" class="academic-btn btn-primary">Créer un compte</a>
-                <a href="#how-it-works" class="academic-btn btn-secondary">Comment ça marche</a>
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="hero-title">Vote Électronique Sécurisé</h1>
+            <p class="hero-subtitle">Plateforme officielle de vote en ligne de l'Université Catholique de l'Afrique de
+                l'Ouest - Unité Universitaire de Cotonou</p>
+            <div class="hero-actions">
+                <a href="/user/register" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Créer un compte
+                </a>
+                <a href="#how-it-works" class="btn btn-secondary">
+                    <i class="fas fa-info-circle"></i> Comment ça marche
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="academic-features" id="features">
+    <!-- Features Section -->
+    <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">Notre Plateforme de Vote</h2>
+            <h2 class="section-title">Une plateforme de confiance</h2>
+            <p class="section-subtitle">Découvrez les fonctionnalités qui font de notre système de vote la référence en
+                matière de sécurité et de transparence</p>
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        <i class="fas fa-lock"></i>
                     </div>
-                    <h3>Sécurité Maximale</h3>
+                    <h3 class="feature-title">Sécurité Maximale</h3>
+                    <p class="feature-description">Chiffrement de bout en bout et protocoles de sécurité avancés pour
+                        garantir l'intégrité du vote.</p>
                 </div>
+
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-id-card" aria-hidden="true"></i>
+                        <i class="fas fa-user-shield"></i>
                     </div>
-                    <h3>Authentification Forte</h3>
+                    <h3 class="feature-title">Anonymat Garanti</h3>
+                    <p class="feature-description">Votez en toute confidentialité avec l'assurance que votre choix reste
+                        secret.</p>
                 </div>
+
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                        <i class="fas fa-mobile-alt"></i>
                     </div>
-                    <h3>Multi-Device</h3>
+                    <h3 class="feature-title">Accessible Partout</h3>
+                    <p class="feature-description">Accédez à la plateforme depuis n'importe quel appareil connecté à
+                        internet.</p>
                 </div>
+
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-user-shield" aria-hidden="true"></i>
+                        <i class="fas fa-chart-pie"></i>
                     </div>
-                    <h3>Anonymat Garanti</h3>
+                    <h3 class="feature-title">Résultats Transparents</h3>
+                    <p class="feature-description">Visualisez les résultats en temps réel avec des statistiques
+                        détaillées.</p>
                 </div>
+
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                        <i class="fas fa-gavel"></i>
                     </div>
-                    <h3>Résultats en Temps Réel</h3>
+                    <h3 class="feature-title">Conforme à la Loi</h3>
+                    <p class="feature-description">Respect strict de la réglementation en vigueur pour les élections
+                        universitaires.</p>
                 </div>
+
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-gavel" aria-hidden="true"></i>
+                        <i class="fas fa-headset"></i>
                     </div>
-                    <h3>Conforme à la Réglementation</h3>
+                    <h3 class="feature-title">Support 24/7</h3>
+                    <p class="feature-description">Une équipe dédiée pour vous accompagner tout au long du processus
+                        électoral.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Elections -->
-    <section class="elections-section" id="elections">
+    <!-- Elections Section -->
+    <section class="elections" id="elections">
         <div class="container">
             <h2 class="section-title">Élections en Cours</h2>
+            <p class="section-subtitle">Participez aux scrutins ouverts et faites entendre votre voix</p>
+
             <div class="loading" id="loading-elections"></div>
             <div class="elections-grid" id="elections-container">
-                <!-- Contenu chargé dynamiquement -->
+                <!-- Élections chargées dynamiquement -->
             </div>
         </div>
     </section>
 
-    <!-- How it works -->
-    <section class="academic-features" id="how-it-works">
+    <!-- How it Works -->
+    <section class="how-it-works" id="how-it-works">
         <div class="container">
             <h2 class="section-title">Comment voter en 3 étapes</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <span class="step-number">1</span>
-                    </div>
-                    <h3>Authentification</h3>
-                    <p>Connectez-vous avec vos identifiants après avoir crée un compte.</p>
+            <p class="section-subtitle">Un processus simple et sécurisé pour exercer votre droit de vote</p>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Authentification</h3>
+                    <p class="step-description">Connectez-vous avec vos identifiants universitaires pour accéder à la
+                        plateforme.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <span class="step-number">2</span>
-                    </div>
-                    <h3>Sélection</h3>
-                    <p>Consultez les programmes et sélectionnez votre candidat ou option préférée dans votre dashboard.
-                    </p>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Sélection</h3>
+                    <p class="step-description">Consultez les programmes des candidats et faites votre choix en toute
+                        connaissance.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <span class="step-number">3</span>
-                    </div>
-                    <h3>Confirmation</h3>
-                    <p>Validez définitivement votre choix qui sera enregistré de manière sécurisée.</p>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Confirmation</h3>
+                    <p class="step-description">Validez définitivement votre vote qui sera enregistré de manière
+                        sécurisée et anonyme.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- FAQ Section -->
-    <section class="faq-section" id="faq">
+    <section class="faq" id="faq">
         <div class="container">
             <h2 class="section-title">Questions Fréquentes</h2>
+            <p class="section-subtitle">Trouvez les réponses aux questions les plus courantes sur notre plateforme de
+                vote</p>
+
             <div class="faq-container">
                 <div class="faq-item">
                     <div class="faq-question">Comment m'inscrire pour voter ?</div>
                     <div class="faq-answer">
-                        <p>Pour vous inscrire, cliquez sur le bouton “S’inscrire” dans le menu, puis remplissez
-                            soigneusement vos informations
-                            personnelles.</p>
+                        <p>Pour vous inscrire, cliquez sur le bouton "S'inscrire" en haut de la page, puis remplissez le
+                            formulaire avec vos informations personnelles et universitaires. Vous recevrez un email de
+                            confirmation pour activer votre compte.</p>
                     </div>
                 </div>
+
                 <div class="faq-item">
                     <div class="faq-question">Puis-je modifier mon vote après confirmation ?</div>
                     <div class="faq-answer">
                         <p>Non, pour garantir l'intégrité du scrutin, un vote confirmé est définitif et ne peut être
-                            modifié.</p>
+                            modifié. Nous vous encourageons à bien réfléchir à votre choix avant de confirmer.</p>
                     </div>
                 </div>
+
                 <div class="faq-item">
                     <div class="faq-question">Comment vérifier que mon vote a bien été pris en compte ?</div>
                     <div class="faq-answer">
-                        <p>Vous recevez immédiatement un accusé de réception avec un code de vérification anonyme qui
-                            vous permet de vérifier ultérieurement que votre vote a bien été comptabilisé sans révéler
-                            votre choix.</p>
+                        <p>Vous recevez immédiatement un accusé de réception avec un code de vérification anonyme. Ce
+                            code vous permet de vérifier ultérieurement que votre vote a bien été comptabilisé sans
+                            révéler votre choix.</p>
                     </div>
                 </div>
+
                 <div class="faq-item">
                     <div class="faq-question">Quelles sont les mesures contre la fraude ?</div>
                     <div class="faq-answer">
-                        <p>Notre système utilise : chiffrement de bout en bout, limitation à un vote par électeur,
-                            journal d'audit inviolable, et vérification par huissier indépendant.</p>
+                        <p>Notre système utilise plusieurs couches de sécurité : chiffrement de bout en bout, limitation
+                            à un vote par électeur, journal d'audit inviolable, et vérification par huissier
+                            indépendant. Toutes les actions sont tracées et auditées.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA -->
-    <section class="academic-cta" id="cta">
+    <!-- CTA Section -->
+    <section class="cta" id="cta">
         <div class="container">
-            <h2>Prêt à exercer votre droit de vote ?</h2>
-            <p>Accédez à la plateforme avec vos identifiants universitaires pour participer aux élections en cours.</p>
-            <a href="/user/login" class="academic-btn btn-primary" style="margin-top: 20px;">Accéder au Portail de
-                Vote</a>
+            <h2 class="cta-title">Prêt à exercer votre droit de vote ?</h2>
+            <p class="cta-description">Rejoignez les milliers d'étudiants qui font confiance à notre plateforme
+                sécurisée pour participer à la vie démocratique de l'université.</p>
+            <a href="/user/register" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Créer mon compte
+            </a>
         </div>
     </section>
 
     <!-- Footer -->
-    <!-- Footer -->
-    <footer class="university-footer">
-        <div class="footer-container">
+    <footer class="footer" id="contact">
+        <div class="container">
             <div class="footer-grid">
-                <!-- Colonne 1 : À propos -->
                 <div class="footer-column">
                     <div class="footer-logo">
                         <i class="fas fa-vote-yea"></i>
-                        <span>UCAO-Vote</span>
+                        UCAO-Vote
                     </div>
                     <p class="footer-description">
                         Plateforme officielle de vote électronique sécurisé de l'Université Catholique de l'Afrique de
-                        l'Ouest.
+                        l'Ouest - Unité Universitaire de Cotonou.
                     </p>
-                    <div class="footer-contact">
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Lot 246, rue de l'hôpital St Jean - Cotonou</span>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Colonne 2 : Ressources -->
+                <div class="footer-column">
+                    <h4>Liens Rapides</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features"><i class="fas fa-arrow-right"></i> Fonctionnalités</a></li>
+                        <li><a href="#elections"><i class="fas fa-arrow-right"></i> Élections</a></li>
+                        <li><a href="#how-it-works"><i class="fas fa-arrow-right"></i> Comment voter</a></li>
+                        <li><a href="#faq"><i class="fas fa-arrow-right"></i> FAQ</a></li>
+                    </ul>
+                </div>
+
                 <div class="footer-column">
                     <h4>Ressources</h4>
                     <ul class="footer-links">
-                        <li><a href="https://www.ucaobenin.org/" target="_blank" rel="noopener">
-                                <i class="fas fa-external-link-alt"></i>Site Officiel UCAO-UUC
-                            </a></li>
-                        <li><a href="reglement-electoral.pdf">
-                                <i class="fas fa-file-pdf"></i>Règlement Électoral
-                            </a></li>
-                        <li><a href="guide-vote.pdf">
-                                <i class="fas fa-file-pdf"></i>Guide du Votant
-                            </a></li>
+                        <li><a href="#"><i class="fas fa-file-pdf"></i> Règlement électoral</a></li>
+                        <li><a href="#"><i class="fas fa-book"></i> Guide de l'électeur</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Charte de confidentialité</a></li>
+                        <li><a href="#"><i class="fas fa-gavel"></i> Mentions légales</a></li>
                     </ul>
                 </div>
 
-                <!-- Colonne 3 : Assistance -->
                 <div class="footer-column">
-                    <h4>Assistance</h4>
-                    <ul class="footer-links">
-                        <li><a href="mailto:support-vote@ucao-uuc.com">
-                                <i class="fas fa-envelope"></i>support-vote@ucao-uuc.com
-                            </a></li>
-                        <li><a href="tel:+229010000000">
-                                <i class="fas fa-phone"></i>+229 01 00 00 00 00
-                            </a></li>
-                        <li><a href="declaration_souci.html">
-                                <i class="fas fa-exclamation-circle"></i>Déclarer un souci
-                            </a></li>
-                    </ul>
+                    <h4>Contact</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Lot 246, rue de l'hôpital St Jean - Cotonou</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+229 01 00 00 00</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>support@ucao-vote.bj</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Barre du bas -->
             <div class="footer-bottom">
-                <div class="footer-copyright">
-                    <p>&copy; 2024 UCAO-UUC - Tous droits réservés</p>
-                    <p>Plateforme développée par UCAO-TECH</p>
-                </div>
+                <p class="copyright">© 2024 UCAO-UUC. Tous droits réservés. | Développé par UCAO-TECH</p>
             </div>
         </div>
     </footer>
-
-    <!-- Scripts -->
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script>
+        // Configuration de l'API
+        const API_BASE_URL = CONFIG.API.BASE_URL;
+        const ENDPOINTS = {
+            ELECTIONS: '/api/election',
+            ACTIVE_ELECTIONS: '/api/election/active'
+        };
 
+        // Éléments DOM
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const electionsContainer = document.getElementById('elections-container');
+        const loadingElement = document.getElementById('loading-elections');
+
+        // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
-            // Configuration
-            const API_BASE = CONFIG.API.BASE_URL;
-            const ELECTION_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.ELECTION.LIST;
-            // Load active elections
-            loadActiveElections();
-
-            // Initialize FAQ
-            initFAQ();
-
-            // Add focus styles for accessibility
-            addFocusStyles();
+            initializeApp();
+            setupEventListeners();
         });
 
-        async function loadActiveElections() {
-            const loader = document.getElementById('loading-elections');
-            const container = document.getElementById('elections-container');
+        // Initialisation de l'application
+        function initializeApp() {
+            // Charger les élections actives
+            loadActiveElections();
 
-            try {
-                const response = await fetch(`${API_BASE}${ELECTION_LIST_ENDPOINT}`);
-                if (response.ok) {
-                    const elections = await response.json();
-                    displayElections(elections);
-                }
-
-                if (elections.length === 0) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                            <h3 style="color: var(--bleu-nuit); margin-bottom: 15px;">Aucune élection en cours</h3>
-                            <p>Les prochaines élections seront annoncées par voie officielle. Consultez régulièrement la plateforme.</p>
-                        </div>
-                    `;
-                } else {
-                    displayElections(elections);
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--rouge-bordeaux);">
-                        <h3 style="margin-bottom: 15px;">Service temporairement indisponible</h3>
-                        <p>Nous rencontrons des difficultés techniques. Veuillez réessayer plus tard.</p>
-                        <button onclick="loadActiveElections()" class="academic-btn btn-primary" style="margin-top: 20px;">
-                            <i class="fas fa-sync-alt"></i> Réessayer
-                        </button>
-                    </div>
-                `;
-            } finally {
-                loader.style.display = 'none';
-            }
+            // Initialiser FAQ
+            initFAQ();
         }
 
-        // Mock function to simulate API call
-        async function mockFetchElections() {
-            // Simulate network delay
-            await new Promise(resolve => setTimeout(resolve, 800));
+        // Configuration des écouteurs d'événements
+        function setupEventListeners() {
+            // Menu mobile
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
 
-            return [
-                {
-                    id: "elec-2023-delegues",
-                    titre: "Élection des Délégués 2023-2024",
-                    description: "Élection des représentants étudiants pour chaque promotion de l'UCAO-UUC.",
-                    dateDebut: "2023-11-01",
-                    dateFin: "2023-11-15",
-                    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                    candidatesCount: 28,
-                    status: "active"
-                },
-                {
-                    id: "elec-2023-conseil",
-                    titre: "Conseil Académique",
-                    description: "Élection des représentants étudiants au conseil académique pour un mandat de 2 ans.",
-                    dateDebut: "2023-11-10",
-                    dateFin: "2023-11-25",
-                    imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                    candidatesCount: 15,
-                    status: "active"
-                }
-            ];
+            // Fermer le menu en cliquant sur les liens
+            navLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
         }
 
-        function displayElections(elections) {
-            const container = document.getElementById('elections-container');
-
-            container.innerHTML = elections.map(election => `
-                <div class="election-card">
-                    <div class="election-badge">${election.status === 'active' ? 'En Cours' : 'À Venir'}</div>
-                    <div class="election-image" style="background-image: url('${election.imageUrl}');" 
-                         aria-label="Image illustrative pour ${election.titre}"></div>
-                    <div class="election-content">
-                        <h3>${election.titre}</h3>
-                        <p>${election.description}</p>
-                        <div class="election-meta">
-                            <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> ${formatDateRange(election.dateDebut, election.dateFin)}</span>
-                            <span><i class="fas fa-users" aria-hidden="true"></i> ${election.candidatesCount} candidats</span>
-                        </div>
-                        <div class="election-actions">
-                            <a href="vote.html?election=${election.id}" class="academic-btn btn-primary btn-small">
-                                <i class="fas fa-vote-yea" aria-hidden="true"></i> Voter
-                            </a>
-                            <a href="candidats.html?election=${election.id}" class="academic-btn btn-secondary btn-small">
-                                <i class="fas fa-list-ul" aria-hidden="true"></i> Candidats
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        // Menu mobile
+        function toggleMobileMenu() {
+            mobileMenuBtn.classList.toggle('active');
+            navMenu.classList.toggle('active');
         }
 
-        function formatDateRange(start, end) {
-            const options = { day: 'numeric', month: 'numeric' };
-            const startDate = new Date(start).toLocaleDateString('fr-FR', options);
-            const endDate = new Date(end).toLocaleDateString('fr-FR', options);
-            return `Du ${startDate} au ${endDate}`;
+        function closeMobileMenu() {
+            mobileMenuBtn.classList.remove('active');
+            navMenu.classList.remove('active');
         }
 
+        // FAQ
         function initFAQ() {
             const faqItems = document.querySelectorAll('.faq-item');
 
@@ -1123,7 +1172,7 @@
                     item.classList.toggle('active');
                 });
 
-                // Keyboard accessibility
+                // Accessibilité clavier
                 question.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -1133,13 +1182,174 @@
             });
         }
 
-        function addFocusStyles() {
-            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-            const focusableContent = document.querySelectorAll(focusableElements);
+        // Charger les élections actives depuis l'API
+        async function loadActiveElections() {
+            try {
+                // Afficher l'indicateur de chargement
+                if (loadingElement) {
+                    loadingElement.style.display = 'block';
+                }
 
-            focusableContent.forEach(element => {
-                element.setAttribute('tabindex', '0');
-            });
+                // Appel à l'API pour récupérer les élections actives
+                const response = await fetch(`${API_BASE_URL}${ENDPOINTS.ELECTIONS}`);
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                const elections = await response.json();
+
+                // Afficher les élections
+                displayElections(elections);
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des élections:', error);
+                showElectionsError();
+            } finally {
+                // Masquer l'indicateur de chargement
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            }
+        }
+
+        // Afficher les élections
+        function displayElections(elections) {
+            if (!electionsContainer) return;
+
+            if (!elections || elections.length === 0) {
+                electionsContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-calendar-times" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3 style="color: var(--bleu-nuit); margin-bottom: 15px;">Aucune élection en cours</h3>
+                        <p>Les prochaines élections seront annoncées par voie officielle. Consultez régulièrement la plateforme.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            electionsContainer.innerHTML = elections.map(election => `
+                <div class="election-card">
+                    <div class="election-header">
+                        <span class="election-badge">${getElectionStatusBadge(election)}</span>
+                        <div class="election-image" style="background-image: url('${election.imageUrl || getDefaultElectionImage(election.type)}');">
+                            ${!election.imageUrl ? `<div class="election-image-placeholder"><i class="fas fa-vote-yea"></i></div>` : ''}
+                        </div>
+                    </div>
+                    <div class="election-content">
+                        <h3 class="election-title">${election.titre}</h3>
+                        <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                        <div class="election-meta">
+                            <span><i class="fas fa-calendar-alt"></i> ${formatDateRange(election.dateDebut, election.dateFin)}</span>
+                            <span><i class="fas fa-user-tie"></i> ${getElectionTypeLabel(election.type)}</span>
+                        </div>
+                        <div class="election-actions">
+                            <a href="/user/register?redirect=vote" class="btn btn-primary btn-small">
+                                <i class="fas fa-user-plus"></i> S'inscrire pour voter
+                            </a>
+                            <button class="btn btn-secondary btn-small" onclick="showElectionDetails(${election.id})">
+                                <i class="fas fa-info-circle"></i> Détails
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Afficher une erreur de chargement des élections
+        function showElectionsError() {
+            if (!electionsContainer) return;
+
+            electionsContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--rouge-bordeaux);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3 style="margin-bottom: 15px;">Service temporairement indisponible</h3>
+                    <p>Nous rencontrons des difficultés techniques. Veuillez réessayer plus tard.</p>
+                    <button onclick="loadActiveElections()" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-sync-alt"></i> Réessayer
+                    </button>
+                </div>
+            `;
+        }
+
+        // Obtenir le badge de statut de l'élection
+        function getElectionStatusBadge(election) {
+            const now = new Date();
+            const startDate = new Date(election.dateDebut);
+            const endDate = new Date(election.dateFin);
+
+            if (now < startDate) {
+                return 'À Venir';
+            } else if (now >= startDate && now <= endDate) {
+                return 'En Cours';
+            } else {
+                return 'Terminée';
+            }
+        }
+
+        // Obtenir l'image par défaut selon le type d'élection
+        function getDefaultElectionImage(electionType) {
+            const images = {
+                'SALLE': 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                'ECOLE': 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                'UNIVERSITE': 'https://images.unsplash.com/photo-1541336032412-2048a678540d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+            };
+
+            return images[electionType] || 'https://images.unsplash.com/photo-1541336032412-2048a678540d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80';
+        }
+
+        // Formater la plage de dates
+        function formatDateRange(start, end) {
+            if (!start || !end) return 'Dates non définies';
+
+            try {
+                const startDate = new Date(start);
+                const endDate = new Date(end);
+
+                const options = { day: 'numeric', month: 'long' };
+                const startStr = startDate.toLocaleDateString('fr-FR', options);
+                const endStr = endDate.toLocaleDateString('fr-FR', options);
+
+                return `Du ${startStr} au ${endStr}`;
+            } catch (error) {
+                console.error('Erreur format date:', error);
+                return 'Dates invalides';
+            }
+        }
+
+        // Obtenir le libellé du type d'élection
+        function getElectionTypeLabel(type) {
+            const types = {
+                'SALLE': 'Responsables de Salle',
+                'ECOLE': 'Délégués d\'École',
+                'UNIVERSITE': 'Délégués Universitaires'
+            };
+
+            return types[type] || type;
+        }
+
+        // Afficher les détails d'une élection (fonctionnalité à implémenter)
+        function showElectionDetails(electionId) {
+            // Redirection vers la page de détails ou ouverture d'une modale
+            alert(`Détails de l'élection ${electionId} - Cette fonctionnalité sera bientôt disponible!`);
+            // window.location.href = `/election/details.html?id=${electionId}`;
+        }
+
+        // Fonction pour formater les dates
+        function formatDate(dateString) {
+            if (!dateString) return 'Date non définie';
+
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                console.error('Erreur format date:', error);
+                return 'Date invalide';
+            }
         }
     </script>
 </body>
