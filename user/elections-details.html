@@ -657,7 +657,6 @@
                 </div>
             </div>
 
-
             <!-- Liste des élections -->
             <div class="elections-grid" id="electionsGrid">
                 <div class="loading">
@@ -700,11 +699,13 @@
         // Configuration
         const API_BASE_URL = CONFIG.API.BASE_URL;
         const ELECTIONS_API = `${API_BASE_URL}/api/election`;
+        const STUDENT_ELECTIONS_API = `${API_BASE_URL}/api/election/student`;
         const CANDIDATES_API = `${API_BASE_URL}/api/candidats`;
         const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
 
         // Variables globales
         let allElections = [];
+        let studentElections = [];
         let allCandidates = [];
         let userProfile = null;
 
@@ -765,14 +766,29 @@
             }
         }
 
+        // Charger les élections spécifiques à l'étudiant
+        async function loadStudentElections() {
+            try {
+                const data = await fetchWithAuth(STUDENT_ELECTIONS_API);
+                if (data) {
+                    studentElections = data;
+                    displayStudentElections(data);
+                    return data;
+                }
+                return [];
+            } catch (error) {
+                console.error('Erreur chargement élections étudiant:', error);
+                showStudentElectionsError('Impossible de charger vos élections');
+                return [];
+            }
+        }
 
         // Charger toutes les élections
-        async function loadElections() {
+        async function loadAllElections() {
             try {
                 const data = await fetchWithAuth(ELECTIONS_API);
                 if (data) {
                     allElections = data;
-                    displayStudentElections(data);
                     displayElections(data);
                     return data;
                 }
@@ -805,27 +821,7 @@
         function displayStudentElections(elections) {
             const container = document.getElementById('studentElectionsGrid');
 
-            // Si le profil utilisateur n'est pas encore chargé, afficher un message
-            if (!userProfile) {
-                container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-                return;
-            }
-
-            // Filtrer en fonction du profil utilisateur
-            const studentElections = elections.filter(election => {
-                // Vérifier si l'élection correspond au profil de l'utilisateur
-                const ecoleMatch = !election.ecole || election.ecole === userProfile.ecole;
-                const filiereMatch = !election.filiere || election.filiere === userProfile.filiere;
-                const anneeMatch = !election.annee || election.annee === userProfile.annee;
-
-                // Vérifier également le statut de l'élection (doit être active ou à venir)
-                const status = getElectionStatus(election);
-                const statusMatch = status === 'active' || status === 'upcoming';
-
-                return ecoleMatch && filiereMatch && anneeMatch && statusMatch;
-            });
-
-            if (studentElections.length === 0) {
+            if (!elections || elections.length === 0) {
                 container.innerHTML = `
                     <div class="no-candidates">
                         <i class="fa-solid fa-calendar-xmark"></i>
@@ -839,7 +835,7 @@
 
             container.innerHTML = '';
 
-            studentElections.forEach(election => {
+            elections.forEach(election => {
                 const electionCard = document.createElement('div');
                 electionCard.className = 'election-card';
 
@@ -848,45 +844,44 @@
                 const statusText = getStatusText(status);
 
                 electionCard.innerHTML = `
-            <div class="election-header">
-                <div>
-                    <h3 class="election-title">${election.titre}</h3>
-                    <span class="election-type">${getElectionTypeLabel(election.type)}</span>
-                </div>
-                <span class="election-status ${statusClass}">${statusText}</span>
-            </div>
+                    <div class="election-header">
+                        <div>
+                            <h3 class="election-title">${election.titre}</h3>
+                            <span class="election-type">${getElectionTypeLabel(election.type)}</span>
+                        </div>
+                        <span class="election-status ${statusClass}">${statusText}</span>
+                    </div>
 
-            <div class="election-meta">
-                <div class="meta-item">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <strong>École:</strong> ${election.ecole || 'Toutes écoles'}
-                </div>
-                <div class="meta-item">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <strong>Filière:</strong> ${election.filiere || 'Toutes filières'}
-                </div>
-                <div class="meta-item">
-                    <i class="fa-solid fa-calendar"></i>
-                    <strong>Année:</strong> ${election.annee || 'Toutes années'}
-                </div>
-                <div class="meta-item">
-                    <i class="fa-solid fa-user-tie"></i>
-                    <strong>Poste:</strong> ${getDelegueTypeLabel(election.delegueType)}
-                </div>
-            </div>
+                    <div class="election-meta">
+                        <div class="meta-item">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <strong>École:</strong> ${election.ecole || 'Toutes écoles'}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <strong>Filière:</strong> ${election.filiere || 'Toutes filières'}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-calendar"></i>
+                            <strong>Année:</strong> ${election.annee || 'Toutes années'}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <strong>Poste:</strong> ${getDelegueTypeLabel(election.delegueType)}
+                        </div>
+                    </div>
 
-            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                    <p class="election-description">${election.description || 'Aucune description disponible'}</p>
 
-            <button class="view-details-btn" onclick="window.location.href='candidature.html?id=${election.id}'">
-                <i class="fa-solid fa-file-signature"></i>
-                Se porter candidat
-            </button>
-        `;
+                    <button class="view-details-btn" onclick="window.location.href='candidature.html?id=${election.id}'">
+                        <i class="fa-solid fa-file-signature"></i>
+                        Se porter candidat
+                    </button>
+                `;
 
                 container.appendChild(electionCard);
             });
         }
-
 
         // Afficher les élections
         function displayElections(elections) {
@@ -1171,6 +1166,20 @@
             `;
         }
 
+        function showStudentElectionsError(message) {
+            const container = document.getElementById('studentElectionsGrid');
+            container.innerHTML = `
+                <div class="no-candidates">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="view-details-btn" onclick="loadData()">
+                        <i class="fa-solid fa-refresh"></i>
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+
         // Filtrer les élections
         function setupFilters() {
             const typeFilter = document.getElementById('typeFilter');
@@ -1218,8 +1227,11 @@
         async function loadData() {
             try {
                 await loadUserProfile();
-                await loadElections();
-                await loadCandidates();
+                await Promise.all([
+                    loadStudentElections(),
+                    loadAllElections(),
+                    loadCandidates()
+                ]);
                 setupFilters();
             } catch (error) {
                 console.error('Erreur chargement données:', error);
