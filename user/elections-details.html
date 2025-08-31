@@ -633,6 +633,20 @@
                 </div>
             </div>
 
+            <!-- Section des élections spécifiques à l'étudiant -->
+            <div class="candidates-section">
+                <h2 class="section-title">
+                    <i class="fa-solid fa-star"></i>
+                    Mes élections disponibles
+                </h2>
+                <div class="elections-grid" id="studentElectionsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- Liste des élections -->
             <div class="elections-grid" id="electionsGrid">
                 <div class="loading">
@@ -740,12 +754,14 @@
             }
         }
 
+
         // Charger toutes les élections
         async function loadElections() {
             try {
                 const data = await fetchWithAuth(ELECTIONS_API);
                 if (data) {
                     allElections = data;
+                    displayStudentElections(data);
                     displayElections(data);
                     return data;
                 }
@@ -773,6 +789,75 @@
                 return [];
             }
         }
+
+        // Afficher les élections spécifiques à l'étudiant
+        function displayStudentElections(elections) {
+            const container = document.getElementById('studentElectionsGrid');
+
+            // Filtrer en fonction du profil utilisateur
+            const studentElections = elections.filter(election => {
+                return (
+                    (!election.ecole || election.ecole === userProfile.ecole) &&
+                    (!election.filiere || election.filiere === userProfile.filiere) &&
+                    (!election.annee || election.annee === userProfile.annee)
+                );
+            });
+
+            if (studentElections.length === 0) {
+                container.innerHTML = '<div class="no-candidates">Aucune élection disponible pour vous</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            studentElections.forEach(election => {
+                const electionCard = document.createElement('div');
+                electionCard.className = 'election-card';
+
+                const status = getElectionStatus(election);
+                const statusClass = `status-${status}`;
+                const statusText = getStatusText(status);
+
+                electionCard.innerHTML = `
+            <div class="election-header">
+                <div>
+                    <h3 class="election-title">${election.titre}</h3>
+                    <span class="election-type">${getElectionTypeLabel(election.type)}</span>
+                </div>
+                <span class="election-status ${statusClass}">${statusText}</span>
+            </div>
+
+            <div class="election-meta">
+                <div class="meta-item">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <strong>École:</strong> ${election.ecole || 'Toutes écoles'}
+                </div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <strong>Filière:</strong> ${election.filiere || 'Toutes filières'}
+                </div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-calendar"></i>
+                    <strong>Année:</strong> ${election.annee || 'Toutes années'}
+                </div>
+                <div class="meta-item">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <strong>Poste:</strong> ${getDelegueTypeLabel(election.delegueType)}
+                </div>
+            </div>
+
+            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+
+            <button class="view-details-btn" onclick="window.location.href='candidature.html?id=${election.id}'">
+                <i class="fa-solid fa-file-signature"></i>
+                Se porter candidat
+            </button>
+        `;
+
+                container.appendChild(electionCard);
+            });
+        }
+
 
         // Afficher les élections
         function displayElections(elections) {
