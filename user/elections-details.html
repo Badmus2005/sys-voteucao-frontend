@@ -173,7 +173,7 @@
         /* ÉLECTIONS GRID */
         .elections-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -185,6 +185,18 @@
             box-shadow: var(--box-shadow);
             transition: var(--transition);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .election-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--or), var(--rouge-bordeaux));
         }
 
         .election-card:hover {
@@ -200,8 +212,8 @@
         }
 
         .election-title {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: var(--bleu-nuit);
             margin-bottom: 0.5rem;
         }
@@ -230,10 +242,18 @@
             gap: 0.5rem;
         }
 
+        .meta-item strong {
+            color: var(--bleu-nuit);
+            min-width: 100px;
+        }
+
         .election-description {
             margin-bottom: 1rem;
             line-height: 1.5;
             color: #555;
+            padding: 0.8rem;
+            background: var(--gris-clair);
+            border-radius: 8px;
         }
 
         .election-status {
@@ -300,7 +320,7 @@
 
         .candidates-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
         }
 
@@ -309,6 +329,18 @@
             border-radius: 12px;
             padding: 1.5rem;
             transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--or), var(--rouge-bordeaux));
         }
 
         .candidate-header {
@@ -319,8 +351,8 @@
         }
 
         .candidate-avatar {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--or);
@@ -331,22 +363,25 @@
         }
 
         .candidate-name {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--bleu-nuit);
             margin-bottom: 0.25rem;
+            font-size: 1.1rem;
         }
 
         .candidate-details {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #666;
+            margin-bottom: 0.25rem;
         }
 
         .candidate-slogan {
             font-style: italic;
-            color: #777;
+            color: var(--rouge-bordeaux);
             margin-bottom: 1rem;
             padding-left: 0.5rem;
             border-left: 3px solid var(--or);
+            font-weight: 500;
         }
 
         .candidate-program {
@@ -366,7 +401,7 @@
             left: 0;
             right: 0;
             height: 30px;
-            background: linear-gradient(transparent, white);
+            background: linear-gradient(transparent, var(--gris-clair));
         }
 
         .view-full-program {
@@ -377,6 +412,11 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .view-full-program:hover {
+            color: var(--rouge-bordeaux);
         }
 
         .no-candidates {
@@ -411,7 +451,8 @@
             position: relative;
             z-index: 2;
             color: var(--bleu-nuit);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         /* LOADING */
@@ -467,7 +508,7 @@
             background: white;
             border-radius: 12px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: var(--box-shadow-hover);
@@ -479,11 +520,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--bleu-nuit);
+            color: white;
+            border-radius: 12px 12px 0 0;
         }
 
         .modal-title {
             font-size: 1.5rem;
-            color: var(--bleu-nuit);
+            color: white;
         }
 
         .modal-close {
@@ -491,7 +535,7 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: #666;
+            color: white;
         }
 
         .modal-body {
@@ -762,15 +806,19 @@
                     <div class="election-meta">
                         <div class="meta-item">
                             <i class="fa-solid fa-graduation-cap"></i>
-                            <span>${election.ecole || 'Toutes écoles'}</span>
+                            <strong>École:</strong> ${election.ecole || 'Toutes écoles'}
                         </div>
                         <div class="meta-item">
                             <i class="fa-solid fa-layer-group"></i>
-                            <span>${election.niveau || 'Tous niveaux'}</span>
+                            <strong>Filière:</strong> ${election.filiere || 'Toutes filières'}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-calendar"></i>
+                            <strong>Année:</strong> ${election.annee || 'Toutes années'}
                         </div>
                         <div class="meta-item">
                             <i class="fa-solid fa-user-tie"></i>
-                            <span>${getDelegueTypeLabel(election.delegueType)}</span>
+                            <strong>Poste:</strong> ${getDelegueTypeLabel(election.delegueType)}
                         </div>
                     </div>
 
@@ -824,10 +872,10 @@
 
                     candidateCard.innerHTML = `
                         <div class="candidate-header">
-                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
+                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/70'}" 
                                  alt="${candidate.prenom} ${candidate.nom}" 
                                  class="candidate-avatar"
-                                 onerror="this.src='https://via.placeholder.com/60'">
+                                 onerror="this.src='https://via.placeholder.com/70'">
                             <div class="candidate-info">
                                 <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
                                 <div class="candidate-details">
@@ -845,7 +893,7 @@
                             ${candidate.programme?.substring(0, 150) || 'Aucun programme disponible'}...
                         </div>
 
-                        <a href="#" class="view-full-program" onclick="event.stopPropagation();showCandidateProgram('${candidate.prenom} ${candidate.nom}', '${candidate.programme || 'Aucun programme disponible'}')">
+                        <a href="profil-candidat.html?id=${candidate.id}" class="view-full-program">
                             <i class="fa-solid fa-book-open"></i>
                             Voir le programme complet
                         </a>
@@ -881,11 +929,15 @@
                     </div>
                     <div class="meta-item">
                         <i class="fa-solid fa-layer-group"></i>
-                        <strong>Niveau:</strong> ${election.niveau || 'Non spécifié'}
+                        <strong>Filière:</strong> ${election.filiere || 'Non spécifié'}
+                    </div>
+                    <div class="meta-item">
+                        <i class="fa-solid fa-calendar"></i>
+                        <strong>Année:</strong> ${election.annee || 'Non spécifié'}
                     </div>
                     <div class="meta-item">
                         <i class="fa-solid fa-user-tie"></i>
-                        <strong>Type:</strong> ${getDelegueTypeLabel(election.delegueType)}
+                        <strong>Poste:</strong> ${getDelegueTypeLabel(election.delegueType)}
                     </div>
                     <div class="meta-item">
                         <i class="fa-solid fa-calendar-days"></i>
@@ -912,10 +964,10 @@
                     ${allCandidates.filter(c => c.electionId === election.id).map(candidate => `
                         <div class="candidate-card">
                             <div class="candidate-header">
-                                <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
+                                <img src="${candidate.photoUrl || 'https://via.placeholder.com/70'}" 
                                      alt="${candidate.prenom} ${candidate.nom}" 
                                      class="candidate-avatar"
-                                     onerror="this.src='https://via.placeholder.com/60'">
+                                     onerror="this.src='https://via.placeholder.com/70'">
                                 <div class="candidate-info">
                                     <h4 class="candidate-name">${candidate.prenom} ${candidate.nom}</h4>
                                     <div class="candidate-details">
@@ -925,6 +977,10 @@
                                 </div>
                             </div>
                             ${candidate.slogan ? `<div class="candidate-slogan">"${candidate.slogan}"</div>` : ''}
+                            <a href="profil-candidat.html?id=${candidate.id}" class="view-full-program">
+                                <i class="fa-solid fa-user"></i>
+                                Voir le profil complet
+                            </a>
                         </div>
                     `).join('')}
 
@@ -934,11 +990,6 @@
             `;
 
             modal.classList.add('active');
-        }
-
-        // Afficher le programme complet d'un candidat
-        function showCandidateProgram(candidateName, program) {
-            alert(`Programme de ${candidateName}:\n\n${program}`);
         }
 
         // Fonctions utilitaires
@@ -976,7 +1027,14 @@
 
         function getDelegueTypeLabel(type) {
             if (!type) return 'Non spécifié';
-            return type === 'PREMIER' ? 'Premier Délégué' : 'Deuxième Délégué';
+
+            const types = {
+                'PREMIER': 'Premier Responsable',
+                'DEUXIEME': 'Deuxième Responsable',
+                'DELEGUE': 'Délégué'
+            };
+
+            return types[type] || type;
         }
 
         function formatDate(dateString) {
