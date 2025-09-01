@@ -1,13 +1,16 @@
 /**
  * Configuration centralisée du système de vote UCAO-UUC
+ * Version modulaire pour l'application frontend
  */
 
 const CONFIG = {
     // Configuration de l'API
     API: {
-        // Utiliser l'URL du backend Railway en production
+        // URL du backend Railway en production
         BASE_URL: 'https://sys-voteucao-backend-production-311c.up.railway.app',
+
         ENDPOINTS: {
+            // Authentification
             AUTH: {
                 LOGIN: '/api/userLogin',
                 REGISTER: '/api/userRegister',
@@ -18,6 +21,8 @@ const CONFIG = {
                 RESET_PASSWORD: '/api/userLogin/reset-password',
                 TEST: '/api/userLogin/test'
             },
+
+            // Élections - ENDPOINTS PRINCIPAUX À UTILISER
             ELECTION: {
                 LIST: '/api/election',
                 DETAILS: (id) => `/api/election/${id}`,
@@ -25,24 +30,49 @@ const CONFIG = {
                 CLOSE: (id) => `/api/election/${id}/close`,
                 DELETE: (id) => `/api/election/${id}`,
                 BY_TYPE: (type) => `/api/election/by-type/${type}`,
-                STATS_BY_TYPE: (type) => `/api/election/stats/by-type/${type}`
+                STATS_BY_TYPE: (type) => `/api/election/stats/by-type/${type}`,
+
+                // NOUVEAU: Endpoint pour les élections de l'utilisateur
+                MY_ELECTIONS: '/api/election/my-elections',
+
+                // NOUVEAU: Endpoint pour vérifier l'éligibilité
+                CHECK_ELIGIBILITY: (electionId) => `/api/election/${electionId}/check-eligibility`
             },
+
+            // Votes - ENDPOINTS PRINCIPAUX À UTILISER  
             VOTE: {
                 TOKEN: (electionId) => `/api/vote/token/${electionId}`,
                 SUBMIT: '/api/vote',
                 RESULTS: (electionId) => `/api/vote/results/${electionId}`,
-                STATUS: (electionId) => `/api/vote/status/${electionId}`
+                STATUS: (electionId) => `/api/vote/status/${electionId}`,
+
+                // NOUVEAU: Endpoints pour nos services
+                MY_VOTES: '/api/vote/my-votes',
+                VALIDATE_TOKEN: '/api/vote/validate-token',
+
+                // Endpoint détaillé pour les résultats 
+                RESULTS_DETAILED: (electionId) => `/api/vote/results-detailed/${electionId}`
             },
+
+            // Candidats - ENDPOINTS PRINCIPAUX À UTILISER
             CANDIDATE: {
                 LIST: '/api/candidats',
-                CREATE: '/api/candidats',
+                CREATE: '/api/candidats/create',
                 IS_CANDIDATE: (electionId) => `/api/candidats/is-candidate/${electionId}`,
-                BY_ELECTION: (electionId) => `/api/candidats/election/${electionId}`
+                BY_ELECTION: (electionId) => `/api/candidats/election/${electionId}`,
+                SUBMIT: '/api/candidats',
+                // NOUVEAU: Endpoints pour nos services
+                MY_CANDIDATURES: '/api/candidats/mes-candidatures',
+                UPDATE: (candidateId) => `/api/candidats/${candidateId}`,
+                DELETE: (candidateId) => `/api/candidats/${candidateId}`
             },
+
+            // Upload d'images
             UPLOAD: {
                 IMAGE: '/api/upload/image'
             },
 
+            // Statistiques
             STATS: {
                 GENERAL: "/api/stats/general",
                 VOTES: "/api/stats/votes",
@@ -51,18 +81,27 @@ const CONFIG = {
                 COMPARISON: "/api/stats/comparison",
                 EXPORT: "/api/stats/export"
             },
+
+            // Utilisateurs
             USERS: {
                 FEED: '/api/users/feed',
-                ELECTION: '/api/users/elections',
+                ELECTION: '/api/users/elections', // Utilisé pour MY_ELECTIONS
                 PROFILE: '/api/users/profile',
                 AVATAR: '/api/users/avatar',
                 UPDATE: '/api/users/profile',
-                CHANGE_PASSWORD: '/api/users/change-password'
+                CHANGE_PASSWORD: '/api/users/change-password',
+
+                // NOUVEAU: Stats utilisateur
+                STATS: '/api/users/stats'
             },
+
+            // Admin
             ADMIN: {
                 ME: '/api/admin/me',
                 UPDATE: '/api/admin/update'
             },
+
+            // Étudiants  
             STUDENTS: {
                 LIST: "/api/students",
                 SEARCH: "/api/students",
@@ -73,25 +112,30 @@ const CONFIG = {
                 DELETE: (id) => `/api/students/${id}/delete`,
                 ACTIVATE: (id) => `/api/students/${id}/activate`,
             },
+
+            // Activité
             ACTIVITY: {
                 LIST: '/api/activity'
             },
+
+            // Codes
             CODES: {
                 GENERATE: '/api/codes/generate',
                 LIST: '/api/codes/list'
             },
-            UPLOAD: {
-                IMAGE: '/api/upload/image'
-            },
+
+            // Notifications
             NOTIFICATIONS: {
                 LIST: '/api/notifications',
-                READ: '/api/notifications/:id/read',
+                READ: (id) => `/api/notifications/${id}/read`,
                 READ_ALL: '/api/notifications/read-all',
-                DELETE: '/api/notifications/:id',
+                DELETE: (id) => `/api/notifications/${id}`,
                 DELETE_ALL: '/api/notifications',
                 STATS: '/api/notifications/stats',
                 ADMIN: '/api/notifications/admin'
             },
+
+            // Configuration académique
             CONFIG_ACADEMIC: '/api/configAcademic'
         }
     },
@@ -101,12 +145,20 @@ const CONFIG = {
         TYPES: {
             SALLE: 'SALLE',
             ECOLE: 'ECOLE',
-            UNIVERISTE: 'UNIVERSITE'
+            UNIVERSITE: 'UNIVERSITE' // Correction: UNIVERISTE → UNIVERSITE
         },
         STATUS: {
             ACTIVE: 'active',
             CLOSED: 'closed',
-            UPCOMING: 'upcoming'
+            UPCOMING: 'upcoming',
+            CANDIDATURE: 'candidature' // Nouveau statut pour période de candidature
+        },
+
+        // Types de délégués
+        DELEGUE_TYPES: {
+            PREMIER: 'PREMIER',
+            DEUXIEME: 'DEUXIEME',
+            DELEGUE: 'DELEGUE'
         }
     },
 
@@ -137,7 +189,10 @@ const CONFIG = {
     SECURITY: {
         TOKEN_EXPIRY: 24 * 60 * 60 * 1000, // 24 heures en millisecondes
         PASSWORD_MIN_LENGTH: 8,
-        SESSION_TIMEOUT: 30 * 60 * 1000 // 30 minutes
+        SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+
+        // Nouveau: Configuration des tokens de vote
+        VOTE_TOKEN_EXPIRY: 15 * 60 * 1000 // 15 minutes pour les tokens de vote
     },
 
     // Messages d'erreur et de succès
@@ -148,7 +203,10 @@ const CONFIG = {
             VOTE: 'Votre vote a été enregistré avec succès !',
             CANDIDATURE: 'Votre candidature a été soumise avec succès !',
             ELECTION_CREATED: 'Élection créée avec succès !',
-            ELECTION_CLOSED: 'Élection clôturée avec succès !'
+            ELECTION_CLOSED: 'Élection clôturée avec succès !',
+            // Nouveaux messages
+            CANDIDATURE_UPDATED: 'Candidature modifiée avec succès !',
+            CANDIDATURE_CANCELLED: 'Candidature annulée avec succès !'
         },
         ERROR: {
             LOGIN_FAILED: 'Échec de la connexion. Vérifiez vos identifiants.',
@@ -159,7 +217,13 @@ const CONFIG = {
             UNAUTHORIZED: 'Accès non autorisé. Veuillez vous connecter.',
             FORBIDDEN: 'Accès interdit. Vous n\'avez pas les permissions nécessaires.',
             NOT_FOUND: 'Ressource non trouvée.',
-            SERVER_ERROR: 'Erreur serveur. Veuillez réessayer plus tard.'
+            SERVER_ERROR: 'Erreur serveur. Veuillez réessayer plus tard.',
+            // Nouveaux messages
+            NOT_ELIGIBLE: 'Vous n\'êtes pas éligible pour cette élection.',
+            ALREADY_CANDIDATE: 'Vous êtes déjà candidat à cette élection.',
+            ALREADY_VOTED: 'Vous avez déjà voté à cette élection.',
+            ELECTION_CLOSED: 'Cette élection est terminée.',
+            CANDIDATURE_CLOSED: 'La période de candidature est terminée.'
         },
         VALIDATION: {
             REQUIRED_FIELD: 'Ce champ est obligatoire.',
@@ -167,10 +231,16 @@ const CONFIG = {
             PASSWORD_TOO_SHORT: 'Le mot de passe doit contenir au moins 8 caractères.',
             PASSWORDS_DONT_MATCH: 'Les mots de passe ne correspondent pas.',
             INVALID_MATRICULE: 'Matricule invalide.',
-            INVALID_CODE: 'Code d\'inscription invalide.'
+            INVALID_CODE: 'Code d\'inscription invalide.',
+            // Nouveaux messages
+            IMAGE_TOO_LARGE: 'L\'image ne doit pas dépasser 2MB.',
+            INVALID_IMAGE_TYPE: 'Format d\'image non supporté. Utilisez JPG ou PNG.',
+            TEXT_TOO_LONG: (maxLength) => `Le texte ne doit pas dépasser ${maxLength} caractères.`,
+            TEXT_TOO_SHORT: (minLength) => `Le texte doit contenir au moins ${minLength} caractères.`
         }
     },
 
+    // Configuration académique
     ACADEMIC: {
         ECOLES: {
             EGEI: {
@@ -179,7 +249,8 @@ const CONFIG = {
                     'Électronique',
                     'Génie Télécoms et TIC',
                     'Informatique Industrielle et Maintenance',
-                    'Electrotechnique']
+                    'Electrotechnique'
+                ]
             },
             ESMEA: {
                 nom: "ESMEA",
@@ -192,7 +263,8 @@ const CONFIG = {
                     'Communication et Action Publicitaire',
                     'Commerce',
                     'Informatique de Gestion',
-                    'Transport et Logistique']
+                    'Transport et Logistique'
+                ]
             },
             FSAE: {
                 nom: "FSAE",
@@ -201,16 +273,25 @@ const CONFIG = {
                     'Production et Gestion des Ressources Animales',
                     'Sciences et Techniques de Production Végétale',
                     'Stockage Conservation et Conditionnement des Produits Agricoles',
-                    'Gestion des Entreprises Rurales et Agricoles']
+                    'Gestion des Entreprises Rurales et Agricoles'
+                ]
             },
             FDE: {
                 nom: "FDE",
                 filieres: [
                     'Droit',
-                    'Economie']
+                    'Economie'
+                ]
             }
         },
-        ANNEES: [1, 2, 3]
+        ANNEES: [1, 2, 3],
+
+        // Nouveau: Niveaux hiérarchiques pour l'éligibilité
+        HIERARCHY: {
+            SALLE: 1,      // Responsable de salle
+            ECOLE: 2,      // Délégué d'école  
+            UNIVERSITE: 3  // Délégué d'université
+        }
     },
 
     // Configuration des notifications
@@ -223,8 +304,39 @@ const CONFIG = {
             WARNING: 'warning',
             INFO: 'info'
         }
+    },
+
+    // Nouveau: Configuration des limites
+    LIMITS: {
+        CANDIDATURE: {
+            SLOGAN_MAX_LENGTH: 100,
+            PROGRAMME_MIN_LENGTH: 50,
+            PROGRAMME_MAX_LENGTH: 2000,
+            MOTIVATION_MIN_LENGTH: 100,
+            MOTIVATION_MAX_LENGTH: 1000,
+            IMAGE_MAX_SIZE: 2 * 1024 * 1024, // 2MB
+            IMAGE_ALLOWED_TYPES: ['image/jpeg', 'image/png']
+        },
+        PAGINATION: {
+            DEFAULT_PAGE_SIZE: 10,
+            MAX_PAGE_SIZE: 50
+        }
+    },
+
+    // Nouveau: Configuration des fonctionnalités
+    FEATURES: {
+        ENABLE_CANDIDATURE: true,
+        ENABLE_VOTING: true,
+        ENABLE_RESULTS: true,
+        ENABLE_STATS: true,
+        MAINTENANCE_MODE: false
     }
 };
+
+// Pour la compatibilité avec les scripts existants
+if (typeof window !== 'undefined') {
+    window.CONFIG = CONFIG;
+}
 
 // Fonctions utilitaires
 const UTILS = {
@@ -308,7 +420,7 @@ const UTILS = {
 };
 
 // Exporter la configuration
-window.CONFIG = CONFIG;
+
 window.UTILS = UTILS;
 
 
