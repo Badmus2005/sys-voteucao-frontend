@@ -1,6 +1,5 @@
 // assets/js/main.js
 // Initialisation globale de l'application
-import { getUserProfile } from './services/userService.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
     // Vérifier l'authentification
@@ -12,8 +11,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Charger le profil utilisateur
     try {
-        window.userProfile = await getUserProfile();
-
+        const url = `${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.USERS.PROFILE}`;
+        window.userProfile = await fetchWithAuth(url);
         updateUIWithUserProfile();
     } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
