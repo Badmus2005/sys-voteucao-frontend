@@ -202,7 +202,7 @@
 
             try {
                 // Charger les élections où l'utilisateur peut voter
-                //await loadElections();
+                await loadElections();
 
                 // Charger tous les candidats
                 await loadCandidates();
@@ -218,10 +218,9 @@
         // Charger les élections accessibles
         async function loadElections() {
             try {
-                // Utiliser le service pour récupérer les élections accessibles
                 const data = await VoteService.getMyElections();
 
-                if (data && Array.isArray(data)) {
+                if (data.length > 0) {
                     allElections = data;
                     displayElections(data);
                 } else {
@@ -232,6 +231,7 @@
                 showElectionsError('Erreur de chargement des élections');
             }
         }
+
 
         // Afficher les élections
         function displayElections(elections) {
