@@ -175,21 +175,29 @@
             }
         ];
 
+
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
+            // VÉRIFICATION URL - DÉPLACEZ LE CODE ICI
+            console.log('URL complète:', window.location.href);
+            console.log('Paramètres URL:', window.location.search);
+            const urlParams = new URLSearchParams(window.location.search);
+            const electionIdFromUrl = urlParams.get('electionId');
+            console.log('electionId présent?:', electionIdFromUrl);
+
+            console.log('Début du chargement - electionId:', electionIdFromUrl);
+
             // Vérifier que l'utilisateur est connecté
             if (!localStorage.getItem('token')) {
                 window.location.href = '/user/login';
                 return;
             }
 
-            // GESTION DE L'ELECTION ID - AJOUTEZ CE CODE
+            // GESTION DE L'ELECTION ID
             if (electionIdFromUrl) {
                 console.log('Mode élection spécifique avec ID:', electionIdFromUrl);
-                // Vous devrez peut-être charger les données différemment
             } else {
                 console.log('Mode liste de toutes les élections');
-                // Mode normal sans élection spécifique
             }
 
             // Initialiser le système de filtres
@@ -199,6 +207,7 @@
 
             // Charger les données
             await loadPageData();
+
             // SI UN electionId EST PRÉSENT, SÉLECTIONNEZ CETTE ÉLECTION
             if (electionIdFromUrl) {
                 try {
