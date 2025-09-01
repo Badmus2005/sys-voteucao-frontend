@@ -30,25 +30,68 @@ class VoteService {
         }
     }
 
-    static async getResults(electionId = null) {
+    static async getActiveElectionId() {
+        // 1. Vérifie l’URL
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get('electionId');
+        if (fromQuery) return fromQuery;
+
+        // 2. Vérifie sessionStorage
+        const fromSession = sessionStorage.getItem('electionId');
+        if (fromSession) return fromSession;
+
+        // 3. Appelle le backend (si endpoint disponible)
         try {
             const BASE = CONFIG.API.BASE_URL;
-            const endpoint = electionId
-                ? CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(electionId)
-                : CONFIG.API.ENDPOINTS.VOTE.RESULTS;
+            const endpoint = '/api/election/active';
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            if (response?.id) {
+                sessionStorage.setItem('electionId', response.id);
+                return response.id;
+            }
+        } catch (_) {
+            // Silencieux si aucune élection active
+        }
 
+        return null;
+    }
+
+    static async getResults(electionId = null) {
+        try {
+            const id = electionId || await this.getActiveElectionId();
+            if (!id) throw new Error('Aucune élection active détectée');
+
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(id);
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
 
-            if (response && response.resultats) {
-                return response;
-            }
-
+            if (response?.resultats) return response;
             throw new Error('Format de réponse invalide');
         } catch (error) {
             console.error('Erreur récupération résultats:', error);
             throw error;
         }
     }
+
+    /* static async getResults(electionId = null) {
+         try {
+             const BASE = CONFIG.API.BASE_URL;
+             const endpoint = electionId
+                 ? CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(electionId)
+                 : CONFIG.API.ENDPOINTS.VOTE.RESULTS;
+ 
+             const response = await fetchWithAuth(`${BASE}${endpoint}`);
+ 
+             if (response && response.resultats) {
+                 return response;
+             }
+ 
+             throw new Error('Format de réponse invalide');
+         } catch (error) {
+             console.error('Erreur récupération résultats:', error);
+             throw error;
+         }
+     }*/
 
     static async getVoteStatus(electionId) {
         try {
