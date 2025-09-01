@@ -227,11 +227,9 @@
             }
         }
 
-        // Charger les élections spécifiques à l'étudiant
         async function loadStudentElections() {
             try {
-                const data = await ElectionService.getMyElections();
-
+                const data = await VoteService.getMyElections();
                 if (data && Array.isArray(data)) {
                     studentElections = data;
                     displayStudentElections(data);
@@ -240,7 +238,15 @@
                 }
             } catch (error) {
                 console.error('Erreur chargement élections étudiant:', error);
-                showStudentElectionsError('Erreur de chargement');
+
+                // Afficher un message d'erreur plus spécifique
+                if (error.message.includes('Profil étudiant incomplet')) {
+                    showStudentElectionsError('Votre profil étudiant est incomplet. Veuillez contacter l\'administration.');
+                } else if (error.message.includes('HTTP error')) {
+                    showStudentElectionsError('Erreur de connexion au serveur');
+                } else {
+                    showStudentElectionsError('Erreur de chargement: ' + error.message);
+                }
             }
         }
 

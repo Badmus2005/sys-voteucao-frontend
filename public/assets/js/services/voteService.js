@@ -130,10 +130,26 @@ class VoteService {
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
 
-            return Array.isArray(response) ? response : [];
+            // Vérifier si la réponse est OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Vérification plus robuste
+            if (data && Array.isArray(data)) {
+                return data;
+            } else if (data && data.message) {
+                // Gérer les messages d'erreur du backend
+                throw new Error(data.message);
+            } else {
+                return [];
+            }
+
         } catch (error) {
             console.error('Erreur récupération élections personnelles:', error);
-            return [];
+            throw error; // Propager l'erreur pour une meilleure gestion
         }
     }
 }

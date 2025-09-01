@@ -34,17 +34,6 @@ class ElectionService {
         }
     }
 
-    static async getMyElections() {
-        try {
-            const BASE = CONFIG.API.BASE_URL;
-            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
-
-            return await fetchWithAuth(`${BASE}${endpoint}`);
-        } catch (error) {
-            console.error('Erreur lors de la récupération de mes élections:', error);
-            throw error;
-        }
-    }
 
     static getElectionStatus(election) {
         if (!election || !election.dateDebut || !election.dateFin) return 'upcoming';
