@@ -3,42 +3,34 @@
   "name": "vote-ucao-frontend",
   "builds": [
     {
-      "src": "src/admin/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "src/user/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "src/*.html",
+      "src": "src/**/*.html",
       "use": "@vercel/static"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/",
-      "destination": "/src/index.html"
+      "src": "^/$",
+      "dest": "/src/index.html"
     },
     {
-      "source": "/admin",
-      "destination": "/src/admin/admin_home.html"
+      "src": "^/admin$",
+      "dest": "/src/admin/admin_home.html"
     },
     {
-      "source": "/admin/:page",
-      "destination": "/src/admin/:page.html"
+      "src": "^/admin/(.*)$",
+      "dest": "/src/admin/$1.html"
     },
     {
-      "source": "/user",
-      "destination": "/src/user/login.html"
+      "src": "^/user$",
+      "dest": "/src/user/login.html"
     },
     {
-      "source": "/user/:page",
-      "destination": "/src/user/:page.html"
+      "src": "^/user/(.*)$",
+      "dest": "/src/user/$1.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/404.html"
+      "src": ".*",
+      "dest": "/404.html"
     }
   ],
   "headers": [
@@ -64,7 +56,7 @@
       ]
     },
     {
-      "source": "/(.*).js",
+      "source": "/(.*)\\.js",
       "headers": [
         {
           "key": "Content-Type",
