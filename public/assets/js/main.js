@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Charger le profil utilisateur
     try {
-        window.userProfile = await fetchWithAuth(CONFIG.API.ENDPOINTS.USERS.PROFILE);
+        window.userProfile = await fetchWithAuth(CONFIG.API.BASE_URL.ENDPOINTS.USERS.PROFILE);
         updateUIWithUserProfile();
     } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
