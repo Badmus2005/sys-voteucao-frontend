@@ -58,19 +58,7 @@
             <!-- Filtres -->
             <div id="filtersContainer"></div>
 
-            <!-- Section des élections spécifiques à l'étudiant -->
-            <div class="elections-section">
-                <h2 class="section-title">
-                    <i class="fa-solid fa-star"></i>
-                    Mes élections disponibles
-                </h2>
-                <div class="elections-grid" id="studentElectionsGrid">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Chargement de vos élections...</p>
-                    </div>
-                </div>
-            </div>
+            <!-- SUPPRIMÉ: Section des élections spécifiques à l'étudiant -->
 
             <!-- Liste de toutes les élections -->
             <div class="elections-section">
@@ -137,7 +125,6 @@
     <script>
         // Variables globales pour cette page
         let allElections = [];
-        let studentElections = [];
         let allCandidates = [];
         let selectedElection = null;
         let filterSystem = null;
@@ -175,29 +162,19 @@
             }
         ];
 
-
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            // VÉRIFICATION URL - DÉPLACEZ LE CODE ICI
+            // VÉRIFICATION URL
             console.log('URL complète:', window.location.href);
             console.log('Paramètres URL:', window.location.search);
             const urlParams = new URLSearchParams(window.location.search);
             const electionIdFromUrl = urlParams.get('electionId');
             console.log('electionId présent?:', electionIdFromUrl);
 
-            console.log('Début du chargement - electionId:', electionIdFromUrl);
-
             // Vérifier que l'utilisateur est connecté
             if (!localStorage.getItem('token')) {
                 window.location.href = '/user/login';
                 return;
-            }
-
-            // GESTION DE L'ELECTION ID
-            if (electionIdFromUrl) {
-                console.log('Mode élection spécifique avec ID:', electionIdFromUrl);
-            } else {
-                console.log('Mode liste de toutes les élections');
             }
 
             // Initialiser le système de filtres
@@ -211,9 +188,6 @@
             // SI UN electionId EST PRÉSENT, SÉLECTIONNEZ CETTE ÉLECTION
             if (electionIdFromUrl) {
                 try {
-                    // Attendre que les élections soient chargées
-                    await loadAllElections();
-
                     // Trouver et sélectionner l'élection
                     selectedElection = allElections.find(e => e.id == electionIdFromUrl);
                     if (selectedElection) {
@@ -246,9 +220,7 @@
             showLoading();
 
             try {
-                // Charger les élections accessibles à l'étudiant
-                await loadStudentElections();
-
+                // SUPPRIMÉ: Chargement des élections spécifiques
                 // Charger toutes les élections
                 await loadAllElections();
 
@@ -263,59 +235,9 @@
             }
         }
 
-        async function loadStudentElections() {
-            try {
-                const data = await VoteService.getMyElections();
-
-                if (data && Array.isArray(data)) {
-                    studentElections = data;
-                    displayStudentElections(data);
-                } else {
-                    showStudentElectionsError('Aucune élection disponible pour votre profil');
-                }
-            } catch (error) {
-                console.error('Erreur chargement élections étudiant:', error);
-
-                // Afficher un message d'erreur plus spécifique
-                let errorMessage = 'Erreur de chargement';
-
-                if (error.message.includes('Profil étudiant incomplet')) {
-                    errorMessage = 'Votre profil étudiant est incomplet. Veuillez contacter l\'administration.';
-                } else if (error.message.includes('HTTP error')) {
-                    errorMessage = 'Erreur de connexion au serveur';
-                } else if (error.message.includes('403')) {
-                    errorMessage = 'Accès refusé. Vérifiez votre profil étudiant.';
-                } else if (error.message.includes('500')) {
-                    errorMessage = 'Erreur serveur interne. Veuillez réessayer plus tard.';
-                }
-
-                showStudentElectionsError(errorMessage);
-            }
-        }
-
-        // Afficher les élections spécifiques à l'étudiant
-        function displayStudentElections(elections) {
-            const container = document.getElementById('studentElectionsGrid');
-            if (!container) return;
-
-            if (!elections || elections.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-calendar-xmark"></i>
-                        <h3>Aucune élection disponible actuellement</h3>
-                        <p>Vérifiez votre profil étudiant ou contactez l'administration.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = elections.map(election =>
-                ElectionCard.create(election, {
-                    showActions: true,
-                    showDetails: true
-                })
-            ).join('');
-        }
+        // SUPPRIMÉ: Fonction loadStudentElections()
+        // SUPPRIMÉ: Fonction displayStudentElections()
+        // SUPPRIMÉ: Fonction showStudentElectionsError()
 
         // Charger toutes les élections
         async function loadAllElections() {
@@ -464,23 +386,7 @@
             await loadAllElections();
         }
 
-        // Fonctions d'affichage d'erreur
-        function showStudentElectionsError(message) {
-            const container = document.getElementById('studentElectionsGrid');
-            if (!container) return;
-
-            container.innerHTML = `
-                <div class="no-data-message">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                    <button class="btn btn-primary" onclick="loadPageData()">
-                        <i class="fa-solid fa-refresh"></i>
-                        Réessayer
-                    </button>
-                </div>
-            `;
-        }
-
+        // Fonction d'affichage d'erreur (seulement pour toutes les élections)
         function showAllElectionsError(message) {
             const container = document.getElementById('allElectionsGrid');
             if (!container) return;
@@ -510,7 +416,7 @@
 
                     if (modal && title && content) {
                         title.textContent = election.titre;
-                        content.innerHTML = this.renderElectionDetails(election);
+                        content.innerHTML = renderElectionDetails(election);
                         modal.classList.add('active');
                     }
                 }
