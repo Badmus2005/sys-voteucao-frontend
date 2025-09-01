@@ -183,6 +183,15 @@
                 return;
             }
 
+            // GESTION DE L'ELECTION ID - AJOUTEZ CE CODE
+            if (electionIdFromUrl) {
+                console.log('Mode élection spécifique avec ID:', electionIdFromUrl);
+                // Vous devrez peut-être charger les données différemment
+            } else {
+                console.log('Mode liste de toutes les élections');
+                // Mode normal sans élection spécifique
+            }
+
             // Initialiser le système de filtres
             filterSystem = new FilterSystem('filtersContainer', filtersConfig);
             filterSystem.render();
@@ -190,6 +199,24 @@
 
             // Charger les données
             await loadPageData();
+            // SI UN electionId EST PRÉSENT, SÉLECTIONNEZ CETTE ÉLECTION
+            if (electionIdFromUrl) {
+                try {
+                    // Attendre que les élections soient chargées
+                    await loadAllElections();
+
+                    // Trouver et sélectionner l'élection
+                    selectedElection = allElections.find(e => e.id == electionIdFromUrl);
+                    if (selectedElection) {
+                        console.log('Élection trouvée:', selectedElection.titre);
+                        await selectElection(selectedElection);
+                    } else {
+                        console.warn('Aucune élection trouvée avec ID:', electionIdFromUrl);
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la sélection de l\'élection:', error);
+                }
+            }
 
             // Gestionnaire d'événements pour la modale
             document.getElementById('closeModal')?.addEventListener('click', () => {
