@@ -132,7 +132,8 @@ class VoteService {
 
             // Vérifier si la réponse est OK
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Erreur serveur'}`);
             }
 
             const data = await response.json();

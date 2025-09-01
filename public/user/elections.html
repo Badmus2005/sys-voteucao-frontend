@@ -230,6 +230,7 @@
         async function loadStudentElections() {
             try {
                 const data = await VoteService.getMyElections();
+
                 if (data && Array.isArray(data)) {
                     studentElections = data;
                     displayStudentElections(data);
@@ -240,13 +241,19 @@
                 console.error('Erreur chargement élections étudiant:', error);
 
                 // Afficher un message d'erreur plus spécifique
+                let errorMessage = 'Erreur de chargement';
+
                 if (error.message.includes('Profil étudiant incomplet')) {
-                    showStudentElectionsError('Votre profil étudiant est incomplet. Veuillez contacter l\'administration.');
+                    errorMessage = 'Votre profil étudiant est incomplet. Veuillez contacter l\'administration.';
                 } else if (error.message.includes('HTTP error')) {
-                    showStudentElectionsError('Erreur de connexion au serveur');
-                } else {
-                    showStudentElectionsError('Erreur de chargement: ' + error.message);
+                    errorMessage = 'Erreur de connexion au serveur';
+                } else if (error.message.includes('403')) {
+                    errorMessage = 'Accès refusé. Vérifiez votre profil étudiant.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Erreur serveur interne. Veuillez réessayer plus tard.';
                 }
+
+                showStudentElectionsError(errorMessage);
             }
         }
 
