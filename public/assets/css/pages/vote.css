@@ -1,45 +1,255 @@
-/* assets/css/pages/vote.css */
+/* ===== VARIABLES CSS ===== */
+:root {
+    --bleu-nuit: #1a365d;
+    --rouge-bordeaux: #800020;
+    --or: #d4af37;
+    --or-clair: #f1c40f;
+    --gris-clair: #f8f9fa;
+    --gris: #e9ecef;
+    --blanc: #ffffff;
+    --texte: #2d3748;
+    --texte-clair: #718096;
+    --success: #38a169;
+    --warning: #ecc94b;
+    --error: #e53e3e;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --box-shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease;
+}
+
+/* ===== STYLES DE BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--gris-clair);
+    color: var(--texte);
+    line-height: 1.6;
+}
+
+/* ===== HEADER ===== */
+header {
+    background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
+    color: var(--blanc);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--box-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-nav a,
+.user-nav span {
+    color: var(--blanc);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.user-nav a:hover {
+    color: var(--or-clair);
+}
+
+.burger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.burger div {
+    width: 25px;
+    height: 3px;
+    background-color: var(--blanc);
+    border-radius: 2px;
+}
+
+/* ===== OVERLAY & LOADING ===== */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    display: none;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--gris);
+    border-top: 5px solid var(--or);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== DASHBOARD LAYOUT ===== */
+.dashboard-container {
+    display: flex;
+    min-height: calc(100vh - 70px);
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--blanc);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem 0;
+    transition: var(--transition);
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--texte);
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 4px solid transparent;
+}
+
+.sidebar-menu a:hover {
+    background-color: var(--gris-clair);
+    color: var(--bleu-nuit);
+}
+
+.sidebar-menu a.active {
+    background-color: var(--gris-clair);
+    color: var(--bleu-nuit);
+    border-left-color: var(--or);
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    color: var(--texte-clair);
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: var(--bleu-nuit);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+    color: var(--or);
+}
+
+/* ===== VOTE CONTAINER ===== */
 .vote-container {
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 2rem;
 }
 
-@media (max-width: 1024px) {
-    .vote-container {
-        grid-template-columns: 1fr;
-    }
-}
-
-.elections-section {
-    background: white;
+/* ===== SECTIONS ===== */
+.elections-section,
+.candidates-section {
+    background: var(--blanc);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: var(--box-shadow);
 }
 
-.elections-list {
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--bleu-nuit);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.elections-list,
+.candidates-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.candidates-section {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--box-shadow);
-}
-
-.no-election-selected {
+.no-election-selected,
+.empty-summary {
     text-align: center;
     padding: 2rem;
     color: #666;
     font-style: italic;
 }
 
+.no-election-selected i,
+.empty-summary i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #ccc;
+}
+
+/* ===== ELECTION INFO ===== */
 .election-info {
     background: var(--gris-clair);
     padding: 1rem;
@@ -66,14 +276,9 @@
     gap: 0.5rem;
 }
 
-.candidates-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
+/* ===== VOTE SUMMARY ===== */
 .vote-summary {
-    background: white;
+    background: var(--blanc);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: var(--box-shadow);
@@ -122,37 +327,79 @@
     object-fit: cover;
 }
 
-.empty-summary {
-    text-align: center;
-    padding: 1rem;
-    color: #666;
-    font-style: italic;
-}
-
-.empty-summary i {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    color: #ccc;
-}
-
 .vote-actions {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-/* Modal Styles */
+/* ===== BOUTONS ===== */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--or);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--or-clair);
+}
+
+.btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: var(--bleu-nuit);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #2a4365;
+}
+
+/* ===== MESSAGES D'ERREUR/VIDE ===== */
+.no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.no-data-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+.no-data-message h3 {
+    margin-bottom: 0.5rem;
+    color: var(--bleu-nuit);
+}
+
+/* ===== MODALES ===== */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10000;
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transition: var(--transition);
@@ -164,18 +411,24 @@
 }
 
 .modal {
-    background: white;
+    background-color: var(--blanc);
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
-    max-height: 80vh;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--box-shadow-hover);
+    transform: translateY(-20px);
+    transition: var(--transition);
+}
+
+.modal-overlay.active .modal {
+    transform: translateY(0);
 }
 
 .modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--gris-clair);
+    border-bottom: 1px solid var(--gris);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -195,6 +448,11 @@
     font-size: 1.5rem;
     cursor: pointer;
     color: white;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    color: var(--or-clair);
 }
 
 .modal-body {
@@ -219,8 +477,111 @@
     justify-content: center;
 }
 
-/* Responsive */
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--success);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow-hover);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast.error {
+    background-color: var(--error);
+}
+
+.toast.warning {
+    background-color: var(--warning);
+    color: var(--texte);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--gris);
+    border-top: 4px solid var(--or);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .vote-container {
+        grid-template-columns: 1fr;
+    }
+
+    .vote-summary {
+        position: static;
+        max-height: none;
+    }
+}
+
 @media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+
+    .user-nav a span {
+        display: none;
+    }
+
+    .burger {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 70px;
+        left: -250px;
+        height: calc(100vh - 70px);
+        z-index: 999;
+        overflow-y: auto;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
     .election-info-details {
         grid-template-columns: 1fr;
     }
@@ -253,5 +614,9 @@
 
     .modal-body {
         padding: 1rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
     }
 }
