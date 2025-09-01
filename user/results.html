@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultats - UCAO-UUC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="../assets/css/components/election-card.css">
+    <link rel="stylesheet" href="../assets/css/components/filters.css">
+    <link rel="stylesheet" href="../assets/css/pages/results.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+        <div class="burger" id="burger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="/user/dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="/user/elections"><i class="fa-solid fa-list"></i> Élections</a></li>
+                <li><a href="/user/mes-candidatures"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
+                <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="/user/resultats" class="active"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Résultats</span>
+            </div>
+
+            <!-- Filters -->
+            <div id="filtersContainer"></div>
+
+            <!-- Results Header -->
+            <div class="results-header">
+                <h1 class="results-title" id="electionTitle">Résultats des élections</h1>
+                <p class="results-subtitle" id="electionDescription">Consultez les résultats des élections passées</p>
+                <div class="results-meta">
+                    <div class="meta-item">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span id="resultsDate">Date de publication: Chargement...</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fa-solid fa-users"></i>
+                        <span id="totalVoters">Électeurs: Chargement...</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fa-solid fa-check-to-slot"></i>
+                        <span id="participationRate">Taux de participation: Chargement...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Winner Banner -->
+            <div class="winner-banner" id="winnerBanner">
+                <div class="winner-crown">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h2 class="winner-title">GAGNANT DE L'ÉLECTION</h2>
+                <div class="winner-name" id="winnerName">Nom du gagnant</div>
+                <div class="winner-details">
+                    <div class="winner-detail">
+                        <div class="detail-value" id="winnerVotes">0</div>
+                        <div class="detail-label">Votes</div>
+                    </div>
+                    <div class="winner-detail">
+                        <div class="detail-value" id="winnerPercentage">0%</div>
+                        <div class="detail-label">Pourcentage</div>
+                    </div>
+                </div>
+                <div class="winner-slogan" id="winnerSlogan">"Slogan du gagnant"</div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-value" id="statTotalVotes">0</div>
+                    <div class="stat-label">Total des votes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div class="stat-value" id="statTotalVoters">0</div>
+                    <div class="stat-label">Électeurs inscrits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <div class="stat-value" id="statParticipation">0%</div>
+                    <div class="stat-label">Taux de participation</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div class="stat-value" id="statCandidates">0</div>
+                    <div class="stat-label">Candidats</div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> Visualisation des résultats</h2>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Répartition des votes</h3>
+                        <div class="chart-container">
+                            <canvas id="votesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Comparaison des candidats</h3>
+                        <div class="chart-container">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidates Ranking -->
+            <div class="ranking-section">
+                <div class="ranking-header">
+                    <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Classement des candidats</h2>
+                    <button class="btn btn-secondary" id="exportResultsBtn">
+                        <i class="fa-solid fa-download"></i>
+                        Exporter
+                    </button>
+                </div>
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th class="candidate-rank">#</th>
+                            <th>Candidat</th>
+                            <th class="vote-count">Votes</th>
+                            <th class="vote-percentage">Pourcentage</th>
+                            <th>Répartition</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingBody">
+                        <!-- Les lignes seront ajoutées dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Results Message -->
+            <div class="no-results" id="noResultsMessage">
+                <div class="no-results-icon">
+                    <i class="fa-solid fa-inbox"></i>
+                </div>
+                <h2 class="no-results-title">Aucun résultat disponible</h2>
+                <p class="no-results-description">
+                    Aucun résultat n'est disponible pour le moment. Les résultats seront affichés ici une fois les
+                    élections terminées et les résultats publiés par l'administration.
+                </p>
+            </div>
+
+            <!-- Election Selection Modal -->
+            <div class="modal-overlay" id="electionSelectionModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Sélectionner une élection</h2>
+                        <button class="modal-close" id="closeSelectionModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-content">
+                            <p>Sélectionnez une élection pour voir ses résultats :</p>
+                            <div class="elections-list-modal" id="electionsListModal">
+                                <!-- Les élections seront chargées ici -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Chargement des scripts -->
+    <script src="../config.js"></script>
+    <script src="../assets/js/utils/api.js"></script>
+    <script src="../assets/js/services/electionService.js"></script>
+    <script src="../assets/js/services/voteService.js"></script>
+    <script src="../assets/js/components/ElectionCard.js"></script>
+    <script src="../assets/js/components/FilterSystem.js"></script>
+    <script src="../assets/js/main.js"></script>
+
+    <script>
+        // Variables globales pour cette page
+        let allElections = [];
+        let currentResults = null;
+        let votesChart = null;
+        let comparisonChart = null;
+        let filterSystem = null;
+
+        // Configuration des filtres
+        const filtersConfig = [
+            {
+                key: 'type',
+                label: 'Type d\'élection',
+                options: [
+                    { value: 'SALLE', label: 'Responsables de Salle' },
+                    { value: 'ECOLE', label: 'Délégués d\'École' },
+                    { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
+                ]
+            },
+            {
+                key: 'ecole',
+                label: 'École/Faculté',
+                options: [
+                    { value: 'EGEI', label: 'EGEI' },
+                    { value: 'ESMEA', label: 'ESMEA' },
+                    { value: 'FSAE', label: 'FSAE' },
+                    { value: 'FDE', label: 'FDE' }
+                ]
+            },
+            {
+                key: 'annee',
+                label: 'Année',
+                options: [
+                    { value: '1', label: 'Licence 1' },
+                    { value: '2', label: 'Licence 2' },
+                    { value: '3', label: 'Licence 3' }
+                ]
+            }
+        ];
+
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Vérifier que l'utilisateur est connecté
+            if (!localStorage.getItem('token')) {
+                window.location.href = '/user/login';
+                return;
+            }
+
+            // Initialiser le système de filtres
+            filterSystem = new FilterSystem('filtersContainer', filtersConfig);
+            filterSystem.render();
+            filterSystem.setFilterChangeCallback(handleFilterChange);
+
+            // Charger les données
+            await loadPageData();
+
+            // Initialiser les gestionnaires d'événements
+            initEventHandlers();
+        });
+
+        // Chargement des données de la page
+        async function loadPageData() {
+            showLoading();
+
+            try {
+                // Charger les élections terminées
+                await loadCompletedElections();
+
+                // Charger les résultats si une élection est spécifiée dans l'URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const electionId = urlParams.get('electionId');
+
+                if (electionId) {
+                    await loadElectionResults(electionId);
+                } else if (allElections.length > 0) {
+                    // Charger les résultats de la première élection terminée
+                    await loadElectionResults(allElections[0].id);
+                } else {
+                    showNoResults();
+                }
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                showToast('Erreur de chargement des données', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Charger les élections terminées
+        async function loadCompletedElections() {
+            try {
+                const filters = filterSystem.getFilters();
+                const data = await ElectionService.getElections(filters);
+
+                if (data && Array.isArray(data)) {
+                    // Filtrer les élections terminées
+                    const now = new Date();
+                    allElections = data.filter(election => {
+                        if (!election.dateFin) return false;
+                        const endDate = new Date(election.dateFin);
+                        return endDate < now;
+                    });
+
+                    if (allElections.length === 0) {
+                        showNoResults();
+                    }
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('Erreur chargement élections terminées:', error);
+                showNoResults();
+            }
+        }
+
+        // Charger les résultats d'une élection
+        async function loadElectionResults(electionId) {
+            showLoading();
+
+            try {
+                const data = await VoteService.getResults(electionId);
+
+                if (data && data.resultats) {
+                    currentResults = data;
+                    displayResults(data);
+                    document.getElementById('noResultsMessage').style.display = 'none';
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('Erreur chargement résultats:', error);
+                showToast('Erreur de chargement des résultats', 'error');
+                showNoResults();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Afficher les résultats
+        function displayResults(results) {
+            const { election, resultats, statistiques } = results;
+
+            // Mettre à jour les informations de l'élection
+            document.getElementById('electionTitle').textContent = `Résultats: ${election.titre}`;
+            document.getElementById('electionDescription').textContent = election.description || 'Aucune description disponible';
+            document.getElementById('resultsDate').textContent = `Date de publication: ${formatDate(new Date())}`;
+            document.getElementById('totalVoters').textContent = `Électeurs: ${statistiques.totalInscrits || 0}`;
+            document.getElementById('participationRate').textContent = `Taux de participation: ${statistiques.tauxParticipation || 0}%`;
+
+            // Mettre à jour les statistiques
+            document.getElementById('statTotalVotes').textContent = statistiques.totalVotes || 0;
+            document.getElementById('statTotalVoters').textContent = statistiques.totalInscrits || 0;
+            document.getElementById('statParticipation').textContent = `${statistiques.tauxParticipation || 0}%`;
+            document.getElementById('statCandidates').textContent = resultats.length;
+
+            // Trouver le gagnant (premier du classement)
+            const winner = resultats[0];
+            if (winner) {
+                displayWinner(winner, statistiques);
+            }
+
+            // Afficher le classement
+            displayRanking(resultats);
+
+            // Créer les graphiques
+            createCharts(resultats, statistiques);
+        }
+
+        // Afficher le gagnant
+        function displayWinner(winner, stats) {
+            const winnerBanner = document.getElementById('winnerBanner');
+            winnerBanner.style.display = 'block';
+
+            document.getElementById('winnerName').textContent = `${winner.prenom} ${winner.nom}`;
+            document.getElementById('winnerVotes').textContent = winner.details.totalVotes || 0;
+            document.getElementById('winnerPercentage').textContent = `${winner.scoreFinal || 0}%`;
+            document.getElementById('winnerSlogan').textContent = `"${winner.slogan || 'Aucun slogan'}"`;
+        }
+
+        // Afficher le classement
+        function displayRanking(candidates) {
+            const rankingBody = document.getElementById('rankingBody');
+            rankingBody.innerHTML = '';
+
+            candidates.forEach((candidate, index) => {
+                const row = document.createElement('tr');
+
+                // Déterminer la classe de rang
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+
+                row.innerHTML = `
+                    <td class="candidate-rank ${rankClass}">${index + 1}</td>
+                    <td>
+                        <div class="candidate-info">
+                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/40'}" 
+                                 alt="${candidate.prenom} ${candidate.nom}" 
+                                 class="candidate-avatar"
+                                 onerror="this.src='https://via.placeholder.com/40'">
+                            <div>
+                                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                                <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="vote-count">${candidate.details.totalVotes || 0}</td>
+                    <td class="vote-percentage">${candidate.scoreFinal || 0}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${candidate.scoreFinal || 0}%"></div>
+                        </div>
+                    </td>
+                `;
+
+                rankingBody.appendChild(row);
+            });
+        }
+
+        // Créer les graphiques
+        function createCharts(candidates, stats) {
+            // Détruire les graphiques existants
+            if (votesChart) votesChart.destroy();
+            if (comparisonChart) comparisonChart.destroy();
+
+            // Données pour les graphiques
+            const labels = candidates.map(c => `${c.prenom} ${c.nom}`);
+            const votesData = candidates.map(c => c.details.totalVotes || 0);
+            const percentages = candidates.map(c => c.scoreFinal || 0);
+            const colors = generateColors(candidates.length);
+
+            // Graphique circulaire (répartition des votes)
+            const votesCtx = document.getElementById('votesChart').getContext('2d');
+            votesChart = new Chart(votesCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: percentages,
+                        backgroundColor: colors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const votes = votesData[context.dataIndex] || 0;
+                                    return `${label}: ${value}% (${votes} votes)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Graphique à barres (comparaison)
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pourcentage de votes',
+                        data: percentages,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Pourcentage (%)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const votes = votesData[context.dataIndex] || 0;
+                                    return `${context.raw}% (${votes} votes)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Générer des couleurs pour les graphiques
+        function generateColors(count) {
+            const colors = [
+                'rgba(167, 109, 33, 0.8)',    // Or
+                'rgba(4, 25, 70, 0.8)',       // Bleu nuit
+                'rgba(101, 6, 36, 0.8)',      // Rouge bordeaux
+                'rgba(222, 167, 57, 0.8)',    // Or clair
+                'rgba(65, 105, 225, 0.8)',    // Royal blue
+                'rgba(220, 20, 60, 0.8)',     // Crimson
+                'rgba(46, 139, 87, 0.8)',     // Sea green
+                'rgba(148, 0, 211, 0.8)',     // Dark violet
+                'rgba(255, 140, 0, 0.8)',     // Dark orange
+                'rgba(0, 128, 128, 0.8)'      // Teal
+            ];
+
+            // Si on a plus de candidats que de couleurs prédéfinies, générer des couleurs aléatoires
+            if (count > colors.length) {
+                for (let i = colors.length; i < count; i++) {
+                    const hue = Math.floor(Math.random() * 360);
+                    colors.push(`hsla(${hue}, 70%, 65%, 0.8)`);
+                }
+            }
+
+            return colors.slice(0, count);
+        }
+
+        // Afficher le message d'absence de résultats
+        function showNoResults() {
+            document.getElementById('noResultsMessage').style.display = 'block';
+            document.getElementById('winnerBanner').style.display = 'none';
+            document.getElementById('stats-grid').style.display = 'none';
+            document.getElementById('charts-section').style.display = 'none';
+            document.getElementById('ranking-section').style.display = 'none';
+        }
+
+        // Gestionnaire de changement de filtre
+        async function handleFilterChange(filters) {
+            await loadCompletedElections();
+
+            if (allElections.length > 0) {
+                await loadElectionResults(allElections[0].id);
+            } else {
+                showNoResults();
+            }
+        }
+
+        // Exporter les résultats
+        function exportResults() {
+            if (!currentResults) return;
+
+            const { election, resultats, statistiques } = currentResults;
+
+            // Créer le contenu CSV
+            let csvContent = "Résultats de l'élection: " + election.titre + "\n\n";
+            csvContent += "Classement,Nom,Prénom,Votes,Pourcentage\n";
+
+            resultats.forEach((candidate, index) => {
+                csvContent += `${index + 1},${candidate.nom},${candidate.prenom},${candidate.details.totalVotes || 0},${candidate.scoreFinal || 0}%\n`;
+            });
+
+            csvContent += "\nStatistiques:\n";
+            csvContent += `Total des votes,${statistiques.totalVotes || 0}\n`;
+            csvContent += `Électeurs inscrits,${statistiques.totalInscrits || 0}\n`;
+            csvContent += `Taux de participation,${statistiques.tauxParticipation || 0}%\n`;
+            csvContent += `Nombre de candidats,${resultats.length}\n`;
+
+            // Créer et télécharger le fichier
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `resultats-${election.titre.replace(/\s+/g, '-').toLowerCase()}.csv`);
+            link.style.visibility = 'hidden';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Résultats exportés avec succès', 'success');
+        }
+
+        // Afficher la modale de sélection d'élection
+        function showElectionSelectionModal() {
+            const modal = document.getElementById('electionSelectionModal');
+            const container = document.getElementById('electionsListModal');
+
+            if (!modal || !container) return;
+
+            // Afficher la liste des élections terminées
+            container.innerHTML = allElections.map(election => `
+                <div class="election-item-modal" onclick="selectElectionForResults(${election.id})">
+                    <h4>${election.titre}</h4>
+                    <p>${ElectionService.getElectionTypeLabel(election.type)} - ${election.ecole || 'Toutes écoles'}</p>
+                    <p class="election-date">Terminée le ${formatDate(election.dateFin)}</p>
+                </div>
+            `).join('');
+
+            modal.classList.add('active');
+        }
+
+        // Sélectionner une élection pour afficher ses résultats
+        async function selectElectionForResults(electionId) {
+            document.getElementById('electionSelectionModal').classList.remove('active');
+            await loadElectionResults(electionId);
+        }
+
+        // Initialiser les gestionnaires d'événements
+        function initEventHandlers() {
+            // Gestionnaire d'export
+            document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
+
+            // Gestionnaire de fermeture de modale
+            document.getElementById('closeSelectionModal').addEventListener('click', function () {
+                document.getElementById('electionSelectionModal').classList.remove('active');
+            });
+
+            // Gestionnaire de clic sur le titre pour changer d'élection
+            document.getElementById('electionTitle').addEventListener('click', function () {
+                if (allElections.length > 1) {
+                    showElectionSelectionModal();
+                }
+            });
+
+            // Fermer la modale en cliquant à l'extérieur
+            document.addEventListener('click', function (event) {
+                const modal = document.getElementById('electionSelectionModal');
+                if (modal && event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+
+        // Exposer les fonctions globales pour cette page
+        window.selectElectionForResults = selectElectionForResults;
+        window.loadPageData = loadPageData;
+    </script>
+</body>
+
+</html>

@@ -7,592 +7,11 @@
     <title>Voter - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --rouge-bordeaux: #650624;
-            --bleu-nuit: #041946;
-            --or: #a76d21;
-            --or-clair: #dea739;
-            --gris-clair: #f5f6fa;
-            --gris-texte: #444;
-            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-            --box-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.18);
-            --transition: all .3s ease;
-            --transition-slow: all .5s ease;
-        }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Poppins", sans-serif;
-        }
-
-        body {
-            background: #f4f6fb;
-            color: var(--gris-texte);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* HEADER */
-        header {
-            background: var(--bleu-nuit);
-            color: #fff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--box-shadow);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: .6rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            font-size: .9rem;
-        }
-
-        .user-nav a,
-        .user-nav span {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            gap: .4rem;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        .user-nav a:hover {
-            color: var(--or);
-        }
-
-        /* LAYOUT */
-        .dashboard-container {
-            display: flex;
-            min-height: calc(100vh - 80px);
-        }
-
-        .sidebar {
-            width: 230px;
-            background: var(--bleu-nuit);
-            color: #fff;
-            padding: 1rem 0;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-        }
-
-        .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            gap: .8rem;
-            padding: .9rem 1.5rem;
-            color: #fff;
-            text-decoration: none;
-            transition: var(--transition);
-            border-left: 4px solid transparent;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: var(--rouge-bordeaux);
-            border-left: 4px solid var(--or);
-            padding-left: 2rem;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        /* BREADCRUMB */
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            background: linear-gradient(135deg, var(--bleu-nuit), var(--rouge-bordeaux));
-            color: white;
-            box-shadow: var(--box-shadow);
-        }
-
-        .breadcrumb a {
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .breadcrumb a:hover {
-            color: var(--or-clair);
-        }
-
-        .breadcrumb span {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* VOTE CONTAINER */
-        .vote-container {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-        }
-
-        @media (max-width: 1024px) {
-            .vote-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ELECTIONS LIST */
-        .elections-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--box-shadow);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--gris-clair);
-        }
-
-        .elections-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .election-item {
-            background: var(--gris-clair);
-            border-radius: 8px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .election-item:hover {
-            background: #e8eef9;
-        }
-
-        .election-item.active {
-            border-color: var(--or);
-            background: #fff;
-            box-shadow: var(--box-shadow);
-        }
-
-        .election-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .election-name {
-            font-weight: 600;
-            color: var(--bleu-nuit);
-        }
-
-        .election-type {
-            padding: 0.2rem 0.6rem;
-            background: var(--bleu-nuit);
-            color: white;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-
-        .election-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .election-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        /* CANDIDATES SECTION */
-        .candidates-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--box-shadow);
-        }
-
-        .no-election-selected {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
-            font-style: italic;
-        }
-
-        .election-info {
-            background: var(--gris-clair);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-
-        .election-info-title {
-            font-weight: 600;
-            color: var(--bleu-nuit);
-            margin-bottom: 0.5rem;
-        }
-
-        .election-info-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .election-info-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .candidates-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .candidate-item {
-            background: var(--gris-clair);
-            border-radius: 8px;
-            padding: 1rem;
-            transition: var(--transition);
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-
-        .candidate-item:hover {
-            background: #e8eef9;
-        }
-
-        .candidate-item.selected {
-            border-color: var(--or);
-            background: #fff;
-            box-shadow: var(--box-shadow);
-        }
-
-        .candidate-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .candidate-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--or);
-        }
-
-        .candidate-info {
-            flex: 1;
-        }
-
-        .candidate-name {
-            font-weight: 600;
-            color: var(--bleu-nuit);
-        }
-
-        .candidate-details {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .candidate-slogan {
-            font-style: italic;
-            color: var(--rouge-bordeaux);
-            margin-bottom: 0.5rem;
-            padding-left: 0.5rem;
-            border-left: 2px solid var(--or);
-            font-size: 0.9rem;
-        }
-
-        .view-program-link {
-            color: var(--or);
-            text-decoration: none;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            transition: var(--transition);
-        }
-
-        .view-program-link:hover {
-            color: var(--rouge-bordeaux);
-        }
-
-        /* VOTE SUMMARY */
-        .vote-summary {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
-            position: sticky;
-            top: 100px;
-            max-height: calc(100vh - 150px);
-            overflow-y: auto;
-        }
-
-        .summary-title {
-            font-size: 1.2rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .summary-items {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .summary-item {
-            background: var(--gris-clair);
-            border-radius: 8px;
-            padding: 1rem;
-        }
-
-        .summary-election {
-            font-weight: 600;
-            color: var(--bleu-nuit);
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-candidate {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .summary-candidate-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .empty-summary {
-            text-align: center;
-            padding: 1rem;
-            color: #666;
-            font-style: italic;
-        }
-
-        .vote-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            border: none;
-        }
-
-        .btn-primary {
-            background: var(--or);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--or-clair);
-        }
-
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--bleu-nuit);
-            border: 2px solid var(--bleu-nuit);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bleu-nuit);
-            color: white;
-        }
-
-        /* MODAL */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--box-shadow-hover);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gris-clair);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bleu-nuit);
-            color: white;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .modal-icon {
-            font-size: 4rem;
-            color: var(--or);
-            margin-bottom: 1rem;
-        }
-
-        .modal-text {
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        /* LOADING */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--gris-clair);
-            border-top: 4px solid var(--or);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-
-            .election-meta {
-                flex-direction: column;
-                gap: 0.3rem;
-            }
-
-            .election-info-details {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="../assets/css/components/election-card.css">
+    <link rel="stylesheet" href="../assets/css/components/candidate-card.css">
+    <link rel="stylesheet" href="../assets/css/pages/vote.css">
 </head>
 
 <body>
@@ -600,19 +19,29 @@
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
         <div class="user-nav">
             <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="/user/profile"><i class="fa-solid fa-solid fa-user"></i> Profil</a>
+            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
             <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
         </div>
+        <div class="burger" id="burger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
     </header>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
 
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="/user/dashboard" class="active"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="/user/dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
                 <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
-                <li><a href="/user/elections-details"><i class="fa-solid fa-list"></i> Détails des élections</a></li>
+                <li><a href="/user/elections"><i class="fa-solid fa-list"></i> Élections</a></li>
                 <li><a href="/user/mes-candidatures"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
-                <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="/user/vote" class="active"><i class="fa-solid fa-check"></i> Voter</a></li>
                 <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
         </aside>
@@ -638,6 +67,7 @@
                         <div class="elections-list" id="electionsList">
                             <div class="loading">
                                 <div class="spinner"></div>
+                                <p>Chargement des élections...</p>
                             </div>
                         </div>
                     </div>
@@ -656,7 +86,8 @@
                     <h2 class="summary-title">Récapitulatif de vote</h2>
                     <div class="summary-items" id="summaryItems">
                         <div class="empty-summary">
-                            Aucun vote sélectionné pour le moment
+                            <i class="fa-solid fa-inbox"></i>
+                            <p>Aucun vote sélectionné pour le moment</p>
                         </div>
                     </div>
                     <div class="vote-actions">
@@ -726,307 +157,176 @@
         </div>
     </div>
 
-    <script src="../config.js"></script>
-    <script>
-        // Configuration
-        const API_BASE_URL = CONFIG.API.BASE_URL;
-        const ELECTIONS_API = `${API_BASE_URL}/api/election`;
-        const CANDIDATES_API = `${API_BASE_URL}/api/candidats`;
-        const VOTE_API = `${API_BASE_URL}/api/vote`;
-        const PROFILE_API = `${API_BASE_URL}/api/users/profile`;
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
 
-        // Variables globales
+    <!-- Chargement des scripts -->
+    <script src="../config.js"></script>
+    <script src="../assets/js/utils/api.js"></script>
+    <script src="../assets/js/services/eligibilityService.js"></script>
+    <script src="../assets/js/services/electionService.js"></script>
+    <script src="../assets/js/services/candidateService.js"></script>
+    <script src="../assets/js/services/voteService.js"></script>
+    <script src="../assets/js/components/ElectionCard.js"></script>
+    <script src="../assets/js/components/CandidateCard.js"></script>
+    <script src="../assets/js/main.js"></script>
+
+    <script>
+        // Variables globales pour cette page
         let allElections = [];
         let allCandidates = [];
-        let userProfile = null;
         let selectedElection = null;
         let selectedCandidates = {};
-        let userVotes = {};
         let voteTokens = {};
 
-        // Fonction pour récupérer le token
-        function getToken() {
-            return localStorage.getItem('token');
-        }
-
-        // Fonctions API
-        async function fetchWithAuth(url, options = {}) {
-            const token = getToken();
-            if (!token) {
-                window.location.href = 'login.html';
-                return null;
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Vérifier que l'utilisateur est connecté
+            if (!localStorage.getItem('token')) {
+                window.location.href = '/user/login';
+                return;
             }
 
-            const defaultOptions = {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                ...options
-            };
+            // Charger les données
+            await loadPageData();
+
+            // Initialiser les gestionnaires d'événements
+            initEventHandlers();
+        });
+
+        // Chargement des données de la page
+        async function loadPageData() {
+            showLoading();
 
             try {
-                const response = await fetch(url, { ...defaultOptions, ...options });
+                // Charger les élections où l'utilisateur peut voter
+                await loadElections();
 
-                if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    window.location.href = 'login.html';
-                    return null;
-                }
+                // Charger tous les candidats
+                await loadCandidates();
 
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-
-                return await response.json();
             } catch (error) {
-                console.error('Erreur fetch:', error);
-                throw error;
+                console.error('Erreur lors du chargement des données:', error);
+                showToast('Erreur de chargement des données', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
-        // Charger le profil utilisateur
-        async function loadUserProfile() {
-            try {
-                const data = await fetchWithAuth(PROFILE_API);
-                if (data) {
-                    userProfile = data;
-                    document.getElementById('userName').textContent =
-                        data.prenom ? `${data.prenom} ${data.nom}` : 'Étudiant';
-                }
-                return data;
-            } catch (error) {
-                console.error('Erreur chargement profil:', error);
-                return null;
-            }
-        }
-
-        // Vérifier si une élection est accessible à l'utilisateur
-        function isElectionAccessible(election, userProfile) {
-            // Si l'utilisateur n'a pas de profil complet, on ne montre rien
-            if (!userProfile || !userProfile.filiere || !userProfile.annee || !userProfile.ecole) {
-                return false;
-            }
-
-            // Élection de salle (filière et année spécifiques)
-            if (election.type === 'SALLE') {
-                return userProfile.filiere === election.filiere &&
-                    userProfile.annee === election.annee &&
-                    userProfile.ecole === election.ecole;
-            }
-
-            // Élection d'école (même école)
-            if (election.type === 'ECOLE') {
-                return userProfile.ecole === election.ecole;
-            }
-
-            // Élection universitaire (accessible à tous)
-            if (election.type === 'UNIVERSITE') {
-                return true;
-            }
-
-            // Par défaut, ne pas afficher l'élection
-            return false;
-        }
-
-        // Charger les élections accessibles à l'étudiant connecté
-
+        // Charger les élections accessibles
         async function loadElections() {
             try {
-                // Utiliser la nouvelle route pour récupérer les élections accessibles
-                const data = await fetchWithAuth(`${VOTE_API}/my-elections`);
-                if (data) {
+                // Utiliser le service pour récupérer les élections accessibles
+                const data = await VoteService.getMyElections();
+
+                if (data && Array.isArray(data)) {
                     allElections = data;
-
-                    // Vérifier les tokens pour chaque élection
-                    for (const election of data) {
-                        if (!election.hasVoted) {
-                            try {
-                                // Précharger le token pour cette élection
-                                await getVoteToken(election.id);
-                            } catch (error) {
-                                console.warn(`Impossible de précharger le token pour l'élection ${election.id}:`, error);
-                            }
-                        }
-                    }
-
                     displayElections(data);
-                    return data;
+                } else {
+                    showElectionsError('Aucune élection disponible pour le moment');
                 }
-                return [];
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
-                showError('Impossible de charger les élections');
-                return [];
-            }
-        }
-
-        // Charger les candidats accessibles (filtrés par élections accessibles)
-        async function loadCandidates() {
-            try {
-                const data = await fetchWithAuth(CANDIDATES_API);
-                if (data && data.candidates) {
-                    // Filtrer les candidats pour ne garder que ceux des élections accessibles
-                    allCandidates = data.candidates.filter(candidate => {
-                        // Trouver l'élection correspondante
-                        const election = allElections.find(e => e.id === candidate.electionId);
-
-                        // Si l'élection n'existe pas ou n'est pas accessible, exclure le candidat
-                        return election && !election.hasVoted;
-                    });
-
-                    return allCandidates;
-                }
-                return [];
-            } catch (error) {
-                console.error('Erreur chargement candidats:', error);
-                return [];
-            }
-        }
-
-
-        function displayTokenInfo(electionId, tokenData) {
-            // Vous pouvez afficher ces informations dans l'interface si nécessaire
-            console.log(`Token pour l'élection ${electionId}:`, {
-                expiresAt: new Date(tokenData.expiresAt).toLocaleString('fr-FR'),
-                election: tokenData.election
-            });
-        }
-
-        // Obtenir un token de vote pour une élection
-
-        async function getVoteToken(electionId) {
-            try {
-                if (voteTokens[electionId]) {
-                    return voteTokens[electionId];
-                }
-
-                const data = await fetchWithAuth(`${VOTE_API}/token/${electionId}`);
-                if (data) {
-                    voteTokens[electionId] = data.token;
-                    displayTokenInfo(electionId, data);
-                    return data.token;
-                }
-                return null;
-            } catch (error) {
-                console.error('Erreur obtention token vote:', error);
-                return null;
-            }
-        }
-
-        // Valider un token en cache
-        async function validateCachedToken(electionId, token) {
-            try {
-                // Vérifier si le token est toujours valide
-                const response = await fetch(`${VOTE_API}/validate-token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
-                    },
-                    body: JSON.stringify({
-                        electionId: parseInt(electionId),
-                        voteToken: token
-                    })
-                });
-
-                return response.ok;
-            } catch (error) {
-                console.error('Erreur validation token:', error);
-                return false;
+                showElectionsError('Erreur de chargement des élections');
             }
         }
 
         // Afficher les élections
         function displayElections(elections) {
             const container = document.getElementById('electionsList');
+            if (!container) return;
 
-            if (!elections || elections.length === 0) {
-                container.innerHTML = '<div class="no-candidates">Aucune élection active pour le moment</div>';
-                return;
-            }
-
-            // Filtrer les élections où l'utilisateur n'a pas encore voté
-            const electionsToVote = elections.filter(election => !election.hasVoted);
+            // Filtrer les élections où l'utilisateur peut voter
+            const electionsToVote = elections.filter(election =>
+                EligibilityService.canVoteInElection(window.userProfile, election)
+            );
 
             if (electionsToVote.length === 0) {
-                container.innerHTML = '<div class="no-candidates">Vous avez déjà voté dans toutes les élections actives</div>';
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <h3>Aucune élection en cours</h3>
+                        <p>Vous n'avez aucune élection en cours où vous pouvez voter.</p>
+                    </div>
+                `;
                 return;
             }
 
-            container.innerHTML = '';
+            container.innerHTML = electionsToVote.map(election =>
+                ElectionCard.create(election, {
+                    showActions: false,
+                    showDetails: true
+                })
+            ).join('');
 
-            electionsToVote.forEach(election => {
-                const electionItem = document.createElement('div');
-                electionItem.className = 'election-item';
-                electionItem.dataset.electionId = election.id;
-                electionItem.onclick = () => selectElection(election);
+            // Ajouter les événements de clic sur les cartes d'élection
+            attachElectionCardEvents();
+        }
 
-                electionItem.innerHTML = `
-                    <div class="election-item-header">
-                        <div class="election-name">${election.titre}</div>
-                        <span class="election-type">${getElectionTypeLabel(election.type)}</span>
-                    </div>
-                    <div class="election-meta">
-                        <div class="election-meta-item">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                            <span>${election.ecole || 'Toutes écoles'}</span>
-                        </div>
-                        ${election.filiere ? `
-                        <div class="election-meta-item">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>${election.filiere}</span>
-                        </div>
-                        ` : ''}
-                        ${election.annee ? `
-                        <div class="election-meta-item">
-                            <i class="fa-solid fa-calendar"></i>
-                            <span>Année ${election.annee}</span>
-                        </div>
-                        ` : ''}
-                        <div class="election-meta-item">
-                            <i class="fa-solid fa-user-tie"></i>
-                            <span>${getDelegueTypeLabel(election.delegueType)}</span>
-                        </div>
-                    </div>
-                    <div class="election-meta">
-                        <div class="election-meta-item">
-                            <i class="fa-solid fa-users"></i>
-                            <span>${election.candidatesCount} candidat(s)</span>
-                        </div>
-                    </div>
-                `;
+        // Attacher les événements aux cartes d'élection
+        function attachElectionCardEvents() {
+            document.querySelectorAll('.election-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const electionId = this.dataset.electionId;
+                    const election = allElections.find(e => e.id == electionId);
 
-                container.appendChild(electionItem);
+                    if (election) {
+                        selectElection(election);
+                    }
+                });
             });
+        }
+
+        // Charger tous les candidats
+        async function loadCandidates() {
+            try {
+                const data = await CandidateService.getCandidates();
+
+                if (data && data.candidates && Array.isArray(data.candidates)) {
+                    allCandidates = data.candidates;
+                }
+            } catch (error) {
+                console.error('Erreur chargement candidats:', error);
+            }
         }
 
         // Sélectionner une élection
         async function selectElection(election) {
             // Vérifier si l'utilisateur a déjà voté pour cette élection
-            if (election.hasVoted) {
-                showError('Vous avez déjà voté pour cette élection');
+            const hasVoted = await VoteService.getVoteStatus(election.id);
+
+            if (hasVoted) {
+                showToast('Vous avez déjà voté pour cette élection', 'warning');
                 return;
             }
 
             selectedElection = election;
 
             // Mettre à jour la sélection visuelle
-            document.querySelectorAll('.election-item').forEach(item => {
-                item.classList.remove('active');
+            document.querySelectorAll('.election-card').forEach(card => {
+                card.classList.remove('selected');
             });
-            document.querySelector(`.election-item[data-election-id="${election.id}"]`).classList.add('active');
+
+            const selectedCard = document.querySelector(`.election-card[data-election-id="${election.id}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
 
             // Afficher les candidats de cette élection
-            await displayCandidates(election);
+            await displayElectionCandidates(election);
         }
 
         // Afficher les candidats d'une élection
-        async function displayCandidates(election) {
-            const container = document.getElementById('candidatesSection');
-            const electionCandidates = allCandidates.filter(candidate => candidate.electionId === election.id);
+        async function displayElectionCandidates(election) {
+            const container = document.getElementById('candidatesGrid');
+            const section = document.getElementById('candidatesSection');
 
-            container.innerHTML = `
+            if (!container || !section) return;
+
+            // Afficher la section des candidats
+            section.innerHTML = `
                 <h2 class="section-title">
                     <i class="fa-solid fa-users"></i>
                     Candidats - ${election.titre}
@@ -1041,72 +341,98 @@
                         ${election.filiere ? `
                         <div class="election-info-item">
                             <i class="fa-solid fa-layer-group"></i>
-                            <span>${election.filiere || 'Non spécifié'}</span>
+                            <span>${election.filiere}</span>
                         </div>
                         ` : ''}
                         ${election.annee ? `
                         <div class="election-info-item">
                             <i class="fa-solid fa-calendar"></i>
-                            <span>Année ${election.annee || 'Non spécifié'}</span>
+                            <span>Année ${election.annee}</span>
                         </div>
                         ` : ''}
                         <div class="election-info-item">
                             <i class="fa-solid fa-user-tie"></i>
-                            <span>${getDelegueTypeLabel(election.delegueType)}</span>
+                            <span>${ElectionService.getDelegueTypeLabel(election.delegueType)}</span>
                         </div>
                     </div>
                 </div>
                 <div class="candidates-list" id="candidatesList">
-                    ${electionCandidates.length > 0 ? electionCandidates.map(candidate => `
-                        <div class="candidate-item" data-candidate-id="${candidate.id}">
-                            <div class="candidate-header">
-                                <img src="${candidate.photoUrl || 'https://via.placeholder.com/50'}" 
-                                     alt="${candidate.prenom} ${candidate.nom}" 
-                                     class="candidate-avatar"
-                                     onerror="this.src='https://via.placeholder.com/50'">
-                                <div class="candidate-info">
-                                    <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
-                                    <div class="candidate-details">
-                                        ${candidate.userDetails?.filiere || 'Non spécifié'} - 
-                                        Année ${candidate.userDetails?.annee || 'N/A'}
-                                    </div>
-                                </div>
-                            </div>
-                            ${candidate.slogan ? `<div class="candidate-slogan">"${candidate.slogan}"</div>` : ''}
-                            <a href="profil-candidat.html?id=${candidate.id}" class="view-program-link" target="_blank">
-                                <i class="fa-solid fa-book-open"></i>
-                                Voir le programme complet
-                            </a>
-                        </div>
-                    `).join('') : '<div class="no-candidates">Aucun candidat pour cette élection</div>'}
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement des candidats...</p>
+                    </div>
                 </div>
             `;
 
-            // Ajouter les événements de clic sur les candidats
-            document.querySelectorAll('.candidate-item').forEach(item => {
-                item.addEventListener('click', function () {
+            const candidatesList = document.getElementById('candidatesList');
+
+            try {
+                // Récupérer les candidats pour cette élection
+                const electionCandidates = allCandidates.filter(c => c.electionId == election.id);
+
+                if (electionCandidates.length === 0) {
+                    candidatesList.innerHTML = `
+                        <div class="no-data-message">
+                            <i class="fa-solid fa-user-slash"></i>
+                            <h3>Aucun candidat pour cette élection</h3>
+                            <p>Aucun candidat ne s'est présenté pour cette élection.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Afficher les candidats
+                candidatesList.innerHTML = electionCandidates.map(candidate =>
+                    CandidateCard.create(candidate, {
+                        showProgram: true,
+                        showViewProfile: true,
+                        showVote: true,
+                        electionId: election.id
+                    })
+                ).join('');
+
+                // Ajouter les événements de sélection des candidats
+                attachCandidateSelectionEvents();
+
+            } catch (error) {
+                console.error('Erreur affichage candidats:', error);
+                candidatesList.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les candidats.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Attacher les événements de sélection des candidats
+        function attachCandidateSelectionEvents() {
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                card.addEventListener('click', function () {
                     const candidateId = this.dataset.candidateId;
                     const candidate = allCandidates.find(c => c.id == candidateId);
-                    selectCandidate(election, candidate);
+
+                    if (candidate && selectedElection) {
+                        selectCandidate(selectedElection, candidate);
+                    }
                 });
             });
         }
 
         // Sélectionner un candidat
         function selectCandidate(election, candidate) {
-            // Vérifier si l'utilisateur a déjà voté pour cette élection
-            if (userVotes[election.id]) {
-                showError('Vous avez déjà voté pour cette élection');
-                return;
-            }
-
             selectedCandidates[election.id] = candidate;
 
             // Mettre à jour la sélection visuelle
-            document.querySelectorAll('.candidate-item').forEach(item => {
-                item.classList.remove('selected');
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                card.classList.remove('selected');
             });
-            document.querySelector(`.candidate-item[data-candidate-id="${candidate.id}"]`).classList.add('selected');
+
+            const selectedCard = document.querySelector(`.candidate-card[data-candidate-id="${candidate.id}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
 
             // Mettre à jour le récapitulatif
             updateVoteSummary();
@@ -1117,8 +443,15 @@
             const container = document.getElementById('summaryItems');
             const submitBtn = document.getElementById('submitVoteBtn');
 
+            if (!container) return;
+
             if (Object.keys(selectedCandidates).length === 0) {
-                container.innerHTML = '<div class="empty-summary">Aucun vote sélectionné pour le moment</div>';
+                container.innerHTML = `
+                    <div class="empty-summary">
+                        <i class="fa-solid fa-inbox"></i>
+                        <p>Aucun vote sélectionné pour le moment</p>
+                    </div>
+                `;
                 submitBtn.disabled = true;
                 return;
             }
@@ -1129,67 +462,52 @@
                 const election = allElections.find(e => e.id == electionId);
                 const candidate = selectedCandidates[electionId];
 
-                const summaryItem = document.createElement('div');
-                summaryItem.className = 'summary-item';
-                summaryItem.innerHTML = `
-                    <div class="summary-election">${election.titre}</div>
-                    <div class="summary-candidate">
-                        <img src="${candidate.photoUrl || 'https://via.placeholder.com/30'}" 
-                             alt="${candidate.prenom} ${candidate.nom}" 
-                             class="summary-candidate-avatar"
-                             onerror="this.src='https://via.placeholder.com/30'">
-                        <span>${candidate.prenom} ${candidate.nom}</span>
-                    </div>
-                `;
+                if (election && candidate) {
+                    const summaryItem = document.createElement('div');
+                    summaryItem.className = 'summary-item';
+                    summaryItem.innerHTML = `
+                        <div class="summary-election">${election.titre}</div>
+                        <div class="summary-candidate">
+                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/30'}" 
+                                 alt="${candidate.prenom} ${candidate.nom}" 
+                                 class="summary-candidate-avatar"
+                                 onerror="this.src='https://via.placeholder.com/30'">
+                            <span>${candidate.prenom} ${candidate.nom}</span>
+                        </div>
+                    `;
 
-                container.appendChild(summaryItem);
+                    container.appendChild(summaryItem);
+                }
             }
 
             submitBtn.disabled = false;
         }
 
-        // Dans votre fichier vote.html, remplacez la fonction submitVote() par cette version améliorée
-
         // Soumettre le vote
         async function submitVote() {
+            const submitBtn = document.getElementById('submitVoteBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> En cours...';
+
+            // Fermer le modal de confirmation
+            document.getElementById('confirmationModal').classList.remove('active');
+
             try {
-                const submitBtn = document.getElementById('submitVoteBtn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> En cours...';
-
-                // Fermer le modal de confirmation
-                document.getElementById('confirmationModal').classList.remove('active');
-
                 for (const electionId in selectedCandidates) {
                     const candidate = selectedCandidates[electionId];
 
                     // Obtenir un token de vote pour cette élection
-                    const voteToken = await getVoteToken(electionId);
+                    const voteToken = await VoteService.getVoteToken(electionId);
                     if (!voteToken) {
-                        throw new Error('Impossible d\'obtenir un token de vote pour l\'élection ' + electionId);
+                        throw new Error('Impossible d\'obtenir un token de vote');
                     }
 
                     // Soumettre le vote avec le token
-                    const response = await fetch(VOTE_API, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${getToken()}`
-                        },
-                        body: JSON.stringify({
-                            electionId: parseInt(electionId),
-                            candidateId: parseInt(candidate.id),
-                            voteToken: voteToken
-                        })
+                    await VoteService.submitVote({
+                        electionId: parseInt(electionId),
+                        candidateId: parseInt(candidate.id),
+                        voteToken: voteToken
                     });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || `Erreur lors du vote pour l'élection ${electionId}`);
-                    }
-
-                    // Marquer l'élection comme votée
-                    userVotes[electionId] = true;
 
                     // Supprimer le token utilisé du cache
                     delete voteTokens[electionId];
@@ -1203,10 +521,9 @@
 
             } catch (error) {
                 console.error('Erreur lors du vote:', error);
-                showError(error.message || 'Une erreur est survenue lors de l\'enregistrement de votre vote');
+                showToast(error.message || 'Une erreur est survenue lors de l\'enregistrement de votre vote', 'error');
 
                 // Réactiver le bouton
-                const submitBtn = document.getElementById('submitVoteBtn');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Soumettre mon vote';
             }
@@ -1216,16 +533,16 @@
         function resetVote() {
             selectedCandidates = {};
             selectedElection = null;
-            voteTokens = {};
 
             // Mettre à jour l'interface
-            document.querySelectorAll('.election-item').forEach(item => {
-                item.classList.remove('active');
+            document.querySelectorAll('.election-card').forEach(item => {
+                item.classList.remove('selected');
             });
-            document.querySelectorAll('.candidate-item').forEach(item => {
+            document.querySelectorAll('.candidate-card').forEach(item => {
                 item.classList.remove('selected');
             });
 
+            // Réinitialiser la section candidats
             document.getElementById('candidatesSection').innerHTML = `
                 <div class="no-election-selected">
                     <i class="fa-solid fa-hand-pointer"></i>
@@ -1234,170 +551,70 @@
             `;
 
             updateVoteSummary();
-
-            // Recharger les élections pour mettre à jour l'état des votes
-            loadElections();
         }
 
+        // Afficher une erreur pour les élections
+        function showElectionsError(message) {
+            const container = document.getElementById('electionsList');
+            if (!container) return;
 
-        function startTokenExpirationCheck() {
-            setInterval(() => {
-                const now = new Date();
-                for (const electionId in voteTokens) {
-                    // Ici vous pourriez vérifier l'expiration si vous stockez aussi les dates d'expiration
-                    // Pour l'instant, on se contente de vider le cache périodiquement
-                    delete voteTokens[electionId];
-                }
-                console.log('Cache des tokens vidé pour prévention expiration');
-            }, 30 * 60 * 1000); // Toutes les 30 minutes
-        }
-
-        // Fonctions utilitaires
-        function getElectionStatus(election) {
-            const now = new Date();
-            const debutVote = new Date(election.dateDebut);
-            const finVote = new Date(election.dateFin);
-
-            if (now < debutVote) return 'upcoming';
-            if (now > finVote) return 'completed';
-            if (now >= debutVote && now <= finVote) return 'active';
-            return 'upcoming';
-        }
-
-        function getElectionTypeLabel(type) {
-            const types = {
-                'SALLE': 'Responsables de Salle',
-                'ECOLE': 'Délégués d\'École',
-                'UNIVERSITE': 'Délégués Universitaires'
-            };
-            return types[type] || type;
-        }
-
-        function getDelegueTypeLabel(type) {
-            if (!type) return 'Non spécifié';
-
-            const types = {
-                'PREMIER': 'Premier Responsable',
-                'DEUXIEME': 'Deuxième Responsable',
-                'DELEGUE': 'Délégué'
-            };
-
-            return types[type] || type;
-        }
-
-        function showError(message) {
-            // Créer une notification d'erreur
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-notification';
-            errorDiv.innerHTML = `
-                <i class="fa-solid fa-exclamation-circle"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="loadPageData()">
+                        <i class="fa-solid fa-refresh"></i>
+                        Réessayer
+                    </button>
+                </div>
             `;
-
-            // Style pour la notification d'erreur
-            errorDiv.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                background: #ffebee;
-                color: #c62828;
-                padding: 1rem;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 10000;
-                max-width: 400px;
-            `;
-
-            document.body.appendChild(errorDiv);
-
-            // Supprimer automatiquement après 5 secondes
-            setTimeout(() => {
-                if (errorDiv.parentElement) {
-                    errorDiv.remove();
-                }
-            }, 5000);
         }
 
-        // Charger les votes de l'utilisateur
-        async function loadUserVotes() {
-            try {
-                // Pour chaque élection, vérifier si l'utilisateur a déjà voté
-                for (const election of allElections) {
-                    const data = await fetchWithAuth(`${VOTE_API}/status/${election.id}`);
-                    if (data) {
-                        userVotes[election.id] = data.hasVoted;
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur chargement votes:', error);
-            }
+        // Initialiser les gestionnaires d'événements
+        function initEventHandlers() {
+            // Gestionnaire de soumission de vote
+            document.getElementById('submitVoteBtn').addEventListener('click', function () {
+                if (Object.keys(selectedCandidates).length === 0) return;
+
+                // Afficher le modal de confirmation
+                document.getElementById('confirmationModal').classList.add('active');
+
+                // Mettre à jour le texte de confirmation
+                const electionCount = Object.keys(selectedCandidates).length;
+                document.getElementById('confirmationText').textContent =
+                    `Êtes-vous sûr de vouloir soumettre votre vote pour ${electionCount} élection(s)? Cette action est irréversible.`;
+            });
+
+            // Gestionnaire de réinitialisation
+            document.getElementById('resetVoteBtn').addEventListener('click', resetVote);
+
+            // Gestionnaire de confirmation de vote
+            document.getElementById('confirmVoteBtn').addEventListener('click', submitVote);
+
+            // Gestionnaire d'annulation de vote
+            document.getElementById('cancelVoteBtn').addEventListener('click', function () {
+                document.getElementById('confirmationModal').classList.remove('active');
+            });
+
+            // Gestionnaire de fermeture de modal
+            document.getElementById('closeModal').addEventListener('click', function () {
+                document.getElementById('confirmationModal').classList.remove('active');
+            });
+
+            document.getElementById('closeSuccessModal').addEventListener('click', function () {
+                document.getElementById('successModal').classList.remove('active');
+            });
+
+            // Gestionnaire de retour aux élections
+            document.getElementById('backToElectionsBtn').addEventListener('click', function () {
+                document.getElementById('successModal').classList.remove('active');
+                // Recharger la page pour actualiser les données
+                location.reload();
+            });
         }
 
-        // Charger toutes les données
-        async function loadData() {
-            try {
-                await loadUserProfile();
-                await loadElections();
-                await loadCandidates();
-                await loadUserVotes();
-            } catch (error) {
-                console.error('Erreur chargement données:', error);
-            }
-        }
-
-        // Événements
-        document.getElementById('submitVoteBtn').addEventListener('click', function () {
-            if (Object.keys(selectedCandidates).length === 0) return;
-
-            // Afficher le modal de confirmation
-            document.getElementById('confirmationModal').classList.add('active');
-
-            // Mettre à jour le texte de confirmation
-            const electionCount = Object.keys(selectedCandidates).length;
-            document.getElementById('confirmationText').textContent =
-                `Êtes-vous sûr de vouloir soumettre votre vote pour ${electionCount} élection(s)? Cette action est irréversible.`;
-        });
-
-        document.getElementById('resetVoteBtn').addEventListener('click', resetVote);
-
-        document.getElementById('confirmVoteBtn').addEventListener('click', submitVote);
-
-        document.getElementById('cancelVoteBtn').addEventListener('click', function () {
-            document.getElementById('confirmationModal').classList.remove('active');
-        });
-
-        document.getElementById('closeModal').addEventListener('click', function () {
-            document.getElementById('confirmationModal').classList.remove('active');
-        });
-
-        document.getElementById('closeSuccessModal').addEventListener('click', function () {
-            document.getElementById('successModal').classList.remove('active');
-        });
-
-        document.getElementById('backToElectionsBtn').addEventListener('click', function () {
-            document.getElementById('successModal').classList.remove('active');
-            // Recharger la page pour actualiser les données
-            location.reload();
-        });
-
-        // Déconnexion
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        });
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            startTokenExpirationCheck();
-        });
+        // Exposer les fonctions globales pour cette page
+        window.loadPageData = loadPageData;
     </script>
 </body>
 

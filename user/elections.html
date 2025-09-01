@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Élections - UCAO-UUC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="../assets/css/components/election-card.css">
+    <link rel="stylesheet" href="../assets/css/components/candidate-card.css">
+    <link rel="stylesheet" href="../assets/css/components/filters.css">
+    <link rel="stylesheet" href="../assets/css/pages/elections.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
+        <div class="user-nav">
+            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
+            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
+        </div>
+        <div class="burger" id="burger">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="/user/dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="/user/elections" class="active"><i class="fa-solid fa-list"></i> Élections</a></li>
+                <li><a href="/user/mes-candidatures"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
+                <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
+                <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
+                <i class="fa-solid fa-chevron-right"></i>
+                <span>Élections</span>
+            </div>
+
+            <!-- Filtres -->
+            <div id="filtersContainer"></div>
+
+            <!-- Section des élections spécifiques à l'étudiant -->
+            <div class="elections-section">
+                <h2 class="section-title">
+                    <i class="fa-solid fa-star"></i>
+                    Mes élections disponibles
+                </h2>
+                <div class="elections-grid" id="studentElectionsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement de vos élections...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste de toutes les élections -->
+            <div class="elections-section">
+                <h2 class="section-title">
+                    <i class="fa-solid fa-list"></i>
+                    Toutes les élections
+                </h2>
+                <div class="elections-grid" id="allElectionsGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement des élections...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section des candidats (visible quand une élection est sélectionnée) -->
+            <div class="candidates-section" id="candidatesSection" style="display: none;">
+                <h2 class="section-title">
+                    <i class="fa-solid fa-users"></i>
+                    Candidats de l'élection sélectionnée
+                </h2>
+                <div class="candidates-grid" id="candidatesGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Chargement des candidats...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal des détails de l'élection -->
+    <div class="modal-overlay" id="electionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalElectionTitle">Détails de l'élection</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalElectionContent">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Chargement des scripts -->
+    <script src="../config.js"></script>
+    <script src="../assets/js/utils/api.js"></script>
+    <script src="../assets/js/services/eligibilityService.js"></script>
+    <script src="../assets/js/services/electionService.js"></script>
+    <script src="../assets/js/services/candidateService.js"></script>
+    <script src="../assets/js/services/voteService.js"></script>
+    <script src="../assets/js/components/ElectionCard.js"></script>
+    <script src="../assets/js/components/CandidateCard.js"></script>
+    <script src="../assets/js/components/FilterSystem.js"></script>
+    <script src="../assets/js/main.js"></script>
+
+    <script>
+        // Variables globales pour cette page
+        let allElections = [];
+        let studentElections = [];
+        let allCandidates = [];
+        let selectedElection = null;
+        let filterSystem = null;
+
+        // Configuration des filtres
+        const filtersConfig = [
+            {
+                key: 'type',
+                label: 'Type d\'élection',
+                options: [
+                    { value: 'SALLE', label: 'Responsables de Salle' },
+                    { value: 'ECOLE', label: 'Délégués d\'École' },
+                    { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
+                ]
+            },
+            {
+                key: 'status',
+                label: 'Statut',
+                options: [
+                    { value: 'active', label: 'Actives' },
+                    { value: 'upcoming', label: 'À venir' },
+                    { value: 'completed', label: 'Terminées' },
+                    { value: 'candidature', label: 'Candidature' }
+                ]
+            },
+            {
+                key: 'ecole',
+                label: 'École/Faculté',
+                options: [
+                    { value: 'EGEI', label: 'EGEI' },
+                    { value: 'ESMEA', label: 'ESMEA' },
+                    { value: 'FSAE', label: 'FSAE' },
+                    { value: 'FDE', label: 'FDE' }
+                ]
+            }
+        ];
+
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Vérifier que l'utilisateur est connecté
+            if (!localStorage.getItem('token')) {
+                window.location.href = '/user/login';
+                return;
+            }
+
+            // Initialiser le système de filtres
+            filterSystem = new FilterSystem('filtersContainer', filtersConfig);
+            filterSystem.render();
+            filterSystem.setFilterChangeCallback(handleFilterChange);
+
+            // Charger les données
+            await loadPageData();
+
+            // Gestionnaire d'événements pour la modale
+            document.getElementById('closeModal')?.addEventListener('click', () => {
+                document.getElementById('electionModal')?.classList.remove('active');
+            });
+
+            // Fermer la modale en cliquant à l'extérieur
+            document.addEventListener('click', function (event) {
+                const modal = document.getElementById('electionModal');
+                if (modal && event.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Chargement des données de la page
+        async function loadPageData() {
+            showLoading();
+
+            try {
+                // Charger les élections accessibles à l'étudiant
+                await loadStudentElections();
+
+                // Charger toutes les élections
+                await loadAllElections();
+
+                // Charger tous les candidats
+                await loadCandidates();
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                showToast('Erreur de chargement des données', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Charger les élections spécifiques à l'étudiant
+        async function loadStudentElections() {
+            try {
+                const data = await ElectionService.getMyElections();
+
+                if (data && Array.isArray(data)) {
+                    studentElections = data;
+                    displayStudentElections(data);
+                } else {
+                    showStudentElectionsError('Aucune élection disponible pour votre profil');
+                }
+            } catch (error) {
+                console.error('Erreur chargement élections étudiant:', error);
+                showStudentElectionsError('Erreur de chargement');
+            }
+        }
+
+        // Afficher les élections spécifiques à l'étudiant
+        function displayStudentElections(elections) {
+            const container = document.getElementById('studentElectionsGrid');
+            if (!container) return;
+
+            if (!elections || elections.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <h3>Aucune élection disponible actuellement</h3>
+                        <p>Vérifiez votre profil étudiant ou contactez l'administration.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = elections.map(election =>
+                ElectionCard.create(election, {
+                    showActions: true,
+                    showDetails: true
+                })
+            ).join('');
+        }
+
+        // Charger toutes les élections
+        async function loadAllElections() {
+            try {
+                const filters = filterSystem.getFilters();
+                const data = await ElectionService.getElections(filters);
+
+                if (data && Array.isArray(data)) {
+                    allElections = data;
+                    displayAllElections(data);
+                } else {
+                    showAllElectionsError('Aucune élection disponible');
+                }
+            } catch (error) {
+                console.error('Erreur chargement toutes les élections:', error);
+                showAllElectionsError('Erreur de chargement');
+            }
+        }
+
+        // Afficher toutes les élections
+        function displayAllElections(elections) {
+            const container = document.getElementById('allElectionsGrid');
+            if (!container) return;
+
+            if (!elections || elections.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-inbox"></i>
+                        <h3>Aucune élection correspondante</h3>
+                        <p>Aucune élection ne correspond aux filtres sélectionnés.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = elections.map(election =>
+                ElectionCard.create(election, {
+                    showActions: true,
+                    showDetails: true
+                })
+            ).join('');
+
+            // Ajouter les événements de clic sur les cartes d'élection
+            attachElectionCardEvents();
+        }
+
+        // Attacher les événements aux cartes d'élection
+        function attachElectionCardEvents() {
+            document.querySelectorAll('.election-card').forEach(card => {
+                card.addEventListener('click', function () {
+                    const electionId = this.dataset.electionId;
+                    const election = allElections.find(e => e.id == electionId);
+
+                    if (election) {
+                        selectElection(election);
+                    }
+                });
+            });
+        }
+
+        // Charger tous les candidats
+        async function loadCandidates() {
+            try {
+                const data = await CandidateService.getCandidates();
+
+                if (data && data.candidates && Array.isArray(data.candidates)) {
+                    allCandidates = data.candidates;
+                }
+            } catch (error) {
+                console.error('Erreur chargement candidats:', error);
+            }
+        }
+
+        // Sélectionner une élection
+        async function selectElection(election) {
+            selectedElection = election;
+
+            // Mettre à jour la sélection visuelle
+            document.querySelectorAll('.election-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const selectedCard = document.querySelector(`.election-card[data-election-id="${election.id}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+
+            // Afficher les candidats de cette élection
+            await displayElectionCandidates(election);
+        }
+
+        // Afficher les candidats d'une élection
+        async function displayElectionCandidates(election) {
+            const container = document.getElementById('candidatesGrid');
+            const section = document.getElementById('candidatesSection');
+
+            if (!container || !section) return;
+
+            section.style.display = 'block';
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des candidats...</p>
+                </div>
+            `;
+
+            try {
+                // Récupérer les candidats pour cette élection
+                const electionCandidates = allCandidates.filter(c => c.electionId == election.id);
+
+                if (electionCandidates.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-data-message">
+                            <i class="fa-solid fa-user-slash"></i>
+                            <h3>Aucun candidat pour cette élection</h3>
+                            <p>Soyez le premier à vous porter candidat !</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Afficher les candidats
+                container.innerHTML = electionCandidates.map(candidate =>
+                    CandidateCard.create(candidate, {
+                        showProgram: true,
+                        showViewProfile: true,
+                        showVote: ElectionService.getElectionStatus(election) === 'active',
+                        electionId: election.id
+                    })
+                ).join('');
+
+            } catch (error) {
+                console.error('Erreur affichage candidats:', error);
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les candidats.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Gestionnaire de changement de filtre
+        async function handleFilterChange(filters) {
+            await loadAllElections();
+        }
+
+        // Fonctions d'affichage d'erreur
+        function showStudentElectionsError(message) {
+            const container = document.getElementById('studentElectionsGrid');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="loadPageData()">
+                        <i class="fa-solid fa-refresh"></i>
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+
+        function showAllElectionsError(message) {
+            const container = document.getElementById('allElectionsGrid');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="loadPageData()">
+                        <i class="fa-solid fa-refresh"></i>
+                        Réessayer
+                    </button>
+                </div>
+            `;
+        }
+
+        // Fonction pour afficher les détails d'une élection (modale)
+        async function showElectionDetails(electionId) {
+            try {
+                showLoading();
+                const election = await ElectionService.getElectionDetails(electionId);
+
+                if (election) {
+                    const modal = document.getElementById('electionModal');
+                    const title = document.getElementById('modalElectionTitle');
+                    const content = document.getElementById('modalElectionContent');
+
+                    if (modal && title && content) {
+                        title.textContent = election.titre;
+                        content.innerHTML = this.renderElectionDetails(election);
+                        modal.classList.add('active');
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur affichage détails:', error);
+                showToast('Erreur de chargement des détails', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Rendu des détails d'une élection
+        function renderElectionDetails(election) {
+            const status = ElectionService.getElectionStatus(election);
+            const statusClass = `status-${status}`;
+            const statusText = ElectionService.getStatusText(status);
+
+            return `
+                <div class="election-details">
+                    <div class="election-header">
+                        <span class="election-type">${ElectionService.getElectionTypeLabel(election.type)}</span>
+                        <span class="election-status ${statusClass}">${statusText}</span>
+                    </div>
+                    
+                    <div class="election-meta">
+                        <div class="meta-item">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <strong>École:</strong> ${election.ecole || 'Non spécifié'}
+                        </div>
+                        ${election.filiere ? `
+                        <div class="meta-item">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <strong>Filière:</strong> ${election.filiere}
+                        </div>
+                        ` : ''}
+                        ${election.annee ? `
+                        <div class="meta-item">
+                            <i class="fa-solid fa-calendar"></i>
+                            <strong>Année:</strong> ${election.annee}
+                        </div>
+                        ` : ''}
+                        <div class="meta-item">
+                            <i class="fa-solid fa-user-tie"></i>
+                            <strong>Poste:</strong> ${ElectionService.getDelegueTypeLabel(election.delegueType)}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <strong>Période de candidature:</strong> 
+                            ${formatDate(election.dateDebutCandidature)} - ${formatDate(election.dateFinCandidature)}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fa-solid fa-vote-yea"></i>
+                            <strong>Période de vote:</strong> 
+                            ${formatDate(election.dateDebut)} - ${formatDate(election.dateFin)}
+                        </div>
+                    </div>
+                    
+                    <div class="election-description">
+                        <strong>Description:</strong><br>
+                        ${election.description || 'Aucune description disponible'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Exposer les fonctions globales pour cette page
+        window.showElectionDetails = showElectionDetails;
+        window.loadPageData = loadPageData;
+    </script>
+</body>
+
+</html>
