@@ -722,6 +722,7 @@
                 return null;
             }
 
+
             const defaultOptions = {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -743,11 +744,18 @@
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
 
+                if (response.status === 500) {
+                    const errorData = await response.json();
+                    console.error('Erreur 500 détaillée:', errorData);
+                    throw new Error(errorData.message || 'Erreur serveur');
+                }
+
                 return await response.json();
             } catch (error) {
                 console.error('Erreur fetch:', error);
                 throw error;
             }
+
         }
 
         // Charger le profil utilisateur
@@ -1227,8 +1235,13 @@
         async function loadData() {
             try {
                 await loadUserProfile();
+                try {
+                    await loadStudentElections();
+                } catch (error) {
+                    console.error('Échec student elections, continuation...');
+                }
+
                 await Promise.all([
-                    loadStudentElections(),
                     loadAllElections(),
                     loadCandidates()
                 ]);
