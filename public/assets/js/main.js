@@ -70,4 +70,4 @@ function initCommonEventHandlers() {
 window.showToast = showToast;
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
-window.formatDate = formatDate;
+window.FormData = formatDate;
