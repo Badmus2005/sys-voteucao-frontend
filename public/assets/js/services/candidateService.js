@@ -2,11 +2,12 @@
 class CandidateService {
     static async getCandidates(electionId = null) {
         try {
-            const url = electionId ?
-                CONFIG.API.ENDPOINTS.CANDIDATE.BY_ELECTION(electionId) :
-                CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = electionId
+                ? CONFIG.API.ENDPOINTS.CANDIDATE.BY_ELECTION(electionId)
+                : CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
 
-            return await fetchWithAuth(url);
+            return await fetchWithAuth(`${BASE}${endpoint}`);
         } catch (error) {
             console.error('Erreur lors de la récupération des candidats:', error);
             throw error;
@@ -15,7 +16,10 @@ class CandidateService {
 
     static async submitCandidature(candidatureData) {
         try {
-            const response = await fetchWithAuth(CONFIG.API.ENDPOINTS.CANDIDATE.SUBMIT, {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.SUBMIT;
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'POST',
                 body: JSON.stringify(candidatureData)
             });
@@ -29,7 +33,10 @@ class CandidateService {
 
     static async isCandidate(electionId) {
         try {
-            const response = await fetchWithAuth(CONFIG.API.ENDPOINTS.CANDIDATE.IS_CANDIDATE(electionId));
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.IS_CANDIDATE(electionId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
             return response.isCandidate || false;
         } catch (error) {
             console.error('Erreur lors de la vérification de candidature:', error);
@@ -39,25 +46,24 @@ class CandidateService {
 
     static async getCandidateProfile(candidateId) {
         try {
-            // Cette endpoint devra être créé côté backend
-            return await fetchWithAuth(`/api/candidats/${candidateId}`);
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.PROFILE(candidateId);
+
+            return await fetchWithAuth(`${BASE}${endpoint}`);
         } catch (error) {
             console.error('Erreur lors de la récupération du profil candidat:', error);
             throw error;
         }
     }
 
-    // Dans assets/js/services/candidateService.js - Ajouter ces méthodes
     static async getMyCandidatures() {
         try {
-            // Cette endpoint devra être créé côté backend
-            const response = await fetchWithAuth('/api/candidats/mes-candidatures');
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.MY_CANDIDATURES;
 
-            if (response && Array.isArray(response)) {
-                return response;
-            }
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
 
-            return [];
+            return Array.isArray(response) ? response : [];
         } catch (error) {
             console.error('Erreur récupération candidatures:', error);
             return [];
@@ -66,7 +72,10 @@ class CandidateService {
 
     static async updateCandidature(candidatureId, data) {
         try {
-            const response = await fetchWithAuth(`/api/candidats/${candidatureId}`, {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.UPDATE(candidatureId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'PUT',
                 body: JSON.stringify(data)
             });
@@ -80,7 +89,10 @@ class CandidateService {
 
     static async deleteCandidature(candidatureId) {
         try {
-            const response = await fetchWithAuth(`/api/candidats/${candidatureId}`, {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.DELETE(candidatureId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'DELETE'
             });
 

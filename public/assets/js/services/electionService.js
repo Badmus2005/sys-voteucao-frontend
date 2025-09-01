@@ -1,10 +1,9 @@
-// assets/js/services/electionService.js
 class ElectionService {
     static async getElections(filters = {}) {
         try {
+            const BASE = CONFIG.API.BASE_URL;
             let url = CONFIG.API.ENDPOINTS.ELECTION.LIST;
 
-            // Ajouter les filtres à l'URL si présents
             const queryParams = new URLSearchParams();
             Object.keys(filters).forEach(key => {
                 if (filters[key] && filters[key] !== 'all') {
@@ -16,7 +15,7 @@ class ElectionService {
                 url += `?${queryParams.toString()}`;
             }
 
-            return await fetchWithAuth(url);
+            return await fetchWithAuth(`${BASE}${url}`);
         } catch (error) {
             console.error('Erreur lors de la récupération des élections:', error);
             throw error;
@@ -25,7 +24,10 @@ class ElectionService {
 
     static async getElectionDetails(id) {
         try {
-            return await fetchWithAuth(CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id));
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id);
+
+            return await fetchWithAuth(`${BASE}${endpoint}`);
         } catch (error) {
             console.error('Erreur lors de la récupération des détails de l\'élection:', error);
             throw error;
@@ -34,7 +36,10 @@ class ElectionService {
 
     static async getMyElections() {
         try {
-            return await fetchWithAuth(CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS);
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
+
+            return await fetchWithAuth(`${BASE}${endpoint}`);
         } catch (error) {
             console.error('Erreur lors de la récupération de mes élections:', error);
             throw error;
