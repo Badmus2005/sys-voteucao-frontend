@@ -17,7 +17,7 @@ async function fetchWithAuth(url, options = {}) {
 
     try {
         const response = await fetch(url, defaultOptions);
-
+        console.log("URL appelée :", url);
         if (response.status === 401) {
             localStorage.removeItem('token');
             window.location.href = '/user/login';
