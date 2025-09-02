@@ -1431,37 +1431,8 @@
             </div>
         </div>
     </div>
+    <script src="/assets/js/config.js"></script>
     <script>
-        // Configuration de l'API
-        const CONFIG = {
-            API: {
-                BASE_URL: 'http://localhost:3000/api',
-                ENDPOINTS: {
-                    ADMIN: {
-                        ME: '/admin/me',
-                        UPDATE: '/admin/update'
-                    },
-                    UPLOAD: {
-                        IMAGE: '/upload/image'
-                    },
-                    STATS: {
-                        GENERAL: '/stats/general',
-                        VOTES: '/stats/votes'
-                    },
-                    ACTIVITY: {
-                        LIST: '/activity'
-                    },
-                    CODES: {
-                        GENERATE: '/codes/generate',
-                        LIST: '/codes'
-                    },
-                    NOTIFICATIONS: {
-                        LIST: '/notifications',
-                        READ: '/notifications/:id/read'
-                    }
-                }
-            }
-        };
 
         // Variables globales
         const API_BASE = CONFIG.API.BASE_URL;
@@ -1473,7 +1444,7 @@
         const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
         const CODES_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.LIST;
         const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
-        const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.LIST;
+        const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.ADMIN;
         const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
 
         // Fonction pour récupérer le token
@@ -2230,7 +2201,7 @@
         async function markAsRead(notificationId) {
             try {
                 const token = getToken();
-                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
+                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT(':id', notificationId)}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
