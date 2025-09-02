@@ -596,7 +596,7 @@
     <script src="/assets/js/config.js"></script>
     <script>
         // --- Configuration ---
-        const BACKEND_URL = CONFIG.API.BASE_URL;
+        const BACKEND_URL = 'https://system-vote-ucao.onrender.com';
 
         // --- Variables DOM ---
         const studentsList = document.getElementById('studentsList');
@@ -671,6 +671,15 @@
         </div>`;
             try {
                 const response = await fetch(buildURL(page));
+
+                if (!response.ok) {
+                    const html = await response.text(); // pour logguer le HTML reçu
+                    console.error("Réponse non-JSON :", html);
+                    studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur ${response.status}
+        </div>`;
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (!data.success) {
@@ -683,10 +692,11 @@
                 renderPagination(data.pagination);
                 populateFilters(data.data);
             } catch (err) {
-                console.error(err);
+                console.error("Erreur fetchStudents :", err);
                 studentsList.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i>Erreur serveur
-        </div>`;
+    </div>`;
             }
+
         }
 
         function populateFilters(students) {
