@@ -1431,8 +1431,37 @@
             </div>
         </div>
     </div>
-    <script src="/assets/js/config.js"></script>
     <script>
+        // Configuration de l'API
+        const CONFIG = {
+            API: {
+                BASE_URL: 'http://localhost:3000/api',
+                ENDPOINTS: {
+                    ADMIN: {
+                        ME: '/admin/me',
+                        UPDATE: '/admin/update'
+                    },
+                    UPLOAD: {
+                        IMAGE: '/upload/image'
+                    },
+                    STATS: {
+                        GENERAL: '/stats/general',
+                        VOTES: '/stats/votes'
+                    },
+                    ACTIVITY: {
+                        LIST: '/activity'
+                    },
+                    CODES: {
+                        GENERATE: '/codes/generate',
+                        LIST: '/codes'
+                    },
+                    NOTIFICATIONS: {
+                        LIST: '/notifications',
+                        READ: '/notifications/:id/read'
+                    }
+                }
+            }
+        };
 
         // Variables globales
         const API_BASE = CONFIG.API.BASE_URL;
@@ -1554,9 +1583,9 @@
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        ${message}
-    `;
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
 
             toastContainer.appendChild(toast);
 
@@ -1663,12 +1692,12 @@
             // Remplir le tableau avec les codes
             if (allCodes.length === 0) {
                 tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 20px;">
-                    Aucun code trouvé
-                </td>
-            </tr>
-        `;
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">
+                            Aucun code trouvé
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
@@ -1686,13 +1715,13 @@
                 const usedBy = code.usedBy || code.used_by || '-';
 
                 row.innerHTML = `
-            <td><strong>${code.code}</strong></td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>${createdAt}</td>
-            <td>${usedAt}</td>
-            <td>${generatedBy}</td>
-            <td>${usedBy}</td>
-        `;
+                    <td><strong>${code.code}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${createdAt}</td>
+                    <td>${usedAt}</td>
+                    <td>${generatedBy}</td>
+                    <td>${usedBy}</td>
+                `;
 
                 tableBody.appendChild(row);
             });
@@ -1788,13 +1817,20 @@
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erreur lors de la génération');
 
-                displayGeneratedCodes(data.data.codes);
-                showToast(`${data.data.codes.length} codes générés avec succès`, 'success');
+                if (!response.ok) {
+                    throw new Error(data.message || 'Erreur lors de la génération');
+                }
 
-                // Recharger la liste des codes
-                await loadAllCodes();
+                if (data.success && data.data && data.data.codes) {
+                    displayGeneratedCodes(data.data.codes);
+                    showToast(`${data.data.codes.length} codes générés avec succès`, 'success');
+
+                    // Recharger la liste des codes
+                    await loadAllCodes();
+                } else {
+                    throw new Error('Format de réponse inattendu');
+                }
             } catch (error) {
                 console.error('Erreur génération codes:', error);
                 showToast(error.message || 'Échec de la génération', 'error');
@@ -1815,11 +1851,11 @@
                 const codeElement = document.createElement('div');
                 codeElement.className = 'code-item';
                 codeElement.innerHTML = `
-            <span>${code}</span>
-            <button class="copy-single-btn" data-code="${code}">
-                <i class="fas fa-copy"></i>
-            </button>
-        `;
+                    <span>${code}</span>
+                    <button class="copy-single-btn" data-code="${code}">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                `;
                 container.appendChild(codeElement);
             });
 
@@ -1918,8 +1954,6 @@
             }
         }
 
-
-
         async function loadActivity() {
             try {
                 showLoading();
@@ -1932,7 +1966,9 @@
                 let activities = [];
 
                 if (res.ok) {
-                    activities = await res.json();
+                    const result = await res.json();
+                    // Vérifier le format de réponse
+                    activities = result.data || result;
                 } else {
                     // Si le serveur renvoie une erreur, utilisons des données fictives
                     console.warn('Serveur d\'activités indisponible, utilisation de données de démonstration');
@@ -1998,13 +2034,13 @@
                     const iconClass = act.icon ? `fas fa-${act.icon}` : 'fas fa-check';
 
                     div.innerHTML = `
-                <div class="activity-icon"><i class="${iconClass}"></i></div>
-                <div class="activity-content">
-                    <h4>${act.title || 'Activité'}</h4>
-                    <p>${act.content || 'Aucun détail'}</p>
-                </div>
-                <div class="activity-time">${act.time || formatDate(act.timestamp)}</div>
-            `;
+                        <div class="activity-icon"><i class="${iconClass}"></i></div>
+                        <div class="activity-content">
+                            <h4>${act.title || 'Activité'}</h4>
+                            <p>${act.content || 'Aucun détail'}</p>
+                        </div>
+                        <div class="activity-time">${act.time || formatDate(act.timestamp)}</div>
+                    `;
                     container.appendChild(div);
                 });
             } catch (err) {
@@ -2015,18 +2051,16 @@
                 const container = document.getElementById('activityList');
                 if (container) {
                     container.innerHTML = `
-                <div style="padding: 20px; text-align: center; color: var(--gris-moyen);">
-                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>Impossible de charger les activités</p>
-                </div>
-            `;
+                        <div style="padding: 20px; text-align: center; color: var(--gris-moyen);">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>Impossible de charger les activités</p>
+                        </div>
+                    `;
                 }
             } finally {
                 hideLoading();
             }
         }
-
-
 
         async function loadVoteStats() {
             try {
@@ -2177,12 +2211,12 @@
                 const div = document.createElement('div');
                 div.className = `notification-item ${notification.read ? '' : 'unread'}`;
                 div.innerHTML = `
-            <div class="notification-content">${notification.message}</div>
-            <div class="notification-time">${formatDate(notification.createdAt)}</div>
-        `;
+                    <div class="notification-content">${notification.message || 'Notification sans contenu'}</div>
+                    <div class="notification-time">${formatDate(notification.createdAt || notification.timestamp)}</div>
+                `;
 
                 div.addEventListener('click', async () => {
-                    if (!notification.read) {
+                    if (!notification.read && notification.id) {
                         await markAsRead(notification.id);
                         div.classList.remove('unread');
                         loadNotifications(); // Recharger pour mettre à jour le badge
