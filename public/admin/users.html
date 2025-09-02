@@ -661,7 +661,7 @@
             if (status) params.append('status', status);
             if (search) params.append('search', search);
 
-            return `${BACKEND_URL}/students?${params.toString()}`;
+            return `${BACKEND_URL}/api/students?${params.toString()}`;
         }
 
         // --- Récupérer étudiants ---
@@ -670,7 +670,12 @@
             <div class="spinner"></div>
         </div>`;
             try {
-                const response = await fetch(buildURL(page));
+                const token = localStorage.getItem('token');
+                const response = await fetch(buildURL(page), {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
                 if (!response.ok) {
                     const html = await response.text(); // pour logguer le HTML reçu
@@ -781,7 +786,14 @@
                 if (filiereFilter.value !== 'all') params.append('filiere', filiereFilter.value);
                 if (anneeFilter.value !== 'all') params.append('annee', anneeFilter.value);
 
-                const response = await fetch(`${BACKEND_URL}/students/stats?${params.toString()}`);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${BACKEND_URL}/api/students/stats?${params.toString()}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+
                 const data = await response.json();
 
                 if (!data.success) return;
@@ -831,9 +843,13 @@
             resetModal.classList.add('active');
 
             try {
-                const response = await fetch(`${BACKEND_URL}/students/${studentId}/reset-access`, {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${BACKEND_URL}/api/students/${studentId}/reset-access`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
 
                 const data = await response.json();
