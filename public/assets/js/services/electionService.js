@@ -1,3 +1,4 @@
+// assets/js/services/electionService.js
 class ElectionService {
     static async getElections(filters = {}) {
         try {
@@ -15,10 +16,11 @@ class ElectionService {
                 url += `?${queryParams.toString()}`;
             }
 
-            return await fetchWithAuth(`${BASE}${url}`);
+            const response = await fetchWithAuth(`${BASE}${url}`);
+            return response.data || response;
         } catch (error) {
             console.error('Erreur lors de la récupération des élections:', error);
-            throw error;
+            throw new Error('Impossible de charger les élections');
         }
     }
 
@@ -27,27 +29,58 @@ class ElectionService {
             const BASE = CONFIG.API.BASE_URL;
             const endpoint = CONFIG.API.ENDPOINTS.ELECTION.DETAILS(id);
 
-            return await fetchWithAuth(`${BASE}${endpoint}`);
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
         } catch (error) {
             console.error('Erreur lors de la récupération des détails de l\'élection:', error);
-            throw error;
+            throw new Error('Impossible de charger les détails de l\'élection');
         }
     }
 
+    static async getMyElections() {
+        try {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('Erreur récupération élections personnelles:', error);
+            throw new Error('Impossible de charger vos élections');
+        }
+    }
 
     static getElectionStatus(election) {
-        if (!election || !election.dateDebut || !election.dateFin) return 'upcoming';
+        if (!election || typeof election !== 'object') return 'upcoming';
 
-        const now = new Date();
-        const debutCandidature = new Date(election.dateDebutCandidature);
-        const finCandidature = new Date(election.dateFinCandidature);
-        const debutVote = new Date(election.dateDebut);
-        const finVote = new Date(election.dateFin);
+        try {
+            const now = new Date();
 
-        if (now > finVote) return 'completed';
-        if (now >= debutVote && now <= finVote) return 'active';
-        if (now >= debutCandidature && now <= finCandidature) return 'candidature';
-        return 'upcoming';
+            // Validation et conversion des dates
+            const debutCandidature = election.dateDebutCandidature ? new Date(election.dateDebutCandidature) : null;
+            const finCandidature = election.dateFinCandidature ? new Date(election.dateFinCandidature) : null;
+            const debutVote = election.dateDebut ? new Date(election.dateDebut) : null;
+            const finVote = election.dateFin ? new Date(election.dateFin) : null;
+
+            // Validation des dates
+            if (!debutVote || !finVote) return 'upcoming';
+            if (isNaN(debutVote.getTime()) || isNaN(finVote.getTime())) return 'upcoming';
+
+            if (now > finVote) return 'completed';
+            if (now >= debutVote && now <= finVote) return 'active';
+
+            // Période de candidature
+            if (debutCandidature && finCandidature &&
+                !isNaN(debutCandidature.getTime()) && !isNaN(finCandidature.getTime()) &&
+                now >= debutCandidature && now <= finCandidature) {
+                return 'candidature';
+            }
+
+            return 'upcoming';
+        } catch (error) {
+            console.error('Erreur calcul statut élection:', error);
+            return 'upcoming';
+        }
     }
 
     static getStatusText(status) {
@@ -55,7 +88,7 @@ class ElectionService {
             'active': 'En cours',
             'upcoming': 'À venir',
             'completed': 'Terminée',
-            'candidature': 'Candidature'
+            'candidature': 'Période de candidature'
         };
         return statuses[status] || status;
     }
@@ -72,10 +105,26 @@ class ElectionService {
     static getDelegueTypeLabel(type) {
         if (!type) return 'Non spécifié';
         const types = {
-            'PREMIER': 'Premier Responsable',
-            'DEUXIEME': 'Deuxième Responsable',
+            'PREMIER': 'Premier Délégué',
+            'DEUXIEME': 'Deuxième Délégué',
             'DELEGUE': 'Délégué'
         };
         return types[type] || type;
+    }
+
+    static formatDate(dateString) {
+        if (!dateString) return 'Date non spécifiée';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'Date invalide';
+        }
     }
 }

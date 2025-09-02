@@ -7,10 +7,11 @@ class CandidateService {
                 ? CONFIG.API.ENDPOINTS.CANDIDATE.BY_ELECTION(electionId)
                 : CONFIG.API.ENDPOINTS.CANDIDATE.LIST;
 
-            return await fetchWithAuth(`${BASE}${endpoint}`);
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
         } catch (error) {
             console.error('Erreur lors de la récupération des candidats:', error);
-            throw error;
+            throw new Error('Impossible de charger les candidats');
         }
     }
 
@@ -21,13 +22,16 @@ class CandidateService {
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(candidatureData)
             });
 
             return response;
         } catch (error) {
             console.error('Erreur lors de la soumission de la candidature:', error);
-            throw error;
+            throw new Error('Échec de la soumission de la candidature');
         }
     }
 
@@ -49,10 +53,11 @@ class CandidateService {
             const BASE = CONFIG.API.BASE_URL;
             const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.PROFILE(candidateId);
 
-            return await fetchWithAuth(`${BASE}${endpoint}`);
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
         } catch (error) {
             console.error('Erreur lors de la récupération du profil candidat:', error);
-            throw error;
+            throw new Error('Impossible de charger le profil du candidat');
         }
     }
 
@@ -62,8 +67,7 @@ class CandidateService {
             const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.MY_CANDIDATURES;
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
-
-            return Array.isArray(response) ? response : [];
+            return response.data || response;
         } catch (error) {
             console.error('Erreur récupération candidatures:', error);
             return [];
@@ -77,13 +81,16 @@ class CandidateService {
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
 
             return response;
         } catch (error) {
             console.error('Erreur modification candidature:', error);
-            throw error;
+            throw new Error('Échec de la modification de la candidature');
         }
     }
 
@@ -99,7 +106,20 @@ class CandidateService {
             return response;
         } catch (error) {
             console.error('Erreur suppression candidature:', error);
-            throw error;
+            throw new Error('Échec de la suppression de la candidature');
+        }
+    }
+
+    static async getCandidatesByElection(electionId) {
+        try {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.CANDIDATE.BY_ELECTION(electionId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('Erreur récupération candidats par élection:', error);
+            throw new Error('Impossible de charger les candidats pour cette élection');
         }
     }
 }

@@ -6,10 +6,10 @@ class VoteService {
             const endpoint = CONFIG.API.ENDPOINTS.VOTE.TOKEN(electionId);
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            return response.token;
+            return response.data?.token || response.token;
         } catch (error) {
-            console.error('Erreur lors de la récupération du token de vote:', error);
-            throw error;
+            console.error('Erreur récupération token de vote:', error);
+            throw new Error('Impossible de récupérer le token de vote');
         }
     }
 
@@ -20,78 +20,61 @@ class VoteService {
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(voteData)
             });
 
             return response;
         } catch (error) {
-            console.error('Erreur lors de la soumission du vote:', error);
-            throw error;
+            console.error('Erreur soumission du vote:', error);
+            throw new Error('Échec de la soumission du vote');
         }
     }
 
     static async getActiveElectionId() {
-        // 1. Vérifie l’URL
-        const params = new URLSearchParams(window.location.search);
-        const fromQuery = params.get('electionId');
-        if (fromQuery) return fromQuery;
-
-        // 2. Vérifie sessionStorage
-        const fromSession = sessionStorage.getItem('electionId');
-        if (fromSession) return fromSession;
-
-        // 3. Appelle le backend (si endpoint disponible)
         try {
             const BASE = CONFIG.API.BASE_URL;
-            const endpoint = '/api/election/active';
-            const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            if (response?.id) {
-                sessionStorage.setItem('electionId', response.id);
-                return response.id;
-            }
-        } catch (_) {
-            // Silencieux si aucune élection active
-        }
+            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.ACTIVE;
 
-        return null;
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            const electionId = response.data?.id || response.id;
+
+            if (electionId) {
+                sessionStorage.setItem('activeElectionId', electionId);
+                return electionId;
+            }
+
+            return null;
+        } catch (error) {
+            console.debug('Aucune élection active:', error.message);
+            return null;
+        }
     }
 
     static async getResults(electionId = null) {
         try {
-            const id = electionId || await this.getActiveElectionId();
-            if (!id) throw new Error('Aucune élection active détectée');
+            let targetElectionId = electionId;
+
+            if (!targetElectionId) {
+                targetElectionId = await this.getActiveElectionId();
+            }
+
+            if (!targetElectionId) {
+                throw new Error('Aucune élection spécifiée ou active');
+            }
 
             const BASE = CONFIG.API.BASE_URL;
-            const endpoint = CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(id);
-            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            const endpoint = CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(targetElectionId);
 
-            if (response?.resultats) return response;
-            throw new Error('Format de réponse invalide');
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
         } catch (error) {
             console.error('Erreur récupération résultats:', error);
-            throw error;
+            throw new Error('Impossible de charger les résultats');
         }
     }
-
-    /* static async getResults(electionId = null) {
-         try {
-             const BASE = CONFIG.API.BASE_URL;
-             const endpoint = electionId
-                 ? CONFIG.API.ENDPOINTS.VOTE.RESULTS_DETAILED(electionId)
-                 : CONFIG.API.ENDPOINTS.VOTE.RESULTS;
- 
-             const response = await fetchWithAuth(`${BASE}${endpoint}`);
- 
-             if (response && response.resultats) {
-                 return response;
-             }
- 
-             throw new Error('Format de réponse invalide');
-         } catch (error) {
-             console.error('Erreur récupération résultats:', error);
-             throw error;
-         }
-     }*/
 
     static async getVoteStatus(electionId) {
         try {
@@ -99,9 +82,9 @@ class VoteService {
             const endpoint = CONFIG.API.ENDPOINTS.VOTE.STATUS(electionId);
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            return response.hasVoted || false;
+            return response.data?.hasVoted || response.hasVoted || false;
         } catch (error) {
-            console.error('Erreur lors de la vérification du statut de vote:', error);
+            console.error('Erreur vérification statut vote:', error);
             return false;
         }
     }
@@ -113,12 +96,18 @@ class VoteService {
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`, {
                 method: 'POST',
-                body: JSON.stringify({ electionId, voteToken: token })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    electionId,
+                    voteToken: token
+                })
             });
 
-            return response.isValid || false;
+            return response.data?.isValid || response.isValid || false;
         } catch (error) {
-            console.error('Erreur lors de la validation du token:', error);
+            console.error('Erreur validation token:', error);
             return false;
         }
     }
@@ -129,28 +118,40 @@ class VoteService {
             const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
 
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
-
-            // Vérifier si la réponse est OK
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || 'Erreur serveur'}`);
-            }
-
-            const data = await response.json();
-
-            // Vérification plus robuste
-            if (data && Array.isArray(data)) {
-                return data;
-            } else if (data && data.message) {
-                // Gérer les messages d'erreur du backend
-                throw new Error(data.message);
-            } else {
-                return [];
-            }
-
+            return response.data || response;
         } catch (error) {
             console.error('Erreur récupération élections personnelles:', error);
-            throw error; // Propager l'erreur pour une meilleure gestion
+            throw new Error('Impossible de charger vos élections');
         }
+    }
+
+    static async getElectionDetails(electionId) {
+        try {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.DETAILS(electionId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('Erreur récupération détails élection:', error);
+            throw new Error('Impossible de charger les détails de l\'élection');
+        }
+    }
+
+    static async hasVoted(electionId) {
+        try {
+            const BASE = CONFIG.API.BASE_URL;
+            const endpoint = CONFIG.API.ENDPOINTS.VOTE.STATUS(electionId);
+
+            const response = await fetchWithAuth(`${BASE}${endpoint}`);
+            return response.data?.hasVoted || response.hasVoted || false;
+        } catch (error) {
+            console.error('Erreur vérification vote:', error);
+            return false;
+        }
+    }
+
+    static clearActiveElection() {
+        sessionStorage.removeItem('activeElectionId');
     }
 }
