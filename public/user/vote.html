@@ -57,7 +57,7 @@
             <!-- Vote Container -->
             <div class="vote-container">
                 <!-- Left Column: Elections and Candidates -->
-                <div>
+                <div class="vote-main-content">
                     <!-- Elections List -->
                     <div class="elections-section">
                         <h2 class="section-title">
@@ -189,11 +189,11 @@
                 return;
             }
 
-            // Charger les données
-            await loadPageData();
-
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
+
+            // Charger les données
+            await loadPageData();
         });
 
         // Chargement des données de la page
@@ -218,9 +218,10 @@
         // Charger les élections accessibles
         async function loadElections() {
             try {
-                const data = await VoteService.getMyElections();
+                // Utiliser la route correcte pour les élections de l'utilisateur
+                const data = await ElectionService.getElectionsForVoting();
 
-                if (data.length > 0) {
+                if (data && data.length > 0) {
                     allElections = data;
                     displayElections(data);
                 } else {
@@ -232,18 +233,12 @@
             }
         }
 
-
         // Afficher les élections
         function displayElections(elections) {
             const container = document.getElementById('electionsList');
             if (!container) return;
 
-            // Filtrer les élections où l'utilisateur peut voter
-            const electionsToVote = elections.filter(election =>
-                EligibilityService.canVoteInElection(window.userProfile, election)
-            );
-
-            if (electionsToVote.length === 0) {
+            if (elections.length === 0) {
                 container.innerHTML = `
                     <div class="no-data-message">
                         <i class="fa-solid fa-calendar-check"></i>
@@ -254,10 +249,11 @@
                 return;
             }
 
-            container.innerHTML = electionsToVote.map(election =>
+            container.innerHTML = elections.map(election =>
                 ElectionCard.create(election, {
                     showActions: false,
-                    showDetails: true
+                    showDetails: true,
+                    clickable: true
                 })
             ).join('');
 
@@ -284,7 +280,9 @@
             try {
                 const data = await CandidateService.getCandidates();
 
-                if (data && data.candidates && Array.isArray(data.candidates)) {
+                if (data && Array.isArray(data)) {
+                    allCandidates = data;
+                } else if (data && data.candidates && Array.isArray(data.candidates)) {
                     allCandidates = data.candidates;
                 }
             } catch (error) {
@@ -295,7 +293,7 @@
         // Sélectionner une élection
         async function selectElection(election) {
             // Vérifier si l'utilisateur a déjà voté pour cette élection
-            const hasVoted = await VoteService.getVoteStatus(election.id);
+            const hasVoted = await VoteService.hasVoted(election.id);
 
             if (hasVoted) {
                 showToast('Vous avez déjà voté pour cette élection', 'warning');
@@ -307,12 +305,10 @@
             // Mettre à jour la sélection visuelle
             document.querySelectorAll('.election-card').forEach(card => {
                 card.classList.remove('selected');
+                if (card.dataset.electionId == election.id) {
+                    card.classList.add('selected');
+                }
             });
-
-            const selectedCard = document.querySelector(`.election-card[data-election-id="${election.id}"]`);
-            if (selectedCard) {
-                selectedCard.classList.add('selected');
-            }
 
             // Afficher les candidats de cette élection
             await displayElectionCandidates(election);
@@ -320,10 +316,8 @@
 
         // Afficher les candidats d'une élection
         async function displayElectionCandidates(election) {
-            const container = document.getElementById('candidatesGrid');
             const section = document.getElementById('candidatesSection');
-
-            if (!container || !section) return;
+            if (!section) return;
 
             // Afficher la section des candidats
             section.innerHTML = `
@@ -385,7 +379,7 @@
                 candidatesList.innerHTML = electionCandidates.map(candidate =>
                     CandidateCard.create(candidate, {
                         showProgram: true,
-                        showViewProfile: true,
+                        showViewProfile: false,
                         showVote: true,
                         electionId: election.id
                     })
@@ -422,17 +416,19 @@
 
         // Sélectionner un candidat
         function selectCandidate(election, candidate) {
-            selectedCandidates[election.id] = candidate;
-
-            // Mettre à jour la sélection visuelle
-            document.querySelectorAll('.candidate-card').forEach(card => {
+            // Désélectionner tous les candidats pour cette élection
+            document.querySelectorAll(`.candidate-card[data-election-id="${election.id}"]`).forEach(card => {
                 card.classList.remove('selected');
             });
 
+            // Sélectionner le candidat choisi
             const selectedCard = document.querySelector(`.candidate-card[data-candidate-id="${candidate.id}"]`);
             if (selectedCard) {
                 selectedCard.classList.add('selected');
             }
+
+            // Stocker la sélection
+            selectedCandidates[election.id] = candidate;
 
             // Mettre à jour le récapitulatif
             updateVoteSummary();
@@ -468,17 +464,36 @@
                     summaryItem.innerHTML = `
                         <div class="summary-election">${election.titre}</div>
                         <div class="summary-candidate">
-                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/30'}" 
+                            <img src="${candidate.photoUrl || '/assets/images/default-avatar.png'}" 
                                  alt="${candidate.prenom} ${candidate.nom}" 
                                  class="summary-candidate-avatar"
-                                 onerror="this.src='https://via.placeholder.com/30'">
+                                 onerror="this.src='/assets/images/default-avatar.png'">
                             <span>${candidate.prenom} ${candidate.nom}</span>
                         </div>
+                        <button class="summary-remove" data-election-id="${electionId}">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     `;
 
                     container.appendChild(summaryItem);
                 }
             }
+
+            // Ajouter les événements pour les boutons de suppression
+            document.querySelectorAll('.summary-remove').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const electionId = this.dataset.electionId;
+                    delete selectedCandidates[electionId];
+
+                    // Désélectionner visuellement
+                    document.querySelectorAll(`.candidate-card[data-election-id="${electionId}"]`).forEach(card => {
+                        card.classList.remove('selected');
+                    });
+
+                    updateVoteSummary();
+                });
+            });
 
             submitBtn.disabled = false;
         }
@@ -493,31 +508,30 @@
             document.getElementById('confirmationModal').classList.remove('active');
 
             try {
+                let successCount = 0;
+
                 for (const electionId in selectedCandidates) {
                     const candidate = selectedCandidates[electionId];
 
-                    // Obtenir un token de vote pour cette élection
-                    const voteToken = await VoteService.getVoteToken(electionId);
-                    if (!voteToken) {
-                        throw new Error('Impossible d\'obtenir un token de vote');
-                    }
-
-                    // Soumettre le vote avec le token
-                    await VoteService.submitVote({
+                    // Soumettre le vote
+                    const result = await VoteService.submitVote({
                         electionId: parseInt(electionId),
-                        candidateId: parseInt(candidate.id),
-                        voteToken: voteToken
+                        candidateId: parseInt(candidate.id)
                     });
 
-                    // Supprimer le token utilisé du cache
-                    delete voteTokens[electionId];
+                    if (result.success) {
+                        successCount++;
+                    }
                 }
 
-                // Afficher le modal de succès
-                document.getElementById('successModal').classList.add('active');
-
-                // Réinitialiser la sélection
-                resetVote();
+                if (successCount > 0) {
+                    // Afficher le modal de succès
+                    document.getElementById('successModal').classList.add('active');
+                    // Réinitialiser la sélection
+                    resetVote();
+                } else {
+                    throw new Error('Aucun vote n\'a pu être enregistré');
+                }
 
             } catch (error) {
                 console.error('Erreur lors du vote:', error);
@@ -535,10 +549,7 @@
             selectedElection = null;
 
             // Mettre à jour l'interface
-            document.querySelectorAll('.election-card').forEach(item => {
-                item.classList.remove('selected');
-            });
-            document.querySelectorAll('.candidate-card').forEach(item => {
+            document.querySelectorAll('.election-card, .candidate-card').forEach(item => {
                 item.classList.remove('selected');
             });
 
@@ -611,6 +622,46 @@
                 // Recharger la page pour actualiser les données
                 location.reload();
             });
+        }
+
+        // Fonctions utilitaires
+        function showLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            if (toast && toastIcon && toastMessage) {
+                toastMessage.textContent = message;
+
+                // Changer l'icône selon le type
+                if (type === 'error') {
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    toast.style.backgroundColor = '#f44336';
+                } else if (type === 'warning') {
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    toast.style.backgroundColor = '#ff9800';
+                } else {
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    toast.style.backgroundColor = '#4CAF50';
+                }
+
+                toast.classList.add('show');
+
+                // Cacher après 3 secondes
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
         }
 
         // Exposer les fonctions globales pour cette page

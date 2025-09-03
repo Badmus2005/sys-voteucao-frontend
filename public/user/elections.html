@@ -58,14 +58,19 @@
             <!-- Filtres -->
             <div id="filtersContainer"></div>
 
-            <!-- SUPPRIMÉ: Section des élections spécifiques à l'étudiant -->
-
             <!-- Liste de toutes les élections -->
             <div class="elections-section">
-                <h2 class="section-title">
-                    <i class="fa-solid fa-list"></i>
-                    Toutes les élections
-                </h2>
+                <div class="page-header">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-list"></i>
+                        Toutes les élections
+                    </h2>
+                    <button class="refresh-btn" id="refreshElections">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span class="spinner" id="refreshSpinner"></span>
+                        Actualiser
+                    </button>
+                </div>
                 <div class="elections-grid" id="allElectionsGrid">
                     <div class="loading">
                         <div class="spinner"></div>
@@ -78,7 +83,7 @@
             <div class="candidates-section" id="candidatesSection" style="display: none;">
                 <h2 class="section-title">
                     <i class="fa-solid fa-users"></i>
-                    Candidats de l'élection sélectionnée
+                    Candidats de l'élection: <span id="selectedElectionTitle"></span>
                 </h2>
                 <div class="candidates-grid" id="candidatesGrid">
                     <div class="loading">
@@ -147,7 +152,7 @@
                     { value: 'active', label: 'Actives' },
                     { value: 'upcoming', label: 'À venir' },
                     { value: 'completed', label: 'Terminées' },
-                    { value: 'candidature', label: 'Candidature' }
+                    { value: 'candidature', label: 'En candidature' }
                 ]
             },
             {
@@ -164,13 +169,6 @@
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            // VÉRIFICATION URL
-            console.log('URL complète:', window.location.href);
-            console.log('Paramètres URL:', window.location.search);
-            const urlParams = new URLSearchParams(window.location.search);
-            const electionIdFromUrl = urlParams.get('electionId');
-            console.log('electionId présent?:', electionIdFromUrl);
-
             // Vérifier que l'utilisateur est connecté
             if (!localStorage.getItem('token')) {
                 window.location.href = '/user/login';
@@ -182,19 +180,22 @@
             filterSystem.render();
             filterSystem.setFilterChangeCallback(handleFilterChange);
 
+            // Initialiser les gestionnaires d'événements
+            initEventHandlers();
+
             // Charger les données
             await loadPageData();
 
-            // SI UN electionId EST PRÉSENT, SÉLECTIONNEZ CETTE ÉLECTION
+            // Vérifier si un electionId est présent dans l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const electionIdFromUrl = urlParams.get('electionId');
+
             if (electionIdFromUrl) {
                 try {
                     // Trouver et sélectionner l'élection
                     selectedElection = allElections.find(e => e.id == electionIdFromUrl);
                     if (selectedElection) {
-                        console.log('Élection trouvée:', selectedElection.titre);
                         await selectElection(selectedElection);
-                    } else {
-                        console.warn('Aucune élection trouvée avec ID:', electionIdFromUrl);
                     }
                 } catch (error) {
                     console.error('Erreur lors de la sélection de l\'élection:', error);
@@ -215,12 +216,30 @@
             });
         });
 
+        // Initialiser les gestionnaires d'événements
+        function initEventHandlers() {
+            // Gestionnaire de rafraîchissement
+            document.getElementById('refreshElections')?.addEventListener('click', async function () {
+                const spinner = document.getElementById('refreshSpinner');
+                const button = this;
+
+                if (spinner) spinner.style.display = 'inline-block';
+                button.disabled = true;
+
+                await loadAllElections();
+
+                if (spinner) spinner.style.display = 'none';
+                button.disabled = false;
+
+                showToast('Liste actualisée avec succès', 'success');
+            });
+        }
+
         // Chargement des données de la page
         async function loadPageData() {
             showLoading();
 
             try {
-                // SUPPRIMÉ: Chargement des élections spécifiques
                 // Charger toutes les élections
                 await loadAllElections();
 
@@ -234,10 +253,6 @@
                 hideLoading();
             }
         }
-
-        // SUPPRIMÉ: Fonction loadStudentElections()
-        // SUPPRIMÉ: Fonction displayStudentElections()
-        // SUPPRIMÉ: Fonction showStudentElectionsError()
 
         // Charger toutes les élections
         async function loadAllElections() {
@@ -325,6 +340,12 @@
                 selectedCard.classList.add('selected');
             }
 
+            // Mettre à jour le titre de la section des candidats
+            const electionTitleElement = document.getElementById('selectedElectionTitle');
+            if (electionTitleElement) {
+                electionTitleElement.textContent = election.titre;
+            }
+
             // Afficher les candidats de cette élection
             await displayElectionCandidates(election);
         }
@@ -384,9 +405,15 @@
         // Gestionnaire de changement de filtre
         async function handleFilterChange(filters) {
             await loadAllElections();
+
+            // Masquer la section des candidats lors du changement de filtre
+            const section = document.getElementById('candidatesSection');
+            if (section) {
+                section.style.display = 'none';
+            }
         }
 
-        // Fonction d'affichage d'erreur (seulement pour toutes les élections)
+        // Fonction d'affichage d'erreur
         function showAllElectionsError(message) {
             const container = document.getElementById('allElectionsGrid');
             if (!container) return;
@@ -480,6 +507,54 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Fonction utilitaire pour formater les dates
+        function formatDate(dateString) {
+            if (!dateString) return 'Non définie';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Fonctions utilitaires (doivent être définies ou importées)
+        function showLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            if (toast && toastIcon && toastMessage) {
+                toastMessage.textContent = message;
+
+                // Changer l'icône selon le type
+                if (type === 'error') {
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    toast.style.backgroundColor = '#f44336';
+                } else {
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    toast.style.backgroundColor = '#4CAF50';
+                }
+
+                toast.classList.add('show');
+
+                // Cacher après 3 secondes
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
         }
 
         // Exposer les fonctions globales pour cette page

@@ -33,7 +33,7 @@ const CONFIG = {
                 STATS_BY_TYPE: (type) => `/api/election/stats/by-type/${type}`,
 
                 // NOUVEAU: Endpoint pour les élections de l'utilisateur
-                MY_ELECTIONS: '/api/election/my-elections',
+                MY_ELECTIONS: '/api/election/vote/my-elections',
                 ACTIVE: '/api/election/active',
                 // NOUVEAU: Endpoint pour vérifier l'éligibilité
                 CHECK_ELIGIBILITY: (electionId) => `/api/election/${electionId}/check-eligibility`
