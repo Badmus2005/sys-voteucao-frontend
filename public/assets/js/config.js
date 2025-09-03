@@ -14,8 +14,8 @@ const CONFIG = {
             AUTH: {
                 LOGIN: '/api/userLogin',
                 REGISTER: '/api/userRegister',
-                ADMIN_LOGIN: '/api/adminLogin',
-                ADMIN_REGISTER: '/api/adminRegister',
+                ADMIN_LOGIN: '/api/admin/auth/login',
+                ADMIN_REGISTER: '/api/admin/auth/register',
                 CHANGE_PASSWORD_TEMPORARY: '/api/userLogin/change-password-temporary',
                 FORGOT_PASSWORD: '/api/userLogin/forgot-password',
                 RESET_PASSWORD: '/api/userLogin/reset-password',
