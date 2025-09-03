@@ -112,19 +112,6 @@ class VoteService {
         }
     }
 
-    static async getMyElections() {
-        try {
-            const BASE = CONFIG.API.BASE_URL;
-            const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
-
-            const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            return response.data || response;
-        } catch (error) {
-            console.error('Erreur récupération élections personnelles:', error);
-            throw new Error('Impossible de charger vos élections');
-        }
-    }
-
     static async getElectionDetails(electionId) {
         try {
             const BASE = CONFIG.API.BASE_URL;

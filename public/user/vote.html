@@ -218,13 +218,18 @@
         // Charger les élections accessibles
         async function loadElections() {
             try {
+                console.log("Chargement des élections pour vote...");
+
                 // Utiliser la route correcte pour les élections de l'utilisateur
                 const data = await ElectionService.getElectionsForVoting();
+                console.log("Données reçues:", data);
 
                 if (data && data.length > 0) {
                     allElections = data;
+                    console.log(`${allElections.length} élections trouvées`);
                     displayElections(data);
                 } else {
+                    console.log("Aucune élection disponible");
                     showElectionsError('Aucune élection disponible pour le moment');
                 }
             } catch (error) {
