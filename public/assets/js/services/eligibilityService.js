@@ -27,7 +27,8 @@ class EligibilityService {
             }
 
             // 🔍 Audit du endpoint généré
-            const endpoint = CONFIG.API.ENDPOINTS.ELIGIBILITY.CAN_CANDIDATE(id);
+            //const endpoint = CONFIG.API.ENDPOINTS.ELIGIBILITY.CAN_CANDIDATE(id);
+            const endpoint = `/eligibility/can-candidate/${id}`;
             console.log(`[Audit] GET ${BASE}${endpoint}`);
 
             // 📡 Requête sécurisée
