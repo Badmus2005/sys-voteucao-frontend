@@ -659,50 +659,28 @@
                 Élection</button>
         </div>
 
+        <!-- Workflow diagram - Correction: Ajout du diagramme manquant -->
         <div class="workflow-diagram">
             <div class="workflow-connector"></div>
-
             <div class="workflow-step step-1">
-                <div class="step-icon"><i class="fas fa-plus-circle"></i></div>
-                <div class="step-label">Création</div>
-                <div class="step-description">Admin crée l'élection</div>
+                <div class="step-icon"><i class="fas fa-cog"></i></div>
+                <div class="step-label">Configuration</div>
+                <div class="step-description">Paramétrage initial</div>
             </div>
-
-            <div class="workflow-arrow" style="left: 16.5%;"><i class="fas fa-chevron-right"></i></div>
-
+            <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
             <div class="workflow-step step-2">
                 <div class="step-icon"><i class="fas fa-user-check"></i></div>
                 <div class="step-label">Candidatures</div>
-                <div class="step-description">Étudiants postulent</div>
+                <div class="step-description">Période de candidature</div>
             </div>
-
-            <div class="workflow-arrow" style="left: 33%;"><i class="fas fa-chevron-right"></i></div>
-
+            <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
             <div class="workflow-step step-3">
-                <div class="step-icon"><i class="fas fa-clipboard-check"></i></div>
-                <div class="step-label">Validation</div>
-                <div class="step-description">Admin valide les candidats</div>
-            </div>
-
-            <div class="workflow-arrow" style="left: 49.5%;"><i class="fas fa-chevron-right"></i></div>
-
-            <div class="workflow-step step-4">
                 <div class="step-icon"><i class="fas fa-vote-yea"></i></div>
                 <div class="step-label">Votes</div>
-                <div class="step-description">Électeurs votent</div>
+                <div class="step-description">Période de vote</div>
             </div>
-
-            <div class="workflow-arrow" style="left: 66%;"><i class="fas fa-chevron-right"></i></div>
-
-            <div class="workflow-step step-5">
-                <div class="step-icon"><i class="fas fa-lock"></i></div>
-                <div class="step-label">Clôture</div>
-                <div class="step-description">Votes terminés</div>
-            </div>
-
-            <div class="workflow-arrow" style="left: 82.5%;"><i class="fas fa-chevron-right"></i></div>
-
-            <div class="workflow-step step-6">
+            <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="workflow-step step-4">
                 <div class="step-icon"><i class="fas fa-chart-bar"></i></div>
                 <div class="step-label">Résultats</div>
                 <div class="step-description">Publication des résultats</div>
@@ -912,7 +890,6 @@
                 <button type="button" class="btn" id="confirmActionBtn">Confirmer</button>
             </div>
         </div>
-    </div>
     </div>
 
     <script src="/assets/js/config.js"></script>
@@ -1300,6 +1277,7 @@
         }
 
         function formatDate(dateString) {
+            if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
@@ -1309,6 +1287,7 @@
         }
 
         function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
             const date = new Date(dateString);
             return date.toLocaleDateString('fr-FR', {
                 year: 'numeric',
@@ -1355,7 +1334,7 @@
 
             // Sélectionner la phase correspondante
             const phase = election.niveau || getPhaseFromElectionType(election.type);
-            document.getElementById("phase").value = phase;
+            document.getElementById("phase").value = getElectionTypeFromPhase(phase);
 
             // Convertir les dates
             const startCandidacyDate = new Date(election.dateDebutCandidature);
@@ -1369,7 +1348,7 @@
             document.getElementById("votingEnd").value = formatDateForInput(endVoteDate);
 
             // Afficher les champs spécifiques à la phase
-            renderPhaseFields(phase);
+            renderPhaseFields(getElectionTypeFromPhase(phase));
 
             // Remplir les champs spécifiques
             if (election.filiere) document.getElementById("filiere").value = election.filiere;
@@ -1472,7 +1451,7 @@
             fields.innerHTML = "";
 
             const phase = selectedPhase || document.getElementById("phase").value;
-            const electionType = getElectionTypeFromPhase(phase);
+            const electionType = phase; // Correction: Utiliser directement le type d'élection
 
             if (electionType === "SALLE") {
                 fields.innerHTML = `
@@ -1598,19 +1577,19 @@
 
             // Utiliser la phase sélectionnée
             const phase = document.getElementById("phase").value;
-            data.niveau = phase;
-            data.type = getElectionTypeFromPhase(phase);
+            data.niveau = getPhaseFromElectionType(phase);
+            data.type = phase;
 
             // Ajouter les champs spécifiques
-            if (phase === "PHASE1") {
+            if (phase === "SALLE") {
                 data.filiere = document.getElementById("filiere").value;
                 data.annee = parseInt(document.getElementById("annee").value);
                 data.ecole = document.getElementById("ecole").value;
                 data.delegueType = document.getElementById("delegueType").value;
-            } else if (phase === "PHASE2") {
+            } else if (phase === "ECOLE") {
                 data.ecole = document.getElementById("ecole").value;
                 data.delegueType = document.getElementById("delegueType").value;
-            } else if (phase === "PHASE3") {
+            } else if (phase === "UNIVERSITE") {
                 data.delegueType = document.getElementById("delegueType").value;
                 data.tour = parseInt(document.getElementById("tour").value);
             }
