@@ -38,15 +38,34 @@ class ElectionService {
     }
 
     static async getElectionsForVoting() {
-
         const BASE = CONFIG.API.BASE_URL;
         const endpoint = CONFIG.API.ENDPOINTS.ELECTION.MY_ELECTIONS;
+        const url = `${BASE}${endpoint}`;
+
+        console.log('🔄 Fetching elections from:', url);
 
         try {
-            const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            return response.data;
+            // fetchWithAuth retourne directement les données, pas un objet {data: ...}
+            const electionsData = await fetchWithAuth(url);
+            console.log('✅ Elections data received:', electionsData);
+
+            // Vérifier le format de réponse
+            if (Array.isArray(electionsData)) {
+                console.log(`📊 Found ${electionsData.length} elections`);
+                return electionsData;
+            } else if (electionsData && Array.isArray(electionsData.data)) {
+                console.log(`📊 Found ${electionsData.data.length} elections (in data property)`);
+                return electionsData.data;
+            } else if (electionsData && Array.isArray(electionsData.elections)) {
+                console.log(`📊 Found ${electionsData.elections.length} elections (in elections property)`);
+                return electionsData.elections;
+            } else {
+                console.warn('⚠️ Unexpected response format:', electionsData);
+                return [];
+            }
+
         } catch (error) {
-            console.error('Error fetching elections for voting:', error);
+            console.error('❌ Error fetching elections for voting:', error);
             throw error;
         }
     }
