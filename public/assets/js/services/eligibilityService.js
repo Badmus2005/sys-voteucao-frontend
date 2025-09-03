@@ -19,15 +19,33 @@ class EligibilityService {
     static async canCandidate(electionId) {
         try {
             const BASE = CONFIG.API.BASE_URL;
-            const endpoint = CONFIG.API.ENDPOINTS.ELIGIBILITY.CAN_CANDIDATE(electionId);
 
+            // 🔐 Sécurisation du paramètre
+            const id = typeof electionId === 'object' ? electionId.id : electionId;
+            if (!id || typeof id !== 'string' && typeof id !== 'number') {
+                throw new Error(`Paramètre electionId invalide: ${JSON.stringify(electionId)}`);
+            }
+
+            // 🔍 Audit du endpoint généré
+            const endpoint = CONFIG.API.ENDPOINTS.ELIGIBILITY.CAN_CANDIDATE(id);
+            console.log(`[Audit] GET ${BASE}${endpoint}`);
+
+            // 📡 Requête sécurisée
             const response = await fetchWithAuth(`${BASE}${endpoint}`);
-            return response.canCandidate || false;
+
+            // ✅ Fallback intelligent
+            if (!response || typeof response.canCandidate === 'undefined') {
+                console.warn('[Audit] Réponse inattendue, retour par défaut: false');
+                return false;
+            }
+
+            return response.canCandidate;
         } catch (error) {
             console.error('Erreur vérification candidature:', error);
             return false;
         }
     }
+
 
     static async canVote(electionId) {
         try {
