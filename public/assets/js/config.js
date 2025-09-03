@@ -135,6 +135,15 @@ const CONFIG = {
                 ADMIN: '/api/notifications/admin'
             },
 
+            ELIGIBILITY: {
+                CHECK: (id) => `/eligibility/check/${id}`,
+                CAN_CANDIDATE: (id) => `/eligibility/can-candidate/${id}`,
+                CAN_VOTE: (id) => `/eligibility/can-vote/${id}`,
+                REQUIREMENTS: (id) => `/eligibility/requirements/${id}`,
+                RESPONSABLE_STATUS: '/eligibility/responsable-status',
+                DELEGUE_STATUS: '/eligibility/delegue-status'
+            },
+
             // Configuration académique
             CONFIG_ACADEMIC: '/api/configAcademic'
         }
