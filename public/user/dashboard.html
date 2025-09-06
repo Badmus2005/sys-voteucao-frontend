@@ -986,7 +986,7 @@
 
             try {
                 const response = await fetch(url, config);
-
+                console.log('Reponse:', response);
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
@@ -1145,10 +1145,10 @@
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            /* if (!localStorage.getItem('token')) {
-                 window.location.href = 'login.html';
-                 return;
-             }*/
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
 
             // Initialiser le menu burger
             const burger = document.getElementById('burger');
@@ -1210,6 +1210,7 @@
             try {
                 const response = await ElectionService.getElections();
                 const data = response.data;
+                console.log("Donnée:", data);
                 if (data && Array.isArray(data)) {
                     // Filtrer les élections en cours
                     const now = new Date();
