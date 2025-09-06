@@ -428,15 +428,16 @@
         </form>
 
         <div class="register-footer">
-            <p>Déjà un compte ? <a href="/user/login">Se connecter</a></p>
+            <p>Déjà un compte ? <a href="login.html">Se connecter</a></p>
             <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
         </div>
     </div>
-    <script src="/assets/js/config.js"></script>
+    <script src="../assets/js/config.js"></script>
     <script>
         // Variables globales
-        const API_BASE = CONFIG.API.BASE_URL;
-        const REGISTER_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.REGISTER;
+        const API_URL = 'https://62e33f6a07e7.ngrok-free.app';
+        const REGISTER_ENDPOINT = '/api/userRegister';
+
         let elements = {};
 
         // Initialisation
@@ -682,7 +683,7 @@
             showMessage('', 'success');
 
             try {
-                const res = await fetch(`${API_BASE}${REGISTER_ENDPOINT}`, {
+                const res = await fetch(`${API_URL}${REGISTER_ENDPOINT}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestData)
@@ -692,7 +693,7 @@
 
                 if (res.ok) {
                     showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
-                    setTimeout(() => window.location.href = '/user/login', 2000);
+                    setTimeout(() => window.location.href = 'login.html', 2000);
                 } else {
                     showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
                 }

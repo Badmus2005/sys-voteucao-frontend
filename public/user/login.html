@@ -531,7 +531,7 @@
 
         <div class="login-footer">
             <p>Mot de passe oublié ? <a href="#" id="forgot-password-link">Réinitialiser</a></p>
-            <p>Pas encore de compte ? <a href="/user/register">Créer un compte</a></p>
+            <p>Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
             <p><a href="/"><i class="fas fa-arrow-left" aria-hidden="true"></i> Retour à l'accueil</a></p>
         </div>
     </div>
@@ -555,11 +555,10 @@
         </div>
     </div>
 
-    <!-- Configuration et scripts -->
-    <script src="/assets/js/config.js"></script>
+
     <script>
-        const API_BASE = CONFIG.API.BASE_URL;
-        const LOGIN_ENDPOINT = CONFIG.API.ENDPOINTS.AUTH.LOGIN;
+        const API_URL = '	https://62e33f6a07e7.ngrok-free.app';
+        const LOGIN_ENDPOINT = '/api/userLogin';
 
         // --- Slider arrière-plan ---
         function initBackgroundSlider() {
@@ -650,7 +649,7 @@
                 if (!validateEmailField(emailInput, document.getElementById('resetEmailError'))) return;
                 submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
                 try {
-                    const res = await fetch(`${API_BASE}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+                    const res = await fetch(`${API_URL}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: emailInput.value.trim() })
                     });
@@ -688,7 +687,7 @@
                     body.identifiantTemporaire = emailOrId;
                 }
 
-                const res = await fetch(`${API_BASE}${LOGIN_ENDPOINT}`, {
+                const res = await fetch(`${API_URL}${LOGIN_ENDPOINT}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -704,7 +703,7 @@
                     showMessage('Connexion réussie! Redirection...', 'success');
 
                     setTimeout(() => {
-                        window.location.replace(data.data.requirePasswordChange ? '/user/change-password' : '/user/dashboard');
+                        window.location.replace(data.data.requirePasswordChange ? 'change-password.html' : 'dashboard.html');
                     }, 1500);
                 }
                 else {

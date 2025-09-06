@@ -7,10 +7,788 @@
     <title>Tableau de Bord - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Styles CSS -->
-    <link rel="stylesheet" href="/assets/css/components/election-card.css">
-    <link rel="stylesheet" href="/assets/css/pages/dashboard.css">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #d4af37;
+            /* Or */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-nav a,
+        .user-nav span {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav a:hover {
+            color: #d4af37;
+            /* Or */
+        }
+
+        .burger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            transition: all 0.3s;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: #fff;
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 0.8rem;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #1b263b;
+            border-left: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8f5f0;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, #800020, #0d1b2a);
+            /* Bordeaux to Bleu nuit */
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-vote {
+            background-color: #d4af37;
+            /* Or */
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .btn-vote:hover {
+            background-color: #b8941f;
+        }
+
+        .btn-result {
+            background-color: #800020;
+            /* Bordeaux */
+            color: white;
+        }
+
+        .btn-result:hover {
+            background-color: #600018;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: #800020;
+            /* Bordeaux */
+            margin-bottom: 1rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .action-description {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* Activity Timeline */
+        .activity-timeline {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-left: 4px solid #800020;
+            /* Bordeaux */
+        }
+
+        .activity-timeline h3 {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: -1.5rem;
+            width: 2px;
+            background-color: #ecf0f1;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #800020;
+            /* Bordeaux */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin-right: 1rem;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-content h4 {
+            margin-bottom: 0.3rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .timeline-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Calendar Widget */
+        .calendar-widget {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-top: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav button {
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            text-align: center;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .calendar-date {
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .calendar-date:hover {
+            background-color: #f0e6d2;
+        }
+
+        .calendar-date.current {
+            background-color: #800020;
+            /* Bordeaux */
+            color: white;
+        }
+
+        .calendar-date.event {
+            position: relative;
+            font-weight: bold;
+        }
+
+        .calendar-date.event:after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #d4af37;
+            /* Or */
+        }
+
+        /* Elections Section */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-header h2 {
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .refresh-btn {
+            background-color: #800020;
+            /* Bordeaux */
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .refresh-btn .spinner {
+            display: none;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .election-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .election-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border-top: 4px solid #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .election-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .election-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            /* Bleu nuit gradient */
+            color: white;
+        }
+
+        .election-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .election-date {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .election-body {
+            padding: 1.5rem;
+        }
+
+        .election-description {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+        }
+
+        .election-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-upcoming {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-ended {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .election-footer {
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+        }
+
+        .election-action {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .action-vote {
+            background-color: #800020;
+            /* Bordeaux */
+            color: white;
+        }
+
+        .action-view {
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-top: 4px solid #800020;
+            /* Bordeaux */
+        }
+
+        .section-title {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: #800020;
+            /* Bordeaux */
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            border-left: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2e7d32;
+        }
+
+        .toast.error {
+            background-color: #c62828;
+        }
+
+        .toast.warning {
+            background-color: #ef6c00;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .no-data-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #bdc3c7;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .welcome-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .welcome-actions {
+                width: 100%;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .user-nav a:not(:last-child) {
+                display: none;
+            }
+
+            .burger {
+                display: flex;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                height: 100vh;
+                z-index: 1000;
+                width: 250px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .election-list {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -18,7 +796,7 @@
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
         <div class="user-nav">
             <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="profile.html"><i class="fa-solid fa-user"></i> Profil</a>
             <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
         </div>
         <div class="burger" id="burger">
@@ -66,7 +844,7 @@
 
             <!-- Quick Actions -->
             <div class="quick-actions">
-                <div class="action-card" onclick="location.href='/user/candidature'">
+                <div class="action-card" onclick="location.href='candidature.html'">
                     <div class="action-icon">
                         <i class="fa-solid fa-file-signature"></i>
                     </div>
@@ -74,7 +852,7 @@
                     <div class="action-description">Postuler pour une élection</div>
                 </div>
 
-                <div class="action-card" onclick="location.href='/user/vote'">
+                <div class="action-card" onclick="location.href='vote.html'">
                     <div class="action-icon">
                         <i class="fa-solid fa-check-to-slot"></i>
                     </div>
@@ -82,7 +860,7 @@
                     <div class="action-description">Participer aux élections</div>
                 </div>
 
-                <div class="action-card" onclick="location.href='/user/resultats'">
+                <div class="action-card" onclick="location.href='results.html'">
                     <div class="action-icon">
                         <i class="fa-solid fa-chart-simple"></i>
                     </div>
@@ -90,7 +868,7 @@
                     <div class="action-description">Consulter les résultats</div>
                 </div>
 
-                <div class="action-card" onclick="location.href='/user/elections'">
+                <div class="action-card" onclick="location.href='elections.html'">
                     <div class="action-icon">
                         <i class="fa-solid fa-circle-info"></i>
                     </div>
@@ -178,18 +956,11 @@
         <span id="toastMessage"></span>
     </div>
 
-
-    <!-- Chargement des scripts -->
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/utils/api.js"></script>
-    <script src="/assets/js/services/electionService.js"></script>
-    <script src="/assets/js/services/candidateService.js"></script>
-    <script src="/assets/js/services/voteService.js"></script>
-    <script src="/assets/js/components/ElectionCard.js"></script>
-    <script src="/assets/js/main.js"></script>
-
-
     <script>
+        // Configuration et constantes
+        const API_URL = 'https://62e33f6a07e7.ngrok-free.app';
+        const TOKEN = localStorage.getItem('token');
+
         // Variables globales pour cette page
         let currentElections = [];
         let electionDates = [];
@@ -200,13 +971,207 @@
             elections: 0
         };
 
+        // Fonctions utilitaires pour les appels API
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_URL}/api${endpoint}`;
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            };
+
+            const config = { ...defaultOptions, ...options };
+
+            try {
+                const response = await fetch(url, config);
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        // Services
+        const ElectionService = {
+            async getElections() {
+                return await apiCall('/elections/active');
+            },
+
+            async getElectionById(id) {
+                return await apiCall(`/elections/${id}`);
+            },
+
+            getElectionStatus(election) {
+                const now = new Date();
+                const startDate = new Date(election.dateDebut);
+                const endDate = new Date(election.dateFin);
+
+                if (now < startDate) return 'upcoming';
+                if (now > endDate) return 'ended';
+                return 'active';
+            }
+        };
+
+        const CandidateService = {
+            async getCandidates(electionId) {
+                return await apiCall(`/candidates/election/${electionId}`);
+            },
+
+            async getMyCandidatures() {
+                return await apiCall('/candidats/my-candidature');
+            },
+
+            async submitCandidature(data) {
+                return await apiCall('/candidats', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            }
+        };
+
+        const VoteService = {
+            async castVote(electionId, candidateId) {
+                return await apiCall('/votes/cast', {
+                    method: 'POST',
+                    body: JSON.stringify({ electionId, candidateId })
+                });
+            },
+
+            async getMyVotes() {
+                return await apiCall('/votes/my-votes');
+            },
+
+            async getResults(electionId) {
+                return await apiCall(`/votes/results/${electionId}`);
+            }
+        };
+
+        const ActivityService = {
+            async getActivity() {
+                return await apiCall('/activity');
+            }
+        }
+
+        // Composant ElectionCard
+        const ElectionCard = {
+            create(election, options = {}) {
+                const status = ElectionService.getElectionStatus(election);
+                const statusText = {
+                    'active': 'En cours',
+                    'upcoming': 'À venir',
+                    'ended': 'Terminée'
+                }[status];
+
+                const statusClass = {
+                    'active': 'status-active',
+                    'upcoming': 'status-upcoming',
+                    'ended': 'status-ended'
+                }[status];
+
+                const startDate = new Date(election.dateDebut).toLocaleDateString();
+                const endDate = new Date(election.dateFin).toLocaleDateString();
+
+                let actionButton = '';
+                if (options.showActions) {
+                    if (status === 'active') {
+                        actionButton = `<button class="election-action action-vote" data-election-id="${election.id}">Voter</button>`;
+                    } else {
+                        actionButton = `<button class="election-action action-view" data-election-id="${election.id}">Voir détails</button>`;
+                    }
+                }
+
+                return `
+                    <div class="election-card" data-election-id="${election.id}">
+                        <div class="election-header">
+                            <h3 class="election-title">${election.titre}</h3>
+                            <div class="election-date">${startDate} - ${endDate}</div>
+                        </div>
+                        <div class="election-body">
+                            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                            <span class="election-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="election-footer">
+                            <div>${election.candidatesCount || 0} candidats</div>
+                            ${actionButton}
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // Fonctions d'affichage
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Changer l'icône selon le type
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    break;
+            }
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            // Cacher après 3 secondes
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = '/user/login';
-                return;
-            }
+            /* if (!localStorage.getItem('token')) {
+                 window.location.href = 'login.html';
+                 return;
+             }*/
+
+            // Initialiser le menu burger
+            const burger = document.getElementById('burger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            burger.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Gestion de la déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = 'login.html';
+            });
 
             // Charger les données
             await loadPageData();
@@ -243,8 +1208,8 @@
         // Charger les élections en cours
         async function loadCurrentElections() {
             try {
-                const data = await ElectionService.getElections();
-
+                const response = await ElectionService.getElections();
+                const data = response.data;
                 if (data && Array.isArray(data)) {
                     // Filtrer les élections en cours
                     const now = new Date();
@@ -298,36 +1263,39 @@
         // Charger l'activité récente
         async function loadRecentActivity() {
             try {
-                // Simuler des données d'activité (à remplacer par un appel API réel)
-                const activities = [
-                    {
-                        type: 'vote',
-                        title: 'Vote enregistré',
-                        description: 'Vous avez voté pour l\'élection "Président des étudiants"',
-                        time: 'Il y a 2 heures',
-                        icon: 'fa-vote-yea'
-                    },
-                    {
-                        type: 'candidature',
-                        title: 'Candidature soumise',
-                        description: 'Votre candidature pour "Délégué de classe" a été approuvée',
-                        time: 'Hier, 14:32',
-                        icon: 'fa-file-circle-check'
-                    },
-                    {
-                        type: 'notification',
-                        title: 'Nouvelle élection',
-                        description: 'Une nouvelle élection "Trésorier" a été créée',
-                        time: '12 Octobre, 10:15',
-                        icon: 'fa-bell'
-                    }
-                ];
+                const response = await ActivityService.getActivity();
 
-                displayRecentActivity(activities);
+                // Adapter la réponse selon la structure backend
+                let logs = [];
+                if (response.logs) {
+                    logs = response.logs;
+                } else if (Array.isArray(response)) {
+                    logs = response;
+                } else if (response.data && Array.isArray(response.data)) {
+                    logs = response.data;
+                }
+
+                displayRecentActivity(logs);
             } catch (error) {
-                console.error('Erreur chargement activité:', error);
-                showActivityError('Erreur de chargement de l\'activité');
+                console.error('Erreur activité :', error);
+                showActivityError('Impossible de charger les activités');
             }
+        }
+
+        function mapActivityLogToDisplay(log) {
+            // Adapter selon la structure de vos logs d'activité
+            const actionType = log.actionType || log.type || 'INFO';
+            const action = log.action || log.description || 'Action inconnue';
+            const details = log.details || log.message || `Action effectuée`;
+            const email = log.email || log.userEmail || 'Utilisateur inconnu';
+            const createdAt = log.createdAt || log.timestamp || new Date().toISOString();
+
+            return {
+                icon: getIconForAction(actionType),
+                title: action,
+                description: details,
+                time: new Date(createdAt).toLocaleString()
+            };
         }
 
         // Afficher l'activité récente
@@ -335,7 +1303,20 @@
             const container = document.getElementById('activityContent');
             if (!container) return;
 
-            container.innerHTML = activities.map(activity => `
+            if (!activities || activities.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <h3>Aucune activité récente</h3>
+                        <p>Vos activités récentes apparaîtront ici.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const mapped = activities.slice(0, 5).map(mapActivityLogToDisplay);
+
+            container.innerHTML = mapped.map(activity => `
                 <div class="timeline-item">
                     <div class="timeline-icon">
                         <i class="fa-solid ${activity.icon}"></i>
@@ -349,14 +1330,29 @@
             `).join('');
         }
 
+        function getIconForAction(type) {
+            switch (type) {
+                case 'VOTE': return 'fa-vote-yea';
+                case 'CANDIDATURE': return 'fa-file-signature';
+                case 'CREATION': return 'fa-plus-circle';
+                case 'MODIFICATION': return 'fa-pen';
+                case 'SUPPRESSION': return 'fa-trash';
+                case 'AUTH': return 'fa-user-check';
+                case 'INFO': return 'fa-info-circle';
+                case 'ERROR': return 'fa-exclamation-triangle';
+                case 'ADMIN': return 'fa-user-shield';
+                default: return 'fa-bolt';
+            }
+        }
+
         // Charger les statistiques utilisateur
         async function loadUserStatistics() {
             try {
-                // Simuler des statistiques (à remplacer par un appel API réel)
+                // Simuler des données de statistiques (à remplacer par des appels API réels)
                 userStats = {
                     candidatures: 3,
-                    votes: 8,
-                    elections: 5
+                    votes: 5,
+                    elections: 2
                 };
 
                 updateStatisticsDisplay();
@@ -524,12 +1520,15 @@
 
         // Mettre à jour le message de bienvenue
         function updateUserWelcome() {
-            if (window.userProfile && window.userProfile.prenom) {
-                document.getElementById('welcomeTitle').textContent = `Bienvenue, ${window.userProfile.prenom} !`;
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
 
-                if (window.userProfile.filiere && window.userProfile.annee) {
+            if (userProfile && userProfile.prenom) {
+                document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userProfile.prenom} !`;
+                document.getElementById('userName').textContent = userProfile.prenom;
+
+                if (userProfile.filiere && userProfile.annee) {
                     document.getElementById('welcomeSubtitle').textContent =
-                        `${window.userProfile.filiere} - Année ${window.userProfile.annee}`;
+                        `${userProfile.filiere} - Année ${userProfile.annee}`;
                 }
             }
         }

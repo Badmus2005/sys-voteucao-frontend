@@ -7,10 +7,848 @@
     <title>Candidature - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Styles CSS -->
-    <link rel="stylesheet" href="/assets/css/components/candidate-card.css">
-    <link rel="stylesheet" href="/assets/css/pages/candidature.css">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #d4af37;
+            /* Or */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-nav a,
+        .user-nav span {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav a:hover {
+            color: #d4af37;
+            /* Or */
+        }
+
+        .burger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            transition: all 0.3s;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: #fff;
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 0.8rem;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #1b263b;
+            border-left: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8f5f0;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: #7f8c8d;
+        }
+
+        .breadcrumb a {
+            color: #0d1b2a;
+            /* Bleu nuit */
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #800020;
+            /* Bordeaux */
+        }
+
+        /* State Messages */
+        .state-message,
+        .status-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .state-icon,
+        .status-icon {
+            font-size: 3rem;
+            color: #d4af37;
+            /* Or */
+            margin-bottom: 1rem;
+        }
+
+        .state-title,
+        .status-title {
+            color: #0d1b2a;
+            /* Bleu nuit */
+            margin-bottom: 1rem;
+        }
+
+        .state-description,
+        .status-description {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .state-actions,
+        .status-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #800020;
+            /* Bordeaux */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #600018;
+        }
+
+        .btn-secondary {
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1b263b;
+        }
+
+        /* Candidature Header */
+        .candidature-header {
+            background: linear-gradient(135deg, #800020, #0d1b2a);
+            /* Bordeaux to Bleu nuit */
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .candidature-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidature-subtitle {
+            opacity: 0.9;
+        }
+
+        /* Loading State */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .loading-state .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        /* Eligibility Alert */
+        .eligibility-alert {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .alert-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .alert-description {
+            margin-bottom: 1.5rem;
+            color: #7f8c8d;
+        }
+
+        /* Form Section */
+        .form-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f0e6d2;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .form-label.required:after {
+            content: " *";
+            color: #e74c3c;
+        }
+
+        .form-input,
+        .form-textarea {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #800020;
+            /* Bordeaux */
+            box-shadow: 0 0 0 2px rgba(128, 0, 32, 0.1);
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 0.3rem;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #800020;
+            /* Bordeaux */
+            background-color: #fff5f5;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .upload-hint {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .upload-preview {
+            display: none;
+            position: relative;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #e74c3c;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Candidates Section */
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .candidate-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            border-top: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .candidate-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            /* Bleu nuit gradient */
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .candidate-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #d4af37;
+            /* Or */
+        }
+
+        .candidate-info {
+            flex: 1;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .candidate-details {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .candidate-body {
+            padding: 1.5rem;
+        }
+
+        .candidate-slogan {
+            font-style: italic;
+            color: #800020;
+            /* Bordeaux */
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .candidate-program {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .view-program-link {
+            color: #800020;
+            /* Bordeaux */
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .view-program-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #bdc3c7;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        /* Candidate Modal */
+        .candidate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 2rem 0;
+        }
+
+        .candidate-modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 700px;
+            margin: 2rem auto;
+            border-radius: 10px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close-modal:hover {
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .candidate-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .candidate-modal-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #d4af37;
+            /* Or */
+        }
+
+        .candidate-modal-info {
+            flex: 1;
+        }
+
+        .candidate-modal-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+        }
+
+        .candidate-modal-slogan {
+            font-style: italic;
+            color: #800020;
+            /* Bordeaux */
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .candidate-modal-section {
+            margin-bottom: 2rem;
+        }
+
+        .candidate-modal-section h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0d1b2a;
+            /* Bleu nuit */
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .candidate-modal-content-text {
+            line-height: 1.6;
+            color: #555;
+            white-space: pre-line;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            border-left: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2e7d32;
+        }
+
+        .toast.error {
+            background-color: #c62828;
+        }
+
+        .toast.warning {
+            background-color: #ef6c00;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .state-actions,
+            .status-actions,
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .user-nav a:not(:last-child) {
+                display: none;
+            }
+
+            .burger {
+                display: flex;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                height: 100vh;
+                z-index: 1000;
+                width: 250px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-modal-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .candidate-modal-image {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .candidature-header {
+                padding: 1.5rem;
+            }
+
+            .candidature-title {
+                font-size: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .candidate-modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -230,20 +1068,208 @@
         <span id="toastMessage"></span>
     </div>
 
-    <!-- Chargement des scripts -->
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/utils/api.js"></script>
-    <script src="/assets/js/services/eligibilityService.js"></script>
-    <script src="/assets/js/services/electionService.js"></script>
-    <script src="/assets/js/services/candidateService.js"></script>
-    <script src="/assets/js/components/CandidateCard.js"></script>
-    <script src="/assets/js/main.js"></script>
-
     <script>
+        // Configuration et constantes
+        const API_URL = 'https://62e33f6a07e7.ngrok-free.app';
+        const TOKEN = localStorage.getItem('token');
+
         // Variables globales pour cette page
         let currentElection = null;
         let uploadedImageUrl = null;
         let electionCandidates = [];
+
+        // Fonctions utilitaires pour les appels API
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_URL}/api${endpoint}`;
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            };
+
+            const config = { ...defaultOptions, ...options };
+
+            try {
+                const response = await fetch(url, config);
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        // Services
+        const ElectionService = {
+            async getElectionDetails(id) {
+                return await apiCall(`/elections/${id}`);
+            },
+
+            getElectionStatus(election) {
+                const now = new Date();
+                const startDate = new Date(election.dateDebut);
+                const endDate = new Date(election.dateFin);
+
+                if (now < startDate) return 'upcoming';
+                if (now > endDate) return 'ended';
+                return 'active';
+            },
+
+            getDelegueTypeLabel(type) {
+                const types = {
+                    'delegue': 'Délégué',
+                    'bde': 'Bureau des Étudiants',
+                    'club': 'Responsable de Club'
+                };
+                return types[type] || type;
+            },
+
+            getElectionTypeLabel(type) {
+                const types = {
+                    'class': 'Classe',
+                    'filiere': 'Filière',
+                    'universite': 'Université'
+                };
+                return types[type] || type;
+            }
+        };
+
+        const CandidateService = {
+            async getCandidates(electionId) {
+                return await apiCall(`/candidates/election/${electionId}`);
+            },
+
+            async isCandidate(electionId) {
+                try {
+                    const response = await apiCall(`/candidates/is-candidate/${electionId}`);
+                    return response.isCandidate;
+                } catch (error) {
+                    console.error('Erreur vérification candidature:', error);
+                    return false;
+                }
+            },
+
+            async submitCandidature(data) {
+                return await apiCall('/candidats', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            }
+        };
+
+        const EligibilityService = {
+            canCandidate(userProfile, election) {
+                // Vérifications basiques d'éligibilité
+                if (!userProfile) return false;
+
+                // Vérifier si l'utilisateur fait partie du bon groupe
+                if (election.filiere && userProfile.filiere !== election.filiere) {
+                    return false;
+                }
+
+                if (election.annee && userProfile.annee !== election.annee) {
+                    return false;
+                }
+
+                // Vérifier si l'élection est active
+                const status = ElectionService.getElectionStatus(election);
+                if (status !== 'active') {
+                    return false;
+                }
+
+                return true;
+            },
+
+            getEligibilityMessage(userProfile, election) {
+                if (!userProfile) return 'Profil utilisateur non disponible';
+
+                if (election.filiere && userProfile.filiere !== election.filiere) {
+                    return `Cette élection est réservée aux étudiants de la filière ${election.filiere}.`;
+                }
+
+                if (election.annee && userProfile.annee !== election.annee) {
+                    return `Cette élection est réservée aux étudiants de ${election.annee} année.`;
+                }
+
+                const status = ElectionService.getElectionStatus(election);
+                if (status !== 'active') {
+                    return 'Cette élection n\'est pas ouverte aux candidatures pour le moment.';
+                }
+
+                return 'Vous n\'êtes pas éligible pour cette élection.';
+            }
+        };
+
+        // Composant CandidateCard
+        const CandidateCard = {
+            create(candidate, options = {}) {
+                return `
+                    <div class="candidate-card" data-candidate-id="${candidate.id}">
+                        <div class="candidate-header">
+                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
+                                 alt="${candidate.prenom} ${candidate.nom}" 
+                                 class="candidate-image"
+                                 onerror="this.src='https://via.placeholder.com/60'">
+                            <div class="candidate-info">
+                                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                                <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div class="candidate-body">
+                            <div class="candidate-slogan">"${candidate.slogan}"</div>
+                            <div class="candidate-program">${candidate.programme ? candidate.programme.substring(0, 150) + '...' : 'Aucun programme disponible'}</div>
+                            ${options.showViewProfile ? `
+                                <a class="view-program-link" data-candidate-id="${candidate.id}">
+                                    <i class="fa-solid fa-eye"></i> Voir le profil complet
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        // Fonctions d'affichage
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Changer l'icône selon le type
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    break;
+            }
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            // Cacher après 3 secondes
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
@@ -252,6 +1278,32 @@
                 window.location.href = '/user/login';
                 return;
             }
+
+            // Initialiser le menu burger
+            const burger = document.getElementById('burger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            burger.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Gestion de la déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = '/user/login';
+            });
+
+            // Mettre à jour le nom d'utilisateur
+            updateUserWelcome();
 
             // Masquer tous les états initialement
             hideAllSections();
@@ -271,6 +1323,15 @@
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
         });
+
+        // Mettre à jour le message de bienvenue
+        function updateUserWelcome() {
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+
+            if (userProfile && userProfile.prenom) {
+                document.getElementById('userName').textContent = userProfile.prenom;
+            }
+        }
 
         // Masquer toutes les sections
         function hideAllSections() {
@@ -334,6 +1395,9 @@
         // Vérifier l'éligibilité du candidat
         async function checkEligibility(election) {
             try {
+                // Récupérer le profil utilisateur
+                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+
                 // Vérifier si déjà candidat
                 const isAlreadyCandidate = await CandidateService.isCandidate(election.id);
 
@@ -343,10 +1407,10 @@
                 }
 
                 // Vérifier l'éligibilité avec le service
-                const isEligible = EligibilityService.canCandidate(window.userProfile, election);
+                const isEligible = EligibilityService.canCandidate(userProfile, election);
 
                 if (!isEligible) {
-                    const message = EligibilityService.getEligibilityMessage(window.userProfile, election);
+                    const message = EligibilityService.getEligibilityMessage(userProfile, election);
                     showEligibilityError(message);
                     return;
                 }
@@ -463,7 +1527,7 @@
             document.querySelectorAll('.view-program-link').forEach(link => {
                 link.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    const candidateId = this.closest('.candidate-card').dataset.candidateId;
+                    const candidateId = this.dataset.candidateId;
                     const candidate = electionCandidates.find(c => c.id == candidateId);
 
                     if (candidate) {
@@ -608,25 +1672,9 @@
                 document.getElementById('uploadPreview').style.display = 'block';
                 document.getElementById('uploadArea').style.display = 'none';
 
-                // Uploader l'image
-                const formData = new FormData();
-                formData.append('image', file);
-
-                const token = localStorage.getItem('token');
-                const response = await fetch(CONFIG.API.ENDPOINTS.UPLOAD.IMAGE, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Échec de l\'upload');
-                }
-
-                const data = await response.json();
-                uploadedImageUrl = data.url;
+                // Uploader l'image (simulation)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                uploadedImageUrl = previewUrl; // En production, vous utiliseriez l'URL du serveur
 
                 showToast('Image téléchargée avec succès', 'success');
                 return true;
@@ -645,7 +1693,7 @@
             if (uploadArea) {
                 uploadArea.innerHTML = `
                     <div style="text-align: center; padding: 2rem; color: #666;">
-                        <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--or); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                        <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
                         <div>Téléchargement en cours...</div>
                     </div>
                 `;
