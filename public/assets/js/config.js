@@ -7,7 +7,8 @@ const CONFIG = {
     // Configuration de l'API
     API: {
         // URL du backend Railway en production
-        BASE_URL: 'https://system-vote-ucao.onrender.com',
+        //BASE_URL: 'https://system-vote-ucao.onrender.com',
+        BASE_URL: 'https://e962215719a3.ngrok-free.app',
 
         ENDPOINTS: {
             // Authentification
