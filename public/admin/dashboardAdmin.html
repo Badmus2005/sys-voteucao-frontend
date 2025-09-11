@@ -1194,7 +1194,7 @@
                             <i class="fas fa-user"></i>
                             <span>Mon Profil</span>
                         </a>
-                        <a href="#" class="dropdown-item">
+                        <a href="parametre.html" class="dropdown-item">
                             <i class="fas fa-cog"></i>
                             <span>Paramètres</span>
                         </a>
@@ -1217,10 +1217,10 @@
                 <h3>Général</h3>
                 <li class="active"><a href="#" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Tableau de
                         Bord</a></li>
-                <li><a href="/admin/users" data-page="users"><i class="fas fa-users"></i> Utilisateurs</a></li>
-                <li><a href="/admin/elections" data-page="elections"><i class="fas fa-vote-yea"></i> Élections</a></li>
-                <li><a href="/admin/candidates" data-page="candidates"><i class="fas fa-user"></i> Candidats</a></li>
-                <li><a href="/admin/statistics" data-page="statistics"><i class="fas fa-chart-pie"></i> Statistiques</a>
+                <li><a href="/users.html" data-page="users"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li><a href="/elections.html" data-page="elections"><i class="fas fa-vote-yea"></i> Élections</a></li>
+                <li><a href="/candidats.html" data-page="candidates"><i class="fas fa-user"></i> Candidats</a></li>
+                <li><a href="/stats.html" data-page="statistics"><i class="fas fa-chart-pie"></i> Statistiques</a>
                 </li>
             </ul>
         </aside>
@@ -1279,7 +1279,7 @@
                     <canvas id="votesChart"></canvas>
                 </div>
 
-                <!-- Gestion des codes - NOUVEAU -->
+                <!-- Gestion des codes -->
                 <div class="codes-management">
                     <div class="codes-header">
                         <h2 class="section-title"><i class="fas fa-key"></i> Gestion des Codes</h2>
@@ -1431,21 +1431,20 @@
             </div>
         </div>
     </div>
-    <script src="/assets/js/config.js"></script>
-    <script>
 
-        // Variables globales
-        const API_BASE = CONFIG.API.BASE_URL;
-        const ADMIN_ME_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.ME;
-        const ADMIN_UPDATE_ENDPOINT = CONFIG.API.ENDPOINTS.ADMIN.UPDATE;
-        const UPLOAD_IMAGE_ENDPOINT = CONFIG.API.ENDPOINTS.UPLOAD.IMAGE;
-        const STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.GENERAL;
-        const ACTIVITY_ENDPOINT = CONFIG.API.ENDPOINTS.ACTIVITY.LIST;
-        const CODES_GENERATE_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.GENERATE;
-        const CODES_LIST_ENDPOINT = CONFIG.API.ENDPOINTS.CODES.LIST;
-        const VOTE_STATS_ENDPOINT = CONFIG.API.ENDPOINTS.STATS.VOTES;
-        const NOTIFICATIONS_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.ADMIN;
-        const NOTIFICATIONS_READ_ENDPOINT = CONFIG.API.ENDPOINTS.NOTIFICATIONS.READ;
+    <script>
+        // Configuration des endpoints API
+        const API_BASE = 'http://localhost:3000';
+        const ADMIN_ME_ENDPOINT = '/api/admin/me';
+        const ADMIN_UPDATE_ENDPOINT = '/api/admin/update';
+        const UPLOAD_IMAGE_ENDPOINT = '/api/upload/image';
+        const STATS_ENDPOINT = '/api/stats/general';
+        const ACTIVITY_ENDPOINT = '/api/activity';
+        const CODES_GENERATE_ENDPOINT = '/api/codes/generate';
+        const CODES_LIST_ENDPOINT = '/api/codes/list';
+        const VOTE_STATS_ENDPOINT = '/api/stats/votes';
+        const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
+        const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/read';
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1519,8 +1518,6 @@
             loadActivity();
             loadVoteStats();
             loadNotifications();
-
-            // Charger tous les codes
             loadAllCodes();
         }
 
@@ -1591,14 +1588,19 @@
         // Formatage de date
         function formatDate(dateString) {
             if (!dateString) return '-';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                console.error('Erreur de formatage de date:', error);
+                return dateString;
+            }
         }
 
         // ------------ GESTION DES CODES ------------
@@ -1929,7 +1931,7 @@
             try {
                 showLoading();
                 const token = getToken();
-                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=10`, {
+                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=10&page=1`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1939,7 +1941,14 @@
                 if (res.ok) {
                     const result = await res.json();
                     // Vérifier le format de réponse
-                    activities = result.data || result;
+                    activities = result.logs.map(log => ({
+                        title: log.action || 'Activité',
+                        content: log.details || '',
+                        time: formatRelativeTime(log.createdAt),
+                        timestamp: log.createdAt,
+                        icon: mapActionTypeToIcon(log.actionType)
+                    }));
+
                 } else {
                     // Si le serveur renvoie une erreur, utilisons des données fictives
                     console.warn('Serveur d\'activités indisponible, utilisation de données de démonstration');
@@ -2033,6 +2042,28 @@
             }
         }
 
+
+        function formatRelativeTime(dateStr) {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const min = Math.floor(diff / 60000);
+            if (min < 60) return `${min} min`;
+            const h = Math.floor(min / 60);
+            if (h < 24) return `${h} h`;
+            const d = Math.floor(h / 24);
+            return `${d} j`;
+        }
+
+        function mapActionTypeToIcon(type) {
+            switch (type) {
+                case 'INFO': return 'info-circle';
+                case 'ACTION': return 'bolt';
+                case 'ERROR': return 'exclamation-triangle';
+                case 'ADMIN': return 'user-shield';
+                default: return 'check';
+            }
+        }
+
+
         async function loadVoteStats() {
             try {
                 const token = getToken();
@@ -2055,10 +2086,10 @@
                 new Chart(chartCtx, {
                     type: 'line',
                     data: {
-                        labels: stats.dates || [],
+                        labels: stats.dates || ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                         datasets: [{
                             label: 'Votes par jour',
-                            data: stats.values || [],
+                            data: stats.values || [12, 19, 8, 15, 22, 18, 25],
                             borderColor: '#7a0026',
                             backgroundColor: 'rgba(122, 0, 38, 0.1)',
                             tension: 0.3,
@@ -2082,6 +2113,39 @@
             } catch (err) {
                 console.error('Erreur chargement stats votes:', err);
                 showToast('Erreur lors du chargement des statistiques de votes', 'error');
+
+                // Créer un graphique avec des données de démonstration
+                const ctx = document.getElementById('votesChart');
+                if (ctx) {
+                    const chartCtx = ctx.getContext('2d');
+                    new Chart(chartCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                            datasets: [{
+                                label: 'Votes par jour (démo)',
+                                data: [12, 19, 8, 15, 22, 18, 25],
+                                borderColor: '#7a0026',
+                                backgroundColor: 'rgba(122, 0, 38, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -2190,7 +2254,7 @@
                     if (!notification.read && notification.id) {
                         await markAsRead(notification.id);
                         div.classList.remove('unread');
-                        loadNotifications(); // Recharger pour mettre à jour le badge
+                        loadNotifications();
                     }
                 });
 
@@ -2201,7 +2265,7 @@
         async function markAsRead(notificationId) {
             try {
                 const token = getToken();
-                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT(':id', notificationId)}`, {
+                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -2218,7 +2282,7 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                loadNotifications(); // Recharger les notifications
+                loadNotifications();
                 showToast('Toutes les notifications marquées comme lues', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
@@ -2333,6 +2397,25 @@
                 document.getElementById('codeSearch').value = '';
                 document.getElementById('statusFilter').value = 'all';
                 loadAllCodes();
+            });
+
+            // Gestion de la modal d'import
+            safeAddListener('closeImportModal', 'click', () => {
+                const modal = document.getElementById('importModal');
+                if (modal) modal.classList.remove('active');
+            });
+
+            safeAddListener('cancelImport', 'click', () => {
+                const modal = document.getElementById('importModal');
+                if (modal) modal.classList.remove('active');
+            });
+
+            // Fermer la modal en cliquant à l'extérieur
+            document.addEventListener('click', function (e) {
+                const modal = document.getElementById('importModal');
+                if (modal && e.target === modal) {
+                    modal.classList.remove('active');
+                }
             });
         }
     </script>

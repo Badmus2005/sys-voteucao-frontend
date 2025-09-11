@@ -7,10 +7,793 @@
     <title>Mes Candidatures - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Styles CSS -->
-    <link rel="stylesheet" href="/assets/css/components/election-card.css">
-    <link rel="stylesheet" href="/assets/css/pages/mes-candidatures.css">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f5f0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #d4af37;
+            /* Or */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-nav a,
+        .user-nav span {
+            text-decoration: none;
+            color: #fff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-nav a:hover {
+            color: #d4af37;
+            /* Or */
+        }
+
+        .burger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            transition: all 0.3s;
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: #fff;
+            padding: 1.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 0.8rem;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #1b263b;
+            border-left-color: #d4af37;
+            /* Or */
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background-color: #f8f5f0;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .breadcrumb a {
+            color: #0d1b2a;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* Filtres */
+        .filters-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #0d1b2a;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #0d1b2a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b263b;
+        }
+
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Candidatures Section */
+        .candidatures-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: #0d1b2a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .candidatures-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Candidature Card Styles */
+        .candidature-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border-left: 4px solid #0d1b2a;
+        }
+
+        .candidature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .candidature-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background-color: #f8f9fa;
+        }
+
+        .candidature-info {
+            flex: 1;
+        }
+
+        .candidature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0d1b2a;
+        }
+
+        .election-type {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background-color: #0d1b2a;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .candidature-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-en_attente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approuve {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejete {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .candidature-meta {
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .candidature-slogan {
+            padding: 0 1.5rem;
+            margin: 1rem 0;
+            font-style: italic;
+            color: #800020;
+            /* Bordeaux */
+            border-left: 3px solid #d4af37;
+            padding-left: 1rem;
+        }
+
+        .candidature-actions {
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-top: 1px solid #eee;
+        }
+
+        /* No Candidatures Message */
+        .no-candidatures {
+            text-align: center;
+            padding: 3rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .no-candidatures i {
+            font-size: 4rem;
+            color: #bdc3c7;
+            margin-bottom: 1.5rem;
+        }
+
+        .no-candidatures h3 {
+            color: #0d1b2a;
+            margin-bottom: 1rem;
+        }
+
+        .no-candidatures p {
+            color: #7f8c8d;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-en_attente .stat-icon {
+            color: #ffc107;
+        }
+
+        .status-approuve .stat-icon {
+            color: #28a745;
+        }
+
+        .status-rejete .stat-icon {
+            color: #dc3545;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0d1b2a;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-large {
+            max-width: 800px;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: #0d1b2a;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Candidature Details Styles */
+        .candidature-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .candidature-detail-title h3 {
+            color: #0d1b2a;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidature-detail-meta {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .candidature-detail-slogan {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-left: 4px solid #d4af37;
+            margin-bottom: 1.5rem;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .candidature-detail-slogan h4 {
+            color: #0d1b2a;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .candidature-detail-slogan p {
+            font-style: italic;
+            color: #800020;
+        }
+
+        .candidature-detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .candidature-detail-section h4 {
+            color: #0d1b2a;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-content {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+
+        .status-info {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .candidature-actions-modal {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: #0d1b2a;
+            /* Bleu nuit */
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            border-left: 4px solid #d4af37;
+            /* Or */
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2e7d32;
+        }
+
+        .toast.error {
+            background-color: #c62828;
+        }
+
+        .toast.warning {
+            background-color: #ef6c00;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #800020;
+            /* Bordeaux */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .no-data-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #bdc3c7;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            .user-nav a:not(:last-child) {
+                display: none;
+            }
+
+            .burger {
+                display: flex;
+            }
+
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                height: 100vh;
+                z-index: 1000;
+                width: 250px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .candidature-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .candidature-actions {
+                flex-direction: column;
+            }
+
+            .candidature-actions-modal {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .candidature-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -18,7 +801,7 @@
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
         <div class="user-nav">
             <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="/user/profile"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="profile"><i class="fa-solid fa-user"></i> Profil</a>
             <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
         </div>
         <div class="burger" id="burger">
@@ -36,13 +819,13 @@
     <div class="dashboard-container">
         <aside class="sidebar" id="sidebar">
             <ul class="sidebar-menu">
-                <li><a href="/user/dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
-                <li><a href="/user/candidature"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
-                <li><a href="/user/elections"><i class="fa-solid fa-list"></i> Élections</a></li>
-                <li><a href="/user/mes-candidatures" class="active"><i class="fa-solid fa-list"></i> Mes
+                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
+                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+                <li><a href="elections.html"><i class="fa-solid fa-list"></i> Élections</a></li>
+                <li><a href="mes-candidatures.html" class="active"><i class="fa-solid fa-list"></i> Mes
                         Candidatures</a></li>
                 <li><a href="/user/vote"><i class="fa-solid fa-check"></i> Voter</a></li>
-                <li><a href="/user/resultats"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+                <li><a href="resultats.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
             </ul>
         </aside>
 
@@ -55,11 +838,13 @@
             </div>
 
             <!-- Filters -->
-            <div class="filters">
-                <h3 class="filters-title"><i class="fa-solid fa-filter"></i> Filtres</h3>
-                <div class="filters-grid">
+            <div class="filters-container">
+                <div class="filters-header">
+                    <h3><i class="fa-solid fa-filter"></i> Filtres</h3>
+                </div>
+                <div class="filters-content">
                     <div class="filter-group">
-                        <label class="filter-label">Statut</label>
+                        <label>Statut</label>
                         <select class="filter-select" id="filterStatus">
                             <option value="all">Tous les statuts</option>
                             <option value="en_attente">En attente</option>
@@ -68,7 +853,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Type d'élection</label>
+                        <label>Type d'élection</label>
                         <select class="filter-select" id="filterType">
                             <option value="all">Tous les types</option>
                             <option value="SALLE">Responsable de Salle</option>
@@ -76,6 +861,16 @@
                             <option value="UNIVERSITE">Délégué d'Université</option>
                         </select>
                     </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="applyFilters">
+                        <i class="fa-solid fa-check"></i>
+                        Appliquer
+                    </button>
+                    <button class="btn btn-secondary" id="resetFilters">
+                        <i class="fa-solid fa-eraser"></i>
+                        Réinitialiser
+                    </button>
                 </div>
             </div>
 
@@ -114,22 +909,22 @@
             <div class="stats-section">
                 <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Statistiques des candidatures</h2>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon status-en_attente">
+                    <div class="stat-card status-en_attente">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-clock"></i>
                         </div>
                         <div class="stat-value" id="statEnAttente">0</div>
                         <div class="stat-label">En attente</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon status-approuve">
+                    <div class="stat-card status-approuve">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-check-circle"></i>
                         </div>
                         <div class="stat-value" id="statApprouve">0</div>
                         <div class="stat-label">Approuvées</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon status-rejete">
+                    <div class="stat-card status-rejete">
+                        <div class="stat-icon">
                             <i class="fa-solid fa-times-circle"></i>
                         </div>
                         <div class="stat-value" id="statRejete">0</div>
@@ -166,15 +961,11 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
-
-    <!-- Chargement des scripts -->
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/utils/api.js"></script>
-    <script src="/assets/js/services/electionService.js"></script>
-    <script src="/assets/js/services/candidateService.js"></script>
-    <script src="/assets/js/main.js"></script>
-
     <script>
+        // Configuration et constantes
+        const API_URL = 'http://localhost:3000/api';
+        const TOKEN = localStorage.getItem('token');
+
         // Variables globales pour cette page
         let allCandidatures = [];
         let filteredCandidatures = [];
@@ -185,13 +976,139 @@
             total: 0
         };
 
+        // Fonctions utilitaires pour les appels API
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_URL}${endpoint}`;
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            };
+
+            const config = { ...defaultOptions, ...options };
+
+            try {
+                const response = await fetch(url, config);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        // Services
+        const ElectionService = {
+            getElectionTypeLabel(type) {
+                const typeMap = {
+                    'SALLE': 'Responsable de Salle',
+                    'ECOLE': 'Délégué d\'École',
+                    'UNIVERSITE': 'Délégué Universitaire'
+                };
+                return typeMap[type] || type;
+            }
+        };
+
+        const CandidatureService = {
+            async getMyCandidatures() {
+                return await apiCall('/candidats/my-candidature');
+            },
+
+            async cancelCandidature(id) {
+                return await apiCall(`/candidats/${id}`, {
+                    method: 'DELETE'
+                });
+            },
+
+            async getCandidatureDetails(id) {
+                return await apiCall(`/candidats/${id}`);
+            }
+        };
+
+        // Fonctions d'affichage
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Changer l'icône selon le type
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fa-solid fa-circle-check';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    break;
+            }
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            // Cacher après 3 secondes
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Fonction utilitaire pour formater les dates
+        function formatDate(dateString) {
+            if (!dateString) return 'Non définie';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = '/user/login';
+            if (!TOKEN) {
+                window.location.href = 'login.html';
                 return;
             }
+
+            // Initialiser le menu burger
+            const burger = document.getElementById('burger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            burger.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Gestion de la déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = 'login.html';
+            });
 
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
@@ -219,12 +1136,10 @@
         // Charger les candidatures de l'utilisateur
         async function loadUserCandidatures() {
             try {
-                // Cette endpoint devra être créé côté backend
-                // Pour l'instant, nous allons simuler des données
-                const simulatedCandidatures = await simulateCandidaturesData();
+                const response = await CandidatureService.getMyCandidatures();
 
-                if (simulatedCandidatures && simulatedCandidatures.length > 0) {
-                    allCandidatures = simulatedCandidatures;
+                if (response && response.success && Array.isArray(response.data)) {
+                    allCandidatures = response.data;
                     filteredCandidatures = [...allCandidatures];
 
                     displayCandidatures(filteredCandidatures);
@@ -238,69 +1153,8 @@
             } catch (error) {
                 console.error('Erreur chargement candidatures:', error);
                 showNoCandidatures();
+                showToast('Erreur lors du chargement des candidatures', 'error');
             }
-        }
-
-        // Simuler des données de candidatures (à remplacer par un appel API réel)
-        async function simulateCandidaturesData() {
-            // Simuler un délai de chargement
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            return [
-                {
-                    id: 1,
-                    election: {
-                        id: 101,
-                        titre: "Président des étudiants",
-                        type: "UNIVERSITE",
-                        ecole: "UCAO",
-                        dateDebut: "2024-01-15",
-                        dateFin: "2024-01-20"
-                    },
-                    slogan: "Unis pour un campus meilleur",
-                    statut: "approuve",
-                    dateSoumission: "2024-01-10",
-                    photoUrl: "https://via.placeholder.com/150",
-                    programme: "Je m'engage à représenter fidèlement les intérêts des étudiants, à améliorer la vie sur le campus, et à faciliter le dialogue entre l'administration et les étudiants.",
-                    motivation: "Passionné par la vie étudiante et ayant déjà une expérience en représentation, je souhaite mettre mes compétences au service de tous les étudiants."
-                },
-                {
-                    id: 2,
-                    election: {
-                        id: 102,
-                        titre: "Délégué de classe L2 Informatique",
-                        type: "SALLE",
-                        ecole: "EGEI",
-                        filiere: "Informatique",
-                        annee: "2",
-                        dateDebut: "2024-02-01",
-                        dateFin: "2024-02-05"
-                    },
-                    slogan: "L'excellence au service de tous",
-                    statut: "en_attente",
-                    dateSoumission: "2024-01-25",
-                    photoUrl: "https://via.placeholder.com/150",
-                    programme: "Organisation de séances de révision, création d'un système d'entraide entre étudiants, amélioration de la communication avec les professeurs.",
-                    motivation: "Je souhaite contribuer à l'amélioration des conditions d'étude de ma promotion et représenter mes camarades auprès de l'administration."
-                },
-                {
-                    id: 3,
-                    election: {
-                        id: 103,
-                        titre: "Trésorier du BDE",
-                        type: "ECOLE",
-                        ecole: "ESMEA",
-                        dateDebut: "2023-11-10",
-                        dateFin: "2023-11-15"
-                    },
-                    slogan: "Transparence et efficacité",
-                    statut: "rejete",
-                    dateSoumission: "2023-11-05",
-                    photoUrl: "https://via.placeholder.com/150",
-                    programme: "Gestion transparente du budget, organisation d'événements financièrement accessibles, compte-rendu régulier des dépenses.",
-                    motivation: "Avec mon expérience en gestion et mon souci du détail, je serai un trésorier rigoureux et transparent."
-                }
-            ];
         }
 
         // Afficher les candidatures
@@ -308,38 +1162,43 @@
             const container = document.getElementById('candidaturesList');
             if (!container) return;
 
-            container.innerHTML = candidatures.map(candidature => `
+            container.innerHTML = candidatures.map(candidature => {
+                // Adapter la structure des données selon la réponse de l'API
+                const election = candidature.election || {};
+                const statut = candidature.statut || 'en_attente';
+
+                return `
                 <div class="candidature-card" data-candidature-id="${candidature.id}">
                     <div class="candidature-header">
                         <div class="candidature-info">
-                            <h3 class="candidature-title">${candidature.election.titre}</h3>
-                            <span class="election-type">${ElectionService.getElectionTypeLabel(candidature.election.type)}</span>
+                            <h3 class="candidature-title">${election.titre || 'Sans titre'}</h3>
+                            <span class="election-type">${ElectionService.getElectionTypeLabel(election.type)}</span>
                         </div>
-                        <span class="candidature-status status-${candidature.statut}">
-                            ${getStatusText(candidature.statut)}
+                        <span class="candidature-status status-${statut}">
+                            ${getStatusText(statut)}
                         </span>
                     </div>
                     
                     <div class="candidature-meta">
                         <div class="meta-item">
                             <i class="fa-solid fa-graduation-cap"></i>
-                            <strong>École:</strong> ${candidature.election.ecole || 'Non spécifié'}
+                            <strong>École:</strong> ${election.ecole || 'Non spécifié'}
                         </div>
-                        ${candidature.election.filiere ? `
+                        ${election.filiere ? `
                         <div class="meta-item">
                             <i class="fa-solid fa-layer-group"></i>
-                            <strong>Filière:</strong> ${candidature.election.filiere}
+                            <strong>Filière:</strong> ${election.filiere}
                         </div>
                         ` : ''}
-                        ${candidature.election.annee ? `
+                        ${election.annee ? `
                         <div class="meta-item">
                             <i class="fa-solid fa-calendar"></i>
-                            <strong>Année:</strong> ${candidature.election.annee}
+                            <strong>Année:</strong> ${election.annee}
                         </div>
                         ` : ''}
                         <div class="meta-item">
                             <i class="fa-solid fa-calendar-days"></i>
-                            <strong>Soumis le:</strong> ${formatDate(candidature.dateSoumission)}
+                            <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
                         </div>
                     </div>
                     
@@ -356,14 +1215,14 @@
                             Voir détails
                         </button>
                         
-                        ${candidature.statut === 'en_attente' ? `
+                        ${statut === 'EN_ATTENTE' ? `
                         <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
                             <i class="fa-solid fa-pen-to-square"></i>
                             Modifier
                         </button>
                         ` : ''}
                         
-                        ${candidature.statut === 'en_attente' ? `
+                        ${statut === 'EN_ATTENTE' ? `
                         <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
                             <i class="fa-solid fa-trash"></i>
                             Annuler
@@ -371,7 +1230,8 @@
                         ` : ''}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             // Ajouter les événements
             attachCandidatureEvents();
@@ -380,6 +1240,9 @@
         // Obtenir le texte du statut
         function getStatusText(status) {
             const statuses = {
+                'EN_ATTENTE': 'En attente',
+                'APPROUVE': 'Approuvé',
+                'REJETE': 'Rejeté',
                 'en_attente': 'En attente',
                 'approuve': 'Approuvé',
                 'rejete': 'Rejeté'
@@ -390,9 +1253,12 @@
         // Calculer les statistiques
         function calculateStatistics() {
             candidatureStats = {
-                en_attente: allCandidatures.filter(c => c.statut === 'en_attente').length,
-                approuve: allCandidatures.filter(c => c.statut === 'approuve').length,
-                rejete: allCandidatures.filter(c => c.statut === 'rejete').length,
+                en_attente: allCandidatures.filter(c =>
+                    c.statut === 'EN_ATTENTE' || c.statut === 'en_attente').length,
+                approuve: allCandidatures.filter(c =>
+                    c.statut === 'APPROUVE' || c.statut === 'approuve').length,
+                rejete: allCandidatures.filter(c =>
+                    c.statut === 'REJETE' || c.statut === 'rejete').length,
                 total: allCandidatures.length
             };
         }
@@ -468,97 +1334,114 @@
         }
 
         // Afficher les détails d'une candidature
-        function showCandidatureDetails(candidature) {
+        async function showCandidatureDetails(candidature) {
             const modal = document.getElementById('candidatureModal');
             const content = document.getElementById('candidatureDetails');
 
             if (!modal || !content) return;
 
+            // Charger les détails complets si nécessaire
+            let fullDetails = candidature;
+            if (!candidature.programme || !candidature.motivation) {
+                try {
+                    const response = await CandidatureService.getCandidatureDetails(candidature.id);
+                    if (response && response.success) {
+                        fullDetails = response.data;
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement détails:', error);
+                    showToast('Erreur lors du chargement des détails', 'error');
+                }
+            }
+
+            const election = fullDetails.election || {};
+            const statut = fullDetails.statut || 'EN_ATTENTE';
+
             content.innerHTML = `
-                <div class="candidature-detail-header">
-                    <div class="candidature-detail-title">
-                        <h3>${candidature.election.titre}</h3>
-                        <span class="election-type">${ElectionService.getElectionTypeLabel(candidature.election.type)}</span>
+            <div class="candidature-detail-header">
+                <div class="candidature-detail-title">
+                    <h3>${election.titre || 'Sans titre'}</h3>
+                    <span class="election-type">${ElectionService.getElectionTypeLabel(election.type)}</span>
+                </div>
+                <span class="candidature-status status-${statut}">
+                    ${getStatusText(statut)}
+                </span>
+            </div>
+
+            <div class="candidature-detail-meta">
+                <div class="detail-meta-grid">
+                    <div class="meta-item">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <strong>École:</strong> ${election.ecole || 'Non spécifié'}
                     </div>
-                    <span class="candidature-status status-${candidature.statut}">
-                        ${getStatusText(candidature.statut)}
-                    </span>
-                </div>
-
-                <div class="candidature-detail-meta">
-                    <div class="detail-meta-grid">
-                        <div class="meta-item">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                            <strong>École:</strong> ${candidature.election.ecole || 'Non spécifié'}
-                        </div>
-                        ${candidature.election.filiere ? `
-                        <div class="meta-item">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <strong>Filière:</strong> ${candidature.election.filiere}
-                        </div>
-                        ` : ''}
-                        ${candidature.election.annee ? `
-                        <div class="meta-item">
-                            <i class="fa-solid fa-calendar"></i>
-                            <strong>Année:</strong> ${candidature.election.annee}
-                        </div>
-                        ` : ''}
-                        <div class="meta-item">
-                            <i class="fa-solid fa-calendar-days"></i>
-                            <strong>Période électorale:</strong> 
-                            ${formatDate(candidature.election.dateDebut)} - ${formatDate(candidature.election.dateFin)}
-                        </div>
-                        <div class="meta-item">
-                            <i class="fa-solid fa-calendar-check"></i>
-                            <strong>Soumis le:</strong> ${formatDate(candidature.dateSoumission)}
-                        </div>
+                    ${election.filiere ? `
+                    <div class="meta-item">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <strong>Filière:</strong> ${election.filiere}
                     </div>
-                </div>
-
-                ${candidature.slogan ? `
-                <div class="candidature-detail-slogan">
-                    <h4><i class="fa-solid fa-quote-left"></i> Slogan de campagne</h4>
-                    <p>"${candidature.slogan}"</p>
-                </div>
-                ` : ''}
-
-                <div class="candidature-detail-section">
-                    <h4><i class="fa-solid fa-book"></i> Programme électoral</h4>
-                    <div class="detail-content">
-                        <p>${candidature.programme || 'Aucun programme disponible'}</p>
+                    ` : ''}
+                    ${election.annee ? `
+                    <div class="meta-item">
+                        <i class="fa-solid fa-calendar"></i>
+                        <strong>Année:</strong> ${election.annee}
+                    </div>
+                    ` : ''}
+                    <div class="meta-item">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <strong>Période électorale:</strong> 
+                        ${formatDate(election.dateDebut)} - ${formatDate(election.dateFin)}
+                    </div>
+                    <div class="meta-item">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <strong>Soumis le:</strong> ${formatDate(fullDetails.createdAt || fullDetails.dateSoumission)}
                     </div>
                 </div>
+            </div>
 
-                <div class="candidature-detail-section">
-                    <h4><i class="fa-solid fa-heart"></i> Lettre de motivation</h4>
-                    <div class="detail-content">
-                        <p>${candidature.motivation || 'Aucune motivation disponible'}</p>
-                    </div>
-                </div>
+            ${fullDetails.slogan ? `
+            <div class="candidature-detail-slogan">
+                <h4><i class="fa-solid fa-quote-left"></i> Slogan de campagne</h4>
+                <p>"${fullDetails.slogan}"</p>
+            </div>
+            ` : ''}
 
-                ${candidature.statut === 'rejete' ? `
-                <div class="candidature-detail-section">
-                    <h4><i class="fa-solid fa-info-circle"></i> Informations</h4>
-                    <div class="detail-content">
-                        <p class="status-info">Votre candidature a été rejetée par l'administration. 
-                        Vous pouvez contacter le service des élections pour plus d'informations.</p>
-                    </div>
+            <div class="candidature-detail-section">
+                <h4><i class="fa-solid fa-book"></i> Programme électoral</h4>
+                <div class="detail-content">
+                    <p>${fullDetails.programme || 'Aucun programme disponible'}</p>
                 </div>
-                ` : ''}
+            </div>
 
-                ${candidature.statut === 'en_attente' ? `
-                <div class="candidature-actions-modal">
-                    <button class="btn btn-warning" onclick="window.location.href='candidature.html?edit=${candidature.id}'">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        Modifier la candidature
-                    </button>
-                    <button class="btn btn-danger" onclick="cancelCandidature(${candidature.id})">
-                        <i class="fa-solid fa-trash"></i>
-                        Annuler la candidature
-                    </button>
+            <div class="candidature-detail-section">
+                <h4><i class="fa-solid fa-heart"></i> Lettre de motivation</h4>
+                <div class="detail-content">
+                    <p>${fullDetails.motivation || 'Aucune motivation disponible'}</p>
                 </div>
-                ` : ''}
-            `;
+            </div>
+
+            ${statut === 'REJETE' || statut === 'rejete' ? `
+            <div class="candidature-detail-section">
+                <h4><i class="fa-solid fa-info-circle"></i> Informations</h4>
+                <div class="detail-content">
+                    <p class="status-info">Votre candidature a été rejetée par l'administration. 
+                    Vous pouvez contacter le service des élections pour plus d'informations.</p>
+                </div>
+            </div>
+            ` : ''}
+
+            ${statut === 'EN_ATTENTE' || statut === 'en_attente' ? `
+            <div class="candidature-actions-modal">
+                <button class="btn btn-warning" onclick="window.location.href='candidature.html?edit=${fullDetails.id}'">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Modifier la candidature
+                </button>
+                <button class="btn btn-danger" onclick="cancelCandidature(${fullDetails.id})">
+                    <i class="fa-solid fa-trash"></i>
+                    Annuler la candidature
+                </button>
+            </div>
+            ` : ''}
+        `;
 
             modal.classList.add('active');
         }
@@ -568,25 +1451,27 @@
             showLoading();
 
             try {
-                // Simuler l'annulation (à remplacer par un appel API réel)
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                const response = await CandidatureService.cancelCandidature(candidatureId);
 
-                // Mettre à jour localement
-                allCandidatures = allCandidatures.filter(c => c.id != candidatureId);
-                filteredCandidatures = [...allCandidatures];
+                if (response && response.success) {
+                    // Mettre à jour localement
+                    allCandidatures = allCandidatures.filter(c => c.id != candidatureId);
+                    filteredCandidatures = [...allCandidatures];
 
-                displayCandidatures(filteredCandidatures);
-                calculateStatistics();
-                updateStatisticsDisplay();
+                    displayCandidatures(filteredCandidatures);
+                    calculateStatistics();
+                    updateStatisticsDisplay();
 
-                // Fermer la modale si ouverte
-                document.getElementById('candidatureModal').classList.remove('active');
+                    // Fermer la modale si ouverte
+                    document.getElementById('candidatureModal').classList.remove('active');
 
-                showToast('Candidature annulée avec succès', 'success');
-
+                    showToast(response.message || 'Candidature annulée avec succès', 'success');
+                } else {
+                    throw new Error(response?.message || 'Erreur lors de l\'annulation');
+                }
             } catch (error) {
                 console.error('Erreur annulation candidature:', error);
-                showToast('Erreur lors de l\'annulation', 'error');
+                showToast(error.message || 'Erreur lors de l\'annulation', 'error');
             } finally {
                 hideLoading();
             }
@@ -598,13 +1483,20 @@
             const typeFilter = document.getElementById('filterType').value;
 
             filteredCandidatures = allCandidatures.filter(candidature => {
+                // Normaliser le statut pour la comparaison
+                const normalizedStatut = candidature.statut.toLowerCase().includes('attente') ? 'en_attente' :
+                    candidature.statut.toLowerCase().includes('approuve') ? 'approuve' :
+                        candidature.statut.toLowerCase().includes('rejete') ? 'rejete' :
+                            candidature.statut.toLowerCase();
+
                 // Filtre par statut
-                if (statusFilter !== 'all' && candidature.statut !== statusFilter) {
+                if (statusFilter !== 'all' && normalizedStatut !== statusFilter) {
                     return false;
                 }
 
                 // Filtre par type
-                if (typeFilter !== 'all' && candidature.election.type !== typeFilter) {
+                const electionType = candidature.election?.type;
+                if (typeFilter !== 'all' && electionType !== typeFilter) {
                     return false;
                 }
 
@@ -619,6 +1511,14 @@
             // Filtres
             document.getElementById('filterStatus').addEventListener('change', filterCandidatures);
             document.getElementById('filterType').addEventListener('change', filterCandidatures);
+
+            // Boutons d'action des filtres
+            document.getElementById('applyFilters').addEventListener('click', filterCandidatures);
+            document.getElementById('resetFilters').addEventListener('click', function () {
+                document.getElementById('filterStatus').value = 'all';
+                document.getElementById('filterType').value = 'all';
+                filterCandidatures();
+            });
 
             // Nouvelle candidature
             document.getElementById('newCandidatureBtn').addEventListener('click', function () {

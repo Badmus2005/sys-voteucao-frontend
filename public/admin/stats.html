@@ -370,6 +370,22 @@
                 padding: 15px;
             }
         }
+
+        /* Styles pour les boutons d'icônes */
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--bleu-nuit);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-icon:hover {
+            background-color: rgba(15, 26, 49, 0.1);
+        }
     </style>
 </head>
 
@@ -474,7 +490,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="chart-placeholder" id="distributionChartContainer">
+                <div class="chart-container" id="distributionChartContainer">
                     <canvas id="distributionChart"></canvas>
                 </div>
             </div>
@@ -488,7 +504,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="chart-placeholder" id="hourlyChartContainer">
+                <div class="chart-container" id="hourlyChartContainer">
                     <canvas id="hourlyChart"></canvas>
                 </div>
             </div>
@@ -502,7 +518,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="chart-placeholder" id="comparisonChartContainer">
+                <div class="chart-container" id="comparisonChartContainer">
                     <canvas id="comparisonChart"></canvas>
                 </div>
             </div>
@@ -532,10 +548,10 @@
             </div>
         </div>
     </div>
-    <script src="/assets/js/config.js"></script>
+
     <script>
-        // Configuration
-        const API_BASE = CONFIG.API.BASE_URL;
+        // Configuration des API
+        const API_BASE = 'http://localhost:3000';
         const STATS_ENDPOINTS = {
             GENERAL: '/api/stats/general',
             VOTES: '/api/stats/votes',
@@ -544,87 +560,28 @@
             COMPARISON: '/api/stats/comparison',
             EXPORT: '/api/stats/export'
         };
-        const ELECTIONS_ENDPOINT = '/api/election';
+        const ELECTIONS_ENDPOINT = '/api/elections';
 
         // Fonction pour récupérer le token
         function getToken() {
             return localStorage.getItem('token');
         }
 
-        // Fonctions d'authentification pour le dashboard
-        const DASHBOARD_AUTH = {
-            isAuthenticated: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return false;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    return payload.exp > now;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
-                }
-            },
-
-            getUserRole: () => {
-                try {
-                    const token = getToken();
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
-            },
-
-            logout: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('adminName');
-                window.location.href = '/admin/login';
-            }
-        };
-
-        // Vérification de l'authentification au chargement de la page
-        document.addEventListener('DOMContentLoaded', function () {
-            const role = DASHBOARD_AUTH.getUserRole();
-            const isAuth = DASHBOARD_AUTH.isAuthenticated();
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
-                window.location.href = '/admin/login';
-                return;
-            }
-
-            if (role !== 'ADMIN') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '/unauthorized.html';
-                return;
-            }
-
-
-            // Si l'utilisateur est authentifié et a le bon rôle, initialiser le dashboard
-            initializeDashboard();
-        });
-
-        function initializeDashboard() {
-            loadElections();
-            setupEventListeners();
-            loadAllStats();
-        }
         // Variables globales
         let charts = {};
         let elections = [];
 
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            initEventListeners();
+            loadElections();
+            loadAllStats();
+        });
 
-        // Configuration des écouteurs d'événements
-        function setupEventListeners() {
-            document.getElementById('applyFilters').addEventListener('click', loadAllStats);
+        function initEventListeners() {
+            document.getElementById("applyFilters").addEventListener('click', loadAllStats);
         }
 
-        // Charger la liste des élections
         async function loadElections() {
             try {
                 const token = getToken();
@@ -639,7 +596,7 @@
                 if (!response.ok) throw new Error('Erreur de chargement des élections');
 
                 const data = await response.json();
-                elections = data.elections || [];
+                elections = data.data || [];
 
                 // Remplir le filtre des élections
                 const electionFilter = document.getElementById('electionFilter');
@@ -657,41 +614,9 @@
             }
         }
 
-        // Charger toutes les statistiques
         async function loadAllStats() {
             try {
                 showLoading();
-
-                // Attendre que le DOM soit complètement chargé
-                if (document.readyState === 'loading') {
-                    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-                }
-
-                // Vérifier que les canvas existent et afficher un message d'erreur dans le DOM si absent
-                const canvasIds = ['votesChart', 'distributionChart', 'hourlyChart', 'comparisonChart'];
-
-                for (const id of canvasIds) {
-                    const canvas = document.getElementById(id);
-                    if (!canvas) {
-                        console.error(`Canvas ${id} non trouvé`);
-
-                        // Cherche un conteneur parent pour afficher un message d'erreur visuel
-                        const container = document.getElementById(`${id}Container`) || document.querySelector(`[data-chart="${id}"]`);
-                        if (container) {
-                            container.innerHTML = `
-                <div class="chart-error">
-                    <p style="color: #c00; font-weight: bold;">
-                        Graphique "${id}" non disponible. Veuillez sélectionner une élection ou vérifier les données.
-                    </p>
-                </div>
-            `;
-                        }
-
-                        // Optionnel : continuer la boucle au lieu de return, pour afficher les erreurs de tous les canvas
-                        continue;
-                    }
-                }
-
 
                 await Promise.all([
                     loadGeneralStats(),
@@ -708,7 +633,6 @@
             }
         }
 
-        // Charger les statistiques générales
         async function loadGeneralStats() {
             try {
                 const token = getToken();
@@ -727,7 +651,7 @@
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Erreur ${response.status}: ${response.statusText}`);
+                    throw new Error(errorData.error || `Erreur ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
@@ -750,7 +674,6 @@
             }
         }
 
-        // Charger le graphique d'évolution des votes
         async function loadVotesChart() {
             try {
                 const token = getToken();
@@ -833,7 +756,6 @@
             }
         }
 
-        // Charger le graphique de répartition des votes
         async function loadDistributionChart() {
             try {
                 const token = getToken();
@@ -846,8 +768,7 @@
                 const electionId = document.getElementById('electionFilter').value;
 
                 if (electionId === 'all') {
-                    document.getElementById('distributionChartContainer').innerHTML =
-                        '<div class="info-message">Sélectionnez une élection pour voir la répartition</div>';
+                    container.innerHTML = '<div class="info-message">Sélectionnez une élection pour voir la répartition</div>';
                     return;
                 }
 
@@ -866,6 +787,9 @@
                 if (charts.distribution) {
                     charts.distribution.destroy();
                 }
+
+                // Recréer le canvas
+                container.innerHTML = '<canvas id="distributionChart"></canvas>';
 
                 // Créer le nouveau graphique
                 const ctx = document.getElementById('distributionChart').getContext('2d');
@@ -899,12 +823,13 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
-                document.getElementById('distributionChartContainer').innerHTML =
-                    '<div class="error-message">Erreur de chargement du graphique</div>';
+                const container = document.getElementById('distributionChartContainer');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">Erreur de chargement du graphique</div>';
+                }
             }
         }
 
-        // Charger le graphique de participation par heure
         async function loadHourlyChart() {
             try {
                 const token = getToken();
@@ -991,7 +916,6 @@
             }
         }
 
-        // Charger le graphique de comparaison des élections
         async function loadComparisonChart() {
             try {
                 const token = getToken();
@@ -1019,25 +943,21 @@
                     charts.comparison.destroy();
                 }
 
+                // Recréer le canvas
+                container.innerHTML = '<canvas id="comparisonChart"></canvas>';
+
                 // Créer le nouveau graphique
                 const ctx = document.getElementById('comparisonChart').getContext('2d');
                 charts.comparison = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: data.labels || [],
+                        labels: data.map(item => item.election_title) || [],
                         datasets: [
                             {
-                                label: 'Inscrits',
-                                data: data.registered || [],
+                                label: 'Votes',
+                                data: data.map(item => item.vote_count) || [],
                                 backgroundColor: 'rgba(122, 0, 38, 0.7)',
                                 borderColor: '#7a0026',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Votants',
-                                data: data.voters || [],
-                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                                borderColor: '#28a745',
                                 borderWidth: 1
                             }
                         ]
@@ -1058,7 +978,7 @@
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: 'Nombre de participants'
+                                    text: 'Nombre de votes'
                                 }
                             }
                         }
@@ -1067,12 +987,13 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
-                document.getElementById('comparisonChartContainer').innerHTML =
-                    '<div class="error-message">Erreur de chargement du graphique</div>';
+                const container = document.getElementById('comparisonChartContainer');
+                if (container) {
+                    container.innerHTML = '<div class="error-message">Erreur de chargement du graphique</div>';
+                }
             }
         }
 
-        // Exporter les statistiques
         async function exportStats(format) {
             try {
                 const token = getToken();
@@ -1116,7 +1037,6 @@
             }
         }
 
-        // Fonctions utilitaires
         function showLoading() {
             const containerIds = [
                 'votesChartContainer',
@@ -1140,7 +1060,16 @@
         }
 
         function showError(message) {
-            alert(message);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+
+            const container = document.querySelector('.container');
+            container.insertBefore(errorDiv, container.firstChild);
+
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
         }
 
         // Exposer les fonctions globales

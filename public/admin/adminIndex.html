@@ -787,8 +787,13 @@
             </div>
         </div>
     </footer>
-    <script src="../assets/js/config.js"></script>
+
     <script>
+
+        API_URL = 'http://localhost:3000';
+        ADMIN_LOGIN = '/api/admin/login';
+        ADMIN_REGISTER = '/api/admin/register';
+
 
         // Tab Switching
         const tabs = document.querySelectorAll('.auth-tab');
@@ -834,7 +839,7 @@
 
             try {
                 console.log('Tentative de connexion...');
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.AUTH.ADMIN_LOGIN}`, {
+                const response = await fetch(`${API_URL}${ADMIN_LOGIN}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -857,7 +862,7 @@
 
                     // Redirection vers dashboard après 2 secondes
                     setTimeout(() => {
-                        window.location.href = "/admin/dashboard.html";
+                        window.location.href = "/dashboardAdmin.html";
                     }, 2000);
                 } else {
                     showMessage(messageDiv, data.message || 'Email ou mot de passe incorrect', 'error');
@@ -896,7 +901,7 @@
             };
 
             try {
-                const response = await fetch(`${CONFIG.API.BASE_URL}${CONFIG.API.ENDPOINTS.AUTH.ADMIN_REGISTER}`, {
+                const response = await fetch(`${API_URL}${ADMIN_REGISTER}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

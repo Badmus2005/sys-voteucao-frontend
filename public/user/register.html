@@ -185,6 +185,9 @@
             color: var(--bleu-nuit);
             opacity: 0.6;
             transition: opacity 0.3s;
+            background: none;
+            border: none;
+            z-index: 2;
         }
 
         .password-toggle:hover {
@@ -306,6 +309,13 @@
             }
         }
 
+        .field-error {
+            color: #c62828;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -350,75 +360,91 @@
             <p>Créez votre compte étudiant</p>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
-        <div class="success-message" id="successMessage"></div>
+        <div class="error-message" id="errorMessage" role="alert" aria-live="assertive"></div>
+        <div class="success-message" id="successMessage" role="status" aria-live="polite"></div>
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p>Inscription en cours...</p>
         </div>
 
-        <form id="registerForm">
+        <form id="registerForm" novalidate>
             <div class="form-row">
                 <div class="form-group">
                     <label for="nom"><i class="fas fa-user"></i> Nom</label>
                     <input type="text" id="nom" name="nom" required>
+                    <div id="nomError" class="field-error"></div>
                 </div>
                 <div class="form-group">
                     <label for="prenom"><i class="fas fa-user"></i> Prénom</label>
                     <input type="text" id="prenom" name="prenom" required>
+                    <div id="prenomError" class="field-error"></div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="email"><i class="fas fa-envelope"></i> Email</label>
                 <input type="email" id="email" name="email" required>
+                <div id="emailError" class="field-error"></div>
             </div>
 
-            <div class="form-group">
-                <label for="ecole"><i class="fas fa-graduation-cap"></i> École/Faculté</label>
-                <select id="ecole" name="ecole" required>
-                    <option value="">Sélectionnez votre école/faculté</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="filiere"><i class="fas fa-book"></i> Filière</label>
-                <select id="filiere" name="filiere" required>
-                    <option value="">Sélectionnez votre filière</option>
-                </select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ecole"><i class="fas fa-graduation-cap"></i> École/Faculté</label>
+                    <select id="ecole" name="ecoleId" required>
+                        <option value="">Sélectionnez votre école/faculté</option>
+                    </select>
+                    <div id="ecoleError" class="field-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="filiere"><i class="fas fa-book"></i> Filière</label>
+                    <select id="filiere" name="filiereId" required>
+                        <option value="">Sélectionnez votre filière</option>
+                    </select>
+                    <div id="filiereError" class="field-error"></div>
+                </div>
             </div>
 
             <div class="form-group">
                 <label for="annee"><i class="fas fa-calendar-alt"></i> Année d'étude</label>
                 <select id="annee" name="annee" required>
                     <option value="">Sélectionnez votre année</option>
+                    <option value="1">1ère année</option>
+                    <option value="2">2ème année</option>
+                    <option value="3">3ème année</option>
                 </select>
+                <div id="anneeError" class="field-error"></div>
             </div>
 
             <div class="form-group" id="matriculeGroup" style="display:none;">
                 <label for="matricule"><i class="fas fa-id-card"></i> Matricule</label>
                 <input type="text" id="matricule" name="matricule">
+                <div id="matriculeError" class="field-error"></div>
             </div>
 
             <div class="form-group" id="codeGroup" style="display:none;">
-                <label for="code"><i class="fas fa-key"></i> Code d'inscription</label>
-                <input type="text" id="code" name="code">
+                <label for="codeInscription"><i class="fas fa-key"></i> Code d'inscription</label>
+                <input type="text" id="codeInscription" name="codeInscription">
+                <div id="codeInscriptionError" class="field-error"></div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
                     <input type="password" id="password" name="password" required>
-                    <span class="password-toggle" id="passwordToggle">
+                    <button type="button" class="password-toggle" id="passwordToggle"
+                        aria-label="Afficher le mot de passe">
                         <i class="fas fa-eye"></i>
-                    </span>
+                    </button>
+                    <div id="passwordError" class="field-error"></div>
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmer le mot de passe</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
-                    <span class="password-toggle" id="confirmPasswordToggle">
+                    <button type="button" class="password-toggle" id="confirmPasswordToggle"
+                        aria-label="Afficher le mot de passe">
                         <i class="fas fa-eye"></i>
-                    </span>
+                    </button>
+                    <div id="confirmPasswordError" class="field-error"></div>
                 </div>
             </div>
 
@@ -432,13 +458,43 @@
             <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
         </div>
     </div>
-    <script src="../assets/js/config.js"></script>
+
     <script>
+        // Configuration
+        const CONFIG = {
+            SECURITY: {
+                PASSWORD_MIN_LENGTH: 8
+            },
+            ACADEMIC: {
+                ANNEES: [1, 2, 3]
+            },
+            MESSAGES: {
+                VALIDATION: {
+                    REQUIRED_FIELD: "Veuillez remplir tous les champs obligatoires.",
+                    INVALID_EMAIL: "Veuillez entrer une adresse email valide.",
+                    FORBIDDEN_CHARS: "Le nom et prénom ne doivent pas contenir de caractères spéciaux.",
+                    PASSWORD_TOO_SHORT: "Le mot de passe doit contenir au moins 8 caractères.",
+                    PASSWORD_REQUIREMENTS: "Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial.",
+                    PASSWORDS_DONT_MATCH: "Les mots de passe ne correspondent pas.",
+                    INVALID_MATRICULE: "Le matricule est requis pour les années supérieures.",
+                    INVALID_CODE: "Le code d'inscription est requis pour la première année."
+                },
+                SUCCESS: {
+                    REGISTER: "Inscription réussie! Redirection en cours..."
+                },
+                ERROR: {
+                    REGISTER_FAILED: "Erreur lors de l'inscription. Veuillez réessayer.",
+                    NETWORK_ERROR: "Erreur de réseau. Veuillez vérifier votre connexion."
+                }
+            }
+        };
+
         // Variables globales
-        const API_URL = CONFIG.API.BASE_URL;
+        const API_URL = 'http://localhost:3000';
         const REGISTER_ENDPOINT = '/api/userRegister';
 
         let elements = {};
+        let errorTimeouts = {};
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
@@ -455,19 +511,21 @@
                 matriculeGroup: document.getElementById('matriculeGroup'),
                 codeGroup: document.getElementById('codeGroup'),
                 matricule: document.getElementById('matricule'),
-                code: document.getElementById('code')
+                codeInscription: document.getElementById('codeInscription')
             };
 
             // Initialisation des composants
             initBackgroundSlider();
             initPasswordToggle();
             populateEcoles();
-            populateAnnees();
 
             // Écouteurs d'événements
             elements.ecole.addEventListener('change', () => populateFilieres(elements.ecole.value));
             elements.annee.addEventListener('change', handleAnneeChange);
             elements.form.addEventListener('submit', handleSubmit);
+
+            // Validation en temps réel
+            setupRealTimeValidation();
         });
 
         // --- Fonctions d'initialisation ---
@@ -491,63 +549,157 @@
                 const type = passwordField.type === 'password' ? 'text' : 'password';
                 passwordField.type = type;
                 passwordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                passwordToggle.setAttribute('aria-label', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
             });
 
             confirmPasswordToggle.addEventListener('click', () => {
                 const type = confirmPasswordField.type === 'password' ? 'text' : 'password';
                 confirmPasswordField.type = type;
                 confirmPasswordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                confirmPasswordToggle.setAttribute('aria-label', type === 'password' ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
             });
         }
 
-        // --- Remplissage des listes déroulantes ---
-        function populateEcoles() {
-            elements.ecole.innerHTML = '<option value="">Sélectionnez votre école/faculté</option>';
-            Object.keys(CONFIG.ACADEMIC.ECOLES).forEach(key => {
-                elements.ecole.add(new Option(CONFIG.ACADEMIC.ECOLES[key].nom, CONFIG.ACADEMIC.ECOLES[key].nom));
+        function setupRealTimeValidation() {
+            // Validation en temps réel pour les champs de texte
+            const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+            textInputs.forEach(input => {
+                input.addEventListener('blur', () => validateField(input));
+            });
+
+            // Validation pour les selects
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', () => validateField(select));
             });
         }
 
-        function populateFilieres(ecoleKey) {
-            elements.filiere.innerHTML = '<option value="">Sélectionnez votre filière</option>';
+        function validateField(field) {
+            const errorElement = document.getElementById(field.id + 'Error');
 
-            if (ecoleKey) {
-                // Trouver l'école par son nom
-                const ecoleEntry = Object.entries(CONFIG.ACADEMIC.ECOLES).find(
-                    ([, value]) => value.nom === ecoleKey
-                );
+            // Réinitialiser le message d'erreur
+            if (errorElement) {
+                errorElement.style.display = 'none';
+                errorElement.textContent = '';
+            }
 
-                if (ecoleEntry && ecoleEntry[1].filieres) {
-                    ecoleEntry[1].filieres.forEach(filiere => {
-                        elements.filiere.add(new Option(filiere, filiere));
-                    });
-                }
+            // Valider selon le type de champ
+            if (field.required && !field.value.trim()) {
+                showFieldError(field.id, 'Ce champ est obligatoire');
+                return false;
+            }
+
+            if (field.type === 'email' && field.value && !isValidEmail(field.value)) {
+                showFieldError(field.id, 'Veuillez entrer une adresse email valide');
+                return false;
+            }
+
+            if (field.id === 'password' && field.value && !validatePassword(field.value)) {
+                showFieldError(field.id, CONFIG.MESSAGES.VALIDATION.PASSWORD_REQUIREMENTS);
+                return false;
+            }
+
+            if (field.id === 'confirmPassword' && field.value !== document.getElementById('password').value) {
+                showFieldError(field.id, 'Les mots de passe ne correspondent pas');
+                return false;
+            }
+
+            return true;
+        }
+
+        function showFieldError(fieldId, message) {
+            // Annuler le timeout précédent s'il existe
+            if (errorTimeouts[fieldId]) {
+                clearTimeout(errorTimeouts[fieldId]);
+            }
+
+            const errorElement = document.getElementById(fieldId + 'Error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+
+                // Masquer le message après 5 secondes
+                errorTimeouts[fieldId] = setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 5000);
             }
         }
 
-        function populateAnnees() {
-            elements.annee.innerHTML = '<option value="">Sélectionnez votre année</option>';
-            CONFIG.ACADEMIC.ANNEES.forEach(annee => {
-                elements.annee.add(new Option(
-                    `${annee === 1 ? '1ère' : ' ' + annee + 'ème'} année`,
-                    annee.toString()
-                ));
-            });
+        // --- Remplissage des listes déroulantes ---
+        async function populateEcoles() {
+            elements.ecole.innerHTML = '<option value="">Sélectionnez votre école/faculté</option>';
+
+            try {
+                const res = await fetch(`${API_URL}/api/ecoles?actif=true`, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Erreur ${res.status}: ${res.statusText}`);
+                }
+
+                const ecoles = await res.json();
+
+                ecoles.forEach(ecole => {
+                    const option = new Option(ecole.nom, ecole.id);
+                    elements.ecole.add(option);
+                });
+            } catch (error) {
+                console.error("Erreur chargement écoles:", error);
+                showMessage("Impossible de charger les écoles. Veuillez rafraîchir la page.", "error");
+            }
+        }
+
+        async function populateFilieres(ecoleId) {
+            elements.filiere.innerHTML = '<option value="">Sélectionnez votre filière</option>';
+
+            if (!ecoleId) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/filieres/ecole/${ecoleId}`, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Erreur ${res.status}: ${res.statusText}`);
+                }
+
+                const filieres = await res.json();
+
+                filieres.forEach(filiere => {
+                    const option = new Option(filiere.nom, filiere.id);
+                    elements.filiere.add(option);
+                });
+            } catch (error) {
+                console.error("Erreur chargement filières:", error);
+                showMessage("Impossible de charger les filières. Veuillez rafraîchir la page.", "error");
+            }
         }
 
         function handleAnneeChange() {
             const isFirstYear = elements.annee.value === '1';
             elements.codeGroup.style.display = isFirstYear ? 'block' : 'none';
             elements.matriculeGroup.style.display = isFirstYear ? 'none' : 'block';
-            elements.code.required = isFirstYear;
+            elements.codeInscription.required = isFirstYear;
             elements.matricule.required = !isFirstYear;
-            elements.code.value = '';
+            elements.codeInscription.value = '';
             elements.matricule.value = '';
         }
 
         // --- Validation ---
         function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 8 &&
+                /[A-Z]/.test(password) &&
+                /[0-9]/.test(password) &&
+                /[!@#$%^&*(),.?":{}|<>]/.test(password);
         }
 
         function containsForbiddenChars(text) {
@@ -555,58 +707,58 @@
         }
 
         function validateForm() {
+            let isValid = true;
             const formData = getFormData();
 
-            // Champs obligatoires communs
-            const requiredFields = [
-                formData.nom, formData.prenom, formData.email,
-                formData.ecole, formData.filiere, formData.annee,
-                formData.password, formData.confirmPassword
+            // Valider tous les champs
+            const fieldsToValidate = [
+                { id: 'nom', value: formData.nom, required: true },
+                { id: 'prenom', value: formData.prenom, required: true },
+                { id: 'email', value: formData.email, required: true, email: true },
+                { id: 'ecole', value: formData.ecoleId, required: true },
+                { id: 'filiere', value: formData.filiereId, required: true },
+                { id: 'annee', value: formData.annee, required: true },
+                { id: 'password', value: formData.password, required: true, minLength: CONFIG.SECURITY.PASSWORD_MIN_LENGTH },
+                { id: 'confirmPassword', value: formData.confirmPassword, required: true, matches: formData.password }
             ];
-
-            if (!requiredFields.every(Boolean)) {
-                showMessage(CONFIG.MESSAGES.VALIDATION.REQUIRED_FIELD, 'error');
-                return false;
-            }
 
             // Validation conditionnelle selon l'année
             if (formData.annee === "1") {
-                if (!formData.code) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_CODE, 'error');
-                    return false;
-                }
+                fieldsToValidate.push({ id: 'codeInscription', value: formData.codeInscription, required: true });
             } else {
-                if (!formData.matricule) {
-                    showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_MATRICULE, 'error');
-                    return false;
-                }
+                fieldsToValidate.push({ id: 'matricule', value: formData.matricule, required: true });
             }
 
-            // Email
-            if (!isValidEmail(formData.email)) {
-                showMessage(CONFIG.MESSAGES.VALIDATION.INVALID_EMAIL, 'error');
-                return false;
+            // Valider chaque champ
+            fieldsToValidate.forEach(field => {
+                if (field.required && !field.value) {
+                    showFieldError(field.id, 'Ce champ est obligatoire');
+                    isValid = false;
+                } else if (field.email && field.value && !isValidEmail(field.value)) {
+                    showFieldError(field.id, 'Veuillez entrer une adresse email valide');
+                    isValid = false;
+                } else if (field.minLength && field.value && field.value.length < field.minLength) {
+                    showFieldError(field.id, `Ce champ doit contenir au moins ${field.minLength} caractères`);
+                    isValid = false;
+                } else if (field.matches && field.value !== field.matches) {
+                    showFieldError(field.id, 'Les valeurs ne correspondent pas');
+                    isValid = false;
+                }
+            });
+
+            // Validation spécifique du mot de passe
+            if (formData.password && !validatePassword(formData.password)) {
+                showFieldError('password', CONFIG.MESSAGES.VALIDATION.PASSWORD_REQUIREMENTS);
+                isValid = false;
             }
 
             // Caractères interdits
-            if (containsForbiddenChars(formData.nom) || containsForbiddenChars(formData.prenom) ||
-                containsForbiddenChars(formData.filiere) || containsForbiddenChars(formData.ecole)) {
+            if (containsForbiddenChars(formData.nom) || containsForbiddenChars(formData.prenom)) {
                 showMessage(CONFIG.MESSAGES.VALIDATION.FORBIDDEN_CHARS, 'error');
-                return false;
+                isValid = false;
             }
 
-            // Mot de passe
-            if (formData.password.length < CONFIG.SECURITY.PASSWORD_MIN_LENGTH) {
-                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORD_TOO_SHORT, 'error');
-                return false;
-            }
-
-            if (formData.password !== formData.confirmPassword) {
-                showMessage(CONFIG.MESSAGES.VALIDATION.PASSWORDS_DONT_MATCH, 'error');
-                return false;
-            }
-
-            return true;
+            return isValid;
         }
 
         function getFormData() {
@@ -623,13 +775,13 @@
                 nom: getValue('nom'),
                 prenom: getValue('prenom'),
                 email: getValue('email'),
-                ecole: getValue('ecole'),
-                filiere: getValue('filiere'),
+                ecoleId: getValue('ecoleId'),
+                filiereId: getValue('filiereId'),
                 annee: getValue('annee'),
                 password: getValue('password'),
                 confirmPassword: getValue('confirmPassword'),
                 matricule: getValue('matricule'),
-                code: getValue('code')
+                codeInscription: getValue('codeInscription')
             };
         }
 
@@ -641,9 +793,13 @@
             if (type === 'error') {
                 elements.error.textContent = msg;
                 elements.error.style.display = 'block';
+                // Annoncer le message d'erreur aux technologies d'assistance
+                elements.error.setAttribute('aria-live', 'assertive');
             } else {
                 elements.success.textContent = msg;
                 elements.success.style.display = 'block';
+                // Annoncer le message de succès aux technologies d'assistance
+                elements.success.setAttribute('aria-live', 'polite');
             }
 
             setTimeout(() => {
@@ -660,23 +816,34 @@
         // --- Soumission du formulaire ---
         async function handleSubmit(e) {
             e.preventDefault();
+
+            // Masquer tous les messages d'erreur de champ
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.style.display = 'none';
+            });
+
             if (!validateForm()) return;
 
             const formData = getFormData();
             const annee = parseInt(formData.annee);
 
             const requestData = {
-                nom: formData.nom,
-                prenom: formData.prenom,
                 email: formData.email,
-                ecole: formData.ecole,
-                filiere: formData.filiere,
-                annee: annee,
                 password: formData.password,
                 confirmPassword: formData.confirmPassword,
-                matricule: annee !== 1 ? formData.matricule : null,
-                code: annee === 1 ? formData.code : null
+                nom: formData.nom,
+                prenom: formData.prenom,
+                filiereId: formData.filiereId,
+                ecoleId: formData.ecoleId,
+                annee: annee
             };
+
+            // Ajouter les champs conditionnels
+            if (annee === 1) {
+                requestData.codeInscription = formData.codeInscription;
+            } else {
+                requestData.matricule = formData.matricule;
+            }
 
             showLoading(true);
             showMessage('', 'error');
@@ -692,7 +859,7 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    showMessage(CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
+                    showMessage(data.message || CONFIG.MESSAGES.SUCCESS.REGISTER, 'success');
                     setTimeout(() => window.location.href = 'login.html', 2000);
                 } else {
                     showMessage(data.message || CONFIG.MESSAGES.ERROR.REGISTER_FAILED, 'error');
