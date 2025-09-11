@@ -1478,11 +1478,14 @@
             try {
                 const etudiant = await UserService.getProfile();
                 console.log("Reponse :", etudiant);
-                if (!etudiant || !etudiant.id) {
+
+                const studentId = etudiant?.data?.id;
+
+                if (!studentId) {
                     throw new Error("Identifiant étudiant introuvable");
                 }
 
-                const response = await ActivityService.getActivity(etudiant.id);
+                const response = await ActivityService.getActivity(studentId);
 
                 let logs = [];
                 if (response.logs) {
@@ -1499,6 +1502,7 @@
                 showActivityError('Impossible de charger les activités');
             }
         }
+
 
 
         function mapActivityLogToDisplay(log) {
