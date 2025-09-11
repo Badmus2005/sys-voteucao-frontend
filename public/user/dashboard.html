@@ -1203,6 +1203,14 @@
         }
 
         // Services
+
+        const UserService = {
+            async getProfile() {
+                return await apiCall('/users/profile');
+            }
+        };
+
+
         const ElectionService = {
             async getElections() {
                 return await apiCall('/elections/active');
@@ -1468,9 +1476,11 @@
         // Charger l'activité récente
         async function loadRecentActivity() {
             try {
-                const response = await ActivityService.getActivity();
+                const user = await UserService.getProfile();
+                const studentId = user.id;
 
-                // Adapter la réponse selon la structure backend
+                const response = await ActivityService.getActivity(studentId);
+
                 let logs = [];
                 if (response.logs) {
                     logs = response.logs;
@@ -1486,6 +1496,7 @@
                 showActivityError('Impossible de charger les activités');
             }
         }
+
 
         function mapActivityLogToDisplay(log) {
             // Adapter selon la structure de vos logs d'activité
