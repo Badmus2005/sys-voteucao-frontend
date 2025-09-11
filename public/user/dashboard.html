@@ -1358,10 +1358,10 @@
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            /* if (!localStorage.getItem('token')) {
-                 window.location.href = 'login.html';
-                 return;
-             }*/
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
 
             // Initialiser le menu burger
             const burger = document.getElementById('burger');
@@ -1477,7 +1477,7 @@
         async function loadRecentActivity() {
             try {
                 const etudiant = await UserService.getProfile();
-
+                console.log("Reponse :", etudiant);
                 if (!etudiant || !etudiant.id) {
                     throw new Error("Identifiant étudiant introuvable");
                 }
