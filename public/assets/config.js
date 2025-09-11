@@ -5,9 +5,8 @@
 
 const CONFIG = {
     // Configuration de l'API
-    // URL du backend Ren production
     BASE_URL: 'https://system-vote-ucao.onrender.com',
-    API: {
+    /*API: {
         ENDPOINTS: {
             // Authentification
             AUTH: {
@@ -146,7 +145,7 @@ const CONFIG = {
             // Configuration académique
             CONFIG_ACADEMIC: '/api/configAcademic'
         }
-    },
+    },*/
 
     // Configuration des élections
     ELECTION: {
