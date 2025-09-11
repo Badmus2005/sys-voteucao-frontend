@@ -204,6 +204,28 @@ const CONFIG = {
         VOTE_TOKEN_EXPIRY: 15 * 60 * 1000 // 15 minutes pour les tokens de vote
     },
 
+    // Configuration
+
+    MESSAGES: {
+        VALIDATION: {
+            REQUIRED_FIELD: "Veuillez remplir tous les champs obligatoires.",
+            INVALID_EMAIL: "Veuillez entrer une adresse email valide.",
+            FORBIDDEN_CHARS: "Le nom et prénom ne doivent pas contenir de caractères spéciaux.",
+            PASSWORD_TOO_SHORT: "Le mot de passe doit contenir au moins 8 caractères.",
+            PASSWORD_REQUIREMENTS: "Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial.",
+            PASSWORDS_DONT_MATCH: "Les mots de passe ne correspondent pas.",
+            INVALID_MATRICULE: "Le matricule est requis pour les années supérieures.",
+            INVALID_CODE: "Le code d'inscription est requis pour la première année."
+        },
+        SUCCESS: {
+            REGISTER: "Inscription réussie! Redirection en cours..."
+        },
+        ERROR: {
+            REGISTER_FAILED: "Erreur lors de l'inscription. Veuillez réessayer.",
+            NETWORK_ERROR: "Erreur de réseau. Veuillez vérifier votre connexion."
+        }
+    },
+
     // Messages d'erreur et de succès
     MESSAGES: {
         SUCCESS: {
@@ -213,7 +235,6 @@ const CONFIG = {
             CANDIDATURE: 'Votre candidature a été soumise avec succès !',
             ELECTION_CREATED: 'Élection créée avec succès !',
             ELECTION_CLOSED: 'Élection clôturée avec succès !',
-            // Nouveaux messages
             CANDIDATURE_UPDATED: 'Candidature modifiée avec succès !',
             CANDIDATURE_CANCELLED: 'Candidature annulée avec succès !'
         },
@@ -227,7 +248,6 @@ const CONFIG = {
             FORBIDDEN: 'Accès interdit. Vous n\'avez pas les permissions nécessaires.',
             NOT_FOUND: 'Ressource non trouvée.',
             SERVER_ERROR: 'Erreur serveur. Veuillez réessayer plus tard.',
-            // Nouveaux messages
             NOT_ELIGIBLE: 'Vous n\'êtes pas éligible pour cette élection.',
             ALREADY_CANDIDATE: 'Vous êtes déjà candidat à cette élection.',
             ALREADY_VOTED: 'Vous avez déjà voté à cette élection.',
@@ -235,13 +255,14 @@ const CONFIG = {
             CANDIDATURE_CLOSED: 'La période de candidature est terminée.'
         },
         VALIDATION: {
-            REQUIRED_FIELD: 'Ce champ est obligatoire.',
-            INVALID_EMAIL: 'Adresse email invalide.',
-            PASSWORD_TOO_SHORT: 'Le mot de passe doit contenir au moins 8 caractères.',
-            PASSWORDS_DONT_MATCH: 'Les mots de passe ne correspondent pas.',
-            INVALID_MATRICULE: 'Matricule invalide.',
-            INVALID_CODE: 'Code d\'inscription invalide.',
-            // Nouveaux messages
+            REQUIRED_FIELD: "Veuillez remplir tous les champs obligatoires.",
+            INVALID_EMAIL: "Veuillez entrer une adresse email valide.",
+            FORBIDDEN_CHARS: "Le nom et prénom ne doivent pas contenir de caractères spéciaux.",
+            PASSWORD_TOO_SHORT: "Le mot de passe doit contenir au moins 8 caractères.",
+            PASSWORD_REQUIREMENTS: "Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial.",
+            PASSWORDS_DONT_MATCH: "Les mots de passe ne correspondent pas.",
+            INVALID_MATRICULE: "Le matricule est requis pour les années supérieures.",
+            INVALID_CODE: "Le code d'inscription est requis pour la première année.",
             IMAGE_TOO_LARGE: 'L\'image ne doit pas dépasser 2MB.',
             INVALID_IMAGE_TYPE: 'Format d\'image non supporté. Utilisez JPG ou PNG.',
             TEXT_TOO_LONG: (maxLength) => `Le texte ne doit pas dépasser ${maxLength} caractères.`,
