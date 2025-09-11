@@ -1476,10 +1476,13 @@
         // Charger l'activité récente
         async function loadRecentActivity() {
             try {
-                const user = await UserService.getProfile();
-                const studentId = user.id;
+                const etudiant = await UserService.getProfile();
 
-                const response = await ActivityService.getActivity(studentId);
+                if (!etudiant || !etudiant.id) {
+                    throw new Error("Identifiant étudiant introuvable");
+                }
+
+                const response = await ActivityService.getActivity(etudiant.id);
 
                 let logs = [];
                 if (response.logs) {
