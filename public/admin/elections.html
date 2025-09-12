@@ -1378,7 +1378,6 @@
             try {
                 const res = await fetch(`${API_BASE}/api/ecoles?actif=true`);
                 const ecoles = await res.json();
-                console.log("Reponse :", ecole);
                 ecoles.forEach(ecole => {
                     const option = document.createElement("option");
                     option.value = ecole.id;
@@ -1425,7 +1424,7 @@
                 if (!res.ok) {
                     if (res.status === 401) {
                         alert("Session expirée. Veuillez vous reconnecter.");
-                        window.location.href = "login.html";
+                        window.location.href = "/admin/adminIndex.html";
                         return;
                     }
                     throw new Error("Erreur lors du chargement des élections");
@@ -1894,7 +1893,7 @@
 
             renderPhaseFields();
 
-            // Set specific fields based on phase
+
             if (election.niveau === "PHASE1") {
                 if (election.ecoleId) document.getElementById("ecole").value = election.ecoleId;
                 if (election.filiereId) document.getElementById("filiere").value = election.filiereId;
@@ -2078,7 +2077,7 @@
             const electionId = document.getElementById("electionId").value;
             const isEdit = !!electionId;
 
-            // Conversion en ISO UTC (correcte) directement depuis les valeurs locales
+
             const candidacyStartISO = new Date(document.getElementById("dateDebutCandidature").value).toISOString();
             const candidacyEndISO = new Date(document.getElementById("dateFinCandidature").value).toISOString();
             const votingStartISO = new Date(document.getElementById("dateDebut").value).toISOString();
