@@ -1273,17 +1273,38 @@
 
             async hasVoted(electionId) {
                 try {
-                    const response = await apiCall(`/api/votes/my-votes`);
-                    // Vérifier si l'utilisateur a déjà voté pour cette élection
-                    if (response && Array.isArray(response)) {
-                        return response.some(vote => vote.electionId == electionId);
-                    } else if (response && response.data && Array.isArray(response.data)) {
-                        return response.data.some(vote => vote.electionId == electionId);
+                    const response = await apiCall(`/api/votes/my-votes/election/${electionId}`);
+
+
+                    if (response && response.success) {
+                        return response.hasVoted;
                     }
                     return false;
                 } catch (error) {
                     console.error('Erreur vérification vote:', error);
                     return false;
+                }
+            },
+
+
+            async getMyVotesHistory() {
+                try {
+                    const response = await apiCall('/api/votes/my-votes');
+                    return response;
+                } catch (error) {
+                    console.error('Erreur récupération historique votes:', error);
+                    return { success: false, data: [] };
+                }
+            },
+
+
+            async getVoteStats() {
+                try {
+                    const response = await apiCall('/api/votes/my-votes/stats');
+                    return response;
+                } catch (error) {
+                    console.error('Erreur récupération stats votes:', error);
+                    return { success: false, data: {} };
                 }
             }
         };
@@ -1469,19 +1490,25 @@
                 const response = await StudentService.getStudentInfo();
 
                 // Gérer différentes structures de réponse
-                if (response && response.data) {
-                    studentInfo = response.data;
-                } else if (response && response.ecoleId) {
+                if (response && response.success && response.data) {
                     studentInfo = response;
-                } else if (response && response.success && response.data) {
-                    studentInfo = response.data;
+                } else if (response && response.ecoleId) {
+                    studentInfo = { data: response };
+                } else if (response) {
+                    studentInfo = { data: response };
+                }
+
+                // Mettre à jour le nom dans l'en-tête
+                if (studentInfo && studentInfo.data) {
+                    const userName = document.getElementById('userName');
+                    if (userName && studentInfo.data.prenom) {
+                        userName.textContent = `${studentInfo.data.prenom} ${studentInfo.data.nom || ''}`;
+                    }
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des informations étudiant:', error);
-                // On continue même en cas d'erreur
             }
         }
-
         // Chargement des données de la page
         async function loadPageData() {
             showLoading();
@@ -1497,6 +1524,31 @@
                 hideLoading();
             }
         }
+
+        // Vérifier si l'étudiant est éligible pour une élection
+        function isStudentEligibleForElection(election) {
+            if (!studentInfo || !studentInfo.data) return false;
+
+            const studentData = studentInfo.data;
+
+            // Si l'élection est de type UNIVERSITE, tous les étudiants sont concernés
+            if (election.type === 'UNIVERSITE') return true;
+
+            // Si l'élection est de type ECOLE, vérifier l'école
+            if (election.type === 'ECOLE') {
+                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString();
+            }
+
+            // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
+            if (election.type === 'SALLE') {
+                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString() &&
+                    studentData.filiereId && studentData.filiereId.toString() === election.filiereId.toString() &&
+                    studentData.annee && studentData.annee.toString() === election.annee.toString();
+            }
+
+            return false;
+        }
+
 
         // Charger les élections accessibles
         async function loadElections() {
@@ -1519,8 +1571,14 @@
                         elections = elections.filter(election => isStudentEligibleForElection(election));
                     }
 
-                    allElections = elections;
-                    displayElections(elections);
+                    // Filtrer pour n'afficher que les élections actives
+                    const activeElections = elections.filter(election => {
+                        const status = ElectionService.getElectionStatus(election);
+                        return status === 'active';
+                    });
+
+                    allElections = activeElections;
+                    displayElections(activeElections);
                 } else {
                     showElectionsError('Aucune élection disponible pour le moment');
                 }
@@ -1529,7 +1587,6 @@
                 showElectionsError('Erreur de chargement des élections');
             }
         }
-
         // Afficher les élections
         function displayElections(elections) {
             const container = document.getElementById('electionsList');
@@ -1591,6 +1648,12 @@
 
         // Sélectionner une élection
         async function selectElection(election) {
+            // Vérifier l'éligibilité
+            if (!isStudentEligibleForElection(election)) {
+                showToast('Vous n\'êtes pas éligible pour cette élection', 'warning');
+                return;
+            }
+
             // Vérifier si l'utilisateur a déjà voté pour cette élection
             const hasVoted = await VoteService.hasVoted(election.id);
 
