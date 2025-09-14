@@ -1401,12 +1401,14 @@
 
         // Vérifier si l'étudiant est concerné par l'élection
         function isStudentEligibleForElection(election) {
-            if (!studentInfo) {
+            if (!studentInfo || !studentInfo.data) {
                 console.log("Student info not available");
                 return false;
             }
 
-            console.log("Student Info:", studentInfo);
+            const studentData = studentInfo.data;
+
+            console.log("Student Data:", studentData);
             console.log("Election Info:", election);
 
             // Si l'élection est de type UNIVERSITE, tous les étudiants sont concernés
@@ -1417,17 +1419,17 @@
 
             // Si l'élection est de type ECOLE, vérifier l'école
             if (election.type === 'ECOLE') {
-                const isEligible = studentInfo.ecoleId && studentInfo.ecoleId === election.ecoleId;
-                console.log(`Élection école - étudiant: ${studentInfo.ecoleId}, élection: ${election.ecoleId}, éligible: ${isEligible}`);
+                const isEligible = studentData.ecoleId && studentData.ecoleId === election.ecoleId;
+                console.log(`Élection école - étudiant: ${studentData.ecoleId}, élection: ${election.ecoleId}, éligible: ${isEligible}`);
                 return isEligible;
             }
 
             // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
             if (election.type === 'SALLE') {
-                const isEligible = studentInfo.ecoleId && studentInfo.ecoleId === election.ecoleId &&
-                    studentInfo.filiereId && studentInfo.filiereId === election.filiereId &&
-                    studentInfo.annee && studentInfo.annee === election.annee;
-                console.log(`Élection salle - étudiant: ecole=${studentInfo.ecoleId}, filiere=${studentInfo.filiereId}, annee=${studentInfo.annee}`);
+                const isEligible = studentData.ecoleId && studentData.ecoleId === election.ecoleId &&
+                    studentData.filiereId && studentData.filiereId === election.filiereId &&
+                    studentData.annee && studentData.annee === election.annee;
+                console.log(`Élection salle - étudiant: ecole=${studentData.ecoleId}, filiere=${studentData.filiereId}, annee=${studentData.annee}`);
                 console.log(`Élection salle - élection: ecole=${election.ecoleId}, filiere=${election.filiereId}, annee=${election.annee}`);
                 console.log(`Éligible: ${isEligible}`);
                 return isEligible;
@@ -1436,6 +1438,7 @@
             console.log("Type d'élection non reconnu:", election.type);
             return false;
         }
+
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
@@ -1637,15 +1640,14 @@
                 studentInfo = response;
 
                 // Mettre à jour le nom de l'utilisateur dans l'en-tête
-                if (response && response.prenom) {
-                    document.getElementById('userName').textContent = response.prenom + ' ' + (response.nom || '');
+                if (response && response.data && response.data.prenom) {
+                    document.getElementById('userName').textContent =
+                        response.data.prenom + ' ' + (response.data.nom || '');
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des informations étudiant:', error);
-                // On continue même en cas d'erreur, l'étudiant pourra quand même voir les élections
             }
         }
-
         // Charger toutes les élections
         async function loadAllElections() {
             try {
@@ -1676,6 +1678,10 @@
 
         // Afficher toutes les élections
         function displayAllElections(elections) {
+            console.log("All elections:", elections);
+            console.log("Full student info:", studentInfo);
+            console.log("Student data:", studentInfo?.data);
+
             const container = document.getElementById('allElectionsGrid');
             if (!container) return;
 
@@ -1690,12 +1696,11 @@
                 return;
             }
 
-            container.innerHTML = elections.map(election =>
-                ElectionCard.create(election, {
-                    showActions: true,
-                    showDetails: true
-                })
-            ).join('');
+            container.innerHTML = elections.map(election => {
+                const isEligible = isStudentEligibleForElection(election);
+                console.log(`Election ${election.titre} (${election.type}): eligible = ${isEligible}`);
+                return ElectionCard.create(election);
+            }).join('');
 
             // Ajouter les événements de clic sur les cartes d'élection
             attachElectionCardEvents();
