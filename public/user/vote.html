@@ -1216,11 +1216,11 @@
         // Services
         const ElectionService = {
             async getActiveElections() {
-                return await apiCall('/elections/active');
+                return await apiCall('/api/elections/active');
             },
 
             async getElectionById(id) {
-                return await apiCall(`/elections/${id}`);
+                return await apiCall(`/api/elections/${id}`);
             },
 
             getElectionStatus(election) {
@@ -1245,17 +1245,17 @@
 
         const CandidateService = {
             async getCandidatesByElection(electionId) {
-                return await apiCall(`/candidats/elections/${electionId}`);
+                return await apiCall(`/api/candidats/elections/${electionId}`);
             }
         };
 
         const VoteService = {
             async getVoteToken(electionId) {
-                return await apiCall(`/votes/token/${electionId}`);
+                return await apiCall(`/api/votes/token/${electionId}`);
             },
 
             async validateToken(token, electionId) {
-                return await apiCall('/votes/validate-token', {
+                return await apiCall('/api/votes/validate-token', {
                     method: 'POST',
                     body: JSON.stringify({
                         voteToken: token,
@@ -1265,7 +1265,7 @@
             },
 
             async submitVote(voteData) {
-                return await apiCall('/votes/cast', {
+                return await apiCall('/api/votes/cast', {
                     method: 'POST',
                     body: JSON.stringify(voteData)
                 });
@@ -1273,7 +1273,7 @@
 
             async hasVoted(electionId) {
                 try {
-                    const response = await apiCall(`/votes/my-votes`);
+                    const response = await apiCall(`/api/votes/my-votes`);
                     // Vérifier si l'utilisateur a déjà voté pour cette élection
                     if (response && Array.isArray(response)) {
                         return response.some(vote => vote.electionId == electionId);
@@ -1290,7 +1290,7 @@
 
         const StudentService = {
             async getStudentInfo() {
-                return await apiCall('/students/me');
+                return await apiCall('/api/users/profile');
             }
         };
 
