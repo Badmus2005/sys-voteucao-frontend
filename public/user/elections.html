@@ -1048,39 +1048,8 @@
         let selectedElection = null;
         let filterSystem = null;
         let studentInfo = null;
-
-        // Configuration des filtres
-        const filtersConfig = [
-            {
-                key: 'type',
-                label: 'Type d\'élection',
-                options: [
-                    { value: 'SALLE', label: 'Responsables de Salle' },
-                    { value: 'ECOLE', label: 'Délégués d\'École' },
-                    { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
-                ]
-            },
-            {
-                key: 'status',
-                label: 'Statut',
-                options: [
-                    { value: 'active', label: 'Actives' },
-                    { value: 'upcoming', label: 'À venir' },
-                    { value: 'completed', label: 'Terminées' },
-                    { value: 'candidature', label: 'En candidature' }
-                ]
-            },
-            {
-                key: 'ecole',
-                label: 'École/Faculté',
-                options: [
-                    { value: 'EGEI', label: 'EGEI' },
-                    { value: 'ESMEA', label: 'ESMEA' },
-                    { value: 'FSAE', label: 'FSAE' },
-                    { value: 'FDE', label: 'FDE' }
-                ]
-            }
-        ];
+        let schoolsList = [];
+        let filtersConfig = [];
 
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
@@ -1212,6 +1181,12 @@
             }
         };
 
+        const SchoolService = {
+            async getSchools() {
+                return await apiCall('/ecoles');
+            }
+        };
+
         // Composant ElectionCard
         const ElectionCard = {
             create(election, options = {}) {
@@ -1221,6 +1196,23 @@
 
                 const startDate = new Date(election.dateDebut).toLocaleDateString();
                 const endDate = new Date(election.dateFin).toLocaleDateString();
+
+                // Vérifier si l'étudiant est éligible pour cette élection
+                const isEligible = isStudentEligibleForElection(election);
+
+                // Générer les boutons d'action en fonction du statut et de l'éligibilité
+                let actionButton = '';
+                if (isEligible) {
+                    if (status === 'candidature') {
+                        actionButton = `<button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
+                            Candidater
+                        </button>`;
+                    } else if (status === 'active') {
+                        actionButton = `<button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
+                            Voter
+                        </button>`;
+                    }
+                }
 
                 return `
                     <div class="election-card" data-election-id="${election.id}">
@@ -1234,9 +1226,12 @@
                         </div>
                         <div class="election-footer">
                             <div>${election.nb_candidats || 0} candidats</div>
-                            <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
-                                Voir détails
-                            </button>
+                            <div>
+                                ${actionButton}
+                                <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
+                                    Voir détails
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1457,6 +1452,9 @@
                 window.location.href = 'login.html';
             });
 
+            // Charger les données de configuration des filtres
+            await loadFilterConfig();
+
             // Initialiser le système de filtres
             filterSystem = new FilterSystem('filtersContainer', filtersConfig);
             filterSystem.render();
@@ -1497,6 +1495,84 @@
                 }
             });
         });
+
+        // Charger la configuration des filtres depuis le backend
+        async function loadFilterConfig() {
+            try {
+                // Récupérer la liste des écoles depuis le backend
+                const schoolsResponse = await SchoolService.getSchools();
+
+                // Formater les options d'écoles pour les filtres
+                const schoolOptions = schoolsResponse.map(school => ({
+                    value: school.id,
+                    label: school.nom
+                }));
+
+                // Configuration des filtres avec les données du backend
+                filtersConfig = [
+                    {
+                        key: 'type',
+                        label: 'Type d\'élection',
+                        options: [
+                            { value: 'SALLE', label: 'Responsables de Salle' },
+                            { value: 'ECOLE', label: 'Délégués d\'École' },
+                            { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
+                        ]
+                    },
+                    {
+                        key: 'status',
+                        label: 'Statut',
+                        options: [
+                            { value: 'active', label: 'Actives' },
+                            { value: 'upcoming', label: 'À venir' },
+                            { value: 'completed', label: 'Terminées' },
+                            { value: 'candidature', label: 'En candidature' }
+                        ]
+                    },
+                    {
+                        key: 'ecole',
+                        label: 'École/Faculté',
+                        options: schoolOptions
+                    }
+                ];
+
+            } catch (error) {
+                console.error('Erreur lors du chargement de la configuration des filtres:', error);
+
+                // Configuration de secours en cas d'erreur
+                filtersConfig = [
+                    {
+                        key: 'type',
+                        label: 'Type d\'élection',
+                        options: [
+                            { value: 'SALLE', label: 'Responsables de Salle' },
+                            { value: 'ECOLE', label: 'Délégués d\'École' },
+                            { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
+                        ]
+                    },
+                    {
+                        key: 'status',
+                        label: 'Statut',
+                        options: [
+                            { value: 'active', label: 'Actives' },
+                            { value: 'upcoming', label: 'À venir' },
+                            { value: 'completed', label: 'Terminées' },
+                            { value: 'candidature', label: 'En candidature' }
+                        ]
+                    },
+                    {
+                        key: 'ecole',
+                        label: 'École/Faculté',
+                        options: [
+                            { value: 'EGEI', label: 'EGEI' },
+                            { value: 'ESMEA', label: 'ESMEA' },
+                            { value: 'FSAE', label: 'FSAE' },
+                            { value: 'FDE', label: 'FDE' }
+                        ]
+                    }
+                ];
+            }
+        }
 
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
@@ -1544,6 +1620,11 @@
             try {
                 const response = await UserService.getStudentInfo();
                 studentInfo = response;
+
+                // Mettre à jour le nom de l'utilisateur dans l'en-tête
+                if (response && response.prenom) {
+                    document.getElementById('userName').textContent = response.prenom + ' ' + (response.nom || '');
+                }
             } catch (error) {
                 console.error('Erreur lors du chargement des informations étudiant:', error);
                 // On continue même en cas d'erreur, l'étudiant pourra quand même voir les élections
@@ -1707,11 +1788,13 @@
 
                 // Afficher les candidats
                 const status = ElectionService.getElectionStatus(election);
+                const isEligible = isStudentEligibleForElection(election);
+
                 container.innerHTML = electionCandidates.map(candidate =>
                     CandidateCard.create(candidate, {
                         showProgram: true,
                         showViewProfile: true,
-                        showVote: status === 'active',
+                        showVote: status === 'active' && isEligible,
                         electionId: election.id
                     })
                 ).join('');
