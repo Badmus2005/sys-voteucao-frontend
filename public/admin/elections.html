@@ -2,24 +2,37 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Gestion des Élections - Admin UCAO</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
     <style>
         :root {
-            --bordeaux: #7B2D3A;
-            --bleu-nuit: #1A2B3C;
-            --or: #D4AF37;
-            --or-clair: #F4E4A6;
-            --blanc: #FFFFFF;
-            --gris-clair: #F5F5F5;
-            --gris-moyen: #999999;
-            --texte: #333333;
-            --success: #28a745;
-            --warning: #ffc107;
-            --danger: #dc3545;
-            --info: #17a2b8;
+            /* Palette de couleurs du dashboard */
+            --bordeaux: #8B0000;
+            --bordeaux-light: #a83232;
+            --blue-night: #0A1931;
+            --blue-night-light: #1a2f57;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+            --info: #3182ce;
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --sidebar-width: 280px;
+            --header-height: 80px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+            /* Couleurs spécifiques aux élections */
             --phase1-color: #1A2B3C;
             --phase2-color: #7B2D3A;
             --phase3-color: #D4AF37;
@@ -29,138 +42,452 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: var(--gris-clair);
-            color: var(--texte);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
             line-height: 1.6;
-            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f1f3f9" width="100" height="100"/><path d="M0,0 L100,100 M20,0 L100,80 M0,20 L80,100" stroke="%23e1e7f5" stroke-width="2"/></svg>');
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-rows: var(--header-height) 1fr auto;
+            grid-template-areas:
+                "header header"
+                "main main"
+                "footer footer";
             min-height: 100vh;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--blanc);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            padding: 25px;
+        /* Header */
+        .main-header {
+            grid-area: header;
+            background: var(--card-bg);
+            color: var(--blue-night);
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            height: var(--header-height);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .menu-toggle span {
+            height: 3px;
+            width: 100%;
+            background-color: var(--blue-night);
+            border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .logo-container img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid var(--bordeaux);
+            object-fit: cover;
+        }
+
+        .logo-text h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--blue-night);
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Navigation supérieure */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-icon {
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: var(--transition);
+            background: var(--light-bg);
+        }
+
+        .nav-icon:hover {
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--bordeaux);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Menu utilisateur */
+        .user-menu {
+            position: relative;
+            z-index: 1001;
+        }
+
+        .user-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .user-toggle:hover {
+            background: var(--light-bg);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--bordeaux);
+            object-fit: cover;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--blue-night);
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            width: 250px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1000;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            border-bottom: 1px solid var(--light-bg);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--bordeaux);
+        }
+
+        .dropdown-item i {
+            color: var(--bordeaux);
+            width: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            height: calc(100vh - var(--header-height));
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            padding: 24px 16px;
+            border-right: 1px solid rgba(0, 0, 0, 0.07);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            height: calc(100vh - var(--header-height));
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 0 12px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+            margin-bottom: 24px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .nav-title {
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 16px 12px 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: var(--border-radius);
+            color: var(--text-secondary);
+            transition: var(--transition);
+            cursor: pointer;
             position: relative;
         }
 
-        .header {
+        .nav-item:hover {
+            background: rgba(139, 0, 0, 0.08);
+            color: var(--bordeaux);
+        }
+
+        .nav-item.active {
+            background: rgba(139, 0, 0, 0.12);
+            color: var(--bordeaux);
+            font-weight: 500;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--bordeaux);
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 15px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--bordeaux);
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-area: main;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-top: 0;
+            margin-left: 0;
+            background-color: transparent;
+        }
+
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--or);
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
             flex-wrap: wrap;
-            gap: 15px;
         }
 
-        .header h1 {
-            color: var(--bleu-nuit);
-            font-size: 2rem;
+        .page-header h1 {
+            color: var(--blue-night);
+            font-size: 1.8rem;
             display: flex;
             align-items: center;
-            margin: 0;
         }
 
-        .header h1 i {
+        .page-header h1 i {
             color: var(--bordeaux);
             margin-right: 15px;
-            font-size: 1.8rem;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+        .breadcrumb {
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
-        .btn {
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+        /* Cartes statistiques */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            border-left: 4px solid var(--bordeaux);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--bordeaux-light);
+        }
+
+        .admin-card h3 {
+            color: var(--blue-night);
+            font-size: 1rem;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            border: none;
-            text-decoration: none;
-            font-size: 0.95rem;
         }
 
-        .btn-primary {
-            background: var(--bleu-nuit);
-            color: var(--blanc);
-            box-shadow: 0 4px 6px rgba(26, 43, 60, 0.2);
+        .admin-card h3 i {
+            margin-right: 10px;
+            color: var(--bordeaux);
+            font-size: 1.2rem;
         }
 
-        .btn-primary:hover {
-            background: #15232e;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(26, 43, 60, 0.3);
+        .admin-card p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--blue-night);
+            margin-bottom: 5px;
         }
 
-        .btn-secondary {
-            background: var(--bordeaux);
-            color: var(--blanc);
-            box-shadow: 0 4px 6px rgba(123, 45, 58, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: #5a2230;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(123, 45, 58, 0.3);
-        }
-
-        .btn-warning {
-            background: var(--or);
-            color: var(--bleu-nuit);
-            box-shadow: 0 4px 6px rgba(212, 175, 55, 0.2);
-        }
-
-        .btn-warning:hover {
-            background: #c19d25;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: var(--blanc);
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: var(--blanc);
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-info {
-            background: var(--info);
-            color: var(--blanc);
-        }
-
-        .btn-info:hover {
-            background: #138496;
-        }
-
-        .btn-sm {
-            padding: 8px 14px;
+        .admin-card small {
+            color: var(--text-muted);
             font-size: 0.85rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: var(--light-bg);
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, var(--bordeaux), var(--bordeaux-light));
+            border-radius: 3px;
+            transition: width 1s ease;
         }
 
         /* Workflow Diagram */
@@ -191,34 +518,34 @@
             justify-content: center;
             margin-bottom: 12px;
             font-size: 1.5rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .step-1 .step-icon {
-            background: var(--bleu-nuit);
-            color: var(--blanc);
+            background: var(--phase1-color);
+            color: var(--card-bg);
         }
 
         .step-2 .step-icon {
-            background: var(--bordeaux);
-            color: var(--blanc);
+            background: var(--phase2-color);
+            color: var(--card-bg);
         }
 
         .step-3 .step-icon {
-            background: var(--or);
-            color: var(--bleu-nuit);
+            background: var(--phase3-color);
+            color: var(--blue-night);
         }
 
         .step-label {
             font-weight: 600;
             font-size: 0.9rem;
             margin-bottom: 5px;
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
         }
 
         .step-description {
             font-size: 0.8rem;
-            color: var(--gris-moyen);
+            color: var(--text-muted);
             max-width: 120px;
         }
 
@@ -228,14 +555,14 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: var(--or);
+            background: var(--bordeaux-light);
             z-index: 1;
         }
 
         .workflow-arrow {
             position: absolute;
             top: 28px;
-            color: var(--or);
+            color: var(--bordeaux-light);
             font-size: 1.2rem;
             z-index: 2;
         }
@@ -252,20 +579,20 @@
 
         .phase-phase1 {
             background: rgba(26, 43, 60, 0.15);
-            color: var(--bleu-nuit);
-            border: 1px solid var(--bleu-nuit);
+            color: var(--phase1-color);
+            border: 1px solid var(--phase1-color);
         }
 
         .phase-phase2 {
             background: rgba(123, 45, 58, 0.15);
-            color: var(--bordeaux);
-            border: 1px solid var(--bordeaux);
+            color: var(--phase2-color);
+            border: 1px solid var(--phase2-color);
         }
 
         .phase-phase3 {
             background: rgba(212, 175, 55, 0.15);
-            color: var(--or);
-            border: 1px solid var(--or);
+            color: var(--phase3-color);
+            border: 1px solid var(--phase3-color);
         }
 
         .election-type-badge {
@@ -288,19 +615,19 @@
 
         .status-active {
             background: rgba(40, 167, 69, .15);
-            color: #28a745;
+            color: var(--success);
             border: 1px solid rgba(40, 167, 69, 0.3);
         }
 
         .status-upcoming {
             background: rgba(23, 162, 184, .15);
-            color: #17a2b8;
+            color: var(--info);
             border: 1px solid rgba(23, 162, 184, 0.3);
         }
 
         .status-completed {
             background: rgba(108, 117, 125, .15);
-            color: #6c757d;
+            color: var(--text-muted);
             border: 1px solid rgba(108, 117, 125, 0.3);
         }
 
@@ -309,17 +636,17 @@
             overflow-x: auto;
             margin-bottom: 30px;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .elections-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            background: var(--card-bg);
         }
 
         .elections-table th {
-            background: var(--bleu-nuit);
+            background: var(--blue-night);
             color: white;
             padding: 15px;
             text-align: left;
@@ -330,7 +657,7 @@
 
         .elections-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid var(--gris-clair);
+            border-bottom: 1px solid var(--light-bg);
         }
 
         .elections-table tr:last-child td {
@@ -338,7 +665,7 @@
         }
 
         .elections-table tr:hover {
-            background-color: rgba(123, 45, 58, 0.03);
+            background-color: rgba(139, 0, 0, 0.03);
         }
 
         .table-actions {
@@ -365,9 +692,9 @@
 
         .election-detail-group h4 {
             margin-bottom: 10px;
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             font-size: 0.9rem;
-            border-bottom: 1px solid var(--gris-clair);
+            border-bottom: 1px solid var(--light-bg);
             padding-bottom: 5px;
         }
 
@@ -380,18 +707,18 @@
         .election-detail-label {
             font-weight: 600;
             min-width: 120px;
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
         }
 
         .election-detail-value {
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             opacity: 0.8;
         }
 
         .toggle-details {
             background: none;
             border: none;
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             cursor: pointer;
             font-size: 0.9rem;
             display: flex;
@@ -416,7 +743,7 @@
             padding: 18px;
             background: rgba(26, 43, 60, 0.05);
             border-radius: 10px;
-            border-left: 4px solid var(--or);
+            border-left: 4px solid var(--bordeaux);
         }
 
         .filter-group {
@@ -428,15 +755,15 @@
         .filter-group label {
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             display: block;
         }
 
         .filter-group select {
             padding: 10px 14px;
-            border: 1px solid var(--gris-clair);
+            border: 1px solid var(--light-bg);
             border-radius: 8px;
-            background: white;
+            background: var(--card-bg);
         }
 
         /* Loading and Empty States */
@@ -465,14 +792,14 @@
         .empty-state {
             text-align: center;
             padding: 60px 40px;
-            color: var(--gris-moyen);
+            color: var(--text-muted);
             display: none;
         }
 
         .empty-state i {
             font-size: 4rem;
             margin-bottom: 20px;
-            color: var(--gris-clair);
+            color: var(--light-bg);
         }
 
         .empty-state h3 {
@@ -489,16 +816,16 @@
         }
 
         .stat-card {
-            background: white;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
             padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow);
             text-align: center;
-            border-top: 4px solid var(--or);
+            border-top: 4px solid var(--bordeaux);
         }
 
         .stat-card h3 {
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             margin-bottom: 10px;
             font-size: 1rem;
         }
@@ -510,7 +837,7 @@
         }
 
         .stat-card .label {
-            color: var(--gris-moyen);
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
 
@@ -525,7 +852,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 1100;
             padding: 20px;
         }
 
@@ -534,13 +861,13 @@
         }
 
         .modal {
-            background: white;
-            border-radius: 12px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
             width: 100%;
             max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow);
         }
 
         .modal-header {
@@ -548,11 +875,11 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px;
-            border-bottom: 1px solid var(--gris-clair);
+            border-bottom: 1px solid var(--light-bg);
         }
 
         .modal-header h2 {
-            color: var(--bleu-nuit);
+            color: var(--blue-night);
             font-size: 1.5rem;
         }
 
@@ -562,130 +889,10 @@
 
         .modal-footer {
             padding: 15px 20px;
-            border-top: 1px solid var(--gris-clair);
+            border-top: 1px solid var(--light-bg);
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-        }
-
-        /* Form Styles */
-        .form-timeline {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .form-timeline::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gris-clair);
-            z-index: 1;
-        }
-
-        .timeline-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            padding: 0 10px;
-            cursor: pointer;
-            color: var(--gris-moyen);
-            text-align: center;
-            font-size: 0.85rem;
-        }
-
-        .timeline-item.active {
-            color: var(--bleu-nuit);
-            font-weight: 600;
-        }
-
-        .timeline-item i {
-            background: var(--gris-clair);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 8px;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-item.active i {
-            background: var(--bleu-nuit);
-            color: white;
-        }
-
-        .form-section {
-            display: none;
-        }
-
-        .form-section.active {
-            display: block;
-        }
-
-        .form-section-title {
-            font-size: 1.2rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--bleu-nuit);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--gris-clair);
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-group .field-error {
-            color: #dc3545;
-            font-size: 0.8rem;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .date-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .form-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--gris-clair);
         }
 
         /* Alert Styles */
@@ -713,7 +920,7 @@
         /* Nouveaux styles pour les détails supplémentaires */
         .election-detail-tabs {
             display: flex;
-            border-bottom: 1px solid var(--gris-clair);
+            border-bottom: 1px solid var(--light-bg);
             margin-bottom: 15px;
         }
 
@@ -721,7 +928,7 @@
             padding: 10px 15px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .election-detail-tab.active {
@@ -741,7 +948,7 @@
         .candidates-list {
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid var(--gris-clair);
+            border: 1px solid var(--light-bg);
             border-radius: 8px;
             padding: 10px;
         }
@@ -750,7 +957,7 @@
             display: flex;
             justify-content: space-between;
             padding: 8px;
-            border-bottom: 1px solid var(--gris-clair);
+            border-bottom: 1px solid var(--light-bg);
         }
 
         .candidate-item:last-child {
@@ -765,7 +972,7 @@
 
         .vote-bar {
             height: 20px;
-            background: var(--gris-clair);
+            background: var(--light-bg);
             border-radius: 10px;
             overflow: hidden;
             position: relative;
@@ -787,17 +994,81 @@
             text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
+        /* Footer */
+        .footer {
+            grid-area: footer;
+            background: var(--blue-night);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
             }
 
-            .header-actions {
-                justify-content: center;
-                flex-wrap: wrap;
+            .elections-table th,
+            .elections-table td {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main"
+                    "footer";
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .elections-table {
+                min-width: 1000px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 0.8rem 1rem;
+            }
+
+            .admin-stats,
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-card,
+            .action-card {
+                padding: 20px;
             }
 
             .filters {
@@ -823,25 +1094,6 @@
                 display: none;
             }
 
-            .date-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-timeline {
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-
-            .form-timeline::before {
-                display: none;
-            }
-
-            .modal {
-                margin: 0;
-                max-height: 100vh;
-                border-radius: 0;
-            }
-
             .election-detail-tabs {
                 flex-wrap: wrap;
             }
@@ -852,264 +1104,294 @@
                 font-size: 0.8rem;
             }
         }
+
+        @media (max-width: 576px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .election-details-content {
+                flex-direction: column;
+            }
+
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+
+            .logo-text p {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Retour</a>
-            <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
-            <div class="header-actions">
-                <button class="btn btn-info" onclick="showHelpModal()" title="Aide">
-                    <i class="fas fa-question-circle"></i> Aide
-                </button>
-                <button class="btn btn-primary" id="createElectionBtn"><i class="fas fa-plus"></i> Nouvelle
-                    Élection</button>
-            </div>
-        </div>
-
-        <!-- Nouvelle section de statistiques -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3><i class="fas fa-vote-yea"></i> Élections Actives</h3>
-                <div class="number" id="activeElectionsCount">0</div>
-                <div class="label">En cours</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-clock"></i> Élections à Venir</h3>
-                <div class="number" id="upcomingElectionsCount">0</div>
-                <div class="label">Programmées</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-check-circle"></i> Élections Terminées</h3>
-                <div class="number" id="completedElectionsCount">0</div>
-                <div class="label">Clôturées</div>
-            </div>
-            <div class="stat-card">
-                <h3><i class="fas fa-users"></i> Total Candidats</h3>
-                <div class="number" id="totalCandidatesCount">0</div>
-                <div class="label">Toutes élections</div>
-            </div>
-        </div>
-
-        <!-- Workflow Diagram -->
-        <div class="workflow-diagram">
-            <div class="workflow-connector"></div>
-
-            <div class="workflow-step step-1">
-                <div class="step-icon"><i class="fas fa-door-open"></i></div>
-                <div class="step-label">Phase 1</div>
-                <div class="step-description">Responsables de Salle</div>
+    <div class="dashboard-container">
+        <!-- Header amélioré -->
+        <header class="main-header">
+            <div class="logo-container">
+                <div class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <img src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
+                    alt="Logo UCAO">
+                <div class="logo-text">
+                    <h1>Admin UCAO</h1>
+                    <p>Portail d'administration</p>
+                </div>
             </div>
 
-            <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
+            <div class="top-nav">
+                <a href="#" class="nav-icon" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                </a>
 
-            <div class="workflow-step step-2">
-                <div class="step-icon"><i class="fas fa-school"></i></div>
-                <div class="step-label">Phase 2</div>
-                <div class="step-description">Délégués d'École</div>
-            </div>
-
-            <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
-
-            <div class="workflow-step step-3">
-                <div class="step-icon"><i class="fas fa-university"></i></div>
-                <div class="step-label">Phase 3</div>
-                <div class="step-description">Délégués Universitaires</div>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="filters">
-            <div class="filter-group">
-                <label for="filterPhase">Phase</label>
-                <select id="filterPhase">
-                    <option value="">Toutes les phases</option>
-                    <option value="PHASE1">Phase 1 - Responsables Salle</option>
-                    <option value="PHASE2">Phase 2 - Délégués École</option>
-                    <option value="PHASE3">Phase 3 - Délégués Université</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filterType">Type</label>
-                <select id="filterType">
-                    <option value="">Tous les types</option>
-                    <option value="SALLE">Responsables de Salle</option>
-                    <option value="ECOLE">Délégués d'École</option>
-                    <option value="UNIVERSITE">Délégués Universitaires</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label for="filterStatus">Statut</label>
-                <select id="filterStatus">
-                    <option value="">Tous les statuts</option>
-                    <option value="active">Actives</option>
-                    <option value="upcoming">À venir</option>
-                    <option value="closed">Clôturées</option>
-                </select>
-            </div>
-
-            <button class="btn btn-secondary" id="applyFilters">
-                <i class="fas fa-filter"></i> Appliquer
-            </button>
-
-            <button class="btn btn-secondary" id="resetFilters">
-                <i class="fas fa-times"></i> Réinitialiser
-            </button>
-        </div>
-
-        <!-- Elections Container -->
-        <div id="electionsContainer">
-            <div class="loading">
-                <div class="spinner"></div>
-            </div>
-        </div>
-
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState">
-            <i class="fas fa-box-open"></i>
-            <h3>Aucune élection trouvée</h3>
-            <p>Créez votre première élection en cliquant sur le bouton "Nouvelle Élection"</p>
-        </div>
-    </div>
-
-    <!-- Election Modal -->
-    <div id="electionModal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 id="modalTitle">Nouvelle Élection</h2>
-                <button class="btn btn-secondary" id="closeModalBtn">✕</button>
-            </div>
-            <div class="modal-body">
-                <div id="modalMessage" class="alert" style="display: none;"></div>
-
-                <div class="form-timeline">
-                    <div class="timeline-item active" data-section="config">
-                        <i class="fas fa-cog"></i> Configuration
+                <div class="user-menu">
+                    <div class="user-toggle" id="userToggle">
+                        <img src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
+                            alt="Photo Admin" class="user-avatar">
+                        <div class="user-info">
+                            <span class="user-name" id="headerUserName">Admin UCAO</span>
+                            <span class="user-role" id="headerUserRole">Administrateur</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
                     </div>
-                    <div class="timeline-item" data-section="candidacy">
-                        <i class="fas fa-user-check"></i> Candidatures
+
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/admin/profile" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mon Profil</span>
+                        </a>
+                        <a href="/admin/parametre.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Aide</span>
+                        </a>
+                        <a href="/admin" class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
                     </div>
-                    <div class="timeline-item" data-section="voting">
-                        <i class="fas fa-vote-yea"></i> Votes
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar et overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-pie logo-icon"></i>
+                    <span>UCAO Admin</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-title">Général</div>
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span class="nav-text">Tableau de Bord</span>
+                </a>
+                <a href="utilisateurs.html" class="nav-item">
+                    <i class="fas fa-users nav-icon"></i>
+                    <span class="nav-text">Utilisateurs</span>
+                </a>
+                <a href="elections.html" class="nav-item active">
+                    <i class="fas fa-vote-yea nav-icon"></i>
+                    <span class="nav-text">Élections</span>
+                </a>
+                <a href="candidats.html" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">Candidats</span>
+                </a>
+                <a href="statistiques.html" class="nav-item">
+                    <i class="fas fa-chart-pie nav-icon"></i>
+                    <span class="nav-text">Statistiques</span>
+                </a>
+
+                <div class="nav-title">Administration</div>
+                <a href="codes.html" class="nav-item">
+                    <i class="fas fa-key nav-icon"></i>
+                    <span class="nav-text">Codes d'accès</span>
+                    <span class="nav-badge">12</span>
+                </a>
+                <a href="parametre.html" class="nav-item">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-text">Paramètres</span>
+                </a>
+            </nav>
+
+            <div class="user-profile" style="margin-top: auto;">
+                <img src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
+                    alt="Admin" class="user-avatar">
+                <div class="user-info">
+                    <div class="user-name">Admin UCAO</div>
+                    <div class="user-role">Administrateur</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-vote-yea"></i> Gestion des Élections</h1>
+                <div class="breadcrumb">
+                    <span>Admin</span> / <span>Élections</span>
+                </div>
+            </div>
+
+            <!-- Contenu de la gestion des élections -->
+            <div id="electionsContent">
+                <!-- Nouvelle section de statistiques -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3><i class="fas fa-vote-yea"></i> Élections Actives</h3>
+                        <div class="number" id="activeElectionsCount">0</div>
+                        <div class="label">En cours</div>
                     </div>
-                    <div class="timeline-item" data-section="results">
-                        <i class="fas fa-chart-bar"></i> Résultats
+                    <div class="stat-card">
+                        <h3><i class="fas fa-clock"></i> Élections à Venir</h3>
+                        <div class="number" id="upcomingElectionsCount">0</div>
+                        <div class="label">Programmées</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-check-circle"></i> Élections Terminées</h3>
+                        <div class="number" id="completedElectionsCount">0</div>
+                        <div class="label">Clôturées</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-users"></i> Total Candidats</h3>
+                        <div class="number" id="totalCandidatesCount">0</div>
+                        <div class="label">Toutes élections</div>
                     </div>
                 </div>
 
-                <form id="electionForm">
-                    <input type="hidden" id="electionId" name="electionId">
+                <!-- Workflow Diagram -->
+                <div class="workflow-diagram">
+                    <div class="workflow-connector"></div>
 
-                    <!-- Configuration Section -->
-                    <div class="form-section active" id="config-section">
-                        <div class="form-section-title">
-                            <i class="fas fa-cog"></i> Configuration de base
-                        </div>
-
-                        <div class="form-group">
-                            <label for="titre">Titre de l'élection :</label>
-                            <input type="text" id="titre" name="titre" required
-                                placeholder="Ex: Élection des délégués de classe">
-                            <div id="titreError" class="field-error"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="description">Description :</label>
-                            <textarea id="description" name="description"
-                                placeholder="Décrivez le contexte et l'objectif de cette élection..."></textarea>
-                            <div id="descriptionError" class="field-error"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="niveau">Phase d'élection :</label>
-                            <select id="niveau" name="niveau" required onchange="renderPhaseFields()">
-                                <option value="">-- Choisir la phase --</option>
-                                <option value="PHASE1">Phase 1 – Responsables de Salle</option>
-                                <option value="PHASE2">Phase 2 – Délégués d'École</option>
-                                <option value="PHASE3">Phase 3 – Délégués Universitaires</option>
-                            </select>
-                            <div id="niveauError" class="field-error"></div>
-                        </div>
-                        <div id="phaseFields"></div>
+                    <div class="workflow-step step-1">
+                        <div class="step-icon"><i class="fas fa-door-open"></i></div>
+                        <div class="step-label">Phase 1</div>
+                        <div class="step-description">Responsables de Salle</div>
                     </div>
 
-                    <!-- Candidacy Section -->
-                    <div class="form-section" id="candidacy-section">
-                        <div class="form-section-title">
-                            <i class="fas fa-user-check"></i> Période de candidature
-                        </div>
+                    <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
 
-                        <div class="date-row">
-                            <div class="form-group">
-                                <label for="dateDebutCandidature">Début des candidatures :</label>
-                                <input type="datetime-local" id="dateDebutCandidature" name="dateDebutCandidature"
-                                    required>
-                                <div id="dateDebutCandidatureError" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="dateFinCandidature">Fin des candidatures :</label>
-                                <input type="datetime-local" id="dateFinCandidature" name="dateFinCandidature" required>
-                                <div id="dateFinCandidatureError" class="field-error"></div>
-                            </div>
-                        </div>
+                    <div class="workflow-step step-2">
+                        <div class="step-icon"><i class="fas fa-school"></i></div>
+                        <div class="step-label">Phase 2</div>
+                        <div class="step-description">Délégués d'École</div>
                     </div>
 
-                    <!-- Voting Section -->
-                    <div class="form-section" id="voting-section">
-                        <div class="form-section-title">
-                            <i class="fas fa-vote-yea"></i> Période de vote
-                        </div>
+                    <div class="workflow-arrow"><i class="fas fa-chevron-right"></i></div>
 
-                        <div class="date-row">
-                            <div class="form-group">
-                                <label for="dateDebut">Début des votes :</label>
-                                <input type="datetime-local" id="dateDebut" name="dateDebut" required>
-                                <div id="dateDebutError" class="field-error"></div>
-                            </div>
+                    <div class="workflow-step step-3">
+                        <div class="step-icon"><i class="fas fa-university"></i></div>
+                        <div class="step-label">Phase 3</div>
+                        <div class="step-description">Délégués Universitaires</div>
+                    </div>
+                </div>
 
-                            <div class="form-group">
-                                <label for="dateFin">Fin des votes :</label>
-                                <input type="datetime-local" id="dateFin" name="dateFin" required>
-                                <div id="dateFinError" class="field-error"></div>
-                            </div>
-                        </div>
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filterPhase">Phase</label>
+                        <select id="filterPhase">
+                            <option value="">Toutes les phases</option>
+                            <option value="PHASE1">Phase 1 - Responsables Salle</option>
+                            <option value="PHASE2">Phase 2 - Délégués École</option>
+                            <option value="PHASE3">Phase 3 - Délégués Université</option>
+                        </select>
                     </div>
 
-                    <!-- Results Section -->
-                    <div class="form-section" id="results-section">
-                        <div class="form-section-title">
-                            <i class="fas fa-chart-bar"></i> Gestion des résultats
-                        </div>
-
-                        <div class="form-group">
-                            <label for="resultsVisibility">Visibilité des résultats :</label>
-                            <select id="resultsVisibility" name="resultsVisibility">
-                                <option value="IMMEDIATE">Publication immédiate après clôture</option>
-                                <option value="MANUAL">Publication manuelle par l'administrateur</option>
-                            </select>
-                            <div id="resultsVisibilityError" class="field-error"></div>
-                        </div>
+                    <div class="filter-group">
+                        <label for="filterType">Type</label>
+                        <select id="filterType">
+                            <option value="">Tous les types</option>
+                            <option value="SALLE">Responsables de Salle</option>
+                            <option value="ECOLE">Délégués d'École</option>
+                            <option value="UNIVERSITE">Délégués Universitaires</option>
+                        </select>
                     </div>
 
-                    <div class="form-navigation">
-                        <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
-                            <i class="fas fa-arrow-left"></i> Précédent
-                        </button>
-                        <button type="button" class="btn btn-primary" id="nextBtn">
-                            Suivant <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
-                            <i class="fas fa-check"></i> Créer l'élection
-                        </button>
+                    <div class="filter-group">
+                        <label for="filterStatus">Statut</label>
+                        <select id="filterStatus">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actives</option>
+                            <option value="upcoming">À venir</option>
+                            <option value="closed">Clôturées</option>
+                        </select>
                     </div>
-                </form>
+
+                    <button class="btn btn-secondary" id="applyFilters">
+                        <i class="fas fa-filter"></i> Appliquer
+                    </button>
+
+                    <button class="btn btn-secondary" id="resetFilters">
+                        <i class="fas fa-times"></i> Réinitialiser
+                    </button>
+                </div>
+
+                <!-- Elections Container -->
+                <div id="electionsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-box-open"></i>
+                    <h3>Aucune élection trouvée</h3>
+                    <p>Créez votre première élection dans la section Paramètres</p>
+                </div>
             </div>
-        </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div>© 2023 UCAO - Tous droits réservés</div>
+            <div class="footer-links">
+                <a href="#">Confidentialité</a>
+                <a href="#">Conditions d'utilisation</a>
+                <a href="#">Support</a>
+                <a href="#">Contact</a>
+            </div>
+        </footer>
     </div>
 
     <!-- Confirmation Modal -->
@@ -1189,12 +1471,131 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
     <script src="/assets/config.js"></script>
     <script>
         // Configuration des API
         const API_BASE = CONFIG.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/elections';
-        const token = () => localStorage.getItem('token');
+
+        // Fonction pour récupérer le token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // Fonctions d'authentification pour le dashboard
+        const DASHBOARD_AUTH = {
+            isAuthenticated: () => {
+                try {
+                    const token = getToken();
+                    if (!token) return false;
+
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const now = Date.now() / 1000;
+                    return payload.exp > now;
+                } catch (error) {
+                    console.error('Erreur de vérification d\'authentification:', error);
+                    return false;
+                }
+            },
+
+            getUserRole: () => {
+                try {
+                    const token = getToken();
+                    if (!token) return null;
+
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.role;
+                } catch (error) {
+                    console.error('Erreur de récupération du rôle:', error);
+                    return null;
+                }
+            },
+
+            logout: () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminName');
+                window.location.href = '/admin';
+            }
+        };
+
+        // Vérification de l'authentification au chargement de la page
+        document.addEventListener('DOMContentLoaded', function () {
+            const role = DASHBOARD_AUTH.getUserRole();
+            const isAuth = DASHBOARD_AUTH.isAuthenticated();
+
+            if (!isAuth) {
+                console.log('Non authentifié, redirection vers /admin/login');
+                window.location.href = '/admin';
+                return;
+            }
+
+            if (role !== 'ADMIN') {
+                console.log('Rôle insuffisant, redirection vers /unauthorized');
+                window.location.href = '/unauthorized.html';
+                return;
+            }
+
+            // Si l'utilisateur est authentifié et a le bon rôle, initialiser la page
+            initializeElectionsPage();
+        });
+
+        function initializeElectionsPage() {
+            // Initialiser les gestionnaires d'événements
+            setupEventListeners();
+
+            // Charger les données des élections
+            loadElections();
+        }
+
+        // ------------ UTILS ------------
+        function showLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) loader.classList.add('active');
+        }
+
+        function hideLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) loader.classList.remove('active');
+        }
+
+        // Fonction utilitaire pour gérer les event listeners
+        function safeAddListener(id, event, handler) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, handler);
+                return true;
+            }
+            console.error(`Element #${id} not found`);
+            return false;
+        }
+
+        // Fonction pour créer des toasts
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Supprimer le toast après 5 secondes
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
 
         // Mapping des phases
         const ELECTION_PHASES = {
@@ -1212,156 +1613,91 @@
         let currentElections = [];
         let currentAction = null;
         let currentElectionId = null;
-        let currentSection = 'config';
-        const sections = ['config', 'candidacy', 'voting', 'results'];
         let expandedElections = new Set();
-        let errorTimeouts = {};
 
         // Fonctions utilitaires pour la gestion des dates
-
-        function toUTC(dateString) {
-            if (!dateString) return null;
-            return new Date(dateString);
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         }
 
-        function fromUTC(dateString) {
-            if (!dateString) return null;
-            return new Date(dateString);
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
-        function formatDateForInput(dateString) {
-            if (!dateString) return '';
-            const d = new Date(dateString);
-            const pad = (n) => String(n).padStart(2, '0');
-            const yyyy = d.getFullYear();
-            const mm = pad(d.getMonth() + 1);
-            const dd = pad(d.getDate());
-            const hh = pad(d.getHours());
-            const mi = pad(d.getMinutes());
-            return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-        }
+        function setupEventListeners() {
+            // Gestion du menu mobile
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
-            initEventListeners();
-            loadElections();
-        });
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+            }
 
-        function initEventListeners() {
-            document.getElementById("createElectionBtn").addEventListener('click', showCreateModal);
-            document.getElementById("applyFilters").addEventListener('click', applyFilters);
-            document.getElementById("resetFilters").addEventListener('click', resetFilters);
-            document.getElementById("electionForm").addEventListener('submit', handleElectionSubmit);
-
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const section = item.getAttribute('data-section');
-                    showSection(section);
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    toggleSidebar();
                 });
+
+                sidebarOverlay.addEventListener('click', function () {
+                    toggleSidebar();
+                });
+
+                // Empêcher la fermeture lors du clic dans la sidebar
+                sidebar.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Gestion du menu utilisateur
+            const userToggle = document.getElementById('userToggle');
+            const userDropdown = document.getElementById('userDropdown');
+
+            if (userToggle && userDropdown) {
+                userToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+
+                // Fermer le dropdown en cliquant à l'extérieur
+                document.addEventListener('click', function (e) {
+                    if (userDropdown.classList.contains('active') && !userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('active');
+                    }
+                });
+            }
+
+            // Gestionnaire de déconnexion
+            safeAddListener('logoutBtn', 'click', function (e) {
+                e.preventDefault();
+                DASHBOARD_AUTH.logout();
             });
 
-            document.getElementById("nextBtn").addEventListener('click', nextSection);
-            document.getElementById("prevBtn").addEventListener('click', prevSection);
+            // Gestion des filtres
+            safeAddListener("applyFilters", 'click', applyFilters);
+            safeAddListener("resetFilters", 'click', resetFilters);
 
-            document.getElementById("closeModalBtn").addEventListener('click', hideElectionModal);
-            document.getElementById("closeConfirmModalBtn").addEventListener('click', hideConfirmModal);
-            document.getElementById("cancelConfirmBtn").addEventListener('click', hideConfirmModal);
-            document.getElementById("confirmActionBtn").addEventListener('click', executeConfirmedAction);
-
-            // Validation en temps réel
-            setupRealTimeValidation();
-        }
-
-        function setupRealTimeValidation() {
-            // Validation en temps réel pour les champs de texte
-            const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea');
-            textInputs.forEach(input => {
-                input.addEventListener('blur', () => validateField(input));
-            });
-
-            // Validation pour les selects
-            const selects = document.querySelectorAll('select');
-            selects.forEach(select => {
-                select.addEventListener('change', () => validateField(select));
-            });
-
-            // Validation pour les dates
-            const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
-            dateInputs.forEach(input => {
-                input.addEventListener('change', () => validateField(input));
-            });
-        }
-
-        function validateField(field) {
-            const errorElement = document.getElementById(field.id + 'Error');
-
-            // Réinitialiser le message d'erreur
-            if (errorElement) {
-                errorElement.style.display = 'none';
-                errorElement.textContent = '';
-            }
-
-            // Valider selon le type de champ
-            if (field.required && !field.value.trim()) {
-                showFieldError(field.id, 'Ce champ est obligatoire');
-                return false;
-            }
-
-            if (field.type === 'email' && field.value && !isValidEmail(field.value)) {
-                showFieldError(field.id, 'Veuillez entrer une adresse email valide');
-                return false;
-            }
-
-            // Validation des dates
-            if (field.id === 'dateFinCandidature' && field.value) {
-                const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
-                const dateFinCandidature = new Date(field.value);
-
-                if (dateFinCandidature <= dateDebutCandidature) {
-                    showFieldError(field.id, 'La fin des candidatures doit être après le début');
-                    return false;
-                }
-            }
-
-            if (field.id === 'dateDebut' && field.value) {
-                const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
-                const dateDebut = new Date(field.value);
-
-                if (dateDebut <= dateFinCandidature) {
-                    showFieldError(field.id, 'Le début des votes doit être après la fin des candidatures');
-                    return false;
-                }
-            }
-
-            if (field.id === 'dateFin' && field.value) {
-                const dateDebut = new Date(document.getElementById('dateDebut').value);
-                const dateFin = new Date(field.value);
-
-                if (dateFin <= dateDebut) {
-                    showFieldError(field.id, 'La fin des votes doit être après le début');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function showFieldError(fieldId, message) {
-            // Annuler le timeout précédent s'il existe
-            if (errorTimeouts[fieldId]) {
-                clearTimeout(errorTimeouts[fieldId]);
-            }
-
-            const errorElement = document.getElementById(fieldId + 'Error');
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-
-                // Masquer le message après 5 secondes
-                errorTimeouts[fieldId] = setTimeout(() => {
-                    errorElement.style.display = 'none';
-                }, 5000);
-            }
+            // Gestion de la modal de confirmation
+            safeAddListener("closeConfirmModalBtn", 'click', hideConfirmModal);
+            safeAddListener("cancelConfirmBtn", 'click', hideConfirmModal);
+            safeAddListener("confirmActionBtn", 'click', executeConfirmedAction);
         }
 
         function resetFilters() {
@@ -1371,52 +1707,13 @@
             applyFilters();
         }
 
-        async function loadEcoles(selectId = "ecole") {
-            const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">-- Choisir --</option>';
-
-            try {
-                const res = await fetch(`${API_BASE}/api/ecoles?actif=true`);
-                const ecoles = await res.json();
-                ecoles.forEach(ecole => {
-                    const option = document.createElement("option");
-                    option.value = ecole.id;
-                    option.textContent = ecole.nom;
-                    select.appendChild(option);
-                });
-            } catch (err) {
-                console.error("Erreur chargement écoles:", err);
-            }
-        }
-
-        async function updateFilieres() {
-            const ecoleId = document.getElementById("ecole").value;
-            const filiereSelect = document.getElementById("filiere");
-            filiereSelect.innerHTML = '<option value="">-- Choisir --</option>';
-
-            if (!ecoleId) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/api/filieres/ecole/${ecoleId}`);
-                const filieres = await res.json();
-
-                filieres.forEach(filiere => {
-                    const option = document.createElement("option");
-                    option.value = filiere.id;
-                    option.textContent = filiere.nom;
-                    filiereSelect.appendChild(option);
-                });
-            } catch (err) {
-                console.error("Erreur chargement filières:", err);
-            }
-        }
-
         async function loadElections() {
             try {
                 showLoading();
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}`, {
                     headers: {
-                        "Authorization": `Bearer ${token()}`,
+                        "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     }
                 });
@@ -1424,7 +1721,7 @@
                 if (!res.ok) {
                     if (res.status === 401) {
                         alert("Session expirée. Veuillez vous reconnecter.");
-                        window.location.href = "/admin/adminIndex.html";
+                        window.location.href = "/admin";
                         return;
                     }
                     throw new Error("Erreur lors du chargement des élections");
@@ -1444,6 +1741,8 @@
                         <i class="fas fa-exclamation-circle"></i>
                         Erreur lors du chargement des élections: ${err.message}
                     </div>`;
+            } finally {
+                hideLoading();
             }
         }
 
@@ -1604,9 +1903,6 @@
                             <button class="btn btn-info btn-sm" onclick="viewElection(${election.id})" title="Voir détails">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-secondary btn-sm" onclick="showEditModal(${JSON.stringify(election).replace(/"/g, '&quot;')})" title="Modifier">
-                                <i class="fas fa-edit"></i>
-                            </button>
                             
                             ${status === 'active' ? `
                             <button class="btn btn-warning btn-sm" onclick="showConfirmModal('Clôturer l\\'élection', 'Êtes-vous sûr de vouloir clôturer cette élection ?', 'Les votes ne seront plus autorisés après la clôture.', 'close', ${election.id}, 'warning')" title="Clôturer">
@@ -1619,10 +1915,6 @@
                                 <i class="fas fa-trophy"></i>
                             </button>
                             ` : ''}
-                            
-                            <button class="btn btn-danger btn-sm" onclick="showConfirmModal('Supprimer l\\'élection', 'Êtes-vous sûr de vouloir supprimer cette élection ?', 'Cette action est irréversible et supprimera toutes les données associées.', 'delete', ${election.id}, 'danger')" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
                         </div>
                     </td>
                 `;
@@ -1706,117 +1998,15 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Nouvelle section avec onglets pour plus de détails -->
-                            <div class="election-detail-tabs">
-                                <div class="election-detail-tab active" data-tab="candidates">Candidats</div>
-                                <div class="election-detail-tab" data-tab="results">Résultats</div>
-                                <div class="election-detail-tab" data-tab="voters">Électeurs</div>
-                            </div>
-                            
-                            <div class="tab-content active" id="candidates-tab">
-                                ${renderCandidatesTab(election)}
-                            </div>
-                            
-                            <div class="tab-content" id="results-tab">
-                                ${renderResultsTab(election)}
-                            </div>
-                            
-                            <div class="tab-content" id="voters-tab">
-                                ${renderVotersTab(election)}
-                            </div>
                         </td>
                     `;
                     tbody.appendChild(detailsRow);
-
-                    // Ajouter les écouteurs d'événements pour les onglets
-                    setTimeout(() => {
-                        document.querySelectorAll('.election-detail-tab').forEach(tab => {
-                            tab.addEventListener('click', function () {
-                                const tabName = this.getAttribute('data-tab');
-
-                                // Désactiver tous les onglets et contenus
-                                document.querySelectorAll('.election-detail-tab').forEach(t => t.classList.remove('active'));
-                                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-                                // Activer l'onglet et le contenu sélectionnés
-                                this.classList.add('active');
-                                document.getElementById(`${tabName}-tab`).classList.add('active');
-                            });
-                        });
-                    }, 100);
                 }
             });
 
             table.appendChild(tbody);
             tableContainer.appendChild(table);
             container.appendChild(tableContainer);
-        }
-
-        function renderCandidatesTab(election) {
-            if (!election.candidates || election.candidates.length === 0) {
-                return `<p style="text-align: center; padding: 20px; color: #999;">Aucun candidat pour cette élection</p>`;
-            }
-
-            return `
-                <div class="candidates-list">
-                    ${election.candidates.map(candidate => `
-                        <div class="candidate-item">
-                            <div>
-                                <strong>${candidate.nom} ${candidate.prenom}</strong>
-                                <div style="font-size: 0.8rem; color: #666;">${candidate.filiere || ''} ${candidate.annee ? 'Licence ' + candidate.annee : ''}</div>
-                            </div>
-                            <div>
-                                <span class="election-status status-${candidate.estElu ? 'active' : 'completed'}">
-                                    ${candidate.estElu ? 'Élu' : 'Non élu'}
-                                </span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderResultsTab(election) {
-            if (!election.results || election.results.length === 0) {
-                return `<p style="text-align: center; padding: 20px; color: #999;">Aucun résultat disponible pour cette élection</p>`;
-            }
-
-            return `
-                <div class="vote-distribution">
-                    ${election.results.map(result => `
-                        <div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>${result.candidateName}</span>
-                                <span>${result.votes} votes (${result.percentage}%)</span>
-                            </div>
-                            <div class="vote-bar">
-                                <div class="vote-fill" style="width: ${result.percentage}%"></div>
-                                <div class="vote-percentage">${result.percentage}%</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderVotersTab(election) {
-            return `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div style="text-align: center; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--bordeaux);">${election.total_voters || 0}</div>
-                        <div style="font-size: 0.9rem;">Électeurs inscrits</div>
-                    </div>
-                    <div style="text-align: center; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--bordeaux);">${election.nb_votes || 0}</div>
-                        <div style="font-size: 0.9rem;">Votes exprimés</div>
-                    </div>
-                    <div style="text-align: center; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--bordeaux);">${election.participation_rate || 0}%</div>
-                        <div style="font-size: 0.9rem;">Taux de participation</div>
-                    </div>
-                </div>
-            `;
         }
 
         function getPhaseLabel(phase) {
@@ -1827,28 +2017,6 @@
             return ELECTION_TYPES[type] || type;
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-
-        function formatDateTime(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
         function toggleElectionDetails(electionId) {
             if (expandedElections.has(electionId)) {
                 expandedElections.delete(electionId);
@@ -1856,295 +2024,6 @@
                 expandedElections.add(electionId);
             }
             applyFilters();
-        }
-
-        function showCreateModal() {
-            document.getElementById("modalTitle").textContent = "Nouvelle Élection";
-            document.getElementById("electionForm").reset();
-            document.getElementById("electionId").value = "";
-            document.getElementById("phaseFields").innerHTML = "";
-            document.getElementById("modalMessage").style.display = "none";
-            showSection('config');
-            document.getElementById("electionModal").classList.add("active");
-        }
-
-        function showEditModal(election) {
-            document.getElementById("modalTitle").textContent = "Modifier l'Élection";
-            document.getElementById("electionId").value = election.id;
-            document.getElementById("titre").value = election.titre;
-            document.getElementById("description").value = election.description || '';
-            document.getElementById("niveau").value = election.niveau;
-
-            // Set dates - conversion depuis UTC vers le fuseau local
-            if (election.dateDebutCandidature) {
-                document.getElementById("dateDebutCandidature").value = formatDateForInput(election.dateDebutCandidature);
-            }
-            if (election.dateFinCandidature) {
-                document.getElementById("dateFinCandidature").value = formatDateForInput(election.dateFinCandidature);
-            }
-            if (election.dateDebut) {
-                document.getElementById("dateDebut").value = formatDateForInput(election.dateDebut);
-            }
-            if (election.dateFin) {
-                document.getElementById("dateFin").value = formatDateForInput(election.dateFin);
-            }
-
-            document.getElementById("resultsVisibility").value = election.resultsVisibility || 'IMMEDIATE';
-
-            renderPhaseFields();
-
-
-            if (election.niveau === "PHASE1") {
-                if (election.ecoleId) document.getElementById("ecole").value = election.ecoleId;
-                if (election.filiereId) document.getElementById("filiere").value = election.filiereId;
-                if (election.annee) document.getElementById("annee").value = election.annee.toString();
-            } else if (election.niveau === "PHASE2" || election.niveau === "PHASE3") {
-                if (election.delegueType) document.getElementById("delegueType").value = election.delegueType;
-                if (election.ecoleId) document.getElementById("ecole").value = election.ecoleId;
-                if (election.niveau === "PHASE3" && election.tour) {
-                    document.getElementById("tour").value = election.tour.toString();
-                }
-            }
-
-            document.getElementById("modalMessage").style.display = "none";
-            showSection('config');
-            document.getElementById("electionModal").classList.add("active");
-        }
-
-        function renderPhaseFields() {
-            const phase = document.getElementById("niveau").value;
-            const fields = document.getElementById("phaseFields");
-            fields.innerHTML = "";
-
-            if (phase === "PHASE1") {
-                fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecoleId" required onchange="updateFilieres()">
-                            <option value="">-- Chargement... --</option>
-                        </select>
-                        <div id="ecoleError" class="field-error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="filiere">Filière :</label>
-                        <select id="filiere" name="filiereId" required>
-                            <option value="">-- Choisissez d'abord une école --</option>
-                        </select>
-                        <div id="filiereError" class="field-error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="annee">Année :</label>
-                        <select id="annee" name="annee" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="1">Licence 1</option>
-                            <option value="2">Licence 2</option>
-                            <option value="3">Licence 3</option>
-                        </select>
-                        <div id="anneeError" class="field-error"></div>
-                    </div>
-                `;
-                loadEcoles();
-            } else if (phase === "PHASE2") {
-                fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecoleId" required>
-                            <option value="">-- Chargement... --</option>
-                        </select>
-                        <div id="ecoleError" class="field-error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="delegueType">Type de délégué :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier Délégué (L3)</option>
-                            <option value="DEUXIEME">Deuxième Délégué (L2)</option>
-                        </select>
-                        <div id="delegueTypeError" class="field-error"></div>
-                    </div>
-                `;
-                loadEcoles();
-            } else if (phase === "PHASE3") {
-                fields.innerHTML = `
-                    <div class="form-group">
-                        <label for="delegueType">Type de délégué :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier Délégué Universitaire</option>
-                            <option value="DEUXIEME">Deuxième Délégué Universitaire</option>
-                        </select>
-                        <div id="delegueTypeError" class="field-error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="tour">Nombre de tours :</label>
-                        <select id="tour" name="tour" required>
-                            <option value="1">1 tour</option>
-                            <option value="2">2 tours</option>
-                        </select>
-                        <div id="tourError" class="field-error"></div>
-                    </div>
-                `;
-            }
-        }
-
-        function showSection(section) {
-            document.querySelectorAll('.form-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-
-            document.getElementById(`${section}-section`).classList.add('active');
-
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
-
-            currentSection = section;
-            updateNavigationButtons();
-        }
-
-        function nextSection() {
-            const currentIndex = sections.indexOf(currentSection);
-            if (currentIndex < sections.length - 1) {
-                showSection(sections[currentIndex + 1]);
-            }
-        }
-
-        function prevSection() {
-            const currentIndex = sections.indexOf(currentSection);
-            if (currentIndex > 0) {
-                showSection(sections[currentIndex - 1]);
-            }
-        }
-
-        function updateNavigationButtons() {
-            const currentIndex = sections.indexOf(currentSection);
-
-            document.getElementById("prevBtn").style.display = currentIndex > 0 ? 'flex' : 'none';
-            document.getElementById("nextBtn").style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
-            document.getElementById("submitBtn").style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
-        }
-
-        async function handleElectionSubmit(e) {
-            e.preventDefault();
-
-            // Masquer tous les messages d'erreur de champ
-            document.querySelectorAll('.field-error').forEach(el => {
-                el.style.display = 'none';
-            });
-
-            // Valider tous les champs
-            let isValid = true;
-            const requiredFields = [
-                'titre', 'niveau', 'dateDebutCandidature',
-                'dateFinCandidature', 'dateDebut', 'dateFin'
-            ];
-
-            requiredFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field && field.required && !field.value.trim()) {
-                    showFieldError(fieldId, 'Ce champ est obligatoire');
-                    isValid = false;
-                }
-            });
-
-            // Validation des dates
-            const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
-            const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
-            const dateDebut = new Date(document.getElementById('dateDebut').value);
-            const dateFin = new Date(document.getElementById('dateFin').value);
-
-            if (dateFinCandidature <= dateDebutCandidature) {
-                showFieldError('dateFinCandidature', 'La fin des candidatures doit être après le début');
-                isValid = false;
-            }
-
-            if (dateDebut <= dateFinCandidature) {
-                showFieldError('dateDebut', 'Le début des votes doit être après la fin des candidatures');
-                isValid = false;
-            }
-
-            if (dateFin <= dateDebut) {
-                showFieldError('dateFin', 'La fin des votes doit être après le début');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                showMessage('error', 'Veuillez corriger les erreurs dans le formulaire');
-                return;
-            }
-
-            const electionId = document.getElementById("electionId").value;
-            const isEdit = !!electionId;
-
-
-            const candidacyStartISO = new Date(document.getElementById("dateDebutCandidature").value).toISOString();
-            const candidacyEndISO = new Date(document.getElementById("dateFinCandidature").value).toISOString();
-            const votingStartISO = new Date(document.getElementById("dateDebut").value).toISOString();
-            const votingEndISO = new Date(document.getElementById("dateFin").value).toISOString();
-
-            // Phase sélectionnée
-            const niveau = document.getElementById("niveau").value;
-
-            // Déterminer le type en fonction de la phase
-            let type = "SALLE";
-            if (niveau === "PHASE2") type = "ECOLE";
-            if (niveau === "PHASE3") type = "UNIVERSITE";
-
-            // Construction des données de base
-            const data = {
-                titre: document.getElementById("titre").value,
-                description: document.getElementById("description").value,
-                dateDebutCandidature: candidacyStartISO,
-                dateFinCandidature: candidacyEndISO,
-                dateDebut: votingStartISO,
-                dateFin: votingEndISO,
-                isActive: true,
-                niveau: niveau,
-                type: type,
-                resultsVisibility: document.getElementById("resultsVisibility").value || "IMMEDIATE"
-            };
-
-            // Champs spécifiques selon la phase
-            if (niveau === "PHASE1") {
-                data.filiereId = document.getElementById("filiere").value || 0;
-                data.annee = parseInt(document.getElementById("annee").value) || 0;
-                data.ecoleId = document.getElementById("ecole").value || 0;
-            } else if (niveau === "PHASE2") {
-                data.delegueType = document.getElementById("delegueType").value;
-                data.ecoleId = document.getElementById("ecole").value || 0;
-            } else if (niveau === "PHASE3") {
-                data.delegueType = document.getElementById("delegueType").value;
-                data.tour = parseInt(document.getElementById("tour").value) || 1;
-            }
-
-            try {
-                const url = isEdit
-                    ? `${API_BASE}${ELECTIONS_ENDPOINT}/${electionId}`
-                    : `${API_BASE}${ELECTIONS_ENDPOINT}`;
-
-                const method = isEdit ? 'PUT' : 'POST';
-
-                const res = await fetch(url, {
-                    method: method,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token()}`
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    throw new Error(errorData.error || `Erreur ${isEdit ? 'modification' : 'création'}`);
-                }
-
-                showMessage('success', `Élection ${isEdit ? 'modifiée' : 'créée'} avec succès !`);
-                hideElectionModal();
-                loadElections();
-            } catch (err) {
-                showMessage('error', err.message);
-            }
         }
 
         function showConfirmModal(title, message, details, action, electionId = null, actionType = 'danger') {
@@ -2178,9 +2057,7 @@
         }
 
         function executeConfirmedAction() {
-            if (currentAction === 'delete') {
-                deleteElection(currentElectionId);
-            } else if (currentAction === 'close') {
+            if (currentAction === 'close') {
                 closeElection(currentElectionId);
             } else if (currentAction === 'proclaim') {
                 proclaimResults(currentElectionId);
@@ -2188,32 +2065,14 @@
             hideConfirmModal();
         }
 
-        async function deleteElection(id) {
-            try {
-                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}`, {
-                    method: "DELETE",
-                    headers: { "Authorization": `Bearer ${token()}` }
-                });
-
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || "Erreur lors de la suppression");
-                }
-
-                showMessage('success', 'Élection supprimée avec succès !');
-                loadElections();
-            } catch (err) {
-                showMessage('error', err.message);
-            }
-        }
-
         async function closeElection(id) {
             try {
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token()}`
+                        "Authorization": `Bearer ${token}`
                     },
                     body: JSON.stringify({ isActive: false })
                 });
@@ -2223,18 +2082,19 @@
                     throw new Error(errorData.error || "Erreur lors de la clôture");
                 }
 
-                showMessage('success', 'Élection clôturée avec succès !');
+                showToast('Élection clôturée avec succès !', 'success');
                 loadElections();
             } catch (err) {
-                showMessage('error', err.message);
+                showToast(err.message, 'error');
             }
         }
 
         async function proclaimResults(id) {
             try {
+                const token = getToken();
                 const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}/proclaim`, {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${token()}` }
+                    headers: { "Authorization": `Bearer ${token}` }
                 });
 
                 if (!res.ok) {
@@ -2242,38 +2102,15 @@
                     throw new Error(errorData.error || "Erreur lors de la proclamation");
                 }
 
-                showMessage('success', 'Résultats proclamés avec succès !');
+                showToast('Résultats proclamés avec succès !', 'success');
                 loadElections();
             } catch (err) {
-                showMessage('error', err.message);
+                showToast(err.message, 'error');
             }
         }
 
         function viewElection(id) {
             window.location.href = `election-details.html?id=${id}`;
-        }
-
-        function hideElectionModal() {
-            document.getElementById("electionModal").classList.remove("active");
-        }
-
-        function showMessage(type, message) {
-            const messageEl = document.getElementById("modalMessage");
-            messageEl.textContent = message;
-            messageEl.className = `alert alert-${type}`;
-            messageEl.style.display = "block";
-
-            if (type === 'success') {
-                const container = document.getElementById("electionsContainer");
-                const alert = document.createElement("div");
-                alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
-                container.insertBefore(alert, container.firstChild);
-
-                setTimeout(() => {
-                    alert.remove();
-                }, 5000);
-            }
         }
 
         function showHelpModal() {
@@ -2283,13 +2120,6 @@
         function hideHelpModal() {
             document.getElementById("helpModal").classList.remove("active");
         }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        // Initial navigation buttons
-        updateNavigationButtons();
     </script>
 </body>
 

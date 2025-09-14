@@ -57,9 +57,9 @@
             grid-template-columns: auto 1fr;
             grid-template-rows: var(--header-height) 1fr auto;
             grid-template-areas:
-                "sidebar header"
-                "sidebar main"
-                "sidebar footer";
+                "header header"
+                "main main"
+                "footer footer";
             min-height: 100vh;
         }
 
@@ -269,19 +269,43 @@
 
         /* Sidebar */
         .sidebar {
-            grid-area: sidebar;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            height: calc(100vh - var(--header-height));
+            width: var(--sidebar-width);
             background: var(--card-bg);
             padding: 24px 16px;
             border-right: 1px solid rgba(0, 0, 0, 0.07);
             display: flex;
             flex-direction: column;
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
             z-index: 100;
             overflow-y: auto;
             box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            height: calc(100vh - var(--header-height));
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
             transition: var(--transition);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
         .sidebar-header {
@@ -651,6 +675,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--blue-night);
         }
 
         .notification-item {
@@ -1128,22 +1153,9 @@
                     "footer";
             }
 
-            .sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
             .main-content {
                 margin-left: 0;
                 padding: 20px;
-            }
-
-            .menu-toggle {
-                display: flex;
             }
 
             .user-info {
@@ -1327,7 +1339,9 @@
             </div>
         </header>
 
-        <!-- Sidebar -->
+        <!-- Sidebar et overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -2177,7 +2191,7 @@
                     const div = document.createElement('div');
                     div.classList.add('activity-item');
 
-                    // Utiliser l'icône provided ou une icône par défaut
+                    // Utiliser l'icône fournie ou une icône par défaut
                     const iconClass = act.icon ? `fas fa-${act.icon}` : 'fas fa-check';
 
                     div.innerHTML = `
@@ -2462,25 +2476,28 @@
             // Gestion du menu mobile
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-            function updateMenu() {
-                if (window.innerWidth <= 992) {
-                    menuToggle.style.display = 'flex';
-                    sidebar.classList.remove('active');
-                } else {
-                    menuToggle.style.display = 'none';
-                    sidebar.classList.add('active');
-                }
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                menuToggle.classList.toggle('active');
             }
 
             if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function () {
-                    sidebar.classList.toggle('active');
-                    menuToggle.classList.toggle('active');
+                menuToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    toggleSidebar();
                 });
 
-                window.addEventListener('resize', updateMenu);
-                updateMenu();
+                sidebarOverlay.addEventListener('click', function () {
+                    toggleSidebar();
+                });
+
+                // Empêcher la fermeture lors du clic dans la sidebar
+                sidebar.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
             }
 
             // Gestion du menu utilisateur
