@@ -1376,8 +1376,8 @@
                 <div class="nav-title">Administration</div>
                 <div class="nav-item">
                     <i class="fas fa-key nav-icon"></i>
-                    <span class="nav-text">Codes d'accès</span>
-                    <span class="nav-badge">12</span>
+                    <a href="/admin/dashboardAdmin#codes-management" class="nav-text">Codes d'accès</a>
+                    <span class="nav-badge" id="code-count">0</span>
                 </div>
                 <div class="nav-item">
                     <i class="fas fa-cog nav-icon"></i>
@@ -1554,7 +1554,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <div>© 2023 UCAO - Tous droits réservés</div>
+            <div>© 2025 UCAO - Tous droits réservés</div>
             <div class="footer-links">
                 <a href="#">Confidentialité</a>
                 <a href="#">Conditions d'utilisation</a>
@@ -1788,6 +1788,7 @@
         let allCodes = [];
         let currentPage = 1;
         const itemsPerPage = 10;
+        document.getElementById('code-count').textContent = allCodes.length;
 
         // Fonction pour charger tous les codes
         async function loadAllCodes() {
@@ -1820,6 +1821,7 @@
                 // Vérifier le format de la réponse
                 if (result.success && result.data) {
                     allCodes = Array.isArray(result.data.codes) ? result.data.codes : [];
+                    document.getElementById('code-count').textContent = allCodes.length;
                     renderCodesTable();
                     setupPagination(result.data.pagination);
                 } else {
