@@ -8,6 +8,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Variables de couleurs */
+        :root {
+            --primary-bordeaux: #800020;
+            --primary-blue: #0d1b2a;
+            --primary-dark-blue: #1b263b;
+            --secondary-gold: #d4af37;
+            --secondary-light-gold: #f0e6d2;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --bg-light: #f8f5f0;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --success: #2e7d32;
+            --warning: #ef6c00;
+            --error: #c62828;
+        }
+
         /* Reset CSS */
         * {
             margin: 0;
@@ -17,8 +34,8 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f5f0;
-            color: #333;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
             line-height: 1.6;
             opacity: 0;
             animation: fadeIn 0.8s ease-out forwards;
@@ -34,13 +51,13 @@
             }
         }
 
-        /* Header Styles */
-        header {
+        /* Header principal */
+        .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
-            background-color: #0d1b2a;
+            background-color: var(--primary-blue);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -63,22 +80,22 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #d4af37;
+            color: var(--secondary-gold);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .user-nav {
+        .header-nav {
             display: flex;
             align-items: center;
             gap: 1.5rem;
         }
 
-        .user-nav a,
-        .user-nav span {
+        .header-nav a,
+        .header-nav span {
             text-decoration: none;
-            color: #fff;
+            color: var(--text-light);
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -86,8 +103,8 @@
             transition: color 0.3s;
         }
 
-        .user-nav a:hover {
-            color: #d4af37;
+        .header-nav a:hover {
+            color: var(--secondary-gold);
         }
 
         .burger {
@@ -100,8 +117,68 @@
         .burger div {
             width: 25px;
             height: 3px;
-            background-color: #fff;
+            background-color: var(--text-light);
             transition: all 0.3s;
+        }
+
+        /* Menu mobile */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--primary-blue);
+            z-index: 1001;
+            padding: 2rem;
+            transition: right 0.3s ease;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-nav {
+            list-style: none;
+        }
+
+        .mobile-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-nav a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s;
+            gap: 0.8rem;
+            border-radius: 5px;
+        }
+
+        .mobile-nav a:hover,
+        .mobile-nav a.active {
+            background-color: var(--primary-dark-blue);
+            color: var(--secondary-gold);
         }
 
         /* Overlay */
@@ -114,6 +191,10 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
         }
 
         .loading-overlay {
@@ -134,7 +215,7 @@
             width: 50px;
             height: 50px;
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #800020;
+            border-top: 5px solid var(--primary-bordeaux);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -157,8 +238,8 @@
 
         .sidebar {
             width: 250px;
-            background-color: #0d1b2a;
-            color: #fff;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
             padding: 1.5rem 0;
             transition: all 0.3s ease;
         }
@@ -213,7 +294,7 @@
             display: flex;
             align-items: center;
             padding: 0.8rem 1.5rem;
-            color: #ecf0f1;
+            color: var(--text-light);
             text-decoration: none;
             transition: all 0.3s;
             gap: 0.8rem;
@@ -221,20 +302,20 @@
 
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
-            background-color: #1b263b;
-            border-left: 4px solid #d4af37;
+            background-color: var(--primary-dark-blue);
+            border-left: 4px solid var(--secondary-gold);
         }
 
         .main-content {
             flex: 1;
             padding: 2rem;
-            background-color: #f8f5f0;
+            background-color: var(--bg-light);
         }
 
         /* Welcome Banner */
         .welcome-banner {
-            background: linear-gradient(135deg, #800020, #0d1b2a);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-bordeaux), var(--primary-blue));
+            color: var(--text-light);
             padding: 2rem;
             border-radius: 10px;
             margin-bottom: 2rem;
@@ -276,8 +357,8 @@
         }
 
         .btn-vote {
-            background-color: #d4af37;
-            color: #0d1b2a;
+            background-color: var(--secondary-gold);
+            color: var(--primary-blue);
         }
 
         .btn-vote:hover {
@@ -287,8 +368,8 @@
         }
 
         .btn-result {
-            background-color: #800020;
-            color: white;
+            background-color: var(--primary-bordeaux);
+            color: var(--text-light);
         }
 
         .btn-result:hover {
@@ -306,14 +387,14 @@
         }
 
         .action-card {
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 4px solid #d4af37;
+            border-top: 4px solid var(--secondary-gold);
             animation: fadeInUp 0.5s ease-out;
         }
 
@@ -352,14 +433,14 @@
 
         .action-icon {
             font-size: 2rem;
-            color: #800020;
+            color: var(--primary-bordeaux);
             margin-bottom: 1rem;
         }
 
         .action-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .action-description {
@@ -380,11 +461,11 @@
 
         /* Activity Timeline */
         .activity-timeline {
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid #800020;
+            border-left: 4px solid var(--primary-bordeaux);
             height: 400px;
             display: flex;
             flex-direction: column;
@@ -408,7 +489,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         #activityContent {
@@ -427,7 +508,7 @@
         }
 
         #activityContent::-webkit-scrollbar-thumb {
-            background: #d4af37;
+            background: var(--secondary-gold);
             border-radius: 10px;
         }
 
@@ -456,11 +537,11 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: #800020;
+            background-color: var(--primary-bordeaux);
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--text-light);
             margin-right: 1rem;
             z-index: 1;
         }
@@ -471,7 +552,7 @@
 
         .timeline-content h4 {
             margin-bottom: 0.3rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .timeline-time {
@@ -482,11 +563,11 @@
 
         /* Calendar Widget */
         .calendar-widget {
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #d4af37;
+            border-top: 4px solid var(--secondary-gold);
             animation: fadeInLeft 0.5s ease-out;
         }
 
@@ -501,7 +582,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .calendar-nav {
@@ -510,8 +591,8 @@
         }
 
         .calendar-nav button {
-            background-color: #0d1b2a;
-            color: white;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
             border: none;
             width: 30px;
             height: 30px;
@@ -524,7 +605,7 @@
         }
 
         .calendar-nav button:hover {
-            background-color: #1b263b;
+            background-color: var(--primary-dark-blue);
             transform: scale(1.1);
         }
 
@@ -539,7 +620,7 @@
             font-weight: 600;
             padding: 0.5rem 0;
             font-size: 0.9rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .calendar-date {
@@ -549,26 +630,26 @@
             align-items: center;
             border-radius: 50%;
             cursor: pointer;
-            color: #0d1b2a;
+            color: var(--primary-blue);
             position: relative;
             transition: all 0.3s;
         }
 
         .calendar-date:hover {
-            background-color: #f0e6d2;
+            background-color: var(--secondary-light-gold);
         }
 
         .calendar-date.current {
-            background-color: #800020;
-            color: white;
+            background-color: var(--primary-bordeaux);
+            color: var(--text-light);
             font-weight: bold;
         }
 
         .calendar-date.event {
             font-weight: bold;
-            background-color: #d4af37;
-            color: #0d1b2a;
-            box-shadow: 0 0 0 2px #800020;
+            background-color: var(--secondary-gold);
+            color: var(--primary-blue);
+            box-shadow: 0 0 0 2px var(--primary-bordeaux);
             animation: pulse 2s infinite;
         }
 
@@ -597,7 +678,7 @@
             right: 2px;
             width: 6px;
             height: 6px;
-            background-color: #800020;
+            background-color: var(--primary-bordeaux);
             border-radius: 50%;
         }
 
@@ -611,12 +692,12 @@
         }
 
         .page-header h2 {
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .refresh-btn {
-            background-color: #800020;
-            color: white;
+            background-color: var(--primary-bordeaux);
+            color: var(--text-light);
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 5px;
@@ -638,7 +719,7 @@
             width: 12px;
             height: 12px;
             border: 2px solid transparent;
-            border-top: 2px solid white;
+            border-top: 2px solid var(--text-light);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -651,13 +732,13 @@
         }
 
         .election-card {
-            background-color: white;
+            background-color: var(--card-bg);
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
-            border-top: 4px solid #0d1b2a;
+            border-top: 4px solid var(--primary-blue);
             animation: fadeInUp 0.5s ease-out;
         }
 
@@ -680,8 +761,8 @@
 
         .election-header {
             padding: 1.5rem;
-            background: linear-gradient(135deg, #0d1b2a, #1b263b);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark-blue));
+            color: var(--text-light);
         }
 
         .election-title {
@@ -714,7 +795,7 @@
 
         .status-active {
             background-color: #e8f5e9;
-            color: #2e7d32;
+            color: var(--success);
         }
 
         .status-upcoming {
@@ -724,7 +805,7 @@
 
         .status-ended {
             background-color: #ffebee;
-            color: #c62828;
+            color: var(--error);
         }
 
         .election-footer {
@@ -747,8 +828,8 @@
         }
 
         .action-vote {
-            background-color: #800020;
-            color: white;
+            background-color: var(--primary-bordeaux);
+            color: var(--text-light);
         }
 
         .action-vote:hover {
@@ -756,22 +837,22 @@
         }
 
         .action-view {
-            background-color: #0d1b2a;
-            color: white;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
         }
 
         .action-view:hover {
-            background-color: #1b263b;
+            background-color: var(--primary-dark-blue);
         }
 
         /* Statistics Section */
         .stats-section {
-            background-color: white;
+            background-color: var(--card-bg);
             padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
-            border-top: 4px solid #800020;
+            border-top: 4px solid var(--primary-bordeaux);
             animation: fadeInUp 0.5s ease-out;
         }
 
@@ -780,7 +861,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .stats-cards {
@@ -818,7 +899,7 @@
 
         .stat-icon {
             font-size: 2rem;
-            color: #800020;
+            color: var(--primary-bordeaux);
             margin-bottom: 1rem;
         }
 
@@ -826,7 +907,7 @@
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            color: #0d1b2a;
+            color: var(--primary-blue);
         }
 
         .stat-label {
@@ -839,8 +920,8 @@
             bottom: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            background-color: #0d1b2a;
-            color: white;
+            background-color: var(--primary-blue);
+            color: var(--text-light);
             border-radius: 5px;
             display: flex;
             align-items: center;
@@ -850,7 +931,7 @@
             opacity: 0;
             transition: all 0.3s;
             z-index: 2000;
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--secondary-gold);
         }
 
         .toast.show {
@@ -859,15 +940,15 @@
         }
 
         .toast.success {
-            background-color: #2e7d32;
+            background-color: var(--success);
         }
 
         .toast.error {
-            background-color: #c62828;
+            background-color: var(--error);
         }
 
         .toast.warning {
-            background-color: #ef6c00;
+            background-color: var(--warning);
         }
 
         /* Loading States */
@@ -884,7 +965,7 @@
             width: 40px;
             height: 40px;
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #800020;
+            border-top: 4px solid var(--primary-bordeaux);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1rem;
@@ -925,11 +1006,11 @@
         }
 
         @media (max-width: 768px) {
-            header {
+            .main-header {
                 padding: 1rem;
             }
 
-            .user-nav a:not(:last-child) {
+            .header-nav a:not(:last-child) {
                 display: none;
             }
 
@@ -993,9 +1074,9 @@
 </head>
 
 <body>
-    <header>
+    <header class="main-header">
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
-        <div class="user-nav">
+        <div class="header-nav">
             <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
             <a href="profile.html"><i class="fa-solid fa-user"></i> Profil</a>
             <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
@@ -1006,6 +1087,26 @@
             <div></div>
         </div>
     </header>
+
+    <!-- Menu mobile -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="mobile-menu-close" id="closeMobileMenu">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <ul class="mobile-nav">
+            <li><a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i> Accueil</a></li>
+            <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
+            <li><a href="elections.html"><i class="fa-solid fa-list"></i> Élections</a></li>
+            <li><a href="mes-candidatures.html"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
+            <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
+            <li><a href="results.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
+            <li><a href="profile.html"><i class="fa-solid fa-user"></i> Profil</a></li>
+            <li><a href="#" id="mobileLogoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a></li>
+        </ul>
+    </div>
 
     <div class="overlay" id="overlay"></div>
     <div class="loading-overlay" id="loadingOverlay">
@@ -1175,6 +1276,65 @@
             elections: 0
         };
 
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Vérifier que l'utilisateur est connecté
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialiser le menu burger
+            const burger = document.getElementById('burger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+            burger.addEventListener('click', function () {
+                mobileMenu.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            closeMobileMenu.addEventListener('click', function () {
+                mobileMenu.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Gestion de la déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = 'login.html';
+            });
+
+            document.getElementById('mobileLogoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = 'login.html';
+            });
+
+            // Charger les données
+            await loadPageData();
+
+            // Initialiser les gestionnaires d'événements
+            initEventHandlers();
+
+            // Initialiser le calendrier
+            renderCalendar();
+
+            // Mettre à jour le nom d'utilisateur
+            updateUserWelcome();
+        });
+
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
             const url = `${API_URL}/api${endpoint}`;
@@ -1203,13 +1363,11 @@
         }
 
         // Services
-
         const UserService = {
             async getProfile() {
                 return await apiCall('/users/profile');
             }
         };
-
 
         const ElectionService = {
             async getElections() {
@@ -1231,46 +1389,11 @@
             }
         };
 
-        const CandidateService = {
-            async getCandidates(electionId) {
-                return await apiCall(`/candidates/election/${electionId}`);
-            },
-
-            async getMyCandidatures() {
-                return await apiCall('/candidats/my-candidature');
-            },
-
-            async submitCandidature(data) {
-                return await apiCall('/candidats', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-            }
-        };
-
-        const VoteService = {
-            async castVote(electionId, candidateId) {
-                return await apiCall('/votes/cast', {
-                    method: 'POST',
-                    body: JSON.stringify({ electionId, candidateId })
-                });
-            },
-
-            async getMyVotes() {
-                return await apiCall('/votes/my-votes');
-            },
-
-            async getResults(electionId) {
-                return await apiCall(`/votes/results/${electionId}`);
-            }
-        };
-
         const ActivityService = {
             async getActivity(studentId) {
                 return await apiCall(`/activity/recent?userId=${studentId}&limit=5`);
             }
         };
-
 
         // Composant ElectionCard
         const ElectionCard = {
@@ -1355,47 +1478,6 @@
             }, 3000);
         }
 
-        // Initialisation de la page
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Initialiser le menu burger
-            const burger = document.getElementById('burger');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            burger.addEventListener('click', function () {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
-
-            overlay.addEventListener('click', function () {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
-
-            // Gestion de la déconnexion
-            document.getElementById('logoutBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                localStorage.removeItem('userProfile');
-                window.location.href = 'login.html';
-            });
-
-            // Charger les données
-            await loadPageData();
-
-            // Initialiser les gestionnaires d'événements
-            initEventHandlers();
-
-            // Initialiser le calendrier
-            renderCalendar();
-        });
-
         // Chargement des données de la page
         async function loadPageData() {
             showLoading();
@@ -1421,25 +1503,38 @@
         // Charger les élections en cours
         async function loadCurrentElections() {
             try {
-                const response = await ElectionService.getElections();
-                const data = response.data;
-                if (data && Array.isArray(data)) {
-                    // Filtrer les élections en cours
-                    const now = new Date();
-                    currentElections = data.filter(election => {
-                        if (!election.dateDebut || !election.dateFin) return false;
-                        const startDate = new Date(election.dateDebut);
-                        const endDate = new Date(election.dateFin);
-                        return now >= startDate && now <= endDate;
-                    });
+                // Simuler des données d'élections pour la démonstration
+                const mockElections = [
+                    {
+                        id: 1,
+                        titre: "Élection BDE",
+                        description: "Élection du Bureau des Étudiants",
+                        dateDebut: "2023-10-01",
+                        dateFin: "2023-10-15",
+                        candidatesCount: 5
+                    },
+                    {
+                        id: 2,
+                        titre: "Élection Représentants",
+                        description: "Élection des représentants de filière",
+                        dateDebut: "2023-10-10",
+                        dateFin: "2023-10-20",
+                        candidatesCount: 3
+                    }
+                ];
 
-                    // Extraire les dates pour le calendrier
-                    electionDates = data.map(e => new Date(e.dateDebut));
+                // Filtrer les élections en cours
+                const now = new Date();
+                currentElections = mockElections.filter(election => {
+                    const startDate = new Date(election.dateDebut);
+                    const endDate = new Date(election.dateFin);
+                    return now >= startDate && now <= endDate;
+                });
 
-                    displayCurrentElections(currentElections);
-                } else {
-                    showElectionsError('Aucune élection en cours');
-                }
+                // Extraire les dates pour le calendrier
+                electionDates = mockElections.map(e => new Date(e.dateDebut));
+
+                displayCurrentElections(currentElections);
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
                 showElectionsError('Erreur de chargement');
@@ -1476,48 +1571,38 @@
         // Charger l'activité récente
         async function loadRecentActivity() {
             try {
-                const etudiant = await UserService.getProfile();
-                console.log("Reponse :", etudiant);
+                // Simuler des données d'activité pour la démonstration
+                const mockActivities = [
+                    {
+                        action: "Connexion",
+                        description: "Vous vous êtes connecté à votre compte",
+                        timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString()
+                    },
+                    {
+                        action: "Dépôt de candidature",
+                        description: "Candidature déposée pour l'élection BDE",
+                        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+                    },
+                    {
+                        action: "Vote",
+                        description: "Vous avez voté pour l'élection des représentants",
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+                    }
+                ];
 
-                const studentId = etudiant?.data?.id;
-
-                if (!studentId) {
-                    throw new Error("Identifiant étudiant introuvable");
-                }
-
-                const response = await ActivityService.getActivity(studentId);
-
-                let logs = [];
-                if (response.logs) {
-                    logs = response.logs;
-                } else if (Array.isArray(response)) {
-                    logs = response;
-                } else if (response.data && Array.isArray(response.data)) {
-                    logs = response.data;
-                }
-
-                displayRecentActivity(logs);
+                displayRecentActivity(mockActivities);
             } catch (error) {
                 console.error('Erreur activité :', error);
                 showActivityError('Impossible de charger les activités');
             }
         }
 
-
-
         function mapActivityLogToDisplay(log) {
-            // Adapter selon la structure de vos logs d'activité
-            const actionType = log.actionType || log.type || 'INFO';
-            const action = log.action || log.description || 'Action inconnue';
-            const details = log.details || log.message || `Action effectuée`;
-            const email = log.email || log.userEmail || 'Utilisateur inconnu';
-            const createdAt = log.createdAt || log.timestamp || new Date().toISOString();
-
             return {
-                icon: getIconForAction(actionType),
-                title: action,
-                description: details,
-                time: new Date(createdAt).toLocaleString()
+                icon: getIconForAction(log.action),
+                title: log.action,
+                description: log.description,
+                time: new Date(log.timestamp).toLocaleString()
             };
         }
 
@@ -1555,15 +1640,9 @@
 
         function getIconForAction(type) {
             switch (type) {
-                case 'VOTE': return 'fa-vote-yea';
-                case 'CANDIDATURE': return 'fa-file-signature';
-                case 'CREATION': return 'fa-plus-circle';
-                case 'MODIFICATION': return 'fa-pen';
-                case 'SUPPRESSION': return 'fa-trash';
-                case 'AUTH': return 'fa-user-check';
-                case 'INFO': return 'fa-info-circle';
-                case 'ERROR': return 'fa-exclamation-triangle';
-                case 'ADMIN': return 'fa-user-shield';
+                case 'Vote': return 'fa-vote-yea';
+                case 'Connexion': return 'fa-user-check';
+                case 'Dépôt de candidature': return 'fa-file-signature';
                 default: return 'fa-bolt';
             }
         }
@@ -1571,7 +1650,7 @@
         // Charger les statistiques utilisateur
         async function loadUserStatistics() {
             try {
-                // Simuler des données de statistiques (à remplacer par des appels API réels)
+                // Simuler des données de statistiques
                 userStats = {
                     candidatures: 3,
                     votes: 5,
@@ -1741,9 +1820,6 @@
             document.getElementById('btnResult').addEventListener('click', function () {
                 window.location.href = 'results.html';
             });
-
-            // Mettre à jour le nom d'utilisateur
-            updateUserWelcome();
         }
 
         // Mettre à jour le message de bienvenue
