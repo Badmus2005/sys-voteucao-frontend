@@ -1106,6 +1106,7 @@
         }
 
         // Services
+        // Services
         const ElectionService = {
             async getElectionDetails(id) {
                 return await apiCall(`/elections/${id}`);
@@ -1113,28 +1114,29 @@
 
             getElectionStatus(election) {
                 const now = new Date();
-                const startDate = new Date(election.dateDebut);
-                const endDate = new Date(election.dateFin);
+                const startCandidature = new Date(election.dateDebutCandidature);
+                const endCandidature = new Date(election.dateFinCandidature);
 
-                if (now < startDate) return 'upcoming';
-                if (now > endDate) return 'ended';
+                if (now < startCandidature) return 'upcoming';
+                if (now > endCandidature) return 'ended';
                 return 'active';
             },
 
             getDelegueTypeLabel(type) {
                 const types = {
+                    'titulaire': 'Titulaire',
+                    'suppleant': 'Suppléant',
                     'delegue': 'Délégué',
-                    'bde': 'Bureau des Étudiants',
-                    'club': 'Responsable de Club'
+                    'bde': 'Bureau des Étudiants'
                 };
                 return types[type] || type;
             },
 
             getElectionTypeLabel(type) {
                 const types = {
-                    'class': 'Classe',
-                    'filiere': 'Filière',
-                    'universite': 'Université'
+                    'SALLE': 'Responsable de Salle',
+                    'ECOLE': 'Délégué d\'École',
+                    'UNIVERSITE': 'Délégué Universitaire'
                 };
                 return types[type] || type;
             }
@@ -1142,13 +1144,13 @@
 
         const CandidateService = {
             async getCandidates(electionId) {
-                return await apiCall(`/candidates/election/${electionId}`);
+                return await apiCall(`/candidats/election/${electionId}`);
             },
 
             async isCandidate(electionId) {
                 try {
-                    const response = await apiCall(`/candidates/is-candidate/${electionId}`);
-                    return response.isCandidate;
+                    const response = await apiCall(`/candidats/is-candidate/${electionId}`);
+                    return response.isCandidate || false;
                 } catch (error) {
                     console.error('Erreur vérification candidature:', error);
                     return false;
@@ -1160,6 +1162,12 @@
                     method: 'POST',
                     body: JSON.stringify(data)
                 });
+            }
+        };
+
+        const UserService = {
+            async getProfile() {
+                return await apiCall('/users/profile');
             }
         };
 
@@ -1392,25 +1400,30 @@
             document.getElementById('candidatureHeader').style.display = 'block';
         }
 
-        // Vérifier l'éligibilité du candidat
         async function checkEligibility(election) {
             try {
-                // Récupérer le profil utilisateur
-                const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                // Récupérer le profil utilisateur complet
+                const userProfile = await UserService.getProfile();
+                const userData = userProfile.data || userProfile;
 
                 // Vérifier si déjà candidat
                 const isAlreadyCandidate = await CandidateService.isCandidate(election.id);
-
                 if (isAlreadyCandidate) {
                     showEligibilityError('Vous êtes déjà candidat à cette élection.');
                     return;
                 }
 
-                // Vérifier l'éligibilité avec le service
-                const isEligible = EligibilityService.canCandidate(userProfile, election);
+                // Vérifier la période de candidature
+                const status = ElectionService.getElectionStatus(election);
+                if (status !== 'active') {
+                    showEligibilityError('La période de candidature pour cette élection est terminée ou n\'a pas encore commencé.');
+                    return;
+                }
 
+                // Vérifier l'éligibilité selon le type d'élection
+                const isEligible = isStudentEligibleForElection(election, userData);
                 if (!isEligible) {
-                    const message = EligibilityService.getEligibilityMessage(userProfile, election);
+                    const message = getEligibilityMessage(election, userData);
                     showEligibilityError(message);
                     return;
                 }
@@ -1424,6 +1437,40 @@
             }
         }
 
+        // Vérifier si l'étudiant est éligible pour l'élection
+        function isStudentEligibleForElection(election, studentInfo) {
+            if (!studentInfo) return false;
+
+            // Si l'élection est de type UNIVERSITE, tous les étudiants sont concernés
+            if (election.type === 'UNIVERSITE') return true;
+
+            // Si l'élection est de type ECOLE, vérifier l'école
+            if (election.type === 'ECOLE') {
+                return studentInfo.ecoleId && studentInfo.ecoleId.toString() === election.ecoleId.toString();
+            }
+
+            // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
+            if (election.type === 'SALLE') {
+                return studentInfo.ecoleId && studentInfo.ecoleId.toString() === election.ecoleId.toString() &&
+                    studentInfo.filiereId && studentInfo.filiereId.toString() === election.filiereId.toString() &&
+                    studentInfo.annee && studentInfo.annee.toString() === election.annee.toString();
+            }
+
+            return false;
+        }
+
+        // Obtenir le message d'éligibilité
+        function getEligibilityMessage(election, studentInfo) {
+            if (election.type === 'ECOLE') {
+                return `Cette élection est réservée aux étudiants de l'école spécifique.`;
+            }
+
+            if (election.type === 'SALLE') {
+                return `Cette élection est réservée aux étudiants de la même filière et année.`;
+            }
+
+            return 'Vous n\'êtes pas éligible pour cette élection.';
+        }
         // Afficher le message d'erreur d'éligibilité
         function showEligibilityError(message) {
             hideAllSections();
@@ -1652,7 +1699,7 @@
 
         // Gérer l'upload d'image
         async function handleImageUpload(file) {
-            const allowedTypes = ['image/jpeg', 'image/png'];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             if (!allowedTypes.includes(file.type)) {
                 showToast('Format de fichier non supporté. Utilisez JPG ou PNG.', 'error');
                 return false;
@@ -1666,23 +1713,37 @@
             showImageUploadLoading();
 
             try {
-                // Créer un aperçu local
-                const previewUrl = URL.createObjectURL(file);
-                document.getElementById('previewImage').src = previewUrl;
-                document.getElementById('uploadPreview').style.display = 'block';
-                document.getElementById('uploadArea').style.display = 'none';
+                const formData = new FormData();
+                formData.append('image', file);
 
-                // Uploader l'image (simulation)
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                uploadedImageUrl = previewUrl; // En production, vous utiliseriez l'URL du serveur
+                const response = await fetch(`${API_URL}/api/upload/image`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    body: formData
+                });
 
-                showToast('Image téléchargée avec succès', 'success');
-                return true;
+                const result = await response.json();
+
+                if (result.success) {
+                    uploadedImageUrl = result.url;
+
+                    // Afficher l'aperçu
+                    document.getElementById('previewImage').src = uploadedImageUrl;
+                    document.getElementById('uploadPreview').style.display = 'block';
+                    document.getElementById('uploadArea').style.display = 'none';
+
+                    showToast('Image téléchargée avec succès', 'success');
+                    return true;
+                } else {
+                    throw new Error(result.message || 'Erreur lors de l\'upload');
+                }
 
             } catch (error) {
                 console.error('Erreur upload:', error);
                 resetImageUpload();
-                showToast('Erreur lors du téléchargement de l\'image', 'error');
+                showToast(error.message || 'Erreur lors du téléchargement de l\'image', 'error');
                 return false;
             }
         }
@@ -1729,7 +1790,6 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
 
-            // Validation
             if (!validateForm()) {
                 return;
             }
@@ -1737,13 +1797,20 @@
             showLoading();
 
             try {
+                // Récupérer les informations utilisateur
+                const userProfile = await UserService.getProfile();
+                const userData = userProfile.data || userProfile;
+
                 const formData = {
+                    nom: userData.nom || '',
+                    prenom: userData.prenom || '',
+                    slogan: document.getElementById('slogan').value.trim(),
+                    programme: document.getElementById('program').value.trim(),
+                    motivation: document.getElementById('motivation').value.trim(),
+                    photoUrl: uploadedImageUrl,
+                    userId: userData.id || userData.userId,
                     electionId: currentElection.id,
-                    slogan: document.getElementById('slogan').value,
-                    photo: uploadedImageUrl,
-                    programme: document.getElementById('program').value,
-                    motivation: document.getElementById('motivation').value,
-                    statut: 'en_attente'
+                    statut: 'EN_ATTENTE'
                 };
 
                 const response = await CandidateService.submitCandidature(formData);
