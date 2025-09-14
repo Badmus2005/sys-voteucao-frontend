@@ -1401,26 +1401,41 @@
 
         // Vérifier si l'étudiant est concerné par l'élection
         function isStudentEligibleForElection(election) {
-            if (!studentInfo) return false;
+            if (!studentInfo) {
+                console.log("Student info not available");
+                return false;
+            }
+
+            console.log("Student Info:", studentInfo);
+            console.log("Election Info:", election);
 
             // Si l'élection est de type UNIVERSITE, tous les étudiants sont concernés
-            if (election.type === 'UNIVERSITE') return true;
+            if (election.type === 'UNIVERSITE') {
+                console.log("Élection universitaire - éligible");
+                return true;
+            }
 
             // Si l'élection est de type ECOLE, vérifier l'école
             if (election.type === 'ECOLE') {
-                return studentInfo.ecoleId == election.ecoleId;
+                const isEligible = studentInfo.ecoleId && studentInfo.ecoleId === election.ecoleId;
+                console.log(`Élection école - étudiant: ${studentInfo.ecoleId}, élection: ${election.ecoleId}, éligible: ${isEligible}`);
+                return isEligible;
             }
 
             // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
             if (election.type === 'SALLE') {
-                return studentInfo.ecoleId == election.ecoleId &&
-                    studentInfo.filiereId == election.filiereId &&
-                    studentInfo.annee == election.annee;
+                const isEligible = studentInfo.ecoleId && studentInfo.ecoleId === election.ecoleId &&
+                    studentInfo.filiereId && studentInfo.filiereId === election.filiereId &&
+                    studentInfo.annee && studentInfo.annee === election.annee;
+                console.log(`Élection salle - étudiant: ecole=${studentInfo.ecoleId}, filiere=${studentInfo.filiereId}, annee=${studentInfo.annee}`);
+                console.log(`Élection salle - élection: ecole=${election.ecoleId}, filiere=${election.filiereId}, annee=${election.annee}`);
+                console.log(`Éligible: ${isEligible}`);
+                return isEligible;
             }
 
+            console.log("Type d'élection non reconnu:", election.type);
             return false;
         }
-
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
@@ -1929,10 +1944,14 @@
                             <strong>Année:</strong> ${election.annee}
                         </div>
                         ` : ''}
-                        <div class="meta-item">
-                            <i class="fa-solid fa-user-tie"></i>
-                            <strong>Poste:</strong> ${ElectionService.getDelegueTypeLabel(election.delegueType)}
-                        </div>
+                       <div class="meta-item">
+    <i class="fa-solid fa-user-tie"></i>
+    <strong>Poste:</strong>
+    ${election.phase === 'PHASE1'
+                    ? ElectionService.getResponsableTypeLabel(election.responsableType)
+                    : ElectionService.getDelegueTypeLabel(election.delegueType)}
+</div>
+
                         <div class="meta-item">
                             <i class="fa-solid fa-calendar-days"></i>
                             <strong>Période de candidature:</strong> 
