@@ -2032,6 +2032,43 @@
             }
         }
 
+        async function updateFilieres() {
+            const ecoleId = document.getElementById("ecole").value;
+            const filiereSelect = document.getElementById("filiere");
+
+            if (!ecoleId) {
+                filiereSelect.innerHTML = '<option value="">-- Choisissez d\'abord une école --</option>';
+                return;
+            }
+
+            filiereSelect.innerHTML = '<option value="">-- Chargement... --</option>';
+
+            try {
+                const token = getToken();
+                const res = await fetch(`${API_BASE}/api/filieres?ecoleId=${ecoleId}&actif=true`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (res.ok) {
+                    const filieres = await res.json();
+                    filiereSelect.innerHTML = '<option value="">-- Choisir une filière --</option>';
+                    filieres.forEach(filiere => {
+                        const option = document.createElement("option");
+                        option.value = filiere.id;
+                        option.textContent = filiere.nom;
+                        filiereSelect.appendChild(option);
+                    });
+                } else {
+                    filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
+                }
+            } catch (err) {
+                console.error("Erreur chargement filières:", err);
+                filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
+            }
+        }
+
         function renderPhaseFields() {
             const phase = document.getElementById("niveau").value;
             const fields = document.getElementById("phaseFields");
@@ -2041,28 +2078,36 @@
 
             if (phase === "PHASE1") {
                 fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecoleId" required onchange="updateFilieres()">
-                            <option value="">-- Chargement... --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filiere">Filière :</label>
-                        <select id="filiere" name="filiereId" required>
-                            <option value="">-- Choisissez d'abord une école --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="annee">Année :</label>
-                        <select id="annee" name="annee" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="1">Licence 1</option>
-                            <option value="2">Licence 2</option>
-                            <option value="3">Licence 3</option>
-                        </select>
-                    </div>
-                `;
+            <div class="form-group">
+                <label>École :</label>
+                <select id="ecole" name="ecoleId" required onchange="updateFilieres()">
+                    <option value="">-- Chargement... --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filiere">Filière :</label>
+                <select id="filiere" name="filiereId" required>
+                    <option value="">-- Choisissez d'abord une école --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="annee">Année :</label>
+                <select id="annee" name="annee" required>
+                    <option value="">-- Choisir --</option>
+                    <option value="1">Licence 1</option>
+                    <option value="2">Licence 2</option>
+                    <option value="3">Licence 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="responsableType">Type de responsable :</label>
+                <select id="responsableType" name="responsableType" required>
+                    <option value="">-- Choisir --</option>
+                    <option value="PREMIER">Premier Responsable</option>
+                    <option value="DEUXIEME">Deuxième Responsable</option>
+                </select>
+            </div>
+        `;
                 loadEcolesForSelect("ecole");
             } else if (phase === "PHASE2") {
                 fields.innerHTML = `
@@ -2225,6 +2270,7 @@
                 data.filiereId = document.getElementById("filiere").value || 0;
                 data.annee = parseInt(document.getElementById("annee").value) || 0;
                 data.ecoleId = document.getElementById("ecole").value || 0;
+                data.responsableType = document.getElementById("responsableType").value;
             } else if (niveau === "PHASE2") {
                 data.delegueType = document.getElementById("delegueType").value;
                 data.ecoleId = document.getElementById("ecole").value || 0;
