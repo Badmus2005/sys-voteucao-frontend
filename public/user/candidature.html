@@ -1406,32 +1406,35 @@
             }
         };
 
-        // Composant CandidateCard
         const CandidateCard = {
             create(candidate, options = {}) {
                 return `
-                    <div class="candidate-card" data-candidate-id="${candidate.id}">
-                        <div class="candidate-header">
-                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
-                                 alt="${candidate.prenom} ${candidate.nom}" 
-                                 class="candidate-image"
-                                 onerror="this.src='https://via.placeholder.com/60'">
-                            <div class="candidate-info">
-                                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
-                                <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
-                            </div>
+            <div class="candidate-card" data-candidate-id="${candidate.candidatId}">
+                <div class="candidate-header">
+                    <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
+                         alt="${candidate.candidatPrenom} ${candidate.candidatNom}" 
+                         class="candidate-image"
+                         onerror="this.src='https://via.placeholder.com/60'">
+                    <div class="candidate-info">
+                        <div class="candidate-name">${candidate.candidatPrenom} ${candidate.candidatNom}</div>
+                        <div class="candidate-details">
+                            ${candidate.filiere_nom || 'Filière inconnue'} - 
+                            ${candidate.annee ? `Année ${candidate.annee}` : 'Année non précisée'}
                         </div>
-                        <div class="candidate-body">
-                            <div class="candidate-slogan">"${candidate.slogan}"</div>
-                            <div class="candidate-program">${candidate.programme ? candidate.programme.substring(0, 150) + '...' : 'Aucun programme disponible'}</div>
-                            ${options.showViewProfile ? `
-                                <a class="view-program-link" data-candidate-id="${candidate.id}">
-                                    <i class="fas fa-eye"></i> Voir le profil complet
-                                </a>
-                            ` : ''}
-                        </div>
+                        <div class="candidate-school">${candidate.ecole_nom || 'École non spécifiée'}</div>
                     </div>
-                `;
+                </div>
+                <div class="candidate-body">
+                    <div class="candidate-slogan">"${candidate.slogan}"</div>
+                    <div class="candidate-program">${candidate.programme ? candidate.programme : 'Aucun programme disponible'}</div>
+                    ${options.showViewProfile ? `
+                        <a class="view-program-link" data-candidate-id="${candidate.candidatId}">
+                            <i class="fas fa-eye"></i> Voir le profil complet
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
+        `;
             }
         };
 
