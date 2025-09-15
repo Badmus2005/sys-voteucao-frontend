@@ -4,11 +4,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voter - UCAO-UUC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Voter - UCAO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reset CSS */
+        :root {
+            --primary: #800020;
+            /* Bordeaux */
+            --primary-dark: #5a0017;
+            --secondary: #0d1b2a;
+            /* Bleu nuit */
+            --accent: #d4af37;
+            /* Or */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,219 +34,253 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f5f0;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--dark);
             line-height: 1.6;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 80px 1fr;
+            grid-template-areas:
+                "sidebar header"
+                "sidebar main";
+            min-height: 100vh;
         }
 
-        /* Header Styles */
-        header {
+        /* Header */
+        .main-header {
+            grid-area: header;
+            background: white;
+            padding: 0 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background-color: #0d1b2a;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
             position: sticky;
             top: 0;
-            z-index: 1000;
-            animation: slideDown 0.5s ease-out;
         }
 
-        @keyframes slideDown {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1.5rem;
+        }
 
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .user-menu:hover {
+            background: var(--gray-light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-area: sidebar;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            height: 100vh;
+            position: fixed;
+            width: 280px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: 700;
-            color: #d4af37;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .user-nav a,
-        .user-nav span {
-            text-decoration: none;
-            color: #fff;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-        }
-
-        .user-nav a:hover {
-            color: #d4af37;
-        }
-
-        .burger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 4px;
-        }
-
-        .burger div {
-            width: 25px;
-            height: 3px;
-            background-color: #fff;
-            transition: all 0.3s;
-        }
-
-        /* Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
             justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            display: none;
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #800020;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Dashboard Layout */
-        .dashboard-container {
-            display: flex;
-            min-height: calc(100vh - 70px);
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #0d1b2a;
-            color: #fff;
-            padding: 1.5rem 0;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
-            opacity: 0;
-            animation: fadeInLeft 0.5s ease-out forwards;
-        }
-
-        .sidebar-menu li:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .sidebar-menu li:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .sidebar-menu li:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .sidebar-menu li:nth-child(4) {
-            animation-delay: 0.4s;
-        }
-
-        .sidebar-menu li:nth-child(5) {
-            animation-delay: 0.5s;
-        }
-
-        .sidebar-menu li:nth-child(6) {
-            animation-delay: 0.6s;
-        }
-
-        @keyframes fadeInLeft {
-            from {
-                transform: translateX(-20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            color: #ecf0f1;
-            text-decoration: none;
-            transition: all 0.3s;
-            gap: 0.8rem;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background-color: #1b263b;
-            border-left: 4px solid #d4af37;
-        }
-
-        .main-content {
+        .nav-menu {
             flex: 1;
+            padding: 2rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.5rem;
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(128, 0, 32, 0.05);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .nav-text {
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 6px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-area: main;
             padding: 2rem;
-            background-color: #f8f5f0;
+            overflow-y: auto;
+            background-color: #f8fafc;
         }
 
         /* Breadcrumb */
@@ -238,18 +290,16 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
-            color: #7f8c8d;
-            animation: fadeIn 0.5s ease-out;
+            color: var(--gray);
         }
 
         .breadcrumb a {
-            color: #0d1b2a;
+            color: var(--primary);
             text-decoration: none;
-            transition: color 0.3s;
+            transition: var(--transition);
         }
 
         .breadcrumb a:hover {
-            color: #800020;
             text-decoration: underline;
         }
 
@@ -260,7 +310,7 @@
             gap: 2rem;
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
             .vote-container {
                 grid-template-columns: 1fr;
             }
@@ -274,163 +324,145 @@
         }
 
         /* Elections Section */
-        .elections-section {
-            background-color: white;
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 0.5s ease-out;
+            margin-bottom: 2rem;
         }
 
-        @keyframes fadeInUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .section-title {
-            color: #0d1b2a;
-            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .elections-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .view-all:hover {
+            text-decoration: underline;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(128, 0, 32, 0.05);
         }
 
         /* Election Card Styles */
+        .elections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
         .election-card {
-            background-color: white;
-            border-radius: 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: var(--transition);
             cursor: pointer;
-            border-left: 4px solid #0d1b2a;
-            animation: fadeInRight 0.5s ease-out;
-        }
-
-        @keyframes fadeInRight {
-            from {
-                transform: translateX(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .election-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .election-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .election-card:nth-child(3) {
-            animation-delay: 0.3s;
         }
 
         .election-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
         .election-card.selected {
-            border-left-color: #d4af37;
+            border-left-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.3);
-            }
-
-            70% {
-                box-shadow: 0 0 0 8px rgba(212, 175, 55, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
-            }
         }
 
         .election-header {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
         }
 
         .election-title {
-            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .election-date {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             opacity: 0.9;
         }
 
         .election-body {
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         .election-description {
-            color: #7f8c8d;
+            color: var(--gray);
+            font-size: 0.9rem;
             margin-bottom: 1rem;
+            line-height: 1.5;
         }
 
         .election-status {
             display: inline-block;
-            padding: 0.3rem 0.8rem;
+            padding: 0.25rem 0.75rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
         }
 
         .status-active {
-            background-color: #e8f5e9;
-            color: #2e7d32;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
         }
 
         .status-upcoming {
-            background-color: #e3f2fd;
-            color: #1565c0;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
         }
 
         .status-ended {
-            background-color: #ffebee;
-            color: #c62828;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
         }
 
         /* Candidates Section */
         .candidates-section {
-            background-color: white;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 0.5s ease-out;
         }
 
         .no-election-selected {
             text-align: center;
             padding: 3rem 1rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
         .no-election-selected i {
@@ -440,17 +472,16 @@
         }
 
         .election-info {
-            background-color: #f8f9fa;
+            background-color: var(--light);
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            animation: fadeIn 0.5s ease-out;
         }
 
         .election-info-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .election-info-details {
@@ -464,7 +495,7 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 0.9rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
         .candidates-list {
@@ -476,45 +507,27 @@
         /* Candidate Card Styles */
         .candidate-card {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
             cursor: pointer;
             border: 2px solid transparent;
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        .candidate-card:nth-child(1) {
-            animation-delay: 0.1s;
-        }
-
-        .candidate-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .candidate-card:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .candidate-card:nth-child(4) {
-            animation-delay: 0.4s;
         }
 
         .candidate-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
         .candidate-card.selected {
-            border-color: #d4af37;
+            border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
-            animation: pulse 2s infinite;
         }
 
         .candidate-header {
             padding: 1.5rem;
-            background: linear-gradient(135deg, #800020, #a52a52);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             text-align: center;
         }
@@ -529,12 +542,12 @@
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            color: #800020;
-            transition: transform 0.3s;
+            color: var(--primary);
+            transition: var(--transition);
         }
 
         .candidate-card:hover .candidate-avatar {
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .candidate-name {
@@ -559,58 +572,56 @@
         .candidate-program-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .candidate-program-text {
-            color: #7f8c8d;
+            color: var(--gray);
             font-size: 0.9rem;
             line-height: 1.5;
         }
 
         .candidate-footer {
             padding: 1rem 1.5rem;
-            background-color: #f8f9fa;
+            background-color: var(--light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--gray-light);
         }
 
         .candidate-action {
             padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border-radius: 6px;
             font-weight: 500;
             font-size: 0.9rem;
             cursor: pointer;
             border: none;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .action-vote {
-            background-color: #800020;
+            background: var(--primary);
             color: white;
         }
 
         .action-vote:hover {
-            background-color: #600018;
-            transform: translateY(-2px);
+            background: var(--primary-dark);
         }
 
         /* Vote Summary */
         .vote-summary {
-            background-color: white;
+            background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             height: fit-content;
             position: sticky;
             top: 100px;
-            animation: fadeInLeft 0.5s ease-out;
         }
 
         .summary-title {
-            color: #0d1b2a;
+            color: var(--dark);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -624,7 +635,7 @@
         .empty-summary {
             text-align: center;
             padding: 2rem 1rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
         .empty-summary i {
@@ -638,16 +649,15 @@
             flex-direction: column;
             gap: 0.5rem;
             padding: 1rem;
-            background-color: #f8f9fa;
+            background-color: var(--light);
             border-radius: 8px;
             margin-bottom: 1rem;
             position: relative;
-            animation: fadeIn 0.5s ease-out;
         }
 
         .summary-election {
             font-weight: 600;
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .summary-candidate {
@@ -669,15 +679,14 @@
             right: 0.5rem;
             background: none;
             border: none;
-            color: #7f8c8d;
+            color: var(--gray);
             cursor: pointer;
             font-size: 1rem;
-            transition: color 0.3s;
+            transition: var(--transition);
         }
 
         .summary-remove:hover {
-            color: #c62828;
-            transform: scale(1.1);
+            color: var(--danger);
         }
 
         .vote-actions {
@@ -687,42 +696,43 @@
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s;
-            justify-content: center;
+            transition: var(--transition);
+            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background-color: #0d1b2a;
+            background: var(--primary);
             color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
-            background-color: #1b263b;
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary:disabled {
-            background-color: #7f8c8d;
+            background: var(--gray-light);
+            color: var(--gray);
             cursor: not-allowed;
         }
 
         .btn-secondary {
-            background-color: #e9ecef;
-            color: #495057;
+            background: var(--gray-light);
+            color: var(--dark);
         }
 
         .btn-secondary:hover {
-            background-color: #dee2e6;
-            transform: translateY(-2px);
+            background: var(--gray);
+            color: white;
         }
 
         /* Refresh button styles */
@@ -733,22 +743,21 @@
         }
 
         .refresh-btn-small {
-            background-color: #800020;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.8rem;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .refresh-btn-small:hover {
-            background-color: #600018;
-            transform: translateY(-2px);
+            background: var(--primary-dark);
         }
 
         .refresh-btn-small .spinner {
@@ -775,7 +784,7 @@
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s;
+            transition: var(--transition);
         }
 
         .modal-overlay.active {
@@ -785,12 +794,12 @@
 
         .modal {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 12px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--card-shadow);
             transform: translateY(-20px);
-            transition: transform 0.3s;
+            transition: var(--transition);
         }
 
         .modal-overlay.active .modal {
@@ -799,14 +808,14 @@
 
         .modal-header {
             padding: 1.5rem;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--gray-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .modal-title {
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .modal-close {
@@ -814,12 +823,12 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: #7f8c8d;
-            transition: color 0.3s;
+            color: var(--gray);
+            transition: var(--transition);
         }
 
         .modal-close:hover {
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .modal-body {
@@ -829,19 +838,8 @@
 
         .modal-icon {
             font-size: 3rem;
-            color: #d4af37;
+            color: var(--accent);
             margin-bottom: 1rem;
-            animation: bounce 1s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from {
-                transform: translateY(0);
-            }
-
-            to {
-                transform: translateY(-10px);
-            }
         }
 
         .modal-text {
@@ -861,9 +859,9 @@
             bottom: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            background-color: #0d1b2a;
+            background-color: var(--secondary);
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -872,7 +870,8 @@
             opacity: 0;
             transition: all 0.3s;
             z-index: 2000;
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--accent);
+            max-width: 350px;
         }
 
         .toast.show {
@@ -881,32 +880,65 @@
         }
 
         .toast.success {
-            background-color: #2e7d32;
+            background-color: var(--success);
         }
 
         .toast.error {
-            background-color: #c62828;
+            background-color: var(--danger);
         }
 
         .toast.warning {
-            background-color: #ef6c00;
+            background-color: var(--warning);
         }
 
         /* Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
         .loading .spinner {
             width: 40px;
             height: 40px;
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #800020;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1rem;
@@ -915,8 +947,7 @@
         .no-data-message {
             text-align: center;
             padding: 2rem;
-            color: #7f8c8d;
-            position: relative;
+            color: var(--gray);
         }
 
         .no-data-message i {
@@ -925,49 +956,75 @@
             color: #bdc3c7;
         }
 
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
         /* Responsive Styles */
-        @media (max-width: 992px) {
+        @media (max-width: 1200px) {
+            .vote-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main";
+            }
+
             .sidebar {
-                width: 200px;
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 1.5rem;
             }
         }
 
         @media (max-width: 768px) {
-            header {
-                padding: 1rem;
+            .main-header {
+                padding: 0 1rem;
             }
 
-            .user-nav a:not(:last-child) {
+            .search-container {
+                margin: 0 1rem;
+                max-width: 300px;
+            }
+
+            .user-info {
                 display: none;
             }
 
-            .burger {
-                display: flex;
-            }
-
-            .dashboard-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -250px;
-                height: 100vh;
-                z-index: 1000;
-                width: 250px;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .overlay.active {
-                display: block;
+            .section {
+                padding: 1.25rem;
             }
 
             .candidates-list {
@@ -979,7 +1036,25 @@
             }
         }
 
-        @media (max-width: 576px) {
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .header-actions {
+                gap: 1rem;
+            }
+
+            .search-container {
+                max-width: 200px;
+            }
+
             .vote-actions {
                 flex-direction: column;
             }
@@ -988,41 +1063,166 @@
                 width: 100%;
             }
         }
+
+        @media (max-width: 480px) {
+            .elections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-card {
+                flex-direction: column;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+            }
+
+            .timeline-icon {
+                margin-bottom: 0.75rem;
+                margin-right: 0;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .search-container {
+                display: none;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
-        <div class="user-nav">
-            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="profile.html"><i class="fa-solid fa-user"></i> Profil</a>
-            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
-        </div>
-        <div class="burger" id="burger">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-    </header>
-
-    <div class="overlay" id="overlay"></div>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <div class="dashboard-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Rechercher...">
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+
+                <div class="user-menu">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                        alt="Photo de profil" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Étudiant</span>
+                        <span class="user-role">Étudiant</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <ul class="sidebar-menu">
-                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
-                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
-                <li><a href="elections.html"><i class="fa-solid fa-list"></i> Élections</a></li>
-                <li><a href="mes-candidatures.html"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
-                <li><a href="vote.html" class="active"><i class="fa-solid fa-check"></i> Voter</a></li>
-                <li><a href="results.html"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
-            </ul>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span>UCAO</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">Accueil</span>
+                </a>
+                <a href="candidature.html" class="nav-item">
+                    <i class="fas fa-file-signature nav-icon"></i>
+                    <span class="nav-text">Candidature</span>
+                </a>
+                <a href="elections.html" class="nav-item">
+                    <i class="fas fa-vote-yea nav-icon"></i>
+                    <span class="nav-text">Élections</span>
+                </a>
+                <a href="mes-candidatures.html" class="nav-item">
+                    <i class="fas fa-list nav-icon"></i>
+                    <span class="nav-text">Mes Candidatures</span>
+                </a>
+                <a href="vote.html" class="nav-item active">
+                    <i class="fas fa-check nav-icon"></i>
+                    <span class="nav-text">Voter</span>
+                </a>
+                <a href="results.html" class="nav-item">
+                    <i class="fas fa-chart-bar nav-icon"></i>
+                    <span class="nav-text">Résultats</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">Profil</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
         </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
             <!-- Breadcrumb -->
             <div class="breadcrumb">
@@ -1045,11 +1245,13 @@
                 <!-- Left Column: Elections and Candidates -->
                 <div class="vote-main-content">
                     <!-- Elections List -->
-                    <div class="elections-section">
-                        <h2 class="section-title">
-                            <i class="fa-solid fa-vote-yea"></i>
-                            Élections en cours
-                        </h2>
+                    <div class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="fa-solid fa-vote-yea"></i>
+                                Élections en cours
+                            </h2>
+                        </div>
                         <div class="elections-list" id="electionsList">
                             <div class="loading">
                                 <div class="spinner"></div>
@@ -1059,7 +1261,7 @@
                     </div>
 
                     <!-- Candidates Section -->
-                    <div class="candidates-section" id="candidatesSection">
+                    <div class="section" id="candidatesSection">
                         <div class="no-election-selected">
                             <i class="fa-solid fa-hand-pointer"></i>
                             <p>Sélectionnez une élection pour voir les candidats</p>
@@ -1069,7 +1271,10 @@
 
                 <!-- Right Column: Vote Summary -->
                 <div class="vote-summary">
-                    <h2 class="summary-title">Récapitulatif de vote</h2>
+                    <h2 class="summary-title">
+                        <i class="fa-solid fa-list-check"></i>
+                        Récapitulatif de vote
+                    </h2>
                     <div class="summary-items" id="summaryItems">
                         <div class="empty-summary">
                             <i class="fa-solid fa-inbox"></i>
@@ -1089,6 +1294,11 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
     </div>
 
     <!-- Confirmation Modal -->
@@ -1445,14 +1655,8 @@
                 return;
             }
 
-            // Charger le profil utilisateur
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            if (userProfile && userProfile.nom) {
-                document.getElementById('userName').textContent = `${userProfile.prenom} ${userProfile.nom}`;
-            }
-
             // Initialiser le menu burger
-            const burger = document.getElementById('burger');
+            const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
@@ -1683,10 +1887,12 @@
 
             // Afficher la section des candidats
             section.innerHTML = `
-                <h2 class="section-title">
-                    <i class="fa-solid fa-users"></i>
-                    Candidats - ${election.titre}
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-users"></i>
+                        Candidats - ${election.titre}
+                    </h2>
+                </div>
                 <div class="election-info">
                     <div class="election-info-title">Informations sur l'élection</div>
                     <div class="election-info-details">
