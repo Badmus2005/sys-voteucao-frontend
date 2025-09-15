@@ -1081,6 +1081,7 @@
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
             const url = `${API_URL}/api${endpoint}`;
+            console.log('API Call:', url);
 
             const defaultOptions = {
                 headers: {
@@ -1093,19 +1094,21 @@
 
             try {
                 const response = await fetch(url, config);
+                console.log('API Response Status:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
 
-                return await response.json();
+                const data = await response.json();
+                console.log('API Response Data:', data);
+                return data;
+
             } catch (error) {
-                console.error('Erreur API:', error);
+                console.error('Erreur API:', error, 'URL:', url);
                 throw error;
             }
         }
-
-        // Services
         // Services
         const ElectionService = {
             async getElectionDetails(id) {
@@ -1139,29 +1142,6 @@
                     'UNIVERSITE': 'Délégué Universitaire'
                 };
                 return types[type] || type;
-            }
-        };
-
-        const CandidateService = {
-            async getCandidates(electionId) {
-                return await apiCall(`/candidats/election/${electionId}`);
-            },
-
-            async isCandidate(electionId) {
-                try {
-                    const response = await apiCall(`/candidats/is-candidate/${electionId}`);
-                    return response.isCandidate || false;
-                } catch (error) {
-                    console.error('Erreur vérification candidature:', error);
-                    return false;
-                }
-            },
-
-            async submitCandidature(data) {
-                return await apiCall('/candidats', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
             }
         };
 
@@ -1279,6 +1259,7 @@
             }, 3000);
         }
 
+
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
@@ -1320,6 +1301,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const electionId = urlParams.get('electionId') || urlParams.get('election');
 
+            console.log('Election ID from URL:', electionId);
+
             if (!electionId) {
                 showNoElectionMessage();
                 return;
@@ -1358,6 +1341,7 @@
             document.getElementById('noElectionMessage').style.display = 'block';
         }
 
+
         // Charger les détails de l'élection
         async function loadElectionDetails(electionId) {
             showLoading();
@@ -1365,11 +1349,24 @@
 
             try {
                 // Charger les détails de l'élection
-                currentElection = await ElectionService.getElectionDetails(electionId);
+                const response = await ElectionService.getElectionDetails(electionId);
+
+                // Gérer différentes structures de réponse
+                if (response && response.data) {
+                    currentElection = response.data;
+                } else if (response && response.success && response.data) {
+                    currentElection = response.data;
+                } else if (response && response.id) {
+                    currentElection = response;
+                } else {
+                    throw new Error('Structure de réponse invalide');
+                }
 
                 if (!currentElection) {
                     throw new Error('Élection non trouvée');
                 }
+
+                console.log('Election chargée:', currentElection);
 
                 // Mettre à jour l'interface avec les détails de l'élection
                 updateElectionDetails(currentElection);
@@ -1382,14 +1379,13 @@
 
             } catch (error) {
                 console.error('Erreur chargement détails élection:', error);
-                showToast('Impossible de charger les détails de l\'élection', 'error');
+                showToast('Impossible de charger les détails de l\'élection: ' + error.message, 'error');
                 showNoElectionMessage();
             } finally {
                 hideLoading();
                 document.getElementById('loadingState').style.display = 'none';
             }
         }
-
         // Mettre à jour les détails de l'élection dans l'interface
         function updateElectionDetails(election) {
             document.getElementById('electionTitle').textContent = `Candidature: ${election.titre}`;
@@ -1400,14 +1396,25 @@
             document.getElementById('candidatureHeader').style.display = 'block';
         }
 
+        // Vérifier l'éligibilité du candidat
         async function checkEligibility(election) {
             try {
+                console.log('Vérification éligibilité pour election:', election);
+
+                if (!election || !election.id) {
+                    throw new Error('Élection invalide');
+                }
+
                 // Récupérer le profil utilisateur complet
                 const userProfile = await UserService.getProfile();
                 const userData = userProfile.data || userProfile;
 
+                console.log('Profil utilisateur:', userData);
+
                 // Vérifier si déjà candidat
+                console.log('Vérification si déjà candidat pour electionId:', election.id);
                 const isAlreadyCandidate = await CandidateService.isCandidate(election.id);
+
                 if (isAlreadyCandidate) {
                     showEligibilityError('Vous êtes déjà candidat à cette élection.');
                     return;
@@ -1433,10 +1440,9 @@
 
             } catch (error) {
                 console.error('Erreur vérification éligibilité:', error);
-                showEligibilityError('Erreur lors de la vérification d\'éligibilité');
+                showEligibilityError('Erreur lors de la vérification d\'éligibilité: ' + error.message);
             }
         }
-
         // Vérifier si l'étudiant est éligible pour l'élection
         function isStudentEligibleForElection(election, studentInfo) {
             if (!studentInfo) return false;
