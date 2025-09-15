@@ -1110,6 +1110,68 @@
             }
         }
         // Services
+        const CandidateService = {
+            async getCandidates(electionId) {
+                return await apiCall(`/candidats/election/${electionId}`);
+            },
+
+            async isCandidate(electionId) {
+                try {
+                    console.log('Appel isCandidate avec electionId:', electionId);
+
+                    if (!electionId) {
+                        console.error('electionId est undefined');
+                        return false;
+                    }
+
+                    const response = await apiCall(`/candidats/is-candidate/${electionId}`);
+                    console.log('Réponse isCandidate:', response);
+
+                    return response.isCandidate || false;
+                } catch (error) {
+                    console.error('Erreur vérification candidature:', error);
+
+                    // Si c'est une 404, la route n'existe peut-être pas encore
+                    if (error.message.includes('404')) {
+                        console.warn('Route /is-candidate/ non disponible, utilisation de fallback');
+                        return await this.isCandidateFallback(electionId);
+                    }
+
+                    return false;
+                }
+            },
+
+            // Méthode de fallback si la route n'existe pas
+            async isCandidateFallback(electionId) {
+                try {
+                    const userProfile = await UserService.getProfile();
+                    const userData = userProfile.data || userProfile;
+                    const userId = userData.id || userData.userId;
+
+                    // Appeler la route qui liste toutes les candidatures et filtrer côté client
+                    const response = await apiCall('/candidats/my-candidature');
+
+                    if (response && response.candidatures) {
+                        return response.candidatures.some(candidature =>
+                            candidature.electionId == electionId
+                        );
+                    }
+
+                    return false;
+                } catch (error) {
+                    console.error('Erreur fallback vérification candidature:', error);
+                    return false;
+                }
+            },
+
+            async submitCandidature(data) {
+                return await apiCall('/candidats', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            }
+        };
+
         const ElectionService = {
             async getElectionDetails(id) {
                 return await apiCall(`/elections/${id}`);
