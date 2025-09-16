@@ -1268,12 +1268,21 @@
                         </div>
 
                         <div class="activity-timeline" id="activityContent">
-                            <div class="loading">
+                            <div class="loading" id="activityLoading">
                                 <div class="spinner"></div>
                                 <p>Chargement de l'activité...</p>
                             </div>
+                            <ul id="activityList" class="activity-list"></ul>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination-controls" id="activityPagination" style="display: none;">
+                            <button id="prevPageBtn" class="btn" disabled>Précédent</button>
+                            <span id="pageInfo">Page 1</span>
+                            <button id="nextPageBtn" class="btn">Suivant</button>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Right Column -->
@@ -1448,10 +1457,11 @@
         };
 
         const ActivityService = {
-            async getActivity(studentId) {
-                return await apiCall(`/activity/recent?userId=${studentId}&limit=5`);
+            async getActivity(studentId, page = 1, limit = 5) {
+                return await apiCall(`/activity/recent?userId=${studentId}&page=${page}&limit=${limit}`);
             }
         };
+
 
         // Composant ElectionCard
         const ElectionCard = {
@@ -1661,33 +1671,55 @@
             attachElectionCardEvents();
         }
 
-        // Charger l'activité récente
-        async function loadRecentActivity() {
+        let currentPage = 1;
+        let totalPages = 1;
+
+        async function loadRecentActivity(page = 1) {
+            document.getElementById('activityLoading').style.display = 'block';
+            document.getElementById('activityList').innerHTML = '';
+            document.getElementById('activityPagination').style.display = 'none';
+
             try {
                 const etudiant = await UserService.getProfile();
                 const studentId = etudiant?.data?.id;
+                if (!studentId) throw new Error("Identifiant étudiant introuvable");
 
-                if (!studentId) {
-                    throw new Error("Identifiant étudiant introuvable");
-                }
+                const response = await ActivityService.getActivity(studentId, page, 5);
+                const logs = response.logs || [];
 
-                const response = await ActivityService.getActivity(studentId);
+                // Affichage des logs
+                const list = document.getElementById('activityList');
+                logs.forEach(log => {
+                    const item = document.createElement('li');
+                    item.textContent = `${log.action} - ${new Date(log.createdAt).toLocaleString()}`;
+                    list.appendChild(item);
+                });
 
-                let logs = [];
-                if (response.logs) {
-                    logs = response.logs;
-                } else if (Array.isArray(response)) {
-                    logs = response;
-                } else if (response.data && Array.isArray(response.data)) {
-                    logs = response.data;
-                }
+                // Mise à jour pagination
+                currentPage = response.pagination.currentPage;
+                totalPages = response.pagination.totalPages;
 
-                displayRecentActivity(logs);
+                document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages}`;
+                document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+                document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+                document.getElementById('activityPagination').style.display = 'block';
+
             } catch (error) {
                 console.error('Erreur activité :', error);
                 showActivityError('Impossible de charger les activités');
+            } finally {
+                document.getElementById('activityLoading').style.display = 'none';
             }
         }
+
+        // Boutons de navigation
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 1) loadRecentActivity(currentPage - 1);
+        });
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            if (currentPage < totalPages) loadRecentActivity(currentPage + 1);
+        });
+
 
         function mapActivityLogToDisplay(log) {
             // Adapter selon la structure de vos logs d'activité

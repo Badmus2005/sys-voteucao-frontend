@@ -627,6 +627,32 @@
             }
         }
 
+        /* Footer */
+        .footer {
+            grid-area: footer;
+            background: var(--blue-night);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .charts-container {
@@ -787,11 +813,11 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-title">Général</div>
-                <a href="dashboard.html" class="nav-item">
+                <a href="dashboardAdmin.html" class="nav-item">
                     <i class="fas fa-tachometer-alt nav-icon"></i>
                     <span class="nav-text">Tableau de Bord</span>
                 </a>
-                <a href="utilisateurs.html" class="nav-item">
+                <a href="users.html" class="nav-item">
                     <i class="fas fa-users nav-icon"></i>
                     <span class="nav-text">Utilisateurs</span>
                 </a>
@@ -882,14 +908,14 @@
                         <label for="filiereFilter" class="form-label">Filière</label>
                         <select class="form-select" id="filiereFilter">
                             <option value="">Toutes les filières</option>
-                            <!-- Options will be populated by JavaScript -->
+
                         </select>
                     </div>
                     <div class="col-md-4 mb-2">
                         <label for="ecoleFilter" class="form-label">École</label>
                         <select class="form-select" id="ecoleFilter">
                             <option value="">Toutes les écoles</option>
-                            <!-- Options will be populated by JavaScript -->
+
                         </select>
                     </div>
                     <div class="col-md-4 mb-2">
@@ -948,7 +974,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Table rows will be populated by JavaScript -->
+
                             </tbody>
                         </table>
                     </div>
@@ -971,7 +997,7 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <div>© 2023 UCAO - Tous droits réservés</div>
+            <div>© 2025 UCAO - Tous droits réservés</div>
             <div class="footer-links">
                 <a href="#">Confidentialité</a>
                 <a href="#">Conditions d'utilisation</a>
@@ -1513,29 +1539,49 @@
             });
         }
 
-        // Open status modal
+        // Ouvrir le modal de changement de statut
         function openStatusModal(candidateId) {
-            document.getElementById('modalCandidateId').value = candidateId;
+            const modalElement = document.getElementById('statusModal');
+            const modalCandidateId = document.getElementById('modalCandidateId');
+            const statusSelect = document.getElementById('statusSelect');
 
-            // Find the candidate to pre-select current status
-            const candidate = allCandidatures.find(c => (c.candidateId || c.id) == candidateId);
-            if (candidate) {
-                document.getElementById('statusSelect').value = candidate.statut;
+            if (!modalElement || !modalCandidateId || !statusSelect) {
+                console.error('Éléments du modal manquants');
+                return;
             }
 
-            // Show the modal
-            const modal = new bootstrap.Modal(document.getElementById('statusModal'));
+            modalCandidateId.value = candidateId;
+
+            const candidate = allCandidatures.find(c => c.id == candidateId || c.candidateId == candidateId);
+            if (candidate) {
+                statusSelect.value = candidate.statut || 'EN_ATTENTE';
+            }
+
+            const modal = new bootstrap.Modal(modalElement);
             modal.show();
         }
 
-        // Update candidate status
+        // Mettre à jour le statut du candidat
         async function updateCandidateStatus() {
             const candidateId = document.getElementById('modalCandidateId').value;
             const newStatus = document.getElementById('statusSelect').value;
+            const updateBtn = document.getElementById('statusUpdateBtn');
 
+            if (!candidateId || !newStatus) {
+                showToast('Veuillez sélectionner un statut valide', 'warning');
+                return;
+            }
+
+            const token = getToken();
+            if (!token) {
+                showToast('Session expirée. Veuillez vous reconnecter.', 'error');
+                return;
+            }
+
+            updateBtn.disabled = true;
             showLoading();
+
             try {
-                const token = getToken();
                 const response = await fetch(`${API_BASE}/api/candidats/admin/${candidateId}/statut`, {
                     method: 'PUT',
                     headers: {
@@ -1547,34 +1593,30 @@
 
                 const result = await response.json();
 
-                if (result.success) {
-                    // Update local data
-                    const candidateIndex = allCandidatures.findIndex(c => (c.candidateId || c.id) == candidateId);
-                    if (candidateIndex !== -1) {
-                        allCandidatures[candidateIndex].statut = newStatus;
+                if (response.ok && result.success) {
+                    const index = allCandidatures.findIndex(c => c.id == candidateId || c.candidateId == candidateId);
+                    if (index !== -1) {
+                        allCandidatures[index].statut = newStatus;
                     }
 
-                    // Reapply filters and render table
                     filterCandidatures();
                     renderTable();
                     updateTableCount();
-
-                    // Reload stats
                     loadStats();
 
-                    // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
-                    modal.hide();
+                    if (modal) modal.hide();
 
                     showToast('Statut mis à jour avec succès', 'success');
                 } else {
-                    throw new Error(result.error);
+                    throw new Error(result.error || 'Erreur inconnue');
                 }
             } catch (error) {
                 console.error('Erreur lors de la mise à jour du statut:', error);
                 showToast('Impossible de mettre à jour le statut', 'error');
             } finally {
                 hideLoading();
+                updateBtn.disabled = false;
             }
         }
 
