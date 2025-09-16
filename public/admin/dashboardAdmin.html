@@ -2118,74 +2118,34 @@
                 const token = getToken();
                 const limit = 10;
                 const page = 1;
-                const offset = (page - 1) * limit;
 
-                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=${limit}&offset=${offset}`, {
+                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=${limit}&page=${page}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
 
                 let activities = [];
 
                 if (res.ok) {
                     const result = await res.json();
-                    // Vérifier le format de réponse
-                    activities = result.logs.map(log => ({
+                    // Adapter selon le nouveau format de réponse
+                    activities = result.logs || [];
+
+                    // Mapper les propriétés
+                    activities = activities.map(log => ({
                         title: log.action || 'Activité',
                         content: log.details || '',
                         time: formatRelativeTime(log.createdAt),
                         timestamp: log.createdAt,
                         icon: mapActionTypeToIcon(log.actionType)
                     }));
-
                 } else {
-                    // Si le serveur renvoie une erreur, utilisons des données fictives
-                    console.warn('Serveur d\'activités indisponible, utilisation de données de démonstration');
-
-                    // Données fictives pour la démonstration
-                    activities = [
-                        {
-                            title: "Connexion administrateur",
-                            content: "Admin UCAO s'est connecté au système",
-                            time: "2 min",
-                            timestamp: new Date().toISOString(),
-                            icon: "sign-in-alt"
-                        },
-                        {
-                            title: "Génération de codes",
-                            content: "25 codes d'accès générés avec succès",
-                            time: "15 min",
-                            timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-                            icon: "key"
-                        },
-                        {
-                            title: "Import d'étudiants",
-                            content: "Fichier Excel importé avec 150 matricules",
-                            time: "1 h",
-                            timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
-                            icon: "file-import"
-                        },
-                        {
-                            title: "Création d'élection",
-                            content: "Nouvelle élection 'Bureau des étudiants 2023' créée",
-                            time: "3 h",
-                            timestamp: new Date(Date.now() - 3 * 60 * 60000).toISOString(),
-                            icon: "vote-yea"
-                        },
-                        {
-                            title: "Ajout de candidat",
-                            content: "Jean Dupont ajouté comme candidat",
-                            time: "1 j",
-                            timestamp: new Date(Date.now() - 24 * 60 * 60000).toISOString(),
-                            icon: "user-plus"
-                        }
-                    ];
-
-                    // Montrer un avertissement discret
-                    showToast('Données de démonstration affichées (serveur indisponible)', 'info');
+                    // Fallback avec des données de démo
+                    console.warn('Serveur indisponible, utilisation de données de démonstration');
+                    activities = [/* données de démo */];
                 }
 
+                // Afficher les activités
                 const container = document.getElementById('activityList');
                 if (!container) return;
 
@@ -2200,33 +2160,21 @@
                     const div = document.createElement('div');
                     div.classList.add('activity-item');
 
-                    // Utiliser l'icône fournie ou une icône par défaut
                     const iconClass = act.icon ? `fas fa-${act.icon}` : 'fas fa-check';
 
                     div.innerHTML = `
-                        <div class="activity-icon"><i class="${iconClass}"></i></div>
-                        <div class="activity-content">
-                            <h4>${act.title || 'Activité'}</h4>
-                            <p>${act.content || 'Aucun détail'}</p>
-                        </div>
-                        <div class="activity-time">${act.time || formatDate(act.timestamp)}</div>
-                    `;
+                <div class="activity-icon"><i class="${iconClass}"></i></div>
+                <div class="activity-content">
+                    <h4>${act.title || 'Activité'}</h4>
+                    <p>${act.content || 'Aucun détail'}</p>
+                </div>
+                <div class="activity-time">${act.time || formatDate(act.timestamp)}</div>
+            `;
                     container.appendChild(div);
                 });
             } catch (err) {
                 console.error('Erreur chargement activités:', err);
                 showToast('Erreur lors du chargement des activités', 'error');
-
-                // Afficher un message d'erreur dans le conteneur
-                const container = document.getElementById('activityList');
-                if (container) {
-                    container.innerHTML = `
-                        <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                            <p>Impossible de charger les activités</p>
-                        </div>
-                    `;
-                }
             } finally {
                 hideLoading();
             }
@@ -2384,25 +2332,18 @@
         async function loadNotifications() {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
+                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}/admin`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (!response.ok) throw new Error('Erreur de chargement des notifications');
 
-                const result = await response.json();
-
-                // Sécurisation du format attendu
-                const notifications = Array.isArray(result.notifications)
-                    ? result.notifications
-                    : Array.isArray(result)
-                        ? result
-                        : [];
+                const notifications = await response.json();
 
                 displayNotifications(notifications);
 
                 // Mettre à jour le badge
-                const unreadCount = notifications.filter(n => !n.read).length;
+                const unreadCount = notifications.filter(n => !n.is_read).length;
                 const badge = document.getElementById('notificationCount');
                 if (badge) {
                     badge.textContent = unreadCount;
