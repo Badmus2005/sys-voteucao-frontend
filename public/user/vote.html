@@ -2114,6 +2114,13 @@
             try {
                 for (const electionId in selectedCandidates) {
                     const candidateId = selectedCandidates[electionId];
+
+                    if (!candidateId || isNaN(candidateId)) {
+                        console.error(`❌ Candidat non sélectionné ou invalide pour l'élection ${electionId}`);
+                        throw new Error(`Aucun candidat sélectionné pour l'élection ${electionId}`);
+                    }
+
+
                     const election = allElections.find(e => e.id == electionId);
 
                     console.log(`📌 Traitement du vote pour l'élection ID: ${electionId}, Candidat ID: ${candidateId}`);
@@ -2145,15 +2152,12 @@
                         throw new Error('Jeton de vote invalide');
                     }
 
-                    if (!candidateId) {
-                        throw new Error(`Aucun candidat sélectionné pour l'élection ${electionId}`);
-                    }
-
                     // Soumettre le vote
                     tokenText.textContent = 'Enregistrement de votre vote...';
                     const votePayload = {
                         electionId: parseInt(electionId),
-                        candidateId: parseInt(candidateId),
+                        candidateId: Number(candidateId),
+
                         voteToken: voteToken
                     };
 
