@@ -1887,46 +1887,46 @@
 
             // Afficher la section des candidats
             section.innerHTML = `
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fa-solid fa-users"></i>
-                        Candidats - ${election.titre}
-                    </h2>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fa-solid fa-users"></i>
+                Candidats - ${election.titre}
+            </h2>
+        </div>
+        <div class="election-info">
+            <div class="election-info-title">Informations sur l'élection</div>
+            <div class="election-info-details">
+                <div class="election-info-item">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>${election.nomEcole || election.ecole || 'Non spécifié'}</span>
                 </div>
-                <div class="election-info">
-                    <div class="election-info-title">Informations sur l'élection</div>
-                    <div class="election-info-details">
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                            <span>${election.nomEcole || election.ecole || 'Non spécifié'}</span>
-                        </div>
-                        ${election.nomFiliere || election.filiere ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>${election.nomFiliere || election.filiere}</span>
-                        </div>
-                        ` : ''}
-                        ${election.annee ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-calendar"></i>
-                            <span>Année ${election.annee}</span>
-                        </div>
-                        ` : ''}
-                        ${election.delegueType ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-user-tie"></i>
-                            <span>${election.delegueType}</span>
-                        </div>
-                        ` : ''}
-                    </div>
+                ${election.nomFiliere || election.filiere ? `
+                <div class="election-info-item">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>${election.nomFiliere || election.filiere}</span>
                 </div>
-                <div class="candidates-list" id="candidatesList">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Chargement des candidats...</p>
-                    </div>
+                ` : ''}
+                ${election.annee ? `
+                <div class="election-info-item">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span>Année ${election.annee}</span>
                 </div>
-            `;
+                ` : ''}
+                ${election.delegueType ? `
+                <div class="election-info-item">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>${election.delegueType}</span>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+        <div class="candidates-list" id="candidatesList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Chargement des candidats...</p>
+            </div>
+        </div>
+    `;
 
             const candidatesList = document.getElementById('candidatesList');
 
@@ -1940,31 +1940,38 @@
                     electionCandidates = response;
                 } else if (response && response.success && Array.isArray(response.candidates)) {
                     electionCandidates = response.candidates;
-                }
-                else if (response && response.success && Array.isArray(response.candidates)) {
-                    electionCandidates = response.candidates;
+                } else if (response && response.success && Array.isArray(response.data)) {
+                    electionCandidates = response.data;
                 }
 
+                console.log('Candidats reçus:', electionCandidates); // Debug
 
                 if (electionCandidates.length === 0) {
                     candidatesList.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fa-solid fa-user-slash"></i>
-                            <h3>Aucun candidat pour cette élection</h3>
-                            <p>Aucun candidat ne s'est présenté pour cette élection.</p>
-                        </div>
-                    `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-user-slash"></i>
+                    <h3>Aucun candidat pour cette élection</h3>
+                    <p>Aucun candidat ne s'est présenté pour cette élection.</p>
+                </div>
+            `;
                     return;
                 }
 
                 // Afficher les candidats
-                candidatesList.innerHTML = electionCandidates.map(candidate =>
-                    CandidateCard.create(candidate, {
+                candidatesList.innerHTML = electionCandidates.map(candidate => {
+                    // S'assurer que l'ID du candidat est valide
+                    const candidateId = candidate.id || candidate.candidatId;
+                    if (!candidateId) {
+                        console.error('Candidat sans ID:', candidate);
+                        return '';
+                    }
+
+                    return CandidateCard.create(candidate, {
                         showProgram: true,
                         showVote: true,
                         electionId: election.id
-                    })
-                ).join('');
+                    });
+                }).join('');
 
                 // Ajouter les événements de sélection des candidats
                 attachCandidateSelectionEvents();
@@ -1972,21 +1979,29 @@
             } catch (error) {
                 console.error('Erreur affichage candidats:', error);
                 candidatesList.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>Erreur de chargement</h3>
-                        <p>Impossible de charger les candidats: ${error.message}</p>
-                    </div>
-                `;
+            <div class="no-data-message">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                <h3>Erreur de chargement</h3>
+                <p>Impossible de charger les candidats: ${error.message}</p>
+            </div>
+        `;
             }
         }
-
         // Attacher les événements de sélection des candidats
         function attachCandidateSelectionEvents() {
             document.querySelectorAll('.candidate-card').forEach(card => {
                 card.addEventListener('click', function () {
                     const candidateId = this.dataset.candidateId;
                     const electionId = this.dataset.electionId;
+
+                    console.log('Candidat sélectionné:', { candidateId, electionId }); // Debug
+
+                    // Vérifier que l'ID est valide
+                    if (!candidateId || candidateId === 'undefined') {
+                        console.error('ID de candidat invalide:', candidateId);
+                        showToast('Erreur de sélection du candidat', 'error');
+                        return;
+                    }
 
                     // Désélectionner tous les candidats pour cette élection
                     document.querySelectorAll(`.candidate-card[data-election-id="${electionId}"]`).forEach(card => {
@@ -1996,15 +2011,16 @@
                     // Sélectionner le candidat choisi
                     this.classList.add('selected');
 
-                    // Stocker la sélection
-                    selectedCandidates[electionId] = candidateId;
+                    // Stocker la sélection (convertir en number)
+                    selectedCandidates[electionId] = parseInt(candidateId);
+
+                    console.log('Sélection mise à jour:', selectedCandidates); // Debug
 
                     // Mettre à jour le récapitulatif
                     updateVoteSummary();
                 });
             });
         }
-
         // Mettre à jour le récapitulatif de vote
         function updateVoteSummary() {
             const container = document.getElementById('summaryItems');
@@ -2014,11 +2030,11 @@
 
             if (Object.keys(selectedCandidates).length === 0) {
                 container.innerHTML = `
-                    <div class="empty-summary">
-                        <i class="fa-solid fa-inbox"></i>
-                        <p>Aucun vote sélectionné pour le moment</p>
-                    </div>
-                `;
+            <div class="empty-summary">
+                <i class="fa-solid fa-inbox"></i>
+                <p>Aucun vote sélectionné pour le moment</p>
+            </div>
+        `;
                 submitBtn.disabled = true;
                 return;
             }
@@ -2030,23 +2046,26 @@
                 const election = allElections.find(e => e.id == electionId);
 
                 if (election) {
-                    // Trouver le nom du candidat
-                    const candidateName = document.querySelector(`.candidate-card[data-candidate-id="${candidateId}"] .candidate-name`)?.textContent || 'Candidat inconnu';
+                    // Trouver le nom du candidat depuis la carte
+                    const candidateCard = document.querySelector(`.candidate-card[data-candidate-id="${candidateId}"]`);
+                    const candidateName = candidateCard ?
+                        candidateCard.querySelector('.candidate-name')?.textContent || 'Candidat inconnu' :
+                        'Candidat inconnu';
 
                     const summaryItem = document.createElement('div');
                     summaryItem.className = 'summary-item';
                     summaryItem.innerHTML = `
-                        <div class="summary-election">${election.titre}</div>
-                        <div class="summary-candidate">
-                            <div class="summary-candidate-avatar">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <span>${candidateName}</span>
-                        </div>
-                        <button class="summary-remove" data-election-id="${electionId}">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    `;
+                <div class="summary-election">${election.titre}</div>
+                <div class="summary-candidate">
+                    <div class="summary-candidate-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <span>${candidateName}</span>
+                </div>
+                <button class="summary-remove" data-election-id="${electionId}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
 
                     container.appendChild(summaryItem);
                 }
@@ -2070,7 +2089,6 @@
 
             submitBtn.disabled = false;
         }
-
         // Obtenir un jeton de vote
         async function getVoteToken(electionId) {
             try {
@@ -2103,6 +2121,7 @@
             }
         }
 
+        // Soumettre le vote
         async function submitVote() {
             const submitBtn = document.getElementById('submitVoteBtn');
             submitBtn.disabled = true;
@@ -2115,15 +2134,17 @@
                 for (const electionId in selectedCandidates) {
                     const candidateId = selectedCandidates[electionId];
 
-                    if (!candidateId || isNaN(candidateId)) {
-                        console.error(`❌ Candidat non sélectionné ou invalide pour l'élection ${electionId}`);
-                        throw new Error(`Aucun candidat sélectionné pour l'élection ${electionId}`);
-                    }
+                    console.log('Validation vote:', { electionId, candidateId, type: typeof candidateId });
 
+                    // Validation plus robuste
+                    if (!candidateId || isNaN(parseInt(candidateId))) {
+                        console.error('❌ Candidat non sélectionné ou invalide:', candidateId);
+                        throw new Error(`Aucun candidat valide sélectionné pour l'élection ${electionId}`);
+                    }
 
                     const election = allElections.find(e => e.id == electionId);
 
-                    console.log(`📌 Traitement du vote pour l'élection ID: ${electionId}, Candidat ID: ${candidateId}`);
+                    console.log(`📌 Traitement du vote pour l'élection: ${election?.titre}, Candidat ID: ${candidateId}`);
 
                     // Afficher le modal de validation du jeton
                     const tokenModal = document.getElementById('tokenValidationModal');
@@ -2156,8 +2177,7 @@
                     tokenText.textContent = 'Enregistrement de votre vote...';
                     const votePayload = {
                         electionId: parseInt(electionId),
-                        candidateId: Number(candidateId),
-
+                        candidateId: parseInt(candidateId), // S'assurer que c'est un nombre
                         voteToken: voteToken
                     };
 
@@ -2193,7 +2213,6 @@
                 submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Soumettre mon vote';
             }
         }
-
         // Réinitialiser le vote
         function resetVote() {
             selectedCandidates = {};
