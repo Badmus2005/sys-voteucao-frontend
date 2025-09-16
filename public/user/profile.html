@@ -4,108 +4,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Étudiant - UCAO-UUC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Profil Étudiant - UCAO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --rouge-bordeaux: #650624;
-            --bleu-nuit: #041946;
-            --or: #a76d21;
-            --or-clair: #dea739;
-            --gris-clair: #f5f6fa;
-            --gris-texte: #444;
-            --box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-            --transition: all .3s ease;
-            --success: #38a169;
-            --error: #e53e3e;
-            --warning: #dd6b20;
-            --info: #3182ce;
+            --primary: #800020;
+            /* Bordeaux */
+            --primary-dark: #5a0017;
+            --secondary: #0d1b2a;
+            /* Bleu nuit */
+            --accent: #d4af37;
+            /* Or */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Poppins", sans-serif;
         }
 
         body {
-            background: #f4f6fb;
-            color: var(--gris-texte);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 80px 1fr;
+            grid-template-areas:
+                "sidebar header"
+                "sidebar main";
             min-height: 100vh;
         }
 
-        /* HEADER */
-        header {
-            background: var(--bleu-nuit);
-            color: #fff;
-            padding: 1rem 2rem;
+        /* Header */
+        .main-header {
+            grid-area: header;
+            background: white;
+            padding: 0 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
             position: sticky;
             top: 0;
-            z-index: 1000;
-            box-shadow: var(--box-shadow);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1.5rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .user-menu:hover {
+            background: var(--gray-light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-area: sidebar;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            height: 100vh;
+            position: fixed;
+            width: 280px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: .6rem;
-            font-size: 1.2rem;
-            font-weight: 600;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            font-size: .9rem;
-        }
-
-        .user-nav a,
-        .user-nav span {
+        .logo-icon {
+            background: var(--primary);
             color: white;
-            text-decoration: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
-            gap: .4rem;
             align-items: center;
-            transition: var(--transition);
+            justify-content: center;
         }
 
-        .user-nav a:hover {
-            color: var(--or);
+        .nav-menu {
+            flex: 1;
+            padding: 2rem 0;
         }
 
-        /* CONTENU PRINCIPAL */
-        .main-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .back-link {
-            display: inline-flex;
+        .nav-item {
+            display: flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--bleu-nuit);
+            padding: 0.9rem 1.5rem;
+            color: var(--gray);
             text-decoration: none;
-            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(128, 0, 32, 0.05);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .nav-text {
             font-weight: 500;
         }
 
-        .back-link:hover {
-            color: var(--or);
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 6px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-area: main;
+            padding: 2rem;
+            overflow-y: auto;
+            background-color: #f8fafc;
         }
 
         .page-title {
             font-size: 1.8rem;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
             margin-bottom: 2rem;
             position: relative;
             padding-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .page-title::after {
@@ -115,8 +301,23 @@
             bottom: 0;
             width: 60px;
             height: 4px;
-            background: var(--or);
+            background: var(--accent);
             border-radius: 2px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary);
         }
 
         /* CARTE DE PROFIL */
@@ -124,17 +325,8 @@
             background: #fff;
             border-radius: 12px;
             padding: 2rem;
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
-        }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-size: 1.4rem;
-            color: var(--bleu-nuit);
-            margin-bottom: 1.5rem;
         }
 
         .profile-container {
@@ -154,7 +346,7 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid var(--or);
+            border: 4px solid var(--accent);
             margin-bottom: 1.5rem;
         }
 
@@ -166,12 +358,12 @@
         .profile-quick-info h3 {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
         }
 
         .profile-quick-info p {
             margin-bottom: 0.3rem;
-            color: var(--gris-texte);
+            color: var(--gray);
         }
 
         .profile-content {
@@ -192,19 +384,19 @@
         .info-item label {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
         }
 
         .info-item span {
             padding: 0.75rem;
-            background: var(--gris-clair);
+            background: var(--gray-light);
             border-radius: 8px;
         }
 
         .status-badge {
             display: inline-block;
             padding: 0.35rem 0.8rem;
-            background: rgba(56, 161, 105, 0.2);
+            background: rgba(16, 185, 129, 0.2);
             color: var(--success);
             border-radius: 20px;
             font-size: 0.85rem;
@@ -226,14 +418,14 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--gray-light);
             border-radius: 8px;
             font-size: 1rem;
             transition: var(--transition);
@@ -242,8 +434,8 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: var(--or);
-            box-shadow: 0 0 0 3px rgba(167, 109, 33, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
         }
 
         .form-actions {
@@ -256,7 +448,7 @@
         .profile-security {
             margin-top: 2.5rem;
             padding-top: 2rem;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--gray-light);
         }
 
         .profile-security h3 {
@@ -264,7 +456,7 @@
             align-items: center;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
         }
 
         /* BOUTONS */
@@ -281,22 +473,22 @@
         }
 
         .btn-primary {
-            background: var(--or);
+            background: var(--primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background: var(--or-clair);
+            background: var(--primary-dark);
         }
 
         .btn-outline {
             background: transparent;
-            border: 2px solid var(--bleu-nuit);
-            color: var(--bleu-nuit);
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
         }
 
         .btn-outline:hover {
-            background: var(--bleu-nuit);
+            background: var(--secondary);
             color: white;
         }
 
@@ -327,7 +519,7 @@
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--card-shadow);
             transform: translateY(-20px);
             transition: transform 0.3s ease;
         }
@@ -341,14 +533,14 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .modal-header h3 {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--bleu-nuit);
+            color: var(--secondary);
         }
 
         .modal-close {
@@ -356,7 +548,7 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: var(--gris-texte);
+            color: var(--gray);
         }
 
         .modal-body {
@@ -370,12 +562,12 @@
 
         .strength-text {
             font-size: 0.85rem;
-            color: var(--gris-texte);
+            color: var(--gray);
         }
 
         .strength-bar {
             height: 5px;
-            background: #eee;
+            background: var(--gray-light);
             border-radius: 3px;
             margin-top: 0.25rem;
             overflow: hidden;
@@ -386,7 +578,7 @@
             display: block;
             height: 100%;
             width: 0;
-            background: var(--error);
+            background: var(--danger);
             transition: width 0.3s ease;
         }
 
@@ -400,41 +592,45 @@
         }
 
         /* NOTIFICATIONS */
-        .notification {
+        .toast {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            border-radius: 8px;
+            background-color: var(--secondary);
             color: white;
-            z-index: 1100;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transform: translateX(100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            z-index: 2000;
+            border-left: 4px solid var(--accent);
+            max-width: 350px;
         }
 
-        .notification.show {
-            transform: translateX(0);
+        .toast.show {
+            transform: translateY(0);
             opacity: 1;
         }
 
-        .notification.success {
-            background: var(--success);
+        .toast.success {
+            background-color: var(--success);
         }
 
-        .notification.error {
-            background: var(--error);
+        .toast.error {
+            background-color: var(--danger);
         }
 
-        .notification.info {
-            background: var(--info);
+        .toast.warning {
+            background-color: var(--warning);
         }
 
-        .notification.warning {
-            background: var(--warning);
+        .toast.info {
+            background-color: var(--secondary);
         }
 
         /* OVERLAY DE CHARGEMENT */
@@ -454,9 +650,9 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(167, 109, 33, 0.2);
+            border: 5px solid rgba(128, 0, 32, 0.2);
             border-radius: 50%;
-            border-top-color: var(--or);
+            border-top-color: var(--primary);
             animation: spin 1s linear infinite;
         }
 
@@ -470,7 +666,7 @@
         .file-name-display {
             margin-top: 0.5rem;
             font-size: 0.85rem;
-            color: var(--gris-texte);
+            color: var(--gray);
             font-style: italic;
             display: none;
         }
@@ -486,9 +682,48 @@
             }
         }
 
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main";
+            }
+
+            .sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
         @media (max-width: 768px) {
-            header {
-                padding: 1rem;
+            .main-header {
+                padding: 0 1rem;
+            }
+
+            .search-container {
+                margin: 0 1rem;
+                max-width: 300px;
+            }
+
+            .user-info {
+                display: none;
             }
 
             .profile-info-grid {
@@ -505,7 +740,11 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 1rem;
+            }
+
             .form-actions {
                 flex-direction: column;
             }
@@ -515,121 +754,264 @@
                 justify-content: center;
             }
         }
+
+        @media (max-width: 480px) {
+            .search-container {
+                display: none;
+            }
+
+            .header-actions {
+                margin-left: auto;
+            }
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header>
-        <div class="logo"><i class="fas fa-vote-yea"></i> Profil</div>
-        <nav class="user-nav">
-            <span id="username"><i class="fas fa-user"></i> <span>Étudiant</span></span>
-            <a href="/user/dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
-            <a href="/user/login" id="logout-btn"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a>
-        </nav>
-    </header>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
 
-    <!-- Contenu principal -->
-    <div class="main-container">
-        <a href="/user/dashboard" class="back-link">
-            <i class="fas fa-arrow-left"></i> Retour au dashboard
-        </a>
-
-        <h1 class="page-title">
-            <i class="fas fa-user-cog"></i>
-            Mon Profil
-        </h1>
-
-        <div class="card">
-            <div class="profile-container">
-                <div class="profile-sidebar">
-                    <img id="profile-avatar-view"
-                        src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
-                        alt="Photo de profil" class="profile-avatar">
-                    <div class="profile-quick-info">
-                        <h3 id="profile-name">-</h3>
-                        <p id="profile-matricule">Matricule: -</p>
-                        <p id="profile-program">Filière: -</p>
-                        <p id="profile-year">Année: -</p>
-                        <p id="profile-email">Email: -</p>
-                    </div>
-                    <button class="btn btn-primary" id="edit-profile-btn">
-                        <i class="fas fa-edit"></i> Modifier mon profil
-                    </button>
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Rechercher...">
                 </div>
+            </div>
 
-                <!-- Mode affichage -->
-                <div class="profile-content" id="profile-view-section">
-                    <div class="profile-info-grid">
-                        <div class="info-item">
-                            <label>Nom complet:</label>
-                            <span id="view-fullname">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Email:</label>
-                            <span id="view-email">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Matricule:</label>
-                            <span id="view-matricule">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Filière:</label>
-                            <span id="view-program">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Année:</label>
-                            <span id="view-year">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Statut:</label>
-                            <span class="status-badge" id="view-status">Étudiant</span>
-                        </div>
+            <div class="header-actions">
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+
+                <div class="user-menu">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                        alt="Photo de profil" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Étudiant</span>
+                        <span class="user-role">Étudiant</span>
                     </div>
                 </div>
+            </div>
+        </header>
 
-                <!-- Mode édition (masqué par défaut) -->
-                <div class="profile-content" id="profile-edit-section" style="display: none;">
-                    <form id="profile-form">
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span>UCAO</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">Accueil</span>
+                </a>
+                <a href="candidature.html" class="nav-item">
+                    <i class="fas fa-file-signature nav-icon"></i>
+                    <span class="nav-text">Candidature</span>
+                </a>
+                <a href="elections.html" class="nav-item">
+                    <i class="fas fa-vote-yea nav-icon"></i>
+                    <span class="nav-text">Élections</span>
+                </a>
+                <a href="mes-candidatures.html" class="nav-item">
+                    <i class="fas fa-list nav-icon"></i>
+                    <span class="nav-text">Mes Candidatures</span>
+                </a>
+                <a href="vote.html" class="nav-item">
+                    <i class="fas fa-check nav-icon"></i>
+                    <span class="nav-text">Voter</span>
+                </a>
+                <a href="results.html" class="nav-item">
+                    <i class="fas fa-chart-bar nav-icon"></i>
+                    <span class="nav-text">Résultats</span>
+                </a>
+                <a href="profile.html" class="nav-item active">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">Profil</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <a href="dashboard.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Retour au dashboard
+            </a>
+
+            <h1 class="page-title">
+                <i class="fas fa-user-cog"></i>
+                Mon Profil
+            </h1>
+
+            <div class="card">
+                <div class="profile-container">
+                    <div class="profile-sidebar">
+                        <img id="profile-avatar-view"
+                            src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
+                            alt="Photo de profil" class="profile-avatar">
+                        <div class="profile-quick-info">
+                            <h3 id="profile-name">-</h3>
+                            <p id="profile-matricule">Matricule: -</p>
+                            <p id="profile-program">Filière: -</p>
+                            <p id="profile-year">Année: -</p>
+                            <p id="profile-email">Email: -</p>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="lastname">Nom</label>
-                                <input type="text" id="lastname" name="lastname" required>
+                        <button class="btn btn-primary" id="edit-profile-btn">
+                            <i class="fas fa-edit"></i> Modifier mon profil
+                        </button>
+                    </div>
+
+                    <!-- Mode affichage -->
+                    <div class="profile-content" id="profile-view-section">
+                        <div class="profile-info-grid">
+                            <div class="info-item">
+                                <label>Nom complet:</label>
+                                <span id="view-fullname">-</span>
                             </div>
-                            <div class="form-group">
-                                <label for="firstname">Prénom</label>
-                                <input type="text" id="firstname" name="firstname" required>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="view-email">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Matricule:</label>
+                                <span id="view-matricule">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Filière:</label>
+                                <span id="view-program">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Année:</label>
+                                <span id="view-year">-</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Statut:</label>
+                                <span class="status-badge" id="view-status">Étudiant</span>
                             </div>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline" id="cancel-changes">
-                                Annuler
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                Enregistrer
-                            </button>
-                        </div>
-                    </form>
-                    <div class="profile-security">
-                        <h3><i class="fas fa-shield-alt"></i> Sécurité du compte</h3>
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button class="btn btn-outline" id="change-password-btn">
-                                <i class="fas fa-key"></i> Changer le mot de passe
-                            </button>
-                            <button class="btn btn-outline" id="change-avatar-btn">
-                                <i class="fas fa-camera"></i> Changer la photo
-                            </button>
-                            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                            <div id="file-name-display" class="file-name-display"></div>
+                    </div>
+
+                    <!-- Mode édition (masqué par défaut) -->
+                    <div class="profile-content" id="profile-edit-section" style="display: none;">
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lastname">Nom</label>
+                                    <input type="text" id="lastname" name="lastname" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstname">Prénom</label>
+                                    <input type="text" id="firstname" name="firstname" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="cancel-changes">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Enregistrer
+                                </button>
+                            </div>
+                        </form>
+                        <div class="profile-security">
+                            <h3><i class="fas fa-shield-alt"></i> Sécurité du compte</h3>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-outline" id="change-password-btn">
+                                    <i class="fas fa-key"></i> Changer le mot de passe
+                                </button>
+                                <button class="btn btn-outline" id="change-avatar-btn">
+                                    <i class="fas fa-camera"></i> Changer la photo
+                                </button>
+                                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                                <div id="file-name-display" class="file-name-display"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- Modal de changement de mot de passe -->
@@ -685,163 +1067,181 @@
         </div>
     </div>
 
-    <!-- Overlay de chargement -->
+    <div class="overlay" id="overlay"></div>
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
     </div>
 
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        <i class="fas fa-info-circle"></i>
-        <span id="notification-message"></span>
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
     </div>
 
-    <script src="/assets/js/config.js"></script>
+    <script src="/assets/config.js"></script>
     <script>
-        // Fonctions d'authentification 
-        const STUDENT_AUTH = {
-            /**
-             * Vérifie si l'étudiant est connecté
-             */
-            isAuthenticated: () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    if (!token) return false;
+        // Configuration et constantes
+        const API_URL = CONFIG.BASE_URL;
+        const TOKEN = localStorage.getItem('token');
 
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const now = Date.now() / 1000;
-                    return payload.exp > now;
-                } catch (error) {
-                    console.error('Erreur de vérification d\'authentification:', error);
-                    return false;
+        // Fonctions utilitaires pour les appels API
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_URL}/api${endpoint}`;
+
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN}`
                 }
+            };
+
+            const config = { ...defaultOptions, ...options };
+
+            try {
+                const response = await fetch(url, config);
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        // Services
+        const UserService = {
+            async getProfile() {
+                return await apiCall('/users/profile');
             },
 
-            /**
-             * Vérifie le rôle de l'étudiant
-             */
-            getUserRole: () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    if (!token) return null;
-
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.role;
-                } catch (error) {
-                    console.error('Erreur de récupération du rôle:', error);
-                    return null;
-                }
+            async updateProfile(data) {
+                return await apiCall('/users/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
             },
 
-            /**
-             * Déconnexion de l'étudiant
-             */
-            logout: () => {
-                localStorage.removeItem('token');
-                window.location.href = '/user/login';
+            async changePassword(data) {
+                return await apiCall('/userLogin/change-password', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            async uploadAvatar(formData) {
+                const url = `${API_URL}/api/users/avatar`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+
+                return await response.json();
             }
         };
 
-        // Initialisation
+        // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            // Vérification de l'authentification et du rôle
-            const role = STUDENT_AUTH.getUserRole();
-            const isAuth = STUDENT_AUTH.isAuthenticated();
-
-            if (!isAuth) {
-                console.log('Non authentifié, redirection vers /user/login');
-                window.location.href = '/user/login';
+            // Vérifier que l'utilisateur est connecté
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
                 return;
             }
 
-            if (role !== 'ETUDIANT') {
-                console.log('Rôle insuffisant, redirection vers /unauthorized');
-                window.location.href = '../unauthorized.html';
-                return;
-            }
+            // Initialiser le menu burger
+            const burger = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
 
-            showLoading();
-            await loadUserData();
-            setupEventListeners();
-            updateUI();
-            hideLoading();
-        });
-
-        // Chargement données utilisateur
-        async function loadUserData() {
-            try {
-                // Utiliser la configuration importée ou la configuration par défaut
-                const config = window.CONFIG || DEFAULT_CONFIG;
-                const API_BASE = config.API.BASE_URL;
-                const profileEndpoint = config.API.ENDPOINTS.USERS.PROFILE || '/api/users/profile';
-
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}${profileEndpoint}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.status === 401) {
-                    localStorage.removeItem('token');
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                if (!response.ok) throw new Error('Erreur chargement profil');
-
-                const userData = await response.json();
-                window.APP_STATE = { userData };
-                updateUserProfile();
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Erreur de chargement du profil', 'error');
-            }
-        }
-
-        // Mise à jour UI profil
-        function updateUserProfile() {
-            if (!window.APP_STATE || !window.APP_STATE.userData) return;
-
-            const user = window.APP_STATE.userData;
-
-            // Header
-            document.getElementById('username').querySelector('span').textContent = `${user.prenom} ${user.nom}`;
-
-            // Sidebar
-            document.getElementById('profile-name').textContent = `${user.prenom} ${user.nom}`;
-            if (user.annee === 1) {
-                document.getElementById('profile-matricule').textContent = `Code inscription: ${user.codeInscription || '-'}`;
-            } else {
-                document.getElementById('profile-matricule').textContent = `Matricule: ${user.matricule || '-'}`;
-            }
-            document.getElementById('profile-program').textContent = `Filière: ${user.filiere || '-'}`;
-            document.getElementById('profile-year').textContent = `Année: ${user.annee ? `${user.annee}ème année` : '-'}`;
-            document.getElementById('profile-email').textContent = `Email: ${user.email || '-'}`;
-
-            // Mode affichage profil
-            document.getElementById('view-fullname').textContent = `${user.prenom} ${user.nom}`;
-            document.getElementById('view-email').textContent = user.email || '-';
-            document.getElementById('view-matricule').textContent =
-                user.annee === 1
-                    ? (user.codeInscription || '-')
-                    : (user.matricule || '-');
-            document.getElementById('view-program').textContent = user.filiere || '-';
-            document.getElementById('view-year').textContent = user.annee ? `${user.annee}ème année` : '-';
-
-            if (user.photoUrl) {
-                document.getElementById('profile-avatar-view').src = user.photoUrl;
-            }
-        }
-
-        // Gestion événements
-        function setupEventListeners() {
-            // Déconnexion
-            document.getElementById('logout-btn').addEventListener('click', (e) => {
-                e.preventDefault();
-                STUDENT_AUTH.logout();
+            burger.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
             });
 
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Gestion de la déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userProfile');
+                window.location.href = 'login.html';
+            });
+
+            // Charger les données utilisateur
+            await loadUserData();
+
+            // Initialiser les gestionnaires d'événements
+            initEventHandlers();
+        });
+
+        // Charger les données utilisateur
+        async function loadUserData() {
+            showLoading();
+
+            try {
+                const response = await UserService.getProfile();
+                const userData = response.data;
+
+                // Mettre à jour l'interface utilisateur
+                updateUserProfile(userData);
+
+                // Stocker les données utilisateur pour une utilisation ultérieure
+                window.userData = userData;
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                showToast('Erreur de chargement des données du profil', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mettre à jour l'affichage du profil
+        function updateUserProfile(userData) {
+            // Header
+            document.getElementById('userName').textContent = `${userData.prenom} ${userData.nom}`;
+
+            // Sidebar
+            document.getElementById('profile-name').textContent = `${userData.prenom} ${userData.nom}`;
+            if (userData.annee === 1) {
+                document.getElementById('profile-matricule').textContent = `Code inscription: ${userData.codeInscription || '-'}`;
+            } else {
+                document.getElementById('profile-matricule').textContent = `Matricule: ${userData.matricule || '-'}`;
+            }
+            document.getElementById('profile-program').textContent = `Filière: ${userData.filiere || '-'}`;
+            document.getElementById('profile-year').textContent = `Année: ${userData.annee ? `${userData.annee}ème année` : '-'}`;
+            document.getElementById('profile-email').textContent = `Email: ${userData.email || '-'}`;
+
+            // Mode affichage profil
+            document.getElementById('view-fullname').textContent = `${userData.prenom} ${userData.nom}`;
+            document.getElementById('view-email').textContent = userData.email || '-';
+            document.getElementById('view-matricule').textContent =
+                userData.annee === 1
+                    ? (userData.codeInscription || '-')
+                    : (userData.matricule || '-');
+            document.getElementById('view-program').textContent = userData.filiere || '-';
+            document.getElementById('view-year').textContent = userData.annee ? `${userData.annee}ème année` : '-';
+
+            if (userData.photoUrl) {
+                document.getElementById('profile-avatar-view').src = userData.photoUrl;
+            }
+        }
+
+        // Initialiser les gestionnaires d'événements
+        function initEventHandlers() {
             // Profil - Bouton modifier
             document.getElementById('edit-profile-btn').addEventListener('click', toggleEditMode);
             document.getElementById('cancel-changes').addEventListener('click', cancelEdit);
@@ -906,17 +1306,16 @@
         }
 
         function loadEditFormData() {
-            if (!window.APP_STATE || !window.APP_STATE.userData) return;
+            if (!window.userData) return;
 
-            const user = window.APP_STATE.userData;
-            document.getElementById('email').value = user.email || '';
-            document.getElementById('lastname').value = user.nom || '';
-            document.getElementById('firstname').value = user.prenom || '';
+            document.getElementById('email').value = window.userData.email || '';
+            document.getElementById('lastname').value = window.userData.nom || '';
+            document.getElementById('firstname').value = window.userData.prenom || '';
         }
 
         function cancelEdit() {
             toggleEditMode();
-            showNotification('Modifications annulées', 'info');
+            showToast('Modifications annulées', 'info');
         }
 
         async function saveProfile(e) {
@@ -930,32 +1329,19 @@
 
             try {
                 showLoading();
-                // Utiliser la configuration importée ou la configuration par défaut
-                const config = window.CONFIG || DEFAULT_CONFIG;
-                const API_BASE = config.API.BASE_URL;
-                const profileEndpoint = config.API.ENDPOINTS.USERS.PROFILE || '/api/users/profile';
+                const response = await UserService.updateProfile(formData);
 
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}${profileEndpoint}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.ok) {
-                    const updatedData = await response.json();
-                    window.APP_STATE.userData = { ...window.APP_STATE.userData, ...updatedData };
-                    updateUserProfile();
+                if (response.success) {
+                    // Mettre à jour les données utilisateur
+                    window.userData = { ...window.userData, ...formData };
+                    updateUserProfile(window.userData);
                     toggleEditMode();
-                    showNotification('Profil mis à jour avec succès', 'success');
+                    showToast('Profil mis à jour avec succès', 'success');
                 } else {
-                    throw new Error('Erreur mise à jour profil');
+                    throw new Error(response.message || 'Erreur lors de la mise à jour');
                 }
             } catch (error) {
-                showNotification('Erreur lors de la mise à jour', 'error');
+                showToast(error.message || 'Erreur lors de la mise à jour du profil', 'error');
             } finally {
                 hideLoading();
             }
@@ -985,36 +1371,22 @@
             const confirmPassword = document.getElementById('confirm-password').value;
 
             if (newPassword !== confirmPassword) {
-                showNotification('Les mots de passe ne correspondent pas', 'error');
+                showToast('Les mots de passe ne correspondent pas', 'error');
                 return;
             }
 
             try {
                 showLoading();
-                // Utiliser la configuration importée ou la configuration par défaut
-                const config = window.CONFIG || DEFAULT_CONFIG;
-                const API_BASE = config.API.BASE_URL;
-                const changePasswordEndpoint = config.API.ENDPOINTS.AUTH.CHANGE_PASSWORD || '/api/userLogin/change-password';
+                const response = await UserService.changePassword({ currentPassword, newPassword });
 
-                const token = localStorage.getItem('token');
-                const response = await fetch(`${API_BASE}${changePasswordEndpoint}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ currentPassword, newPassword })
-                });
-
-                if (response.ok) {
+                if (response.success) {
                     closePasswordModal();
-                    showNotification('Mot de passe changé avec succès', 'success');
+                    showToast('Mot de passe changé avec succès', 'success');
                 } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Erreur changement mot de passe');
+                    throw new Error(response.message || 'Erreur lors du changement de mot de passe');
                 }
             } catch (error) {
-                showNotification(error.message || 'Erreur lors du changement de mot de passe', 'error');
+                showToast(error.message || 'Erreur lors du changement de mot de passe', 'error');
             } finally {
                 hideLoading();
             }
@@ -1031,43 +1403,30 @@
             fileNameDisplay.style.display = 'block';
 
             if (!file.type.match('image.*')) {
-                showNotification('Veuillez sélectionner une image', 'error');
+                showToast('Veuillez sélectionner une image', 'error');
                 fileNameDisplay.style.display = 'none';
                 return;
             }
 
             try {
                 showLoading();
-                // Utiliser la configuration importée ou la configuration par défaut
-                const config = window.CONFIG || DEFAULT_CONFIG;
-                const API_BASE = config.API.BASE_URL;
-                const avatarEndpoint = config.API.ENDPOINTS.USERS.AVATAR || '/api/users/avatar';
-
-                const token = localStorage.getItem('token');
                 const formData = new FormData();
                 formData.append('avatar', file);
 
-                const response = await fetch(`${API_BASE}${avatarEndpoint}`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
+                const response = await UserService.uploadAvatar(formData);
 
-                if (response.ok) {
-                    const result = await response.json();
-                    document.getElementById('profile-avatar-view').src = result.avatarUrl;
-                    showNotification('Photo de profil mise à jour', 'success');
+                if (response.success) {
+                    document.getElementById('profile-avatar-view').src = response.avatarUrl;
+                    showToast('Photo de profil mise à jour', 'success');
                     // Masquer l'affichage du nom de fichier après succès
                     setTimeout(() => {
                         fileNameDisplay.style.display = 'none';
                     }, 3000);
                 } else {
-                    throw new Error('Erreur upload avatar');
+                    throw new Error(response.message || 'Erreur lors du changement de photo');
                 }
             } catch (error) {
-                showNotification('Erreur lors du changement de photo', 'error');
+                showToast(error.message || 'Erreur lors du changement de photo', 'error');
                 fileNameDisplay.style.display = 'none';
             } finally {
                 hideLoading();
@@ -1084,41 +1443,33 @@
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notification');
-            const icon = notification.querySelector('i');
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
 
             // Changer l'icône selon le type
             switch (type) {
                 case 'success':
-                    icon.className = 'fas fa-check-circle';
+                    toastIcon.className = 'fa-solid fa-circle-check';
                     break;
                 case 'error':
-                    icon.className = 'fas fa-exclamation-circle';
+                    toastIcon.className = 'fa-solid fa-circle-exclamation';
                     break;
                 case 'warning':
-                    icon.className = 'fas fa-exclamation-triangle';
+                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
                     break;
                 default:
-                    icon.className = 'fas fa-info-circle';
+                    toastIcon.className = 'fa-solid fa-info-circle';
             }
 
-            notification.className = `notification ${type}`;
-            document.getElementById('notification-message').textContent = message;
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
 
-            // Afficher la notification
+            // Cacher après 3 secondes
             setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-
-            // Cacher après 5 secondes
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 5000);
-        }
-
-        function updateUI() {
-            updateUserProfile();
+                toast.className = 'toast';
+            }, 3000);
         }
     </script>
 </body>
