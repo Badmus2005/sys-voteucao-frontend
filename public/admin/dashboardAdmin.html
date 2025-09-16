@@ -2116,10 +2116,15 @@
             try {
                 showLoading();
                 const token = getToken();
-                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=10&page=1`, {
+                const limit = 10;
+                const page = 1;
+                const offset = (page - 1) * limit;
+
+                const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=${limit}&offset=${offset}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
 
                 let activities = [];
 
@@ -2388,8 +2393,8 @@
                 const result = await response.json();
 
                 // Sécurisation du format attendu
-                const notifications = Array.isArray(result.data)
-                    ? result.data
+                const notifications = Array.isArray(result.notifications)
+                    ? result.notifications
                     : Array.isArray(result)
                         ? result
                         : [];
