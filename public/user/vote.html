@@ -2103,7 +2103,6 @@
             }
         }
 
-        // Soumettre le vote
         async function submitVote() {
             const submitBtn = document.getElementById('submitVoteBtn');
             submitBtn.disabled = true;
@@ -2113,30 +2112,34 @@
             document.getElementById('confirmationModal').classList.remove('active');
 
             try {
-                // Obtenir un jeton de vote pour chaque élection
                 for (const electionId in selectedCandidates) {
                     const candidateId = selectedCandidates[electionId];
+                    const election = allElections.find(e => e.id == electionId);
+
+                    console.log(`📌 Traitement du vote pour l'élection ID: ${electionId}, Candidat ID: ${candidateId}`);
 
                     // Afficher le modal de validation du jeton
                     const tokenModal = document.getElementById('tokenValidationModal');
                     const tokenText = document.getElementById('tokenValidationText');
                     const tokenActions = document.getElementById('tokenValidationActions');
 
-                    tokenText.textContent = `Obtention du jeton de vote pour ${allElections.find(e => e.id == electionId).titre}...`;
+                    tokenText.textContent = `Obtention du jeton de vote pour ${election?.titre || 'Élection inconnue'}...`;
                     tokenActions.innerHTML = `
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p>Obtention du jeton...</p>
-                        </div>
-                    `;
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Obtention du jeton...</p>
+                </div>
+            `;
                     tokenModal.classList.add('active');
 
                     // Obtenir le jeton
                     const voteToken = await getVoteToken(electionId);
+                    console.log(`🔐 Jeton obtenu: ${voteToken}`);
 
                     // Valider le jeton
                     tokenText.textContent = 'Validation du jeton de vote...';
                     const isValid = await validateVoteToken(voteToken, electionId);
+                    console.log(`✅ Jeton validé: ${isValid}`);
 
                     if (!isValid) {
                         throw new Error('Jeton de vote invalide');
@@ -2148,11 +2151,16 @@
 
                     // Soumettre le vote
                     tokenText.textContent = 'Enregistrement de votre vote...';
-                    const voteResult = await VoteService.submitVote({
+                    const votePayload = {
                         electionId: parseInt(electionId),
                         candidateId: parseInt(candidateId),
                         voteToken: voteToken
-                    });
+                    };
+
+                    console.log('📤 Envoi du vote:', votePayload);
+
+                    const voteResult = await VoteService.submitVote(votePayload);
+                    console.log('📥 Résultat du vote:', voteResult);
 
                     if (!voteResult || !voteResult.success) {
                         throw new Error(voteResult?.message || 'Erreur lors de l\'enregistrement du vote');
@@ -2169,7 +2177,7 @@
                 resetVote();
 
             } catch (error) {
-                console.error('Erreur lors du vote:', error);
+                console.error('❌ Erreur lors du vote:', error);
 
                 // Fermer le modal de validation
                 document.getElementById('tokenValidationModal').classList.remove('active');
