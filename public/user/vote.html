@@ -2132,7 +2132,7 @@
                     tokenModal.classList.add('active');
 
                     // Obtenir le jeton
-                    voteToken = await getVoteToken(electionId);
+                    const voteToken = await getVoteToken(electionId);
 
                     // Valider le jeton
                     tokenText.textContent = 'Validation du jeton de vote...';
@@ -2140,6 +2140,10 @@
 
                     if (!isValid) {
                         throw new Error('Jeton de vote invalide');
+                    }
+
+                    if (!candidateId) {
+                        throw new Error(`Aucun candidat sélectionné pour l'élection ${electionId}`);
                     }
 
                     // Soumettre le vote
