@@ -1938,11 +1938,13 @@
                 let electionCandidates = [];
                 if (response && Array.isArray(response)) {
                     electionCandidates = response;
-                } else if (response && response.data && Array.isArray(response.data)) {
-                    electionCandidates = response.data;
-                } else if (response && response.success && Array.isArray(response.data)) {
-                    electionCandidates = response.data;
+                } else if (response && response.success && Array.isArray(response.candidates)) {
+                    electionCandidates = response.candidates;
                 }
+                else if (response && response.success && Array.isArray(response.candidates)) {
+                    electionCandidates = response.candidates;
+                }
+
 
                 if (electionCandidates.length === 0) {
                     candidatesList.innerHTML = `
