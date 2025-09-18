@@ -1119,6 +1119,7 @@
         .footer-links {
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
@@ -1309,7 +1310,7 @@
         .students-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 1000px;
         }
 
         .students-table th,
@@ -1445,6 +1446,146 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+
+        /* Styles pour les boutons d'action */
+        .btn-secondary {
+            background: var(--blue-night);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: var(--blue-night-light);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-success:hover {
+            background: #2d9a58;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-warning:hover {
+            background: #c28a1c;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            background: #d32c2c;
+        }
+
+        /* Styles pour la modal de réinitialisation */
+        .modal-content {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--light-bg);
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .credentials-display {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 15px;
+            border-left: 4px solid var(--bordeaux);
+        }
+
+        .credentials-display h4 {
+            margin-bottom: 10px;
+            color: var(--blue-night);
+        }
+
+        .credential-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .credential-label {
+            font-weight: 600;
+            color: var(--blue-night);
+        }
+
+        .credential-value {
+            font-family: monospace;
+            color: var(--bordeaux);
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: var(--bordeaux);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: var(--bordeaux-light);
         }
     </style>
 </head>
@@ -1662,6 +1803,8 @@
                                 <th>Filière</th>
                                 <th>Année</th>
                                 <th>Email</th>
+                                <th>Identifiant Temporaire</th>
+                                <th>Mot de passe Temporaire</th>
                                 <th>Statut</th>
                                 <th>Actions</th>
                             </tr>
@@ -1711,6 +1854,46 @@
         <div id="notificationList"></div>
     </div>
 
+    <!-- Modal pour la réinitialisation des accès -->
+    <div class="modal-overlay" id="resetModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Réinitialiser les accès étudiant</h3>
+                <button class="close-modal" onclick="closeResetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="resetModalContent">
+                    <p>Êtes-vous sûr de vouloir réinitialiser les accès de cet étudiant ?</p>
+                    <p>Un identifiant et mot de passe temporaires seront générés.</p>
+                </div>
+                <div id="resetResult" class="credentials-display" style="display: none;">
+                    <h4>Identifiants temporaires générés</h4>
+                    <div class="credential-item">
+                        <span class="credential-label">Identifiant temporaire:</span>
+                        <span class="credential-value" id="tempIdDisplay"></span>
+                        <button class="copy-btn" onclick="copyToClipboard('tempIdDisplay')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="credential-item">
+                        <span class="credential-label">Mot de passe temporaire:</span>
+                        <span class="credential-value" id="tempPasswordDisplay"></span>
+                        <button class="copy-btn" onclick="copyToClipboard('tempPasswordDisplay')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p style="margin-top: 10px; font-style: italic;">
+                        Ces identifiants seront valides pendant 24 heures.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeResetModal()">Annuler</button>
+                <button class="btn btn-primary" id="confirmResetBtn" onclick="confirmReset()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/assets/config.js"></script>
     <script>
         // Configuration des endpoints API
@@ -1728,6 +1911,11 @@
         const FILIERES_ENDPOINT = '/api/filieres/ecole';
         const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
         const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/read';
+        const RESET_ACCESS_ENDPOINT = '/api/admin/students/:id/reset-access';
+
+        // Variables globales
+        let currentPage = 1;
+        let currentStudentId = null;
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1888,9 +2076,21 @@
             }
         }
 
-        // ------------ GESTION DES ÉTUDIANTS ------------
-        let currentPage = 1;
+        // Fonction pour copier du texte dans le presse-papier
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
 
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copié dans le presse-papier', 'success');
+            }).catch(err => {
+                console.error('Erreur lors de la copie:', err);
+                showToast('Erreur lors de la copie', 'error');
+            });
+        }
+
+        // ------------ GESTION DES ÉTUDIANTS ------------
         async function fetchAllEtudiants(page = 1) {
             try {
                 showLoading();
@@ -2120,6 +2320,72 @@
             }
         }
 
+        // Fonction pour ouvrir la modal de réinitialisation
+        function openResetModal(studentId, studentName) {
+            currentStudentId = studentId;
+            const modal = document.getElementById('resetModalOverlay');
+            const content = document.getElementById('resetModalContent');
+            const result = document.getElementById('resetResult');
+
+            content.innerHTML = `
+                <p>Êtes-vous sûr de vouloir réinitialiser les accès de <strong>${studentName}</strong> ?</p>
+                <p>Un identifiant et mot de passe temporaires seront générés.</p>
+            `;
+
+            result.style.display = 'none';
+            modal.classList.add('active');
+        }
+
+        // Fonction pour fermer la modal
+        function closeResetModal() {
+            const modal = document.getElementById('resetModalOverlay');
+            modal.classList.remove('active');
+            currentStudentId = null;
+        }
+
+        // Fonction pour confirmer la réinitialisation
+        async function confirmReset() {
+            if (!currentStudentId) return;
+
+            try {
+                showLoading();
+                const token = getToken();
+                const res = await fetch(`${API_BASE}${RESET_ACCESS_ENDPOINT.replace(':id', currentStudentId)}`, {
+                    method: 'POST',
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) throw new Error('Erreur lors de la réinitialisation');
+
+                const result = await res.json();
+
+                // Afficher les identifiants générés
+                document.getElementById('tempIdDisplay').textContent = result.temporaryIdentifiant;
+                document.getElementById('tempPasswordDisplay').textContent = result.temporaryPassword;
+
+                document.getElementById('resetModalContent').style.display = 'none';
+                document.getElementById('resetResult').style.display = 'block';
+
+                // Mettre à jour le bouton de confirmation
+                const confirmBtn = document.getElementById('confirmResetBtn');
+                confirmBtn.textContent = 'Fermer';
+                confirmBtn.onclick = closeResetModal;
+
+                showAlert('Accès réinitialisés avec succès', 'success');
+
+                // Rafraîchir la liste des étudiants
+                fetchAllEtudiants();
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert(error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
         function renderStudentsTable(data) {
             const tableBody = document.getElementById('studentsTableBody');
             if (!tableBody) return;
@@ -2131,7 +2397,7 @@
             if (!data || data.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 20px;">
+                        <td colspan="10" style="text-align: center; padding: 20px;">
                             Aucun étudiant trouvé
                         </td>
                     </tr>
@@ -2141,6 +2407,8 @@
 
             data.forEach(e => {
                 const isActive = e.actif ?? e.user?.actif;
+                const identifiantTemporaire = e.identifiant_temporaire || e.temporaryId || '-';
+                const tempPassword = e.temp_password ? 'Défini' : 'Aucun';
                 const row = document.createElement('tr');
 
                 row.innerHTML = `
@@ -2150,11 +2418,16 @@
                     <td>${e.filiere || '-'}</td>
                     <td>${e.annee || '-'}</td>
                     <td>${e.email || e.user?.email || '-'}</td>
+                    <td>${identifiantTemporaire}</td>
+                    <td>${tempPassword}</td>
                     <td><span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'Actif' : 'Inactif'}</span></td>
                     <td>
                         <div class="action-buttons">
                             <button class="action-btn toggle-btn btn-sm" onclick="toggleStatus(${e.id}, ${isActive})">
                                 <i class="fas fa-toggle-${isActive ? 'on' : 'off'}"></i>
+                            </button>
+                            <button class="action-btn reset-btn btn-sm" onclick="openResetModal(${e.id}, '${e.prenom} ${e.nom}')">
+                                <i class="fas fa-key"></i>
                             </button>
                             <button class="action-btn delete-btn btn-sm" onclick="deleteEtudiant(${e.id})">
                                 <i class="fas fa-trash"></i>
@@ -2560,6 +2833,16 @@
                 currentPage++;
                 fetchAllEtudiants(currentPage);
             });
+
+            // Fermer la modal en cliquant à l'extérieur
+            const resetModal = document.getElementById('resetModalOverlay');
+            if (resetModal) {
+                resetModal.addEventListener('click', function (e) {
+                    if (e.target === resetModal) {
+                        closeResetModal();
+                    }
+                });
+            }
         }
     </script>
 </body>
