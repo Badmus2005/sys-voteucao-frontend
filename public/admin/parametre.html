@@ -1702,7 +1702,7 @@
                     el.addEventListener(event, handler);
                     return true;
                 }
-                console.error(`Element #${id} not found`);
+                console.warn(`Element #${id} not found for event listener`);
                 return false;
             },
 
@@ -1735,6 +1735,21 @@
                 setTimeout(() => {
                     alertBox.style.display = "none";
                 }, 4000);
+            },
+
+            // Fonction sécurisée pour manipuler classList
+            safeClassList: (element, action, className) => {
+                if (element && element.classList) {
+                    if (action === 'add') {
+                        element.classList.add(className);
+                    } else if (action === 'remove') {
+                        element.classList.remove(className);
+                    } else if (action === 'toggle') {
+                        element.classList.toggle(className);
+                    }
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -1779,20 +1794,20 @@
         };
 
         // =============================================
-        // GESTIONNAIRES D'ÉVÉNEMENTS
+        // GESTIONNAIRES D'ÉVÉNEMENTS - CORRIGÉ
         // =============================================
         const EVENT_HANDLERS = {
             setupNavigation: () => {
-                // Navigation sidebar
+                // Navigation sidebar - version sécurisée
                 const menuToggle = document.getElementById('menuToggle');
                 const sidebar = document.getElementById('sidebar');
                 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
                 if (menuToggle && sidebar && sidebarOverlay) {
                     const toggleSidebar = () => {
-                        sidebar.classList.toggle('active');
-                        sidebarOverlay.classList.toggle('active');
-                        menuToggle.classList.toggle('active');
+                        UTILS.safeClassList(sidebar, 'toggle', 'active');
+                        UTILS.safeClassList(sidebarOverlay, 'toggle', 'active');
+                        UTILS.safeClassList(menuToggle, 'toggle', 'active');
                     };
 
                     menuToggle.addEventListener('click', function (e) {
@@ -1801,6 +1816,8 @@
                     });
 
                     sidebarOverlay.addEventListener('click', toggleSidebar);
+
+                    // Empêcher la fermeture lors du clic dans la sidebar
                     sidebar.addEventListener('click', (e) => e.stopPropagation());
                 }
 
@@ -1815,7 +1832,7 @@
                     });
 
                     document.addEventListener('click', function (e) {
-                        if (userDropdown.classList.contains('active') &&
+                        if (userDropdown && userDropdown.classList.contains('active') &&
                             !userToggle.contains(e.target) &&
                             !userDropdown.contains(e.target)) {
                             userDropdown.classList.remove('active');
@@ -1829,20 +1846,35 @@
                     DASHBOARD_AUTH.logout();
                 });
 
-                // Navigation paramètres
-                document.querySelectorAll('.settings-nav-item').forEach(item => {
+                // Navigation paramètres - CORRECTION IMPORTANTE
+                const settingsNavItems = document.querySelectorAll('.settings-nav-item');
+                settingsNavItems.forEach(item => {
                     item.addEventListener('click', function () {
                         const target = this.getAttribute('data-target');
 
-                        document.querySelectorAll('.settings-nav-item').forEach(i => {
-                            i.classList.remove('active');
-                        });
-                        this.classList.add('active');
+                        // Vérifier que la cible existe
+                        if (!target) {
+                            console.warn('Data-target manquant pour:', this);
+                            return;
+                        }
 
-                        document.querySelectorAll('.settings-section').forEach(section => {
-                            section.classList.remove('active');
+                        // Mettre à jour la navigation
+                        settingsNavItems.forEach(i => {
+                            UTILS.safeClassList(i, 'remove', 'active');
                         });
-                        document.getElementById(target).classList.add('active');
+                        UTILS.safeClassList(this, 'add', 'active');
+
+                        // Afficher la section correspondante
+                        document.querySelectorAll('.settings-section').forEach(section => {
+                            UTILS.safeClassList(section, 'remove', 'active');
+                        });
+
+                        const targetSection = document.getElementById(target);
+                        if (targetSection) {
+                            UTILS.safeClassList(targetSection, 'add', 'active');
+                        } else {
+                            console.warn(`Section #${target} non trouvée`);
+                        }
                     });
                 });
 
@@ -1850,7 +1882,9 @@
                 document.querySelectorAll('.timeline-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const section = item.getAttribute('data-section');
-                        ELECTION_FORM.showSection(section);
+                        if (section) {
+                            ELECTION_FORM.showSection(section);
+                        }
                     });
                 });
             },
@@ -1894,16 +1928,26 @@
         // =============================================
         const ELECTION_FORM = {
             showSection: (section) => {
-                document.querySelectorAll('.form-section').forEach(sec => {
-                    sec.classList.remove('active');
+                const formSections = document.querySelectorAll('.form-section');
+                const timelineItems = document.querySelectorAll('.timeline-item');
+
+                formSections.forEach(sec => {
+                    UTILS.safeClassList(sec, 'remove', 'active');
                 });
 
-                document.getElementById(`${section}-section`).classList.add('active');
+                const targetSection = document.getElementById(`${section}-section`);
+                if (targetSection) {
+                    UTILS.safeClassList(targetSection, 'add', 'active');
+                }
 
-                document.querySelectorAll('.timeline-item').forEach(item => {
-                    item.classList.remove('active');
+                timelineItems.forEach(item => {
+                    UTILS.safeClassList(item, 'remove', 'active');
                 });
-                document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
+
+                const targetTimelineItem = document.querySelector(`.timeline-item[data-section="${section}"]`);
+                if (targetTimelineItem) {
+                    UTILS.safeClassList(targetTimelineItem, 'add', 'active');
+                }
 
                 currentSection = section;
                 ELECTION_FORM.updateNavigationButtons();
