@@ -1100,6 +1100,49 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        .action-results {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-results:hover {
+            background: #0d9c6d;
+        }
+
+        /* Amélioration des actions des cartes */
+        .election-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .election-action {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+
+        /* Amélioration responsive des cartes */
+        @media (max-width: 480px) {
+            .election-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .election-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 
     <link rel="stylesheet" href="/assets/notifications.css">
@@ -1448,48 +1491,83 @@
                 const startDate = new Date(election.dateDebut).toLocaleDateString();
                 const endDate = new Date(election.dateFin).toLocaleDateString();
 
-                // Vérifier si l'étudiant est éligible pour cette élection
+                // Vérifier les conditions pour chaque type de bouton
                 const isEligible = isStudentEligibleForElection(election);
+                const canCandidate = isEligible && isCandidaturePeriodOpen(election);
+                const canVote = isEligible && canStudentVote(election);
+                const canViewResults = areResultsAvailable(election);
 
-                // Générer les boutons d'action en fonction du statut et de l'éligibilité
-                let actionButton = '';
-                if (isEligible) {
-                    if (status === 'candidature') {
-                        actionButton = `<button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
-                            Candidater
-                        </button>`;
-                    } else if (status === 'active') {
-                        actionButton = `<button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
-                            Voter
-                        </button>`;
-                    }
+                // Générer les boutons d'action en fonction des conditions
+                let actionButtons = '';
+
+                if (canCandidate) {
+                    actionButtons += `
+                <button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
+                    <i class="fas fa-file-signature"></i>
+                    Candidater
+                </button>
+            `;
                 }
+
+                if (canVote) {
+                    actionButtons += `
+                <button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
+                    <i class="fas fa-vote-yea"></i>
+                    Voter
+                </button>
+            `;
+                }
+
+                if (canViewResults) {
+                    actionButtons += `
+                <button class="election-action action-results" onclick="event.stopPropagation(); redirectToResults('${election.id}')">
+                    <i class="fas fa-chart-bar"></i>
+                    Résultats
+                </button>
+            `;
+                }
+
+                // Toujours afficher le bouton détails
+                actionButtons += `
+            <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
+                <i class="fas fa-eye"></i>
+                Détails
+            </button>
+        `;
 
                 // Image par défaut selon l'école
                 const ecoleImage = ECOLE_IMAGES[election.ecole] || ECOLE_IMAGES.EGEI;
 
                 return `
-                    <div class="election-card" data-election-id="${election.id}">
-                        <div class="election-image" style="background-image: url('${ecoleImage}')">
-                            <span class="election-badge ${statusClass}">${statusText}</span>
+            <div class="election-card" data-election-id="${election.id}">
+                <div class="election-image" style="background-image: url('${ecoleImage}')">
+                    <span class="election-badge ${statusClass}">${statusText}</span>
+                </div>
+                <div class="election-content">
+                    <div>
+                        <h3 class="election-title">${election.titre}</h3>
+                        <div class="election-date">
+                            <i class="far fa-calendar"></i>
+                            ${startDate} - ${endDate}
                         </div>
-                        <div class="election-content">
-                            <div>
-                                <h3 class="election-title">${election.titre}</h3>
-                                <div class="election-date">${startDate} - ${endDate}</div>
+                        ${election.description ? `
+                            <div class="election-description" title="${election.description}">
+                                ${election.description.substring(0, 60)}${election.description.length > 60 ? '...' : ''}
                             </div>
-                            <div class="election-footer">
-                                <div class="election-info">${election.nb_candidats || 0} candidats</div>
-                                <div>
-                                    ${actionButton}
-                                    <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
-                                        Détails
-                                    </button>
-                                </div>
-                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="election-footer">
+                        <div class="election-info">
+                            <i class="fas fa-users"></i>
+                            ${election.nb_candidats || 0} candidat(s)
+                        </div>
+                        <div class="election-actions">
+                            ${actionButtons}
                         </div>
                     </div>
-                `;
+                </div>
+            </div>
+        `;
             }
         };
 
@@ -1710,6 +1788,41 @@
             }
         });
 
+        // Vérifier si la période de candidature est ouverte
+        function isCandidaturePeriodOpen(election) {
+            if (!election.dateDebutCandidature || !election.dateFinCandidature) {
+                return false;
+            }
+
+            const now = new Date();
+            const startCandidature = new Date(election.dateDebutCandidature);
+            const endCandidature = new Date(election.dateFinCandidature);
+
+            return now >= startCandidature && now <= endCandidature;
+        }
+
+        // Vérifier si l'étudiant peut voter
+        function canStudentVote(election) {
+            if (!isStudentEligibleForElection(election)) {
+                return false;
+            }
+
+            const now = new Date();
+            const startDate = new Date(election.dateDebut);
+            const endDate = new Date(election.dateFin);
+
+            return now >= startDate && now <= endDate;
+        }
+
+        // Vérifier si les résultats sont disponibles
+        function areResultsAvailable(election) {
+            const now = new Date();
+            const endDate = new Date(election.dateFin);
+
+            // Les résultats sont disponibles après la fin de l'élection
+            return now > endDate;
+        }
+
         // Initialiser le système de notifications
         function initializeNotifications() {
             const notificationService = new NotificationService();
@@ -1850,6 +1963,8 @@
             showLoading();
 
             try {
+
+                await loadUserProfilePhoto();
                 // Charger les informations de l'étudiant
                 await loadStudentInfo();
 
@@ -1867,6 +1982,32 @@
             }
         }
 
+        // Fonction pour charger la photo de profil depuis l'API
+        async function loadUserProfilePhoto() {
+            try {
+                const userProfile = await UserService.getStudentInfo();
+                const userData = userProfile.data;
+
+                // Mettre à jour l'avatar si une photo existe
+                const avatarElement = document.querySelector('.user-avatar');
+                if (userData && userData.photoUrl) {
+                    // Construire l'URL complète de la photo
+                    const photoUrl = userData.photoUrl.startsWith('http')
+                        ? userData.photoUrl
+                        : `${API_URL}${userData.photoUrl}`;
+
+                    avatarElement.src = photoUrl;
+
+                    // Gérer les erreurs de chargement d'image
+                    avatarElement.onerror = function () {
+                        this.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                    };
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la photo de profil:', error);
+            }
+        }
+
         // Charger les informations de l'étudiant
         async function loadStudentInfo() {
             try {
@@ -1877,6 +2018,10 @@
                 if (response && response.data && response.data.prenom) {
                     document.getElementById('userName').textContent =
                         response.data.prenom + ' ' + (response.data.nom || '');
+
+
+                    // Charger la photo de profil
+                    await loadUserProfilePhoto();
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des informations étudiant:', error);
@@ -2219,6 +2364,10 @@
             window.location.href = `vote.html?electionId=${electionId}`;
         }
 
+        function redirectToResults(electionId) {
+            window.location.href = `results.html?electionId=${electionId}`;
+        }
+
         // Fonctions utilitaires pour les interactions
         function viewCandidateProfile(candidateId) {
             // Rediriger vers la page de profil du candidat
@@ -2238,6 +2387,9 @@
         window.viewCandidateProfile = viewCandidateProfile;
         window.redirectToCandidature = redirectToCandidature;
         window.redirectToVote = redirectToVote;
+        window.redirectToResults = redirectToResults;
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
     </script>
 </body>
 
