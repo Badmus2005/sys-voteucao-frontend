@@ -929,8 +929,8 @@
         let elements = {};
         let currentStep = 1;
         let selectedActivities = [];
-        let selectedSubactivities = {}; // Objet pour stocker {activityId: [subactivityIds]}
-        let activitiesWithSubs = {}; // Cache pour les sous-activités déjà chargées
+        let selectedSubactivities = {};
+        let activitiesWithSubs = {};
         let currentActivityId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1350,45 +1350,6 @@
             };
 
             return defaults[activityName] || [];
-        }
-
-        function renderSubactivities(subactivities) {
-            elements.subactivitiesGrid.innerHTML = '';
-
-            subactivities.forEach(subactivity => {
-                const subCard = document.createElement('div');
-                subCard.className = 'activity-card';
-                subCard.innerHTML = `
-                    <div class="activity-icon">
-                        <i class="fas fa-${subactivity.icone}"></i>
-                    </div>
-                    <div class="activity-name">${subactivity.nom}</div>
-                    <div class="activity-description">${subactivity.description}</div>
-                `;
-
-                subCard.addEventListener('click', () => {
-                    subCard.classList.toggle('selected');
-                    const subactivityId = subactivity.id;
-
-                    if (subCard.classList.contains('selected')) {
-                        // Ajouter à la sélection
-                        if (!selectedSubactivities[currentActivityId]) {
-                            selectedSubactivities[currentActivityId] = [];
-                        }
-                        if (!selectedSubactivities[currentActivityId].includes(subactivityId)) {
-                            selectedSubactivities[currentActivityId].push(subactivityId);
-                        }
-                    } else {
-                        // Retirer de la sélection
-                        if (selectedSubactivities[currentActivityId]) {
-                            selectedSubactivities[currentActivityId] = selectedSubactivities[currentActivityId]
-                                .filter(id => id !== subactivityId);
-                        }
-                    }
-                });
-
-                elements.subactivitiesGrid.appendChild(subCard);
-            });
         }
 
         function getActivityIcon(activityName) {
