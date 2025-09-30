@@ -422,6 +422,7 @@
             margin-bottom: 1rem;
         }
 
+
         .form-actions {
             display: flex;
             justify-content: space-between;
@@ -1147,11 +1148,29 @@
                 }
             } catch (error) {
                 console.error("Erreur chargement activités:", error);
-                // En cas d'erreur, afficher des activités par défaut
+                // En cas d'erreur, afficher des activités par défaut AVEC has_subactivities
                 const defaultActivities = [
-                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions", icone: "running", has_subactivities: true },
-                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre", icone: "palette", has_subactivities: true },
-                    { id: 3, nom: "Technologie", description: "Club tech, programmation, robotique", icone: "laptop-code", has_subactivities: true }
+                    {
+                        id: 1,
+                        nom: "Sport",
+                        description: "Activités sportives et compétitions",
+                        icone: "running",
+                        has_subactivities: true
+                    },
+                    {
+                        id: 2,
+                        nom: "Culture",
+                        description: "Arts, musique, danse, théâtre",
+                        icone: "palette",
+                        has_subactivities: true
+                    },
+                    {
+                        id: 3,
+                        nom: "Technologie",
+                        description: "Club tech, programmation, robotique",
+                        icone: "laptop-code",
+                        has_subactivities: true
+                    }
                 ];
                 renderActivities(defaultActivities);
             }
@@ -1163,21 +1182,26 @@
             activities.forEach(activity => {
                 const activityCard = document.createElement('div');
                 activityCard.className = 'activity-card';
-                activityCard.dataset.hasSubactivities = activity.has_subactivities || false;
+
+                // Vérification améliorée de has_subactivities
+                const hasSubactivities = activity.has_subactivities === true ||
+                    activity.has_subactivities === 'true' ||
+                    activity.has_subactivities === 1;
+
+                activityCard.dataset.hasSubactivities = hasSubactivities;
 
                 activityCard.innerHTML = `
-                    <div class="activity-icon">
-                        <i class="fas fa-${activity.icone || getActivityIcon(activity.nom)}"></i>
-                    </div>
-                    <div class="activity-name">${activity.nom}</div>
-                    <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
-                    ${activity.has_subactivities ? '<div class="activity-badge"><i class="fas fa-chevron-down"></i> Options</div>' : ''}
-                `;
+            <div class="activity-icon">
+                <i class="fas fa-${activity.icone || getActivityIcon(activity.nom)}"></i>
+            </div>
+            <div class="activity-name">${activity.nom}</div>
+            <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
+            ${hasSubactivities ? '<div class="activity-badge"><i class="fas fa-chevron-down"></i> Options</div>' : ''}
+        `;
 
                 activityCard.addEventListener('click', () => {
                     const wasSelected = activityCard.classList.contains('selected');
                     const activityId = activity.id;
-                    const hasSubactivities = activityCard.dataset.hasSubactivities === 'true';
 
                     // Gérer la sélection/désélection
                     activityCard.classList.toggle('selected');
@@ -1201,7 +1225,6 @@
                         // Si on désélectionne une activité avec sous-activités
                         if (hasSubactivities && currentActivityId === activityId) {
                             elements.subactivitiesContainer.style.display = 'none';
-                            // Ne pas vider selectedSubactivities pour permettre la reselection
                         }
                     }
                 });
@@ -1209,25 +1232,34 @@
                 elements.activitiesContainer.appendChild(activityCard);
             });
         }
-
         async function populateSubactivities(activityId, activityName, activityDescription) {
+            console.log('populateSubactivities appelé avec:', { activityId, activityName });
+
             try {
                 // Mettre à jour le titre
                 elements.subactivitiesTitle.textContent = `Sélectionnez vos ${activityName.toLowerCase()} préférés`;
                 elements.subactivitiesDescription.textContent = activityDescription || `Choisissez parmi les options de ${activityName}`;
 
+                console.log('Chargement des sous-activités pour:', activityId);
+
                 // Vérifier si on a déjà chargé ces sous-activités
                 if (activitiesWithSubs[activityId]) {
+                    console.log('Sous-activités déjà en cache:', activitiesWithSubs[activityId]);
                     renderSubactivities(activitiesWithSubs[activityId]);
                     return;
                 }
 
                 const res = await fetch(`${API_URL}/api/activities/${activityId}/subactivities`);
+                console.log('Réponse API:', res);
+
                 if (!res.ok) throw new Error(`Erreur ${res.status}`);
 
                 const data = await res.json();
+                console.log('Données reçues:', data);
+
                 if (data.success) {
                     activitiesWithSubs[activityId] = data.data;
+                    console.log('Sous-activités chargées:', data.data);
                     renderSubactivities(data.data);
                 } else {
                     throw new Error(data.message);
@@ -1236,9 +1268,61 @@
                 console.error(`Erreur chargement sous-activités pour ${activityName}:`, error);
                 // Utiliser des sous-activités par défaut selon le type
                 const defaultSubs = getDefaultSubactivities(activityName);
+                console.log('Utilisation des sous-activités par défaut:', defaultSubs);
                 activitiesWithSubs[activityId] = defaultSubs;
                 renderSubactivities(defaultSubs);
             }
+        }
+
+        function renderSubactivities(subactivities) {
+            console.log('renderSubactivities appelé avec:', subactivities);
+
+            elements.subactivitiesGrid.innerHTML = '';
+
+            if (subactivities.length === 0) {
+                console.log('Aucune sous-activité à afficher');
+                elements.subactivitiesGrid.innerHTML = '<p style="color: var(--gray); text-align: center;">Aucune option disponible pour le moment</p>';
+                return;
+            }
+
+            subactivities.forEach(subactivity => {
+                const subCard = document.createElement('div');
+                subCard.className = 'activity-card';
+                subCard.innerHTML = `
+            <div class="activity-icon">
+                <i class="fas fa-${subactivity.icone}"></i>
+            </div>
+            <div class="activity-name">${subactivity.nom}</div>
+            <div class="activity-description">${subactivity.description}</div>
+        `;
+
+                subCard.addEventListener('click', () => {
+                    subCard.classList.toggle('selected');
+                    const subactivityId = subactivity.id;
+
+                    if (subCard.classList.contains('selected')) {
+                        // Ajouter à la sélection
+                        if (!selectedSubactivities[currentActivityId]) {
+                            selectedSubactivities[currentActivityId] = [];
+                        }
+                        if (!selectedSubactivities[currentActivityId].includes(subactivityId)) {
+                            selectedSubactivities[currentActivityId].push(subactivityId);
+                        }
+                        console.log('Sous-activité sélectionnée:', { activityId: currentActivityId, subactivityId, selectedSubactivities });
+                    } else {
+                        // Retirer de la sélection
+                        if (selectedSubactivities[currentActivityId]) {
+                            selectedSubactivities[currentActivityId] = selectedSubactivities[currentActivityId]
+                                .filter(id => id !== subactivityId);
+                        }
+                        console.log('Sous-activité désélectionnée:', { activityId: currentActivityId, subactivityId, selectedSubactivities });
+                    }
+                });
+
+                elements.subactivitiesGrid.appendChild(subCard);
+            });
+
+            console.log('Sous-activités rendues avec succès');
         }
 
         function getDefaultSubactivities(activityName) {
