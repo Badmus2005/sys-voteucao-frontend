@@ -1534,6 +1534,8 @@
                 return;
             }
 
+            await loadUserProfilePhoto();
+
             // Charger les détails de l'élection
             await loadElectionDetails(electionId);
 
@@ -1604,6 +1606,37 @@
             }
         }
 
+        // Fonction pour charger la photo de profil depuis l'API
+        async function loadUserProfilePhoto() {
+            try {
+                const userProfile = await UserService.getProfile();
+                const userData = userProfile.data;
+
+                // Mettre à jour l'avatar si une photo existe
+                const avatarElement = document.getElementById('userAvatar');
+                if (userData && userData.photoUrl) {
+                    // Construire l'URL complète de la photo
+                    const photoUrl = userData.photoUrl.startsWith('http')
+                        ? userData.photoUrl
+                        : `${API_URL}${userData.photoUrl}`;
+
+                    avatarElement.src = photoUrl;
+                } else {
+                    // Photo par défaut si aucune photo n'est définie
+                    avatarElement.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                }
+
+                // Mettre à jour le nom d'utilisateur
+                if (userData && userData.prenom) {
+                    document.getElementById('userName').textContent = userData.prenom + ' ' + userData.nom;
+                }
+
+            } catch (error) {
+                console.error('Erreur lors du chargement de la photo de profil:', error);
+                // Garder l'image par défaut en cas d'erreur
+            }
+        }
+
         // Charger le profil utilisateur
         async function loadUserProfile() {
             try {
@@ -1613,6 +1646,8 @@
                 // Mettre à jour le nom d'utilisateur
                 if (userProfile && userProfile.prenom) {
                     document.getElementById('userName').textContent = userProfile.prenom;
+
+                    await loadUserProfilePhoto();
                 }
             } catch (error) {
                 console.error('Erreur chargement profil:', error);
@@ -1663,26 +1698,47 @@
             }
         }
 
-        // Vérifier l'éligibilité de l'utilisateur selon les critères de l'élection
+        // Vérifier plus précisément l'éligibilité de l'utilisateur
         async function checkUserEligibility(election) {
-            if (!userProfile) return false;
-
-            // Vérifier l'école
-            if (election.ecole && userProfile.ecole !== election.ecole) {
+            if (!userProfile) {
+                console.error('Profil utilisateur non chargé');
                 return false;
             }
 
-            // Vérifier la filière
-            if (election.filiere && userProfile.filiere !== election.filiere) {
-                return false;
-            }
+            try {
+                // Vérifications basiques
+                if (!userProfile.ecoleId || !userProfile.filiereId || !userProfile.annee) {
+                    console.warn('Profil utilisateur incomplet');
+                    return false;
+                }
 
-            // Vérifier l'année
-            if (election.annee && userProfile.annee !== election.annee) {
-                return false;
-            }
+                // Vérifier l'école si spécifiée dans l'élection
+                if (election.ecoleId && userProfile.ecoleId !== election.ecoleId) {
+                    console.log('École non éligible');
+                    return false;
+                }
 
-            return true;
+                // Vérifier la filière si spécifiée dans l'élection
+                if (election.filiereId && userProfile.filiereId !== election.filiereId) {
+                    console.log('Filière non éligible');
+                    return false;
+                }
+
+                // Vérifier l'année si spécifiée dans l'élection
+                if (election.anneeRequise && userProfile.annee < election.anneeRequise) {
+                    console.log('Année non éligible');
+                    return false;
+                }
+
+                // Vérifier si l'utilisateur a le droit de candidater
+                const eligibilityResponse = await apiCall(`/elections/${election.id}/check-eligibility`);
+                return eligibilityResponse.eligible !== false;
+
+            } catch (error) {
+                console.error('Erreur vérification éligibilité détaillée:', error);
+                // En cas d'erreur, on considère l'utilisateur comme éligible
+                return true;
+            }
         }
 
         // Afficher le message d'erreur d'éligibilité
@@ -1699,6 +1755,30 @@
             document.getElementById('candidatureHeader').style.display = 'block';
             document.getElementById('candidatureForm').style.display = 'block';
             document.getElementById('candidatesSection').style.display = 'block';
+        }
+
+        // Gestion améliorée des erreurs
+        function handleApiError(error, context) {
+            console.error(`Erreur ${context}:`, error);
+
+            let userMessage = 'Une erreur est survenue';
+
+            if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+                userMessage = 'Problème de connexion. Vérifiez votre connexion internet.';
+            } else if (error.message.includes('401') || error.message.includes('token')) {
+                userMessage = 'Session expirée. Veuillez vous reconnecter.';
+                setTimeout(() => {
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else if (error.message.includes('404')) {
+                userMessage = 'Ressource non trouvée.';
+            } else if (error.message.includes('500')) {
+                userMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
+            }
+
+            showToast(userMessage, 'error');
+            return false;
         }
 
         // Charger les candidats de l'élection
@@ -1752,15 +1832,18 @@
             emptyElement.style.display = 'none';
 
             container.innerHTML = `
-                <div class="candidates-grid">
-                    ${candidates.map(candidate =>
+        <div class="candidates-grid">
+            ${candidates.map(candidate =>
                 CandidateCard.create(candidate, {
                     showProgram: true,
                     showViewProfile: true
                 })
             ).join('')}
-                </div>
-            `;
+        </div>
+    `;
+
+            // Attacher les événements après le rendu
+            attachCandidateCardEvents();
         }
 
         // Afficher le message d'absence de candidats
@@ -2059,6 +2142,12 @@
                 return;
             }
 
+            // Désactiver le bouton de soumission
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Soumission en cours...';
+            submitBtn.disabled = true;
+
             showLoading();
 
             try {
@@ -2071,22 +2160,41 @@
                     photoUrl: uploadedImageUrl,
                     userId: userProfile.id || userProfile.userId,
                     electionId: currentElection.id,
-                    statut: 'EN_ATTENTE'
+                    statut: 'EN_ATTENTE',
+                    // Ajouter les informations de l'étudiant
+                    etudiantId: userProfile.id,
+                    matricule: userProfile.matricule,
+                    codeInscription: userProfile.codeInscription,
+                    annee: userProfile.annee,
+                    filiereId: userProfile.filiereId,
+                    ecoleId: userProfile.ecoleId
                 };
+
+                console.log('Données soumises:', formData);
 
                 const response = await CandidateService.submitCandidature(formData);
 
-                if (response && response.success) {
+                if (response && (response.success || response.id)) {
+                    showToast('Candidature soumise avec succès !', 'success');
                     showSuccessMessage();
+
+                    // Mettre à jour la liste des candidats
+                    setTimeout(() => {
+                        loadElectionCandidates(currentElection.id);
+                    }, 1000);
+
                 } else {
                     throw new Error(response?.message || 'Erreur lors de la soumission');
                 }
 
             } catch (error) {
                 console.error('Erreur soumission candidature:', error);
-                showToast(error.message || 'Erreur lors de la soumission de la candidature', 'error');
+                handleApiError(error, 'soumission candidature');
             } finally {
                 hideLoading();
+                // Réactiver le bouton
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         }
 
@@ -2136,6 +2244,41 @@
                 window.location.href = `elections.html`;
             }
         }
+
+        // Gérer les clics sur les cartes candidats
+        function attachCandidateCardEvents() {
+            document.addEventListener('click', function (e) {
+                // Voir le profil complet d'un candidat
+                if (e.target.closest('.view-program-link')) {
+                    const link = e.target.closest('.view-program-link');
+                    const candidateId = link.getAttribute('data-candidate-id');
+                    viewCandidateProfile(candidateId);
+                }
+
+                // Cliquer sur une carte candidat
+                if (e.target.closest('.candidate-card')) {
+                    const card = e.target.closest('.candidate-card');
+                    const candidateId = card.getAttribute('data-candidate-id');
+                    viewCandidateProfile(candidateId);
+                }
+            });
+        }
+
+        // Voir le profil d'un candidat
+        function viewCandidateProfile(candidateId) {
+            const candidate = electionCandidates.find(c => c.candidatId == candidateId || c.id == candidateId);
+            if (candidate) {
+                // Afficher une modale ou rediriger vers la page de profil
+                const message = `
+            ${candidate.candidatPrenom} ${candidate.candidatNom}
+            ${candidate.filiere_nom ? `\nFilière: ${candidate.filiere_nom}` : ''}
+            ${candidate.annee ? `\nAnnée: ${candidate.annee}` : ''}
+            ${candidate.slogan ? `\nSlogan: "${candidate.slogan}"` : ''}
+        `;
+                alert(message);
+            }
+        }
+
     </script>
 </body>
 
