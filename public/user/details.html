@@ -7,6 +7,7 @@
     <title>Détails de l'Élection - UCAO-UUC</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/notifications.css">
     <style>
         :root {
             --rouge-bordeaux: #650624;
@@ -492,6 +493,10 @@
     <header>
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
         <div class="user-nav">
+            <button class="notification-btn">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">0</span>
+            </button>
             <span><i class="fa-solid fa-user"></i> Invité</span>
             <a href="/user/login"><i class="fa-solid fa-right-from-bracket"></i> Connexion</a>
         </div>
@@ -529,7 +534,19 @@
             </a>
         </div>
     </div>
+    <!-- Panneau de notifications -->
+    <div id="notificationPanel" class="notification-panel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="markAllReadBtn" class="mark-all-read">Tout marquer comme lu</button>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <!-- Les notifications seront insérées ici -->
+        </div>
+    </div>
+
     <script src="/assets/js/config.js"></script>
+    <script src="../assets/js/notifications.js"></script>
     <script>
         // Configuration de l'API
         const API_BASE_URL = CONFIG.API.BASE_URL;
@@ -790,7 +807,23 @@
         }
 
         // Initialisation
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Initialiser le service de notifications
+            const notificationBtn = document.querySelector('.notification-btn');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const notificationService = new NotificationService(notificationBtn, notificationPanel);
+            await notificationService.initialize();
+
+            // Gestion du clic en dehors du panneau de notifications
+            document.addEventListener('click', function (e) {
+                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                    notificationPanel.classList.remove('active');
+                }
+            });
+
+            // Charger les données de l'élection
+            await loadData();
+        });
     </script>
 </body>
 

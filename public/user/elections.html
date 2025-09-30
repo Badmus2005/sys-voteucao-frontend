@@ -974,6 +974,10 @@
             background: #a8a8a8;
         }
     </style>
+
+    <link rel="stylesheet" href="/assets/notifications.css">
+    <script src="/assets/notificationService.js"></script>
+    <script src="/assets/initNotifications.js"></script>
 </head>
 
 <body>
@@ -992,10 +996,24 @@
             </div>
 
             <div class="header-actions">
-                <button class="notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
+                <div class="notifications-container">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+
+                    <div class="notifications-panel" id="notificationsPanel">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i> Tout marquer comme lu
+                            </button>
+                        </div>
+                        <div class="notifications-body" id="notificationsList">
+                            <!-- Les notifications seront insérées ici -->
+                        </div>
+                    </div>
+                </div>
 
                 <div class="user-menu">
                     <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -1435,6 +1453,9 @@
                 return;
             }
 
+            // Initialiser le système de notifications
+            initializeNotifications();
+
             // Initialiser le menu burger
             const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
@@ -1480,6 +1501,123 @@
                 }
             }
         });
+
+        // Initialiser le système de notifications
+        function initializeNotifications() {
+            const notificationService = new NotificationService();
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            // Gestionnaire de clic sur le bouton de notifications
+            notificationBtn.addEventListener('click', () => {
+                notificationsPanel.classList.toggle('show');
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+            });
+
+            // Fermer le panneau si on clique en dehors
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notifications-container')) {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+
+            // Marquer toutes les notifications comme lues
+            markAllReadBtn.addEventListener('click', () => {
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+                renderNotifications();
+            });
+
+            // Fonction pour mettre à jour le badge
+            function updateNotificationBadge() {
+                const unreadCount = notificationService.getUnreadCount();
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            }
+
+            // Fonction pour afficher les notifications
+            function renderNotifications() {
+                const notifications = notificationService.getNotifications();
+                const container = document.getElementById('notificationsList');
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                // Ajouter les gestionnaires de clic pour chaque notification
+                container.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const notifId = item.dataset.id;
+                        notificationService.markAsRead(notifId);
+                        item.classList.remove('unread');
+                        updateNotificationBadge();
+                    });
+                });
+            }
+
+            // Fonction utilitaire pour obtenir l'icône selon le type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'success': 'fa-check-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'error': 'fa-times-circle',
+                    'info': 'fa-info-circle',
+                    'election': 'fa-vote-yea',
+                    'candidature': 'fa-file-signature',
+                    'profile': 'fa-user',
+                    'system': 'fa-cog'
+                };
+                return icons[type] || 'fa-bell';
+            }
+
+            // Fonction utilitaire pour formater la date
+            function formatNotificationDate(date) {
+                const now = new Date();
+                const notifDate = new Date(date);
+                const diff = now - notifDate;
+                const diffMinutes = Math.floor(diff / 60000);
+                const diffHours = Math.floor(diff / 3600000);
+                const diffDays = Math.floor(diff / 86400000);
+
+                if (diffMinutes < 60) {
+                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 24) {
+                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                } else if (diffDays < 7) {
+                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                } else {
+                    return notifDate.toLocaleDateString();
+                }
+            }
+
+            // Faire le rendu initial et démarrer la mise à jour automatique
+            renderNotifications();
+            updateNotificationBadge();
+            setInterval(() => {
+                notificationService.fetchNewNotifications().then(() => {
+                    renderNotifications();
+                    updateNotificationBadge();
+                });
+            }, 30000); // Actualiser toutes les 30 secondes
+        }
 
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
