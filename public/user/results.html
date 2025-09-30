@@ -4,12 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résultats - UCAO-UUC</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Résultats - UCAO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="../assets/css/notifications.css">
     <style>
+        :root {
+            --primary: #800020;
+            --primary-dark: #5a0017;
+            --secondary: #0d1b2a;
+            --accent: #d4af37;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,161 +32,264 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f5f0;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--dark);
             line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Header Styles */
-        header {
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 80px 1fr;
+            grid-template-areas:
+                "sidebar header"
+                "sidebar main";
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .main-header {
+            grid-area: header;
+            background: white;
+            padding: 0 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background-color: #0d1b2a;
-            /* Bleu nuit */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
             position: sticky;
             top: 0;
-            z-index: 1000;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1.5rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary);
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .user-menu:hover {
+            background: var(--gray-light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-area: sidebar;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            height: 100vh;
+            position: fixed;
+            width: 280px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-light);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: 700;
-            color: #d4af37;
-            /* Or */
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .user-nav a,
-        .user-nav span {
-            text-decoration: none;
-            color: #fff;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .user-nav a:hover {
-            color: #d4af37;
-            /* Or */
-        }
-
-        .burger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 4px;
-        }
-
-        .burger div {
-            width: 25px;
-            height: 3px;
-            background-color: #fff;
-            transition: all 0.3s;
-        }
-
-        /* Overlay */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
             justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            display: none;
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #800020;
-            /* Bordeaux */
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Dashboard Layout */
-        .dashboard-container {
-            display: flex;
-            min-height: calc(100vh - 70px);
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #0d1b2a;
-            /* Bleu nuit */
-            color: #fff;
-            padding: 1.5rem 0;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 0.8rem 1.5rem;
-            color: #ecf0f1;
-            text-decoration: none;
-            transition: all 0.3s;
-            gap: 0.8rem;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background-color: #1b263b;
-            border-left: 4px solid #d4af37;
-            /* Or */
-        }
-
-        .main-content {
+        .nav-menu {
             flex: 1;
+            padding: 2rem 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.5rem;
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(128, 0, 32, 0.05);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .nav-text {
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 6px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-area: main;
             padding: 2rem;
-            background-color: #f8f5f0;
+            overflow-y: auto;
+            background-color: #f8fafc;
         }
 
         /* Breadcrumb */
@@ -181,25 +299,79 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
-            color: #7f8c8d;
+            color: var(--gray);
+            animation: fadeIn 0.5s ease-out;
         }
 
         .breadcrumb a {
-            color: #0d1b2a;
+            color: var(--primary);
             text-decoration: none;
+            transition: var(--transition);
         }
 
         .breadcrumb a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
-        /* Filtres */
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        /* Filters */
         .filters-container {
-            background-color: white;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .filters-header {
@@ -209,83 +381,103 @@
             margin-bottom: 1rem;
         }
 
+        .filters-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
         .filter-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .filter-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #0d1b2a;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.9rem;
         }
 
         .filter-select {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f8f9fa;
-            font-family: 'Poppins', sans-serif;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
         }
 
         .filter-actions {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             margin-top: 1rem;
         }
 
         .btn {
-            padding: 0.8rem 1.5rem;
+            padding: 0.75rem 1.25rem;
             border: none;
-            border-radius: 5px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s;
+            transition: var(--transition);
+            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background-color: #0d1b2a;
+            background: var(--primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: #1b263b;
+            background: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background-color: #e9ecef;
-            color: #495057;
+            background: var(--gray-light);
+            color: var(--dark);
         }
 
         .btn-secondary:hover {
-            background-color: #dee2e6;
+            background: var(--gray);
+            color: white;
         }
 
         /* Results Header */
         .results-header {
-            background-color: white;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
         }
 
         .results-title {
-            color: #0d1b2a;
+            color: var(--secondary);
             margin-bottom: 0.5rem;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         .results-title:hover {
-            color: #800020;
+            color: var(--primary);
         }
 
         .results-subtitle {
-            color: #7f8c8d;
+            color: var(--gray);
             margin-bottom: 1.5rem;
         }
 
@@ -299,26 +491,59 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
-        /* Winner Banner */
+        /* Winner Banner avec Animation */
         .winner-banner {
-            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
             color: white;
-            padding: 2rem;
-            border-radius: 10px;
+            padding: 2.5rem;
+            border-radius: 16px;
             text-align: center;
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
             display: none;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .winner-crown {
-            font-size: 2.5rem;
-            color: #d4af37;
+            font-size: 3rem;
+            color: var(--accent);
             margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
         }
 
         .winner-title {
@@ -328,10 +553,10 @@
         }
 
         .winner-name {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            color: #d4af37;
+            color: var(--accent);
         }
 
         .winner-details {
@@ -346,7 +571,7 @@
         }
 
         .detail-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
         }
 
@@ -360,53 +585,91 @@
             opacity: 0.9;
             max-width: 600px;
             margin: 0 auto;
+            font-size: 1.1rem;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
-            background-color: white;
+            background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
         .stat-icon {
-            font-size: 2rem;
-            color: #800020;
-            margin-bottom: 1rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue {
+            background: rgba(13, 27, 42, 0.1);
+            color: var(--secondary);
+        }
+
+        .stat-icon.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-icon.orange {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-icon.purple {
+            background: rgba(128, 0, 32, 0.1);
+            color: var(--primary);
+        }
+
+        .stat-content {
+            flex: 1;
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #0d1b2a;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .stat-label {
-            color: #7f8c8d;
-            font-weight: 500;
+            color: var(--gray);
+            font-size: 0.9rem;
         }
 
         /* Charts Section */
         .charts-section {
-            background-color: white;
+            background: white;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.7s ease-out;
         }
 
         .section-title {
-            color: #0d1b2a;
+            color: var(--secondary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -420,14 +683,21 @@
         }
 
         .chart-card {
-            background-color: #f8f9fa;
+            background: var(--light);
             padding: 1.5rem;
-            border-radius: 10px;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         .chart-card h3 {
             margin-bottom: 1rem;
-            color: #0d1b2a;
+            color: var(--secondary);
+            font-size: 1.1rem;
         }
 
         .chart-container {
@@ -437,11 +707,12 @@
 
         /* Ranking Section */
         .ranking-section {
-            background-color: white;
+            background: white;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .ranking-header {
@@ -460,13 +731,13 @@
         .ranking-table td {
             padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--gray-light);
         }
 
         .ranking-table th {
-            background-color: #f8f9fa;
+            background-color: var(--light);
             font-weight: 600;
-            color: #0d1b2a;
+            color: var(--secondary);
         }
 
         .candidate-rank {
@@ -476,15 +747,18 @@
         }
 
         .rank-1 {
-            color: #d4af37;
+            color: var(--accent);
+            font-size: 1.2rem;
         }
 
         .rank-2 {
             color: #c0c0c0;
+            font-size: 1.1rem;
         }
 
         .rank-3 {
             color: #cd7f32;
+            font-size: 1.1rem;
         }
 
         .vote-count,
@@ -500,145 +774,48 @@
         }
 
         .candidate-avatar {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid var(--primary);
         }
 
         .candidate-name {
             font-weight: 600;
-            color: #0d1b2a;
+            color: var(--dark);
         }
 
         .candidate-details {
-            font-size: 0.9rem;
-            color: #7f8c8d;
+            font-size: 0.85rem;
+            color: var(--gray);
         }
 
         .progress-bar {
             height: 8px;
-            background-color: #e9ecef;
+            background-color: var(--gray-light);
             border-radius: 4px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background-color: #800020;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             border-radius: 4px;
+            transition: width 1s ease-in-out;
         }
 
-        /* No Results Message */
-        .no-results {
-            text-align: center;
-            padding: 3rem;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        .no-results-icon {
-            font-size: 4rem;
-            color: #bdc3c7;
-            margin-bottom: 1.5rem;
-        }
-
-        .no-results-title {
-            color: #0d1b2a;
-            margin-bottom: 1rem;
-        }
-
-        .no-results-description {
-            color: #7f8c8d;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Election Selection Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+        /* Loading Animation */
+        .loading-gif {
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
+            padding: 3rem;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            color: #0d1b2a;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #7f8c8d;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .elections-list-modal {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .election-item-modal {
-            padding: 1rem;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .election-item-modal:hover {
-            border-color: #0d1b2a;
-            background-color: #f8f9fa;
-        }
-
-        .election-item-modal h4 {
-            color: #0d1b2a;
-            margin-bottom: 0.5rem;
-        }
-
-        .election-date {
-            color: #7f8c8d;
-            font-size: 0.9rem;
+        .loading-gif img {
+            width: 80px;
+            height: 80px;
         }
 
         /* Toast Notification */
@@ -647,10 +824,9 @@
             bottom: 20px;
             right: 20px;
             padding: 1rem 1.5rem;
-            background-color: #0d1b2a;
-            /* Bleu nuit */
+            background-color: var(--secondary);
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -659,8 +835,8 @@
             opacity: 0;
             transition: all 0.3s;
             z-index: 2000;
-            border-left: 4px solid #d4af37;
-            /* Or */
+            border-left: 4px solid var(--accent);
+            max-width: 350px;
         }
 
         .toast.show {
@@ -669,33 +845,65 @@
         }
 
         .toast.success {
-            background-color: #2e7d32;
+            background-color: var(--success);
         }
 
         .toast.error {
-            background-color: #c62828;
+            background-color: var(--danger);
         }
 
         .toast.warning {
-            background-color: #ef6c00;
+            background-color: var(--warning);
         }
 
         /* Loading States */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem;
-            color: #7f8c8d;
+            color: var(--gray);
         }
 
         .loading .spinner {
             width: 40px;
             height: 40px;
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #800020;
-            /* Bordeaux */
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1rem;
@@ -703,63 +911,105 @@
 
         .no-data-message {
             text-align: center;
-            padding: 2rem;
-            color: #7f8c8d;
+            padding: 3rem;
+            color: var(--gray);
+            animation: fadeIn 0.5s ease-out;
         }
 
         .no-data-message i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
             color: #bdc3c7;
         }
 
-        /* Responsive Styles */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 200px;
-            }
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
         }
 
-        @media (max-width: 768px) {
-            header {
-                padding: 1rem;
-            }
+        .overlay.active {
+            display: block;
+        }
 
-            .user-nav a:not(:last-child) {
-                display: none;
-            }
-
-            .burger {
-                display: flex;
-            }
-
-            .dashboard-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -250px;
-                height: 100vh;
-                z-index: 1000;
-                width: 250px;
-            }
-
-            .sidebar.active {
-                left: 0;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .overlay.active {
-                display: block;
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .filters-content {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .charts-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "main";
+            }
+
+            .sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 0 1rem;
+            }
+
+            .search-container {
+                margin: 0 1rem;
+                max-width: 300px;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .filters-content {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
             }
 
             .winner-details {
@@ -779,69 +1029,248 @@
             }
         }
 
-        @media (max-width: 576px) {
-            .filter-actions {
-                flex-direction: column;
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 1rem;
             }
 
-            .btn {
-                width: 100%;
-                justify-content: center;
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .header-actions {
+                margin-left: auto;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 1rem;
+            }
+        }
+
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
+
+    <link rel="stylesheet" href="/assets/notifications.css">
 </head>
 
 <body>
-    <header>
-        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> UCAO-UUC</div>
-        <div class="user-nav">
-            <button class="notification-btn">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">0</span>
-            </button>
-            <span><i class="fa-solid fa-user"></i> <span id="userName">Étudiant</span></span>
-            <a href="profile.html"><i class="fa-solid fa-user"></i> Profil</a>
-            <a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</a>
-        </div>
-        <div class="burger" id="burger">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-    </header>
-
-    <div class="overlay" id="overlay"></div>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
     <div class="dashboard-container">
+        <!-- Header -->
+        <header class="main-header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Rechercher...">
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="notifications-container">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+
+                    <div class="notifications-panel" id="notificationsPanel">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i> Tout marquer comme lu
+                            </button>
+                        </div>
+                        <div class="notifications-body" id="notificationsList">
+                            <!-- Les notifications seront insérées ici -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-menu">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                        alt="Photo de profil" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Étudiant</span>
+                        <span class="user-role">Étudiant</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <ul class="sidebar-menu">
-                <li><a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a></li>
-                <li><a href="candidature.html"><i class="fa-solid fa-file-signature"></i> Candidature</a></li>
-                <li><a href="elections.html"><i class="fa-solid fa-list"></i> Élections</a></li>
-                <li><a href="mes-candidatures.html"><i class="fa-solid fa-list"></i> Mes Candidatures</a></li>
-                <li><a href="vote.html"><i class="fa-solid fa-check"></i> Voter</a></li>
-                <li><a href="resultats.html" class="active"><i class="fa-solid fa-chart-bar"></i> Résultats</a></li>
-            </ul>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span>UCAO</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">Accueil</span>
+                </a>
+                <a href="candidature.html" class="nav-item">
+                    <i class="fas fa-file-signature nav-icon"></i>
+                    <span class="nav-text">Candidature</span>
+                </a>
+                <a href="elections.html" class="nav-item">
+                    <i class="fas fa-vote-yea nav-icon"></i>
+                    <span class="nav-text">Élections</span>
+                </a>
+                <a href="mes-candidatures.html" class="nav-item">
+                    <i class="fas fa-list nav-icon"></i>
+                    <span class="nav-text">Mes Candidatures</span>
+                </a>
+                <a href="vote.html" class="nav-item">
+                    <i class="fas fa-check nav-icon"></i>
+                    <span class="nav-text">Voter</span>
+                </a>
+                <a href="resultats.html" class="nav-item active">
+                    <i class="fas fa-chart-bar nav-icon"></i>
+                    <span class="nav-text">Résultats</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">Profil</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
         </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
             <!-- Breadcrumb -->
             <div class="breadcrumb">
-                <a href="dashboard.html"><i class="fa-solid fa-house"></i> Accueil</a>
-                <i class="fa-solid fa-chevron-right"></i>
+                <a href="dashboard.html"><i class="fas fa-home"></i> Accueil</a>
+                <i class="fas fa-chevron-right"></i>
                 <span>Résultats</span>
             </div>
 
-            <!-- Filters -->
-            <div id="filtersContainer"></div>
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Résultats des élections
+                </h2>
+                <button class="refresh-btn" id="refreshResults">
+                    <i class="fas fa-arrows-rotate"></i>
+                    Actualiser
+                </button>
+            </div>
+
+            <!-- Filtres -->
+            <div class="filters-container" id="filtersContainer">
+                <div class="filters-header">
+                    <h3><i class="fas fa-filter"></i> Filtres</h3>
+                </div>
+                <div class="filters-content">
+                    <div class="filter-group">
+                        <label>Type d'élection</label>
+                        <select class="filter-select" id="filter-type">
+                            <option value="">Tous</option>
+                            <option value="SALLE">Responsables de Salle</option>
+                            <option value="ECOLE">Délégués d'École</option>
+                            <option value="UNIVERSITE">Délégués Universitaires</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>École/Faculté</label>
+                        <select class="filter-select" id="filter-ecole">
+                            <option value="">Tous</option>
+                            <option value="EGEI">EGEI</option>
+                            <option value="ESMEA">ESMEA</option>
+                            <option value="FSAE">FSAE</option>
+                            <option value="FDE">FDE</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Année</label>
+                        <select class="filter-select" id="filter-annee">
+                            <option value="">Toutes</option>
+                            <option value="1">Licence 1</option>
+                            <option value="2">Licence 2</option>
+                            <option value="3">Licence 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="applyFilters">
+                        <i class="fas fa-check"></i>
+                        Appliquer
+                    </button>
+                    <button class="btn btn-secondary" id="resetFilters">
+                        <i class="fas fa-eraser"></i>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
 
             <!-- Results Header -->
             <div class="results-header">
@@ -849,15 +1278,15 @@
                 <p class="results-subtitle" id="electionDescription">Consultez les résultats des élections passées</p>
                 <div class="results-meta">
                     <div class="meta-item">
-                        <i class="fa-solid fa-calendar"></i>
+                        <i class="fas fa-calendar"></i>
                         <span id="resultsDate">Date de publication: Chargement...</span>
                     </div>
                     <div class="meta-item">
-                        <i class="fa-solid fa-users"></i>
+                        <i class="fas fa-users"></i>
                         <span id="totalVoters">Électeurs: Chargement...</span>
                     </div>
                     <div class="meta-item">
-                        <i class="fa-solid fa-check-to-slot"></i>
+                        <i class="fas fa-check-to-slot"></i>
                         <span id="participationRate">Taux de participation: Chargement...</span>
                     </div>
                 </div>
@@ -866,7 +1295,7 @@
             <!-- Winner Banner -->
             <div class="winner-banner" id="winnerBanner">
                 <div class="winner-crown">
-                    <i class="fa-solid fa-crown"></i>
+                    <i class="fas fa-crown"></i>
                 </div>
                 <h2 class="winner-title">GAGNANT DE L'ÉLECTION</h2>
                 <div class="winner-name" id="winnerName">Nom du gagnant</div>
@@ -886,38 +1315,46 @@
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-users"></i>
+                    <div class="stat-icon purple">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-value" id="statTotalVotes">0</div>
-                    <div class="stat-label">Total des votes</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotalVotes">0</div>
+                        <div class="stat-label">Total des votes</div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-user-check"></i>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-user-check"></i>
                     </div>
-                    <div class="stat-value" id="statTotalVoters">0</div>
-                    <div class="stat-label">Électeurs inscrits</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statTotalVoters">0</div>
+                        <div class="stat-label">Électeurs inscrits</div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-chart-pie"></i>
+                    <div class="stat-icon green">
+                        <i class="fas fa-chart-pie"></i>
                     </div>
-                    <div class="stat-value" id="statParticipation">0%</div>
-                    <div class="stat-label">Taux de participation</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statParticipation">0%</div>
+                        <div class="stat-label">Taux de participation</div>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fa-solid fa-user-tie"></i>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-user-tie"></i>
                     </div>
-                    <div class="stat-value" id="statCandidates">0</div>
-                    <div class="stat-label">Candidats</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="statCandidates">0</div>
+                        <div class="stat-label">Candidats</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Charts Section -->
             <div class="charts-section">
-                <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> Visualisation des résultats</h2>
+                <h2 class="section-title"><i class="fas fa-chart-simple"></i> Visualisation des résultats</h2>
                 <div class="charts-grid">
                     <div class="chart-card">
                         <h3>Répartition des votes</h3>
@@ -937,9 +1374,9 @@
             <!-- Candidates Ranking -->
             <div class="ranking-section">
                 <div class="ranking-header">
-                    <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Classement des candidats</h2>
+                    <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des candidats</h2>
                     <button class="btn btn-secondary" id="exportResultsBtn">
-                        <i class="fa-solid fa-download"></i>
+                        <i class="fas fa-download"></i>
                         Exporter
                     </button>
                 </div>
@@ -960,46 +1397,18 @@
             </div>
 
             <!-- No Results Message -->
-            <div class="no-results" id="noResultsMessage" style="display: none">
-                <div class="no-results-icon">
-                    <i class="fa-solid fa-inbox"></i>
-                </div>
-                <h2 class="no-results-title">Aucun résultat disponible</h2>
-                <p class="no-results-description">
-                    Aucun résultat n'est disponible pour le moment. Les résultats seront affichés ici une fois les
-                    élections terminées et les résultats publiés par l'administration.
-                </p>
-            </div>
-
-            <!-- Election Selection Modal -->
-            <div class="modal-overlay" id="electionSelectionModal">
-                <div class="modal">
-                    <div class="modal-header">
-                        <h2 class="modal-title">Sélectionner une élection</h2>
-                        <button class="modal-close" id="closeSelectionModal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="modal-content">
-                            <p>Sélectionnez une élection pour voir ses résultats :</p>
-                            <div class="elections-list-modal" id="electionsListModal">
-                                <!-- Les élections seront chargées ici -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="no-data-message" id="noResultsMessage" style="display: none">
+                <i class="fas fa-inbox"></i>
+                <h3>Aucun résultat disponible</h3>
+                <p>Aucun résultat n'est disponible pour le moment. Les résultats seront affichés ici une fois les
+                    élections terminées.</p>
             </div>
         </main>
     </div>
 
-    <!-- Panneau de notifications -->
-    <div id="notificationPanel" class="notification-panel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button id="markAllReadBtn" class="mark-all-read">Tout marquer comme lu</button>
-        </div>
-        <div id="notificationList" class="notification-list">
-            <!-- Les notifications seront insérées ici -->
-        </div>
+    <div class="overlay" id="overlay"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
     </div>
 
     <div class="toast" id="toast">
@@ -1007,7 +1416,8 @@
         <span id="toastMessage"></span>
     </div>
     <script src="/assets/config.js"></script>
-    <script src="../assets/js/notifications.js"></script>
+    <script src="/assets/js/notificationService.js"></script>
+    <script src="/assets/initNotifications.js"></script>
     <script>
         // Configuration et constantes
         const API_URL = CONFIG.BASE_URL;
@@ -1018,39 +1428,6 @@
         let currentResults = null;
         let votesChart = null;
         let comparisonChart = null;
-        let filterSystem = null;
-
-        // Configuration des filtres
-        const filtersConfig = [
-            {
-                key: 'type',
-                label: 'Type d\'élection',
-                options: [
-                    { value: 'SALLE', label: 'Responsables de Salle' },
-                    { value: 'ECOLE', label: 'Délégués d\'École' },
-                    { value: 'UNIVERSITE', label: 'Délégués Universitaires' }
-                ]
-            },
-            {
-                key: 'ecole',
-                label: 'École/Faculté',
-                options: [
-                    { value: 'EGEI', label: 'EGEI' },
-                    { value: 'ESMEA', label: 'ESMEA' },
-                    { value: 'FSAE', label: 'FSAE' },
-                    { value: 'FDE', label: 'FDE' }
-                ]
-            },
-            {
-                key: 'annee',
-                label: 'Année',
-                options: [
-                    { value: '1', label: 'Licence 1' },
-                    { value: '2', label: 'Licence 2' },
-                    { value: '3', label: 'Licence 3' }
-                ]
-            }
-        ];
 
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
@@ -1101,39 +1478,6 @@
 
             async getElectionById(id) {
                 return await apiCall(`/elections/${id}`);
-            },
-
-            getElectionStatus(election) {
-                const now = new Date();
-                const startCandidature = new Date(election.dateDebutCandidature);
-                const endCandidature = new Date(election.dateFinCandidature);
-                const startDate = new Date(election.dateDebut);
-                const endDate = new Date(election.dateFin);
-
-                if (now < startCandidature) return 'upcoming';
-                if (now >= startCandidature && now <= endCandidature) return 'candidature';
-                if (now >= startDate && now <= endDate) return 'active';
-                if (now > endDate) return 'completed';
-                return 'upcoming';
-            },
-
-            getStatusText(status) {
-                const statusMap = {
-                    'active': 'En cours',
-                    'upcoming': 'À venir',
-                    'completed': 'Terminée',
-                    'candidature': 'En candidature'
-                };
-                return statusMap[status] || 'Inconnu';
-            },
-
-            getElectionTypeLabel(type) {
-                const typeMap = {
-                    'SALLE': 'Responsable de Salle',
-                    'ECOLE': 'Délégué d\'École',
-                    'UNIVERSITE': 'Délégué Universitaire'
-                };
-                return typeMap[type] || type;
             }
         };
 
@@ -1142,92 +1486,6 @@
                 return await apiCall(`/votes/results/${electionId}`);
             }
         };
-
-        // Système de filtres
-        class FilterSystem {
-            constructor(containerId, filtersConfig) {
-                this.containerId = containerId;
-                this.filtersConfig = filtersConfig;
-                this.currentFilters = {};
-                this.filterChangeCallback = null;
-            }
-
-            render() {
-                const container = document.getElementById(this.containerId);
-                if (!container) return;
-
-                container.innerHTML = `
-                    <div class="filters-container">
-                        <div class="filters-header">
-                            <h3><i class="fa-solid fa-filter"></i> Filtres</h3>
-                        </div>
-                        <div class="filters-content">
-                            ${this.filtersConfig.map(filter => `
-                                <div class="filter-group">
-                                    <label>${filter.label}</label>
-                                    <select class="filter-select" id="filter-${filter.key}" data-key="${filter.key}">
-                                        <option value="">Tous</option>
-                                        ${filter.options.map(option => `
-                                            <option value="${option.value}">${option.label}</option>
-                                        `).join('')}
-                                    </select>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="filter-actions">
-                            <button class="btn btn-primary" id="applyFilters">
-                                <i class="fa-solid fa-check"></i>
-                                Appliquer
-                            </button>
-                            <button class="btn btn-secondary" id="resetFilters">
-                                <i class="fa-solid fa-eraser"></i>
-                                Réinitialiser
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                // Ajouter les écouteurs d'événements
-                document.getElementById('applyFilters').addEventListener('click', () => this.applyFilters());
-                document.getElementById('resetFilters').addEventListener('click', () => this.resetFilters());
-            }
-
-            applyFilters() {
-                this.currentFilters = {};
-                this.filtersConfig.forEach(filter => {
-                    const select = document.getElementById(`filter-${filter.key}`);
-                    if (select && select.value) {
-                        this.currentFilters[filter.key] = select.value;
-                    }
-                });
-
-                if (this.filterChangeCallback) {
-                    this.filterChangeCallback(this.currentFilters);
-                }
-            }
-
-            resetFilters() {
-                this.filtersConfig.forEach(filter => {
-                    const select = document.getElementById(`filter-${filter.key}`);
-                    if (select) {
-                        select.value = '';
-                    }
-                });
-
-                this.currentFilters = {};
-                if (this.filterChangeCallback) {
-                    this.filterChangeCallback(this.currentFilters);
-                }
-            }
-
-            getFilters() {
-                return this.currentFilters;
-            }
-
-            setFilterChangeCallback(callback) {
-                this.filterChangeCallback = callback;
-            }
-        }
 
         // Fonctions d'affichage
         function showLoading() {
@@ -1246,13 +1504,13 @@
             // Changer l'icône selon le type
             switch (type) {
                 case 'success':
-                    toastIcon.className = 'fa-solid fa-circle-check';
+                    toastIcon.className = 'fas fa-circle-check';
                     break;
                 case 'error':
-                    toastIcon.className = 'fa-solid fa-circle-exclamation';
+                    toastIcon.className = 'fas fa-circle-exclamation';
                     break;
                 case 'warning':
-                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
+                    toastIcon.className = 'fas fa-triangle-exclamation';
                     break;
             }
 
@@ -1280,28 +1538,15 @@
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
             if (!localStorage.getItem('token')) {
-                window.location.href = '/user/login';
+                window.location.href = 'login.html';
                 return;
             }
 
-            // Initialiser le service de notifications
-            const notificationBtn = document.querySelector('.notification-btn');
-            const notificationPanel = document.getElementById('notificationPanel');
-            const notificationService = new NotificationService(notificationBtn, notificationPanel);
-            await notificationService.initialize();
-
-            // Gestion du clic en dehors du panneau de notifications
-            document.addEventListener('click', function (e) {
-                const notificationPanel = document.getElementById('notificationPanel');
-                const notificationBtn = document.querySelector('.notification-btn');
-
-                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
-                    notificationPanel.classList.remove('active');
-                }
-            });
+            // Initialiser le système de notifications
+            initializeNotifications();
 
             // Initialiser le menu burger
-            const burger = document.getElementById('burger');
+            const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
@@ -1320,13 +1565,8 @@
                 e.preventDefault();
                 localStorage.removeItem('token');
                 localStorage.removeItem('userProfile');
-                window.location.href = '/user/login';
+                window.location.href = 'login.html';
             });
-
-            // Initialiser le système de filtres
-            filterSystem = new FilterSystem('filtersContainer', filtersConfig);
-            filterSystem.render();
-            filterSystem.setFilterChangeCallback(handleFilterChange);
 
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
@@ -1334,6 +1574,144 @@
             // Charger les données
             await loadPageData();
         });
+
+        // Initialiser le système de notifications
+        function initializeNotifications() {
+            const notificationService = new NotificationService();
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            // Gestionnaire de clic sur le bouton de notifications
+            notificationBtn.addEventListener('click', () => {
+                notificationsPanel.classList.toggle('show');
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+            });
+
+            // Fermer le panneau si on clique en dehors
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notifications-container')) {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+
+            // Marquer toutes les notifications comme lues
+            markAllReadBtn.addEventListener('click', () => {
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+                renderNotifications();
+            });
+
+            // Fonction pour mettre à jour le badge
+            function updateNotificationBadge() {
+                const unreadCount = notificationService.getUnreadCount();
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            }
+
+            // Fonction pour afficher les notifications
+            function renderNotifications() {
+                const notifications = notificationService.getNotifications();
+                const container = document.getElementById('notificationsList');
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                // Ajouter les gestionnaires de clic pour chaque notification
+                container.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const notifId = item.dataset.id;
+                        notificationService.markAsRead(notifId);
+                        item.classList.remove('unread');
+                        updateNotificationBadge();
+                    });
+                });
+            }
+
+            // Fonction utilitaire pour obtenir l'icône selon le type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'success': 'fa-check-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'error': 'fa-times-circle',
+                    'info': 'fa-info-circle',
+                    'election': 'fa-vote-yea',
+                    'candidature': 'fa-file-signature',
+                    'profile': 'fa-user',
+                    'system': 'fa-cog'
+                };
+                return icons[type] || 'fa-bell';
+            }
+
+            // Fonction utilitaire pour formater la date
+            function formatNotificationDate(date) {
+                const now = new Date();
+                const notifDate = new Date(date);
+                const diff = now - notifDate;
+                const diffMinutes = Math.floor(diff / 60000);
+                const diffHours = Math.floor(diff / 3600000);
+                const diffDays = Math.floor(diff / 86400000);
+
+                if (diffMinutes < 60) {
+                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 24) {
+                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                } else if (diffDays < 7) {
+                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                } else {
+                    return notifDate.toLocaleDateString();
+                }
+            }
+
+            // Faire le rendu initial et démarrer la mise à jour automatique
+            renderNotifications();
+            updateNotificationBadge();
+            setInterval(() => {
+                notificationService.fetchNewNotifications().then(() => {
+                    renderNotifications();
+                    updateNotificationBadge();
+                });
+            }, 30000); // Actualiser toutes les 30 secondes
+        }
+
+        // Initialiser les gestionnaires d'événements
+        function initEventHandlers() {
+            // Gestionnaire de rafraîchissement
+            document.getElementById('refreshResults').addEventListener('click', async function () {
+                await loadPageData();
+                showToast('Résultats actualisés avec succès', 'success');
+            });
+
+            // Gestionnaire de filtres
+            document.getElementById('applyFilters').addEventListener('click', async function () {
+                await applyFilters();
+            });
+
+            document.getElementById('resetFilters').addEventListener('click', async function () {
+                resetFilters();
+            });
+
+            // Gestionnaire d'export
+            document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
+        }
 
         // Chargement des données de la page
         async function loadPageData() {
@@ -1367,13 +1745,31 @@
         // Charger les élections terminées
         async function loadCompletedElections() {
             try {
-                const filters = filterSystem.getFilters();
-                const data = await ElectionService.getElections(filters);
+                const typeFilter = document.getElementById('filter-type').value;
+                const ecoleFilter = document.getElementById('filter-ecole').value;
+                const anneeFilter = document.getElementById('filter-annee').value;
 
-                if (data && Array.isArray(data)) {
+                const filters = {};
+                if (typeFilter) filters.type = typeFilter;
+                if (ecoleFilter) filters.ecole = ecoleFilter;
+                if (anneeFilter) filters.annee = anneeFilter;
+
+                const response = await ElectionService.getElections(filters);
+
+                // Gérer différentes structures de réponse
+                let elections = [];
+                if (response && Array.isArray(response)) {
+                    elections = response;
+                } else if (response && response.data && Array.isArray(response.data)) {
+                    elections = response.data;
+                } else if (response && response.success && Array.isArray(response.data)) {
+                    elections = response.data;
+                }
+
+                if (elections && Array.isArray(elections)) {
                     // Filtrer les élections terminées
                     const now = new Date();
-                    allElections = data.filter(election => {
+                    allElections = elections.filter(election => {
                         if (!election.dateFin) return false;
                         const endDate = new Date(election.dateFin);
                         return endDate < now;
@@ -1413,7 +1809,6 @@
                 hideLoading();
             }
         }
-
 
         // Afficher les résultats
         function displayResults(results) {
@@ -1474,10 +1869,10 @@
                     <td class="candidate-rank ${rankClass}">${index + 1}</td>
                     <td>
                         <div class="candidate-info">
-                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/40'}" 
+                            <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
                                  alt="${candidate.prenom} ${candidate.nom}" 
                                  class="candidate-avatar"
-                                 onerror="this.src='https://via.placeholder.com/40'">
+                                 onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'">
                             <div>
                                 <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
                                 <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
@@ -1495,6 +1890,13 @@
 
                 rankingBody.appendChild(row);
             });
+
+            // Animer les barres de progression
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    bar.style.transition = 'width 1.5s ease-in-out';
+                });
+            }, 100);
         }
 
         // Créer les graphiques
@@ -1512,7 +1914,7 @@
             // Graphique circulaire (répartition des votes)
             const votesCtx = document.getElementById('votesChart').getContext('2d');
             votesChart = new Chart(votesCtx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
@@ -1530,7 +1932,7 @@
                             position: 'right',
                             labels: {
                                 font: {
-                                    size: 12
+                                    size: 11
                                 }
                             }
                         },
@@ -1544,6 +1946,10 @@
                                 }
                             }
                         }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     }
                 }
             });
@@ -1590,6 +1996,10 @@
                                 }
                             }
                         }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
                     }
                 }
             });
@@ -1598,16 +2008,16 @@
         // Générer des couleurs pour les graphiques
         function generateColors(count) {
             const colors = [
-                'rgba(167, 109, 33, 0.8)',    // Or
-                'rgba(4, 25, 70, 0.8)',       // Bleu nuit
-                'rgba(101, 6, 36, 0.8)',      // Rouge bordeaux
-                'rgba(222, 167, 57, 0.8)',    // Or clair
-                'rgba(65, 105, 225, 0.8)',    // Royal blue
-                'rgba(220, 20, 60, 0.8)',     // Crimson
-                'rgba(46, 139, 87, 0.8)',     // Sea green
-                'rgba(148, 0, 211, 0.8)',     // Dark violet
-                'rgba(255, 140, 0, 0.8)',     // Dark orange
-                'rgba(0, 128, 128, 0.8)'      // Teal
+                'rgba(128, 0, 32, 0.8)',     // Bordeaux
+                'rgba(13, 27, 42, 0.8)',     // Bleu nuit
+                'rgba(212, 175, 55, 0.8)',   // Or
+                'rgba(16, 185, 129, 0.8)',   // Vert
+                'rgba(245, 158, 11, 0.8)',   // Orange
+                'rgba(239, 68, 68, 0.8)',    // Rouge
+                'rgba(99, 102, 241, 0.8)',   // Indigo
+                'rgba(139, 92, 246, 0.8)',   // Violet
+                'rgba(14, 165, 233, 0.8)',   // Cyan
+                'rgba(20, 184, 166, 0.8)'    // Teal
             ];
 
             // Si on a plus de candidats que de couleurs prédéfinies, générer des couleurs aléatoires
@@ -1625,20 +2035,28 @@
         function showNoResults() {
             document.getElementById('noResultsMessage').style.display = 'block';
             document.getElementById('winnerBanner').style.display = 'none';
-            document.getElementById('stats-grid').style.display = 'none';
-            document.getElementById('charts-section').style.display = 'none';
-            document.getElementById('ranking-section').style.display = 'none';
         }
 
-        // Gestionnaire de changement de filtre
-        async function handleFilterChange(filters) {
+        // Appliquer les filtres
+        async function applyFilters() {
             await loadCompletedElections();
 
             if (allElections.length > 0) {
                 await loadElectionResults(allElections[0].id);
+                showToast('Filtres appliqués avec succès', 'success');
             } else {
                 showNoResults();
             }
+        }
+
+        // Réinitialiser les filtres
+        async function resetFilters() {
+            document.getElementById('filter-type').value = '';
+            document.getElementById('filter-ecole').value = '';
+            document.getElementById('filter-annee').value = '';
+
+            await loadPageData();
+            showToast('Filtres réinitialisés', 'success');
         }
 
         // Exporter les résultats
@@ -1677,77 +2095,7 @@
             showToast('Résultats exportés avec succès', 'success');
         }
 
-        // Afficher la modale de sélection d'élection
-        function showElectionSelectionModal() {
-            const modal = document.getElementById('electionSelectionModal');
-            const container = document.getElementById('electionsListModal');
-
-            if (!modal || !container) return;
-
-            // Afficher la liste des élections terminées
-            container.innerHTML = allElections.map(election => `
-                <div class="election-item-modal" onclick="selectElectionForResults(${election.id})">
-                    <h4>${election.titre}</h4>
-                    <p>${ElectionService.getElectionTypeLabel(election.type)} - ${election.ecole || 'Toutes écoles'}</p>
-                    <p class="election-date">Terminée le ${formatDate(election.dateFin)}</p>
-                </div>
-            `).join('');
-
-            modal.classList.add('active');
-        }
-
-        // Sélectionner une élection pour afficher ses résultats
-        async function selectElectionForResults(electionId) {
-            document.getElementById('electionSelectionModal').classList.remove('active');
-            await loadElectionResults(electionId);
-        }
-
-        function showNoResults() {
-            const noResultsElement = document.getElementById('noResultsMessage');
-            const winnerBanner = document.getElementById('winnerBanner');
-            const statsGrid = document.querySelector('.stats-grid');
-            const chartsSection = document.querySelector('.charts-section');
-            const rankingSection = document.querySelector('.ranking-section');
-
-            if (noResultsElement) {
-                noResultsElement.style.display = 'block';
-            }
-
-            if (winnerBanner) winnerBanner.style.display = 'none';
-            if (statsGrid) statsGrid.style.display = 'none';
-            if (chartsSection) chartsSection.style.display = 'none';
-            if (rankingSection) rankingSection.style.display = 'none';
-        }
-
-
-        // Initialiser les gestionnaires d'événements
-        function initEventHandlers() {
-            // Gestionnaire d'export
-            document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
-
-            // Gestionnaire de fermeture de modale
-            document.getElementById('closeSelectionModal').addEventListener('click', function () {
-                document.getElementById('electionSelectionModal').classList.remove('active');
-            });
-
-            // Gestionnaire de clic sur le titre pour changer d'élection
-            document.getElementById('electionTitle').addEventListener('click', function () {
-                if (allElections.length > 1) {
-                    showElectionSelectionModal();
-                }
-            });
-
-            // Fermer la modale en cliquant à l'extérieur
-            document.addEventListener('click', function (event) {
-                const modal = document.getElementById('electionSelectionModal');
-                if (modal && event.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        }
-
         // Exposer les fonctions globales pour cette page
-        window.selectElectionForResults = selectElectionForResults;
         window.loadPageData = loadPageData;
     </script>
 </body>
