@@ -58,7 +58,7 @@
 
         .register-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
@@ -146,26 +146,30 @@
 
         .progress-steps {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 3rem;
             position: relative;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .progress-steps::before {
             content: '';
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
+            left: 0;
+            right: 0;
             height: 3px;
             background: var(--gray-light);
             z-index: 1;
+            transform: translateY(-50%);
         }
 
         .step {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: white;
             border: 3px solid var(--gray-light);
@@ -177,7 +181,6 @@
             position: relative;
             z-index: 2;
             transition: var(--transition);
-            margin: 0 1rem;
         }
 
         .step.active {
@@ -185,6 +188,7 @@
             background: var(--primary);
             color: white;
             transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
         }
 
         .step.completed {
@@ -210,11 +214,13 @@
             top: 100%;
             left: 50%;
             transform: translateX(-50%);
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
             color: var(--gray);
             white-space: nowrap;
             font-weight: 500;
+            text-align: center;
+            width: 120px;
         }
 
         .step.active .step-label {
@@ -352,6 +358,7 @@
             transition: var(--transition);
             text-align: center;
             background: white;
+            position: relative;
         }
 
         .activity-card:hover {
@@ -363,6 +370,18 @@
         .activity-card.selected {
             border-color: var(--primary);
             background: rgba(128, 0, 32, 0.05);
+        }
+
+        .activity-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--accent);
+            color: var(--secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
         .activity-icon {
@@ -381,6 +400,26 @@
             font-size: 0.8rem;
             color: var(--gray);
             line-height: 1.4;
+        }
+
+        .subactivities-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(128, 0, 32, 0.02);
+            border-radius: 10px;
+            border: 1px solid var(--gray-light);
+        }
+
+        .subactivities-section h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .subactivities-section p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
         }
 
         .form-actions {
@@ -573,13 +612,13 @@
             }
 
             .step {
-                width: 40px;
-                height: 40px;
-                margin: 0 0.5rem;
+                width: 50px;
+                height: 50px;
             }
 
             .step-label {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
+                width: 100px;
             }
 
             .form-actions {
@@ -588,6 +627,10 @@
 
             .btn {
                 width: 100%;
+            }
+
+            .progress-steps {
+                max-width: 100%;
             }
         }
 
@@ -613,14 +656,18 @@
             }
 
             .step {
-                width: 35px;
-                height: 35px;
-                margin: 0 0.25rem;
+                width: 45px;
+                height: 45px;
                 font-size: 0.9rem;
             }
 
             .step-label {
-                font-size: 0.65rem;
+                font-size: 0.7rem;
+                width: 80px;
+            }
+
+            .progress-steps {
+                margin-bottom: 2rem;
             }
         }
     </style>
@@ -824,6 +871,16 @@
                             <div class="activities-grid" id="activitiesContainer">
                                 <!-- Les activités seront chargées dynamiquement -->
                             </div>
+
+                            <!-- Section pour les sous-activités -->
+                            <div class="subactivities-section" id="subactivitiesContainer" style="display: none;">
+                                <h4 id="subactivitiesTitle">Sélectionnez vos activités</h4>
+                                <p id="subactivitiesDescription">Choisissez parmi les options disponibles</p>
+                                <div class="activities-grid" id="subactivitiesGrid">
+                                    <!-- Les sous-activités seront chargées ici dynamiquement -->
+                                </div>
+                            </div>
+
                             <div class="field-error" id="activitiesError"></div>
                         </div>
 
@@ -871,6 +928,9 @@
         let elements = {};
         let currentStep = 1;
         let selectedActivities = [];
+        let selectedSubactivities = {}; // Objet pour stocker {activityId: [subactivityIds]}
+        let activitiesWithSubs = {}; // Cache pour les sous-activités déjà chargées
+        let currentActivityId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeElements();
@@ -901,6 +961,10 @@
                 strengthText: document.getElementById('strengthText'),
                 strengthFill: document.getElementById('strengthFill'),
                 activitiesContainer: document.getElementById('activitiesContainer'),
+                subactivitiesContainer: document.getElementById('subactivitiesContainer'),
+                subactivitiesGrid: document.getElementById('subactivitiesGrid'),
+                subactivitiesTitle: document.getElementById('subactivitiesTitle'),
+                subactivitiesDescription: document.getElementById('subactivitiesDescription'),
                 whatsapp: document.getElementById('whatsapp'),
                 additionalInfo: document.getElementById('additionalInfo')
             };
@@ -1085,9 +1149,9 @@
                 console.error("Erreur chargement activités:", error);
                 // En cas d'erreur, afficher des activités par défaut
                 const defaultActivities = [
-                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions", icone: "running" },
-                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre", icone: "palette" },
-                    { id: 3, nom: "Technologie", description: "Club tech, programmation, robotique", icone: "laptop-code" }
+                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions", icone: "running", has_subactivities: true },
+                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre", icone: "palette", has_subactivities: true },
+                    { id: 3, nom: "Technologie", description: "Club tech, programmation, robotique", icone: "laptop-code", has_subactivities: true }
                 ];
                 renderActivities(defaultActivities);
             }
@@ -1099,28 +1163,147 @@
             activities.forEach(activity => {
                 const activityCard = document.createElement('div');
                 activityCard.className = 'activity-card';
+                activityCard.dataset.hasSubactivities = activity.has_subactivities || false;
+
                 activityCard.innerHTML = `
                     <div class="activity-icon">
                         <i class="fas fa-${activity.icone || getActivityIcon(activity.nom)}"></i>
                     </div>
                     <div class="activity-name">${activity.nom}</div>
                     <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
+                    ${activity.has_subactivities ? '<div class="activity-badge"><i class="fas fa-chevron-down"></i> Options</div>' : ''}
                 `;
 
                 activityCard.addEventListener('click', () => {
-                    activityCard.classList.toggle('selected');
+                    const wasSelected = activityCard.classList.contains('selected');
                     const activityId = activity.id;
+                    const hasSubactivities = activityCard.dataset.hasSubactivities === 'true';
+
+                    // Gérer la sélection/désélection
+                    activityCard.classList.toggle('selected');
 
                     if (activityCard.classList.contains('selected')) {
                         if (!selectedActivities.includes(activityId)) {
                             selectedActivities.push(activityId);
                         }
+
+                        // Si l'activité a des sous-activités, les afficher
+                        if (hasSubactivities) {
+                            currentActivityId = activityId;
+                            elements.subactivitiesContainer.style.display = 'block';
+                            populateSubactivities(activityId, activity.nom, activity.description);
+                        } else {
+                            elements.subactivitiesContainer.style.display = 'none';
+                        }
                     } else {
                         selectedActivities = selectedActivities.filter(id => id !== activityId);
+
+                        // Si on désélectionne une activité avec sous-activités
+                        if (hasSubactivities && currentActivityId === activityId) {
+                            elements.subactivitiesContainer.style.display = 'none';
+                            // Ne pas vider selectedSubactivities pour permettre la reselection
+                        }
                     }
                 });
 
                 elements.activitiesContainer.appendChild(activityCard);
+            });
+        }
+
+        async function populateSubactivities(activityId, activityName, activityDescription) {
+            try {
+                // Mettre à jour le titre
+                elements.subactivitiesTitle.textContent = `Sélectionnez vos ${activityName.toLowerCase()} préférés`;
+                elements.subactivitiesDescription.textContent = activityDescription || `Choisissez parmi les options de ${activityName}`;
+
+                // Vérifier si on a déjà chargé ces sous-activités
+                if (activitiesWithSubs[activityId]) {
+                    renderSubactivities(activitiesWithSubs[activityId]);
+                    return;
+                }
+
+                const res = await fetch(`${API_URL}/api/activities/${activityId}/subactivities`);
+                if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+                const data = await res.json();
+                if (data.success) {
+                    activitiesWithSubs[activityId] = data.data;
+                    renderSubactivities(data.data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error(`Erreur chargement sous-activités pour ${activityName}:`, error);
+                // Utiliser des sous-activités par défaut selon le type
+                const defaultSubs = getDefaultSubactivities(activityName);
+                activitiesWithSubs[activityId] = defaultSubs;
+                renderSubactivities(defaultSubs);
+            }
+        }
+
+        function getDefaultSubactivities(activityName) {
+            const defaults = {
+                'Sport': [
+                    { id: 101, nom: "Football", description: "Football et futsal", icone: "futbol" },
+                    { id: 102, nom: "Basketball", description: "Basketball", icone: "basketball-ball" },
+                    { id: 103, nom: "Handball", description: "Handball", icone: "hand-rock" },
+                    { id: 104, nom: "Volleyball", description: "Volleyball", icone: "volleyball-ball" },
+                    { id: 105, nom: "Taekwondo", description: "Arts martiaux", icone: "user-ninja" }
+                ],
+                'Culture': [
+                    { id: 201, nom: "Musique", description: "Chant, instruments", icone: "music" },
+                    { id: 202, nom: "Danse", description: "Danse traditionnelle et moderne", icone: "user-friends" },
+                    { id: 203, nom: "Théâtre", description: "Art dramatique", icone: "theater-masks" },
+                    { id: 204, nom: "Couture", description: "Couture et confection", icone: "tshirt" },
+                    { id: 205, nom: "Coiffure et tresses", description: "Art capillaire", icone: "user" },
+                    { id: 206, nom: "Make-up", description: "Maquillage artistique", icone: "spa" }
+                ],
+                'Technologie': [
+                    { id: 301, nom: "UCAO Tech", description: "Club technologique UCAO", icone: "laptop-code" },
+                    { id: 302, nom: "Programmation", description: "Développement web et mobile", icone: "code" },
+                    { id: 303, nom: "Robotique", description: "Robotique et IA", icone: "robot" }
+                ]
+            };
+
+            return defaults[activityName] || [];
+        }
+
+        function renderSubactivities(subactivities) {
+            elements.subactivitiesGrid.innerHTML = '';
+
+            subactivities.forEach(subactivity => {
+                const subCard = document.createElement('div');
+                subCard.className = 'activity-card';
+                subCard.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas fa-${subactivity.icone}"></i>
+                    </div>
+                    <div class="activity-name">${subactivity.nom}</div>
+                    <div class="activity-description">${subactivity.description}</div>
+                `;
+
+                subCard.addEventListener('click', () => {
+                    subCard.classList.toggle('selected');
+                    const subactivityId = subactivity.id;
+
+                    if (subCard.classList.contains('selected')) {
+                        // Ajouter à la sélection
+                        if (!selectedSubactivities[currentActivityId]) {
+                            selectedSubactivities[currentActivityId] = [];
+                        }
+                        if (!selectedSubactivities[currentActivityId].includes(subactivityId)) {
+                            selectedSubactivities[currentActivityId].push(subactivityId);
+                        }
+                    } else {
+                        // Retirer de la sélection
+                        if (selectedSubactivities[currentActivityId]) {
+                            selectedSubactivities[currentActivityId] = selectedSubactivities[currentActivityId]
+                                .filter(id => id !== subactivityId);
+                        }
+                    }
+                });
+
+                elements.subactivitiesGrid.appendChild(subCard);
             });
         }
 
@@ -1264,6 +1447,7 @@
                 ecoleId: formData.ecoleId,
                 annee: annee,
                 activities: selectedActivities,
+                subactivities: selectedSubactivities, // ← NOUVEAU CHAMP
                 whatsapp: formData.whatsapp,
                 additionalInfo: formData.additionalInfo
             };
