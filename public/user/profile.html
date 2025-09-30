@@ -7,7 +7,6 @@
     <title>Profil Étudiant - UCAO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/assets/notifications.css">
     <style>
         :root {
             --primary: #800020;
@@ -592,6 +591,136 @@
             background: var(--warning);
         }
 
+        /* NOTIFICATIONS PANEL */
+        .notifications-container {
+            position: relative;
+        }
+
+        .notifications-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 380px;
+            max-height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--gray-light);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            margin-top: 0.5rem;
+        }
+
+        .notifications-panel.show {
+            display: flex;
+        }
+
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--gray-light);
+            background: var(--light);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .notifications-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .mark-all-read:hover {
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        .notifications-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+            gap: 0.75rem;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item:hover {
+            background: rgba(128, 0, 32, 0.03);
+        }
+
+        .notification-item.unread {
+            background: rgba(13, 27, 42, 0.02);
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(128, 0, 32, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .notification-item.unread .notification-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .no-notifications {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-style: italic;
+        }
+
         /* NOTIFICATIONS */
         .toast {
             position: fixed;
@@ -739,6 +868,11 @@
             .user-nav span span {
                 display: none;
             }
+
+            .notifications-panel {
+                width: 320px;
+                right: -50px;
+            }
         }
 
         @media (max-width: 640px) {
@@ -754,6 +888,11 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .notifications-panel {
+                width: 280px;
+                right: -80px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -763,6 +902,11 @@
 
             .header-actions {
                 margin-left: auto;
+            }
+
+            .notifications-panel {
+                width: 250px;
+                right: -100px;
             }
         }
 
@@ -864,10 +1008,24 @@
             </div>
 
             <div class="header-actions">
-                <button class="notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
+                <div class="notifications-container">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge">0</span>
+                    </button>
+
+                    <div class="notifications-panel" id="notificationsPanel">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i> Tout marquer comme lu
+                            </button>
+                        </div>
+                        <div class="notifications-body" id="notificationsList">
+                            <!-- Les notifications seront insérées ici -->
+                        </div>
+                    </div>
+                </div>
 
                 <div class="user-menu">
                     <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
@@ -1097,19 +1255,7 @@
         <span id="toastMessage"></span>
     </div>
 
-    <!-- Panneau de notifications -->
-    <div id="notificationPanel" class="notification-panel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button id="markAllReadBtn" class="mark-all-read">Tout marquer comme lu</button>
-        </div>
-        <div id="notificationList" class="notification-list">
-            <!-- Les notifications seront insérées ici -->
-        </div>
-    </div>
-
     <script src="/assets/config.js"></script>
-    <script src="/assets/js/notificationService.js"></script>
     <script>
         // Configuration et constantes
         const API_URL = CONFIG.BASE_URL;
@@ -1163,13 +1309,12 @@
             },
 
             async uploadAvatar(formData) {
-                const url = `${API_URL}/api/upload/image`; // Ajustez l'endpoint selon votre API
+                const url = `${API_URL}/api/upload/image`;
 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${TOKEN}`
-                        // Ne pas mettre Content-Type pour FormData, le navigateur le gère
                     },
                     body: formData
                 });
@@ -1181,7 +1326,196 @@
 
                 return await response.json();
             }
+        };
+
+        // Service des notifications
+        const NotificationService = {
+            async getNotifications() {
+                try {
+                    const response = await apiCall('/notifications');
+                    return response.data || [];
+                } catch (error) {
+                    console.error('Erreur lors de la récupération des notifications:', error);
+                    return [];
+                }
+            },
+
+            async markAsRead(notificationId) {
+                try {
+                    await apiCall(`/notifications/${notificationId}/read`, {
+                        method: 'PUT'
+                    });
+                } catch (error) {
+                    console.error('Erreur lors du marquage comme lu:', error);
+                }
+            },
+
+            async markAllAsRead() {
+                try {
+                    await apiCall('/notifications/mark-all-read', {
+                        method: 'PUT'
+                    });
+                } catch (error) {
+                    console.error('Erreur lors du marquage de toutes comme lues:', error);
+                }
+            },
+
+            async getUnreadCount() {
+                try {
+                    const response = await apiCall('/notifications/unread-count');
+                    return response.count || 0;
+                } catch (error) {
+                    console.error('Erreur lors du comptage des non lues:', error);
+                    return 0;
+                }
+            }
+        };
+
+        // Fonctions pour les notifications
+        async function initializeNotifications() {
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            const notificationBadge = document.getElementById('notificationBadge');
+
+            if (!notificationBtn || !notificationsPanel) {
+                console.warn('Éléments de notifications non trouvés');
+                return;
+            }
+
+            // Gestionnaire de clic sur le bouton de notifications
+            notificationBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationsPanel.classList.toggle('show');
+                loadNotifications();
+            });
+
+            // Fermer le panneau si on clique en dehors
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notifications-container') && !e.target.closest('.notifications-panel')) {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+
+            // Empêcher la fermeture quand on clique dans le panneau
+            notificationsPanel.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // Marquer toutes les notifications comme lues
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', async () => {
+                    try {
+                        await NotificationService.markAllAsRead();
+                        await updateNotificationBadge();
+                        await loadNotifications();
+                        showToast('Toutes les notifications marquées comme lues', 'success');
+                    } catch (error) {
+                        showToast('Erreur lors du marquage des notifications', 'error');
+                    }
+                });
+            }
+
+            // Chargement initial
+            await updateNotificationBadge();
         }
+
+        async function loadNotifications() {
+            const container = document.getElementById('notificationsList');
+            if (!container) return;
+
+            try {
+                const notifications = await NotificationService.getNotifications();
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.createdAt)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                // Ajouter les gestionnaires de clic pour chaque notification
+                container.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', async () => {
+                        const notifId = item.dataset.id;
+                        try {
+                            await NotificationService.markAsRead(notifId);
+                            item.classList.remove('unread');
+                            await updateNotificationBadge();
+                        } catch (error) {
+                            console.error('Erreur lors du marquage comme lu:', error);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+                container.innerHTML = '<div class="no-notifications">Erreur de chargement</div>';
+            }
+        }
+
+        async function updateNotificationBadge() {
+            const notificationBadge = document.getElementById('notificationBadge');
+            if (!notificationBadge) return;
+
+            try {
+                const unreadCount = await NotificationService.getUnreadCount();
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour du badge:', error);
+                notificationBadge.style.display = 'none';
+            }
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'success': 'fa-check-circle',
+                'warning': 'fa-exclamation-triangle',
+                'error': 'fa-times-circle',
+                'info': 'fa-info-circle',
+                'election': 'fa-vote-yea',
+                'candidature': 'fa-file-signature',
+                'profile': 'fa-user',
+                'system': 'fa-cog'
+            };
+            return icons[type] || 'fa-bell';
+        }
+
+        function formatNotificationDate(date) {
+            const now = new Date();
+            const notifDate = new Date(date);
+            const diff = now - notifDate;
+            const diffMinutes = Math.floor(diff / 60000);
+            const diffHours = Math.floor(diff / 3600000);
+            const diffDays = Math.floor(diff / 86400000);
+
+            if (diffMinutes < 1) {
+                return 'À l\'instant';
+            } else if (diffMinutes < 60) {
+                return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+            } else if (diffHours < 24) {
+                return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+            } else if (diffDays < 7) {
+                return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+            } else {
+                return notifDate.toLocaleDateString();
+            }
+        }
+
+        // Fonctions pour le changement de mot de passe
         async function changePassword(e) {
             e.preventDefault();
 
@@ -1216,7 +1550,6 @@
                 if (response.success) {
                     closePasswordModal();
                     showToast('Mot de passe changé avec succès', 'success');
-                    // Réinitialiser le formulaire
                     document.getElementById('password-form').reset();
                 } else {
                     throw new Error(response.message || 'Erreur lors du changement de mot de passe');
@@ -1224,7 +1557,6 @@
             } catch (error) {
                 console.error('Erreur changement mot de passe:', error);
 
-                // Messages d'erreur spécifiques
                 if (error.message.includes('current password') || error.message.includes('actuel')) {
                     showToast('Le mot de passe actuel est incorrect', 'error');
                 } else if (error.message.includes('same') || error.message.includes('identique')) {
@@ -1244,50 +1576,42 @@
                 feedback: []
             };
 
-            // Longueur minimale
             if (password.length >= 8) strength.score++;
             else strength.feedback.push('Au moins 8 caractères');
 
-            // Contient des minuscules
             if (/[a-z]/.test(password)) strength.score++;
             else strength.feedback.push('Au moins une minuscule');
 
-            // Contient des majuscules
             if (/[A-Z]/.test(password)) strength.score++;
             else strength.feedback.push('Au moins une majuscule');
 
-            // Contient des chiffres
             if (/[0-9]/.test(password)) strength.score++;
             else strength.feedback.push('Au moins un chiffre');
 
-            // Contient des caractères spéciaux
             if (/[^A-Za-z0-9]/.test(password)) strength.score++;
             else strength.feedback.push('Au moins un caractère spécial');
 
             return strength;
         }
 
-        // Mettre à jour l'affichage de la force du mot de passe
         function updatePasswordStrength() {
             const password = document.getElementById('new-password').value;
             const strength = validatePasswordStrength(password);
             const strengthBar = document.querySelector('.strength-bar');
             const strengthText = document.querySelector('.strength-text');
 
-            // Mettre à jour la barre de progression
             const width = (strength.score / 5) * 100;
             strengthBar.style.setProperty('--strength-width', `${width}%`);
 
-            // Mettre à jour la couleur et le texte
             let color, text;
             if (strength.score <= 2) {
-                color = '#ef4444'; // Rouge
+                color = '#ef4444';
                 text = 'Faible';
             } else if (strength.score <= 3) {
-                color = '#f59e0b'; // Orange
+                color = '#f59e0b';
                 text = 'Moyen';
             } else {
-                color = '#10b981'; // Vert
+                color = '#10b981';
                 text = 'Fort';
             }
 
@@ -1304,23 +1628,10 @@
                 return;
             }
 
-            // Initialiser le service de notifications
-            const notificationBtn = document.querySelector('.notification-btn');
-            const notificationPanel = document.getElementById('notificationPanel');
-            const notificationService = new NotificationService(notificationBtn, notificationPanel);
-            await notificationService.initialize();
+            // Initialiser le système de notifications
+            await initializeNotifications();
 
             // Initialiser le menu burger
-            // Gestionnaire de clic en dehors du panneau de notifications
-            document.addEventListener('click', function (e) {
-                const notificationPanel = document.getElementById('notificationPanel');
-                const notificationBtn = document.querySelector('.notification-btn');
-
-                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
-                    notificationPanel.classList.remove('active');
-                }
-            });
-
             const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -1411,6 +1722,7 @@
                 document.getElementById('userAvatar').src = photoUrl;
             }
         }
+
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
             // Profil - Bouton modifier
@@ -1537,35 +1849,6 @@
             }, 300);
         }
 
-        async function changePassword(e) {
-            e.preventDefault();
-
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (newPassword !== confirmPassword) {
-                showToast('Les mots de passe ne correspondent pas', 'error');
-                return;
-            }
-
-            try {
-                showLoading();
-                const response = await UserService.changePassword({ currentPassword, newPassword });
-
-                if (response.success) {
-                    closePasswordModal();
-                    showToast('Mot de passe changé avec succès', 'success');
-                } else {
-                    throw new Error(response.message || 'Erreur lors du changement de mot de passe');
-                }
-            } catch (error) {
-                showToast(error.message || 'Erreur lors du changement de mot de passe', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
         // Fonction pour charger la photo de profil depuis l'API
         async function loadUserProfilePhoto() {
             try {
@@ -1628,8 +1911,8 @@
             try {
                 showLoading();
                 const formData = new FormData();
-                formData.append('image', file); // Changé de 'avatar' à 'image' pour correspondre à votre API
-                formData.append('userId', window.userData.id); // Ajouter l'ID utilisateur
+                formData.append('image', file);
+                formData.append('userId', window.userData.id);
 
                 const response = await UserService.uploadAvatar(formData);
 
@@ -1668,7 +1951,7 @@
                 fileNameDisplay.style.display = 'none';
             } finally {
                 hideLoading();
-                e.target.value = ''; // Réinitialiser l'input file
+                e.target.value = '';
             }
         }
 
