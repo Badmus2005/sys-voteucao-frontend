@@ -1080,6 +1080,189 @@
                 max-height: 80vh;
             }
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Form Styles in Modal */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        /* Enhanced Card Styles */
+        .candidature-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--secondary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .candidature-card-header {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .candidature-card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .candidature-card-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidature-card-content {
+            padding: 1.25rem;
+        }
+
+        .candidature-card-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .candidature-card-slogan {
+            padding: 1rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        .candidature-card-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
     </style>
 </head>
 
@@ -1314,6 +1497,65 @@
         </div>
     </div>
 
+    <!-- Modal pour les détails -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="detailModalTitle">
+                    <i class="fas fa-file-signature"></i>
+                    Détails de la candidature
+                </h3>
+                <button class="modal-close" id="closeDetailModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="detailModalBody">
+                <!-- Le contenu sera chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour l'édition -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="editModalTitle">
+                    <i class="fas fa-edit"></i>
+                    Modifier la candidature
+                </h3>
+                <button class="modal-close" id="closeEditModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editCandidatureForm">
+                    <div class="form-group">
+                        <label for="editSlogan">Slogan de campagne</label>
+                        <input type="text" class="form-control" id="editSlogan"
+                            placeholder="Votre slogan de campagne...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editProgramme">Programme électoral</label>
+                        <textarea class="form-control" id="editProgramme"
+                            placeholder="Décrivez votre programme électoral..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelEdit">
+                            <i class="fas fa-times"></i>
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveEdit">
+                            <i class="fas fa-save"></i>
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast">
         <i class="fas fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
@@ -1334,6 +1576,8 @@
             rejete: 0,
             total: 0
         };
+
+        let currentEditingCandidature = null;
 
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
@@ -1383,6 +1627,17 @@
                 return await apiCall(`/candidats/${id}`, {
                     method: 'DELETE'
                 });
+            },
+
+            async updateCandidature(id, data) {
+                return await apiCall(`/candidats/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            async getCandidatureDetails(id) {
+                return await apiCall(`/candidats/${id}`);
             }
         };
 
@@ -1429,8 +1684,34 @@
             return date.toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
+        }
+
+        // Obtenir le texte du statut
+        function getStatusText(status) {
+            const statuses = {
+                'EN_ATTENTE': 'En attente',
+                'APPROUVE': 'Approuvé',
+                'REJETE': 'Rejeté',
+                'en_attente': 'En attente',
+                'approuve': 'Approuvé',
+                'rejete': 'Rejeté'
+            };
+            return statuses[status] || status;
+        }
+
+        // Gestion des modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
 
         // Initialisation de la page
@@ -1464,6 +1745,9 @@
                 window.location.href = 'login.html';
             });
 
+            // Initialiser les gestionnaires d'événements des modales
+            initModalHandlers();
+
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
 
@@ -1474,39 +1758,36 @@
             await loadPageData();
         });
 
-        // Charger une candidature pour modification
-        async function loadCandidatureForEdit(candidatureId) {
-            try {
-                const response = await apiCall(`/candidats/${candidatureId}`);
+        // Initialiser les gestionnaires des modales
+        function initModalHandlers() {
+            // Modal de détails
+            document.getElementById('closeDetailModal').addEventListener('click', function () {
+                closeModal('detailModal');
+            });
 
-                if (response && response.success) {
-                    const candidature = response.candidature;
+            // Modal d'édition
+            document.getElementById('closeEditModal').addEventListener('click', function () {
+                closeModal('editModal');
+            });
 
-                    // Pré-remplir le formulaire avec les données existantes
-                    document.getElementById('electionId').value = candidature.election?.id || '';
-                    document.getElementById('slogan').value = candidature.slogan || '';
-                    document.getElementById('programme').value = candidature.programme || '';
+            document.getElementById('cancelEdit').addEventListener('click', function () {
+                closeModal('editModal');
+            });
 
-                    // Mettre à jour l'interface
-                    document.getElementById('formTitle').textContent = 'Modifier ma candidature';
-                    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Mettre à jour';
+            // Formulaire d'édition
+            document.getElementById('editCandidatureForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                await saveCandidatureEdit();
+            });
 
-                    // Afficher les informations de l'élection
-                    if (candidature.election) {
-                        displayElectionInfo(candidature.election);
+            // Fermer les modales en cliquant à l'extérieur
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        closeModal(this.id);
                     }
-                }
-            } catch (error) {
-                console.error('Erreur chargement candidature:', error);
-                showToast('Erreur lors du chargement de la candidature', 'error');
-            }
-        }
-
-        // Vérifier si on est en mode édition au chargement
-        const urlParams = new URLSearchParams(window.location.search);
-        const editCandidatureId = urlParams.get('edit');
-        if (editCandidatureId) {
-            loadCandidatureForEdit(editCandidatureId);
+                });
+            });
         }
 
         // Chargement des données de la page
@@ -1529,7 +1810,8 @@
         async function loadUserCandidatures() {
             try {
                 const response = await CandidatureService.getMyCandidatures();
-                console.log("Donnée :", response);
+                console.log("Données reçues:", response);
+
                 if (response && response.success && Array.isArray(response.candidatures)) {
                     allCandidatures = response.candidatures;
                     filteredCandidatures = [...allCandidatures];
@@ -1549,84 +1831,290 @@
             }
         }
 
-        // Afficher les candidatures
+        // Afficher les candidatures avec plus d'informations
         function displayCandidatures(candidatures) {
             const container = document.getElementById('candidaturesList');
             if (!container) return;
 
+            if (candidatures.length === 0) {
+                showNoCandidatures();
+                return;
+            }
+
             container.innerHTML = candidatures.map(candidature => {
-                // Adapter la structure des données selon la réponse de l'API
                 const election = candidature.election || {};
                 const statut = candidature.statut || 'en_attente';
 
+                // Informations supplémentaires pour le debug
+                console.log("Candidature:", candidature);
+                console.log("Élection:", election);
+
                 return `
-                <div class="candidature-card" data-candidature-id="${candidature.id}">
-                    <div class="candidature-header">
-                        <div class="candidature-info">
-                            <h3 class="candidature-title">${election.titre || 'Sans titre'}</h3>
-                            <span class="election-type">${ElectionService.getElectionTypeLabel(election.type)}</span>
-                        </div>
-                        <span class="candidature-status status-${statut}">
-                            ${getStatusText(statut)}
-                        </span>
-                    </div>
-                    
-                    <div class="candidature-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-graduation-cap"></i>
-                            <strong>École:</strong> ${election.ecole || 'Non spécifié'}
-                        </div>
-                        ${election.filiere ? `
-                        <div class="meta-item">
-                            <i class="fas fa-layer-group"></i>
-                            <strong>Filière:</strong> ${election.filiere}
-                        </div>
-                        ` : ''}
-                        ${election.annee ? `
-                        <div class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            <strong>Année:</strong> ${election.annee}
-                        </div>
-                        ` : ''}
-                        <div class="meta-item">
-                            <i class="fas fa-calendar-days"></i>
-                            <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
-                        </div>
-                    </div>
-                    
-                    ${candidature.slogan ? `
-                    <div class="candidature-slogan">
-                        <i class="fas fa-quote-left"></i>
-                        "${candidature.slogan}"
-                    </div>
-                    ` : ''}
-                    
-                    <div class="candidature-actions">
-                        <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
-                            <i class="fas fa-eye"></i>
-                            Voir détails
-                        </button>
-                        
-                        ${statut === 'EN_ATTENTE' ? `
-                        <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
-                            <i class="fas fa-pen-to-square"></i>
-                            Modifier
-                        </button>
-                        ` : ''}
-                        
-                        ${statut === 'EN_ATTENTE' ? `
-                        <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
-                            <i class="fas fa-trash"></i>
-                            Annuler
-                        </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
+<div class="candidature-card" data-candidature-id="${candidature.id}">
+    <div class="candidature-card-header">
+        <div class="candidature-info">
+            <h3 class="candidature-card-title">${election.titre || 'Élection sans titre'}</h3>
+            <div class="candidature-card-subtitle">
+                ${ElectionService.getElectionTypeLabel(election.type)} •
+                ${election.ecole || 'École non spécifiée'}
+            </div>
+            ${election.filiere ? `<div class="candidature-card-subtitle">Filière: ${election.filiere}</div>` : ''}
+        </div>
+        <span class="candidature-status status-${statut}">
+            ${getStatusText(statut)}
+        </span>
+    </div>
+
+    <div class="candidature-card-content">
+        <div class="candidature-card-meta">
+            <div class="meta-item">
+                <i class="fas fa-university"></i>
+                <strong>École:</strong> ${election.ecole || 'Non spécifié'}
+            </div>
+            ${election.filiere ? `
+            <div class="meta-item">
+                <i class="fas fa-layer-group"></i>
+                <strong>Filière:</strong> ${election.filiere}
+            </div>
+            ` : ''}
+            ${election.annee ? `
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <strong>Année:</strong> ${election.annee}
+            </div>
+            ` : ''}
+            <div class="meta-item">
+                <i class="fas fa-calendar-days"></i>
+                <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
+            </div>
+        </div>
+
+        ${candidature.slogan ? `
+        <div class="candidature-card-slogan">
+            <i class="fas fa-quote-left"></i>
+            "${candidature.slogan}"
+        </div>
+        ` : ''}
+
+        <div class="candidature-card-actions">
+            <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-eye"></i>
+                Voir détails
+            </button>
+
+            ${statut === 'EN_ATTENTE' || statut === 'en_attente' ? `
+            <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-pen-to-square"></i>
+                Modifier
+            </button>
+            ` : ''}
+
+            ${statut === 'EN_ATTENTE' || statut === 'en_attente' ? `
+            <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-trash"></i>
+                Annuler
+            </button>
+            ` : ''}
+        </div>
+    </div>
+</div>
+`;
             }).join('');
 
             // Ajouter les événements
             attachCandidatureEvents();
+        }
+
+        // Afficher les détails d'une candidature dans la modale
+        async function showCandidatureDetails(candidatureId) {
+            showLoading();
+
+            try {
+                const response = await CandidatureService.getCandidatureDetails(candidatureId);
+
+                if (response && response.success) {
+                    const candidature = response.candidature;
+                    const election = candidature.election || {};
+                    const statut = candidature.statut || 'en_attente';
+
+                    const modalBody = document.getElementById('detailModalBody');
+                    modalBody.innerHTML = `
+<div class="detail-section">
+    <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Élection</span>
+            <span class="info-value">${election.titre || 'Non spécifié'}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Type</span>
+            <span class="info-value">${ElectionService.getElectionTypeLabel(election.type)}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">École</span>
+            <span class="info-value">${election.ecole || 'Non spécifié'}</span>
+        </div>
+        ${election.filiere ? `
+        <div class="info-item">
+            <span class="info-label">Filière</span>
+            <span class="info-value">${election.filiere}</span>
+        </div>
+        ` : ''}
+        ${election.annee ? `
+        <div class="info-item">
+            <span class="info-label">Année</span>
+            <span class="info-value">${election.annee}</span>
+        </div>
+        ` : ''}
+    </div>
+</div>
+
+<div class="detail-section">
+    <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Date de soumission</span>
+            <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Dernière modification</span>
+            <span class="info-value">${formatDate(candidature.updatedAt)}</span>
+        </div>
+    </div>
+</div>
+
+<div class="detail-section">
+    <h3><i class="fas fa-chart-bar"></i> Statut</h3>
+    <div class="candidature-status status-${statut}">
+        ${getStatusText(statut)}
+    </div>
+</div>
+
+${candidature.slogan ? `
+<div class="detail-section">
+    <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
+    <div class="slogan-display">
+        "${candidature.slogan}"
+    </div>
+</div>
+` : ''}
+
+${candidature.programme ? `
+<div class="detail-section">
+    <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
+    <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
+        ${candidature.programme}
+    </div>
+</div>
+` : ''}
+`;
+
+                    openModal('detailModal');
+                } else {
+                    throw new Error('Impossible de charger les détails');
+                }
+            } catch (error) {
+                console.error('Erreur chargement détails:', error);
+                showToast('Erreur lors du chargement des détails', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Ouvrir la modale d'édition
+        function openEditModal(candidatureId) {
+            const candidature = allCandidatures.find(c => c.id == candidatureId);
+
+            if (candidature) {
+                currentEditingCandidature = candidature;
+
+                // Pré-remplir le formulaire
+                document.getElementById('editSlogan').value = candidature.slogan || '';
+                document.getElementById('editProgramme').value = candidature.programme || '';
+
+                openModal('editModal');
+            }
+        }
+
+        // Sauvegarder les modifications
+        async function saveCandidatureEdit() {
+            if (!currentEditingCandidature) return;
+
+            const slogan = document.getElementById('editSlogan').value;
+            const programme = document.getElementById('editProgramme').value;
+
+            showLoading();
+
+            try {
+                const response = await CandidatureService.updateCandidature(
+                    currentEditingCandidature.id,
+                    { slogan, programme }
+                );
+
+                if (response && response.success) {
+                    // Mettre à jour localement
+                    const index = allCandidatures.findIndex(c => c.id === currentEditingCandidature.id);
+                    if (index !== -1) {
+                        allCandidatures[index].slogan = slogan;
+                        allCandidatures[index].programme = programme;
+                        filteredCandidatures = [...allCandidatures];
+
+                        displayCandidatures(filteredCandidatures);
+                    }
+
+                    closeModal('editModal');
+                    showToast('Candidature modifiée avec succès', 'success');
+
+                    // Mettre à jour les notifications
+                    if (window.notificationService) {
+                        window.notificationService.addNotification({
+                            title: 'Candidature modifiée',
+                            message: 'Votre candidature a été modifiée avec succès.',
+                            category: 'candidature'
+                        });
+                    }
+                } else {
+                    throw new Error(response?.message || 'Erreur lors de la modification');
+                }
+            } catch (error) {
+                console.error('Erreur modification:', error);
+                showToast(error.message || 'Erreur lors de la modification', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Les autres fonctions restent les mêmes (calculateStatistics, updateStatisticsDisplay, showNoCandidatures, etc.)
+        // ... (gardez le reste de votre code JavaScript existant pour ces fonctions)
+
+        // Attacher les événements aux candidatures
+        function attachCandidatureEvents() {
+            // Boutons de détails
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const candidatureId = this.dataset.candidatureId;
+                    showCandidatureDetails(candidatureId);
+                });
+            });
+
+            // Boutons de modification
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const candidatureId = this.dataset.candidatureId;
+                    openEditModal(candidatureId);
+                });
+            });
+
+            // Boutons d'annulation
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', async function (e) {
+                    e.stopPropagation();
+                    const candidatureId = this.dataset.candidatureId;
+                    await cancelCandidature(candidatureId);
+                });
+            });
         }
 
         // Obtenir le texte du statut
@@ -1751,13 +2239,6 @@
                 }
             }
         }
-
-        // Afficher les détails d'une candidature
-        function showCandidatureDetails(candidature) {
-            // Rediriger vers la page de détails
-            window.location.href = `detail-candidature.html?id=${candidature.id}`;
-        }
-
         // Filtrer les candidatures
         function filterCandidatures() {
             const statusFilter = document.getElementById('filterStatus').value;
@@ -1812,20 +2293,22 @@
             function displayNotifications() {
                 const notifications = notificationService.getNotifications();
                 notificationsList.innerHTML = notifications.length ? notifications.map(notif => `
-                    <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                        <div class="notification-icon">
-                            <i class="${getNotificationIcon(notif.category)}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-title">${notif.title}</div>
-                            <div class="notification-message">${notif.message}</div>
-                            <div class="notification-meta">
-                                <span class="notification-time">${formatNotificationDate(notif.timestamp)}</span>
-                                <span class="notification-category">${notif.category}</span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('') : '<div class="empty-state" style="padding: 2rem; text-align: center;"><i class="fas fa-bell-slash"></i><p>Aucune notification</p></div>';
+<div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+    <div class="notification-icon">
+        <i class="${getNotificationIcon(notif.category)}"></i>
+    </div>
+    <div class="notification-content">
+        <div class="notification-title">${notif.title}</div>
+        <div class="notification-message">${notif.message}</div>
+        <div class="notification-meta">
+            <span class="notification-time">${formatNotificationDate(notif.timestamp)}</span>
+            <span class="notification-category">${notif.category}</span>
+        </div>
+    </div>
+</div>
+`).join('') : `<div class="empty-state" style="padding: 2rem; text-align: center;"><i class="fas fa-bell-slash"></i>
+    <p>Aucune notification</p>
+</div>`;
             }
 
             // Formater la date des notifications
