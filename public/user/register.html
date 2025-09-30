@@ -144,6 +144,109 @@
             padding: 2.5rem;
         }
 
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 3px;
+            background: var(--gray-light);
+            z-index: 1;
+        }
+
+        .step {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+            margin: 0 1rem;
+        }
+
+        .step.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+        }
+
+        .step-icon {
+            display: none;
+        }
+
+        .step.completed .step-number {
+            display: none;
+        }
+
+        .step.completed .step-icon {
+            display: block;
+        }
+
+        .step-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .step.completed .step-label {
+            color: var(--success);
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -181,7 +284,8 @@
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 1rem 1rem 1rem 3rem;
             border: 2px solid var(--gray-light);
@@ -191,17 +295,26 @@
             background: white;
             position: relative;
             z-index: 1;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+            padding: 1rem;
         }
 
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
         }
 
         .form-group input.error,
-        .form-group select.error {
+        .form-group select.error,
+        .form-group textarea.error {
             border-color: var(--danger);
         }
 
@@ -224,43 +337,107 @@
             display: none;
         }
 
-        .btn-register {
-            width: 100%;
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .activity-card {
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            background: white;
+        }
+
+        .activity-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-card.selected {
+            border-color: var(--primary);
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        .activity-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.8rem;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .btn {
             padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            min-width: 140px;
+            justify-content: center;
         }
 
+        .btn-prev {
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        .btn-prev:hover {
+            background: #d1d5db;
+        }
+
+        .btn-next,
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.3);
+        }
+
+        .btn-next:hover,
         .btn-register:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(128, 0, 32, 0.3);
+            box-shadow: 0 10px 25px rgba(128, 0, 32, 0.4);
         }
 
-        .btn-register:active {
-            transform: translateY(0);
-        }
-
-        .btn-register:disabled {
+        .btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
 
         .register-footer {
             text-align: center;
             padding-top: 1.5rem;
             border-top: 1px solid var(--gray-light);
+            margin-top: 2rem;
         }
 
         .register-footer p {
@@ -329,111 +506,6 @@
             }
         }
 
-        .progress-steps {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .progress-steps::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 2px;
-            background: var(--gray-light);
-            z-index: 1;
-        }
-
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid var(--gray-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: var(--gray);
-            position: relative;
-            z-index: 2;
-            transition: var(--transition);
-        }
-
-        .step.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .step.completed {
-            border-color: var(--success);
-            background: var(--success);
-            color: white;
-        }
-
-        .step-icon {
-            display: none;
-        }
-
-        .step.completed .step-number {
-            display: none;
-        }
-
-        .step.completed .step-icon {
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .register-container {
-                max-width: 100%;
-                margin: 0;
-            }
-
-            .register-content {
-                padding: 2rem 1.5rem;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .register-header {
-                padding: 2rem 1.5rem;
-            }
-
-            .register-header h1 {
-                font-size: 1.8rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-
-            .register-content {
-                padding: 1.5rem 1rem;
-            }
-
-            .register-header {
-                padding: 1.5rem 1rem;
-            }
-
-            .logo-text {
-                font-size: 1.4rem;
-            }
-
-            .register-header h1 {
-                font-size: 1.5rem;
-            }
-        }
-
         .password-strength {
             margin-top: 0.5rem;
         }
@@ -472,6 +544,85 @@
             width: 100%;
             background: var(--success);
         }
+
+        @media (max-width: 768px) {
+            .register-container {
+                max-width: 100%;
+                margin: 0;
+            }
+
+            .register-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .register-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .register-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                width: 40px;
+                height: 40px;
+                margin: 0 0.5rem;
+            }
+
+            .step-label {
+                font-size: 0.7rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .register-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .register-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .logo-text {
+                font-size: 1.4rem;
+            }
+
+            .register-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .step {
+                width: 35px;
+                height: 35px;
+                margin: 0 0.25rem;
+                font-size: 0.9rem;
+            }
+
+            .step-label {
+                font-size: 0.65rem;
+            }
+        }
     </style>
 </head>
 
@@ -495,14 +646,17 @@
                 <div class="step active" data-step="1">
                     <span class="step-number">1</span>
                     <i class="fas fa-check step-icon"></i>
+                    <div class="step-label">Informations<br>personnelles</div>
                 </div>
                 <div class="step" data-step="2">
                     <span class="step-number">2</span>
                     <i class="fas fa-check step-icon"></i>
+                    <div class="step-label">Informations<br>académiques</div>
                 </div>
                 <div class="step" data-step="3">
                     <span class="step-number">3</span>
                     <i class="fas fa-check step-icon"></i>
+                    <div class="step-label">Activités &<br>contact</div>
                 </div>
             </div>
 
@@ -522,123 +676,193 @@
             </div>
 
             <form id="registerForm" novalidate>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="nom">Nom</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" id="nom" name="nom" required>
-                        </div>
-                        <div class="field-error" id="nomError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="prenom">Prénom</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" id="prenom" name="prenom" required>
-                        </div>
-                        <div class="field-error" id="prenomError"></div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="email">Email</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="field-error" id="emailError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="ecole">École/Faculté</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-graduation-cap input-icon"></i>
-                            <select id="ecole" name="ecoleId" required>
-                                <option value="">Sélectionnez votre école</option>
-                            </select>
-                        </div>
-                        <div class="field-error" id="ecoleError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="filiere">Filière</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-book input-icon"></i>
-                            <select id="filiere" name="filiereId" required>
-                                <option value="">Sélectionnez votre filière</option>
-                            </select>
-                        </div>
-                        <div class="field-error" id="filiereError"></div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="annee">Année d'étude</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-calendar-alt input-icon"></i>
-                            <select id="annee" name="annee" required>
-                                <option value="">Sélectionnez votre année</option>
-                                <option value="1">1ère année</option>
-                                <option value="2">2ème année</option>
-                                <option value="3">3ème année</option>
-                            </select>
-                        </div>
-                        <div class="field-error" id="anneeError"></div>
-                    </div>
-
-                    <div class="form-group full-width" id="matriculeGroup" style="display:none;">
-                        <label for="matricule">Matricule</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-id-card input-icon"></i>
-                            <input type="text" id="matricule" name="matricule">
-                        </div>
-                        <div class="field-error" id="matriculeError"></div>
-                    </div>
-
-                    <div class="form-group full-width" id="codeGroup" style="display:none;">
-                        <label for="codeInscription">Code d'inscription</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-key input-icon"></i>
-                            <input type="text" id="codeInscription" name="codeInscription">
-                        </div>
-                        <div class="field-error" id="codeInscriptionError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Mot de passe</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input type="password" id="password" name="password" required>
-                            <button type="button" class="password-toggle" id="passwordToggle">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="password-strength">
-                            <div class="strength-text" id="strengthText">Force du mot de passe</div>
-                            <div class="strength-bar">
-                                <div class="strength-fill" id="strengthFill"></div>
+                <!-- Étape 1: Informations personnelles -->
+                <div class="form-step active" id="step1">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nom">Nom</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="nom" name="nom" required>
                             </div>
+                            <div class="field-error" id="nomError"></div>
                         </div>
-                        <div class="field-error" id="passwordError"></div>
+
+                        <div class="form-group">
+                            <label for="prenom">Prénom</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="prenom" name="prenom" required>
+                            </div>
+                            <div class="field-error" id="prenomError"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="email">Email</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="field-error" id="emailError"></div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirmer le mot de passe</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input type="password" id="confirmPassword" name="confirmPassword" required>
-                            <button type="button" class="password-toggle" id="confirmPasswordToggle">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        <div class="field-error" id="confirmPasswordError"></div>
+                    <div class="form-actions">
+                        <div></div> <!-- Empty div for spacing -->
+                        <button type="button" class="btn btn-next" id="nextToStep2">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-register" id="registerBtn">
-                    <i class="fas fa-user-plus"></i>
-                    Créer mon compte
-                </button>
+                <!-- Étape 2: Informations académiques -->
+                <div class="form-step" id="step2">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ecole">École/Faculté</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-graduation-cap input-icon"></i>
+                                <select id="ecole" name="ecoleId" required>
+                                    <option value="">Sélectionnez votre école</option>
+                                </select>
+                            </div>
+                            <div class="field-error" id="ecoleError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filiere">Filière</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-book input-icon"></i>
+                                <select id="filiere" name="filiereId" required>
+                                    <option value="">Sélectionnez votre filière</option>
+                                </select>
+                            </div>
+                            <div class="field-error" id="filiereError"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="annee">Année d'étude</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-calendar-alt input-icon"></i>
+                                <select id="annee" name="annee" required>
+                                    <option value="">Sélectionnez votre année</option>
+                                    <option value="1">1ère année</option>
+                                    <option value="2">2ème année</option>
+                                    <option value="3">3ème année</option>
+                                </select>
+                            </div>
+                            <div class="field-error" id="anneeError"></div>
+                        </div>
+
+                        <div class="form-group full-width" id="matriculeGroup" style="display:none;">
+                            <label for="matricule">Matricule</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" id="matricule" name="matricule">
+                            </div>
+                            <div class="field-error" id="matriculeError"></div>
+                        </div>
+
+                        <div class="form-group full-width" id="codeGroup" style="display:none;">
+                            <label for="codeInscription">Code d'inscription</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-key input-icon"></i>
+                                <input type="text" id="codeInscription" name="codeInscription">
+                            </div>
+                            <div class="field-error" id="codeInscriptionError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Mot de passe</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" id="password" name="password" required>
+                                <button type="button" class="password-toggle" id="passwordToggle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength">
+                                <div class="strength-text" id="strengthText">Force du mot de passe</div>
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                            </div>
+                            <div class="field-error" id="passwordError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirmer le mot de passe</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="field-error" id="confirmPasswordError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-prev" id="prevToStep1">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button type="button" class="btn btn-next" id="nextToStep3">
+                            Suivant <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Étape 3: Activités para-universitaires et contact -->
+                <div class="form-step" id="step3">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="activities">Activités para-universitaires</label>
+                            <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 1rem;">
+                                Sélectionnez les activités qui vous intéressent (optionnel)
+                            </p>
+                            <div class="activities-grid" id="activitiesContainer">
+                                <!-- Les activités seront chargées dynamiquement -->
+                            </div>
+                            <div class="field-error" id="activitiesError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="whatsapp">Numéro WhatsApp</label>
+                            <div class="input-with-icon">
+                                <i class="fab fa-whatsapp input-icon" style="color: #25D366;"></i>
+                                <input type="tel" id="whatsapp" name="whatsapp" placeholder="+229 XX XX XX XX">
+                            </div>
+                            <div class="field-error" id="whatsappError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Numéro d'appel</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-phone input-icon"></i>
+                                <input type="tel" id="phone" name="phone" placeholder="+229 XX XX XX XX">
+                            </div>
+                            <div class="field-error" id="phoneError"></div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="additionalInfo">Informations supplémentaires</label>
+                            <textarea id="additionalInfo" name="additionalInfo"
+                                placeholder="Toute information supplémentaire que vous souhaitez partager..."></textarea>
+                            <div class="field-error" id="additionalInfoError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-prev" id="prevToStep2">
+                            <i class="fas fa-arrow-left"></i> Précédent
+                        </button>
+                        <button type="submit" class="btn btn-register" id="registerBtn">
+                            <i class="fas fa-user-plus"></i>
+                            Créer mon compte
+                        </button>
+                    </div>
+                </div>
             </form>
 
             <div class="register-footer">
@@ -655,12 +879,14 @@
 
         let elements = {};
         let currentStep = 1;
+        let selectedActivities = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeElements();
             initPasswordToggle();
             initPasswordStrength();
             populateEcoles();
+            populateActivities();
             setupEventListeners();
             updateProgressSteps();
         });
@@ -671,7 +897,7 @@
                 error: document.getElementById('errorMessage'),
                 success: document.getElementById('successMessage'),
                 loading: document.getElementById('loading'),
-                button: document.getElementById('registerBtn'),
+                registerBtn: document.getElementById('registerBtn'),
                 ecole: document.getElementById('ecole'),
                 filiere: document.getElementById('filiere'),
                 annee: document.getElementById('annee'),
@@ -682,11 +908,22 @@
                 password: document.getElementById('password'),
                 confirmPassword: document.getElementById('confirmPassword'),
                 strengthText: document.getElementById('strengthText'),
-                strengthFill: document.getElementById('strengthFill')
+                strengthFill: document.getElementById('strengthFill'),
+                activitiesContainer: document.getElementById('activitiesContainer'),
+                whatsapp: document.getElementById('whatsapp'),
+                phone: document.getElementById('phone'),
+                additionalInfo: document.getElementById('additionalInfo')
             };
         }
 
         function setupEventListeners() {
+            // Navigation entre les étapes
+            document.getElementById('nextToStep2').addEventListener('click', () => navigateToStep(2));
+            document.getElementById('nextToStep3').addEventListener('click', () => navigateToStep(3));
+            document.getElementById('prevToStep1').addEventListener('click', () => navigateToStep(1));
+            document.getElementById('prevToStep2').addEventListener('click', () => navigateToStep(2));
+
+            // Événements pour les champs
             elements.ecole.addEventListener('change', () => populateFilieres(elements.ecole.value));
             elements.annee.addEventListener('change', handleAnneeChange);
             elements.form.addEventListener('submit', handleSubmit);
@@ -696,6 +933,74 @@
             inputs.forEach(input => {
                 input.addEventListener('blur', () => validateField(input));
                 input.addEventListener('input', () => clearFieldError(input));
+            });
+        }
+
+        function navigateToStep(step) {
+            // Valider l'étape actuelle avant de passer à la suivante
+            if (step > currentStep) {
+                if (!validateCurrentStep()) {
+                    return;
+                }
+            }
+
+            // Masquer l'étape actuelle
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+
+            // Afficher la nouvelle étape
+            document.getElementById(`step${step}`).classList.add('active');
+
+            // Mettre à jour l'étape courante
+            currentStep = step;
+
+            // Mettre à jour la progression
+            updateProgressSteps();
+        }
+
+        function validateCurrentStep() {
+            let isValid = true;
+
+            if (currentStep === 1) {
+                // Valider les champs de l'étape 1
+                const fields = ['nom', 'prenom', 'email'];
+                fields.forEach(field => {
+                    if (!validateField(document.getElementById(field))) {
+                        isValid = false;
+                    }
+                });
+            } else if (currentStep === 2) {
+                // Valider les champs de l'étape 2
+                const fields = ['ecole', 'filiere', 'annee', 'password', 'confirmPassword'];
+                fields.forEach(field => {
+                    if (!validateField(document.getElementById(field))) {
+                        isValid = false;
+                    }
+                });
+
+                // Validation conditionnelle pour matricule/code
+                if (elements.annee.value === '1') {
+                    if (!validateField(elements.codeInscription)) {
+                        isValid = false;
+                    }
+                } else {
+                    if (!validateField(elements.matricule)) {
+                        isValid = false;
+                    }
+                }
+            }
+
+            return isValid;
+        }
+
+        function updateProgressSteps() {
+            document.querySelectorAll('.step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
             });
         }
 
@@ -738,18 +1043,6 @@
             }
         }
 
-        function updateProgressSteps() {
-            document.querySelectorAll('.step').forEach(step => {
-                const stepNum = parseInt(step.dataset.step);
-                step.classList.remove('active', 'completed');
-                if (stepNum < currentStep) {
-                    step.classList.add('completed');
-                } else if (stepNum === currentStep) {
-                    step.classList.add('active');
-                }
-            });
-        }
-
         async function populateEcoles() {
             elements.ecole.innerHTML = '<option value="">Sélectionnez votre école/faculté</option>';
 
@@ -787,6 +1080,74 @@
             }
         }
 
+        async function populateActivities() {
+            try {
+                const res = await fetch(`${API_URL}/api/activities`);
+                if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+                const activities = await res.json();
+                renderActivities(activities);
+            } catch (error) {
+                console.error("Erreur chargement activités:", error);
+                // En cas d'erreur, afficher des activités par défaut
+                const defaultActivities = [
+                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions" },
+                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre" },
+                    { id: 3, nom: "Bénévolat", description: "Actions sociales et humanitaires" },
+                    { id: 4, nom: "Technologie", description: "Club tech, programmation, robotique" }
+                ];
+                renderActivities(defaultActivities);
+            }
+        }
+
+        function renderActivities(activities) {
+            elements.activitiesContainer.innerHTML = '';
+
+            activities.forEach(activity => {
+                const activityCard = document.createElement('div');
+                activityCard.className = 'activity-card';
+                activityCard.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas fa-${getActivityIcon(activity.nom)}"></i>
+                    </div>
+                    <div class="activity-name">${activity.nom}</div>
+                    <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
+                `;
+
+                activityCard.addEventListener('click', () => {
+                    activityCard.classList.toggle('selected');
+                    const activityId = activity.id;
+
+                    if (activityCard.classList.contains('selected')) {
+                        if (!selectedActivities.includes(activityId)) {
+                            selectedActivities.push(activityId);
+                        }
+                    } else {
+                        selectedActivities = selectedActivities.filter(id => id !== activityId);
+                    }
+                });
+
+                elements.activitiesContainer.appendChild(activityCard);
+            });
+        }
+
+        function getActivityIcon(activityName) {
+            const icons = {
+                'Sport': 'running',
+                'Culture': 'palette',
+                'Bénévolat': 'hands-helping',
+                'Technologie': 'laptop-code',
+                'Art': 'palette',
+                'Musique': 'music',
+                'Danse': 'user-friends',
+                'Théâtre': 'theater-masks',
+                'Débats': 'comments',
+                'Échecs': 'chess'
+            };
+
+            return icons[activityName] || 'star';
+        }
+
         function handleAnneeChange() {
             const isFirstYear = elements.annee.value === '1';
             elements.codeGroup.style.display = isFirstYear ? 'block' : 'none';
@@ -813,6 +1174,9 @@
                 isValid = false;
             } else if (field.id === 'confirmPassword' && field.value !== elements.password.value) {
                 errorMessage = 'Les mots de passe ne correspondent pas';
+                isValid = false;
+            } else if ((field.id === 'whatsapp' || field.id === 'phone') && field.value && !isValidPhone(field.value)) {
+                errorMessage = 'Veuillez entrer un numéro valide';
                 isValid = false;
             }
 
@@ -848,37 +1212,16 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        function isValidPhone(phone) {
+            // Validation basique pour les numéros internationaux
+            return /^[\+]?[0-9\s\-\(\)]{8,}$/.test(phone);
+        }
+
         function validatePassword(password) {
             return password.length >= 8 &&
                 /[A-Z]/.test(password) &&
                 /[0-9]/.test(password) &&
                 /[!@#$%^&*(),.?":{}|<>]/.test(password);
-        }
-
-        function validateForm() {
-            let isValid = true;
-            const fields = elements.form.querySelectorAll('input[required], select[required]');
-
-            fields.forEach(field => {
-                if (!validateField(field)) {
-                    isValid = false;
-                }
-            });
-
-            // Validation spécifique pour les champs conditionnels
-            if (elements.annee.value === '1') {
-                if (!elements.codeInscription.value.trim()) {
-                    showFieldError('codeInscription', 'Le code d\'inscription est obligatoire pour la 1ère année');
-                    isValid = false;
-                }
-            } else {
-                if (!elements.matricule.value.trim()) {
-                    showFieldError('matricule', 'Le matricule est obligatoire');
-                    isValid = false;
-                }
-            }
-
-            return isValid;
         }
 
         function showMessage(message, type) {
@@ -900,18 +1243,17 @@
 
         function showLoading(show) {
             elements.loading.style.display = show ? 'block' : 'none';
-            elements.button.disabled = show;
+            elements.registerBtn.disabled = show;
+            elements.registerBtn.innerHTML = show ?
+                '<i class="fas fa-spinner fa-spin"></i> Inscription...' :
+                '<i class="fas fa-user-plus"></i> Créer mon compte';
         }
 
         async function handleSubmit(e) {
             e.preventDefault();
 
-            // Masquer tous les messages d'erreur
-            document.querySelectorAll('.field-error').forEach(el => {
-                el.style.display = 'none';
-            });
-
-            if (!validateForm()) {
+            // Valider toutes les étapes
+            if (!validateCurrentStep()) {
                 showMessage('Veuillez corriger les erreurs dans le formulaire', 'error');
                 return;
             }
@@ -927,7 +1269,11 @@
                 prenom: formData.prenom,
                 filiereId: formData.filiereId,
                 ecoleId: formData.ecoleId,
-                annee: annee
+                annee: annee,
+                activities: selectedActivities,
+                whatsapp: formData.whatsapp,
+                phone: formData.phone,
+                additionalInfo: formData.additionalInfo
             };
 
             // Ajouter les champs conditionnels
@@ -977,7 +1323,10 @@
                 password: document.getElementById('password').value,
                 confirmPassword: document.getElementById('confirmPassword').value,
                 matricule: document.getElementById('matricule').value.trim(),
-                codeInscription: document.getElementById('codeInscription').value.trim()
+                codeInscription: document.getElementById('codeInscription').value.trim(),
+                whatsapp: document.getElementById('whatsapp').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                additionalInfo: document.getElementById('additionalInfo').value.trim()
             };
         }
     </script>
