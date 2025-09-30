@@ -1037,8 +1037,12 @@
     </style>
 
     <link rel="stylesheet" href="/assets/notifications.css">
+    <link rel="stylesheet" href="/assets/toast.css">
     <script src="/assets/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
+    <script src="/assets/utils.js"></script>
+    <script src="/assets/authGuard.js"></script>
+    <script src="/assets/errorHandlers.js"></script>
 </head>
 
 <body>
@@ -1495,13 +1499,14 @@
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = '/user/login';
-                return;
-            }
+            // Vérifier l'authentification
+            await authGuard();
 
-            // Initialiser le système de notifications
-            initializeNotifications();
+            // Initialiser les services
+            await Promise.all([
+                initializeNotifications(),
+                initializeErrorHandlers()
+            ]);
 
             // Initialiser le menu burger
             const burger = document.getElementById('mobileMenuBtn');
@@ -1855,14 +1860,78 @@
 
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
-            // Gestionnaire de formulaire
-            document.getElementById('candidatureFormElement').addEventListener('submit', handleFormSubmit);
+            try {
+                // Gestionnaire de formulaire
+                const form = document.getElementById('candidatureFormElement');
+                if (form) {
+                    form.addEventListener('submit', handleFormSubmit);
+                }
 
-            // Gestionnaire d'annulation
-            document.getElementById('cancelBtn').addEventListener('click', handleCancel);
+                // Gestionnaire d'annulation
+                const cancelBtn = document.getElementById('cancelBtn');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', handleCancel);
+                }
 
-            // Gestionnaire d'upload d'image
-            initImageUploadHandlers();
+                // Gestionnaire d'upload d'image
+                initImageUploadHandlers();
+
+                // Gestionnaire de navigation 
+                initNavigationHandlers();
+
+                // Gestionnaire de profil candidat
+                initCandidateProfileHandlers();
+
+            } catch (error) {
+                console.error('Erreur initialisation handlers:', error);
+                showToast('Une erreur est survenue lors de l\'initialisation', 'error');
+            }
+        }
+
+        // Initialiser les gestionnaires de navigation
+        function initNavigationHandlers() {
+            // Liens de navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (item.getAttribute('href')) {
+                        e.preventDefault();
+                        const isDirty = checkFormDirty();
+                        if (isDirty) {
+                            if (confirm('Des modifications non enregistrées seront perdues. Voulez-vous continuer ?')) {
+                                window.location.href = item.getAttribute('href');
+                            }
+                        } else {
+                            window.location.href = item.getAttribute('href');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialiser les gestionnaires de profil candidat
+        function initCandidateProfileHandlers() {
+            // Gestionnaires de clic pour voir le profil complet
+            document.querySelectorAll('.view-program-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const candidateId = link.getAttribute('data-candidate-id');
+                    if (candidateId) {
+                        window.location.href = `profil-candidat.html?id=${candidateId}`;
+                    }
+                });
+            });
+        }
+
+        // Vérifier si le formulaire a été modifié
+        function checkFormDirty() {
+            const form = document.getElementById('candidatureFormElement');
+            if (!form) return false;
+
+            const slogan = document.getElementById('slogan').value.trim();
+            const program = document.getElementById('program').value.trim();
+            const motivation = document.getElementById('motivation').value.trim();
+
+            return slogan !== '' || program !== '' || motivation !== '' || uploadedImageUrl !== null;
         }
 
         // Initialiser les gestionnaires d'upload d'image
