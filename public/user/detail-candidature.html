@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails Candidature - UCAO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Styles similaires à votre page principale */
+        :root {
+            --primary: #800020;
+            --primary-dark: #5a0017;
+            --secondary: #0d1b2a;
+            --accent: #d4af37;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .candidature-detail-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .candidature-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+        }
+
+        .candidature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .election-type {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .candidature-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        .status-en_attente {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-approuve {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-rejete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .detail-content {
+            padding: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--gray-light);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .slogan-display {
+            padding: 1rem;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+            border-left: 4px solid var(--accent);
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: #2e7d32;
+        }
+
+        .toast.error {
+            background-color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1 class="section-title">
+                <i class="fas fa-file-signature"></i>
+                Détails de la candidature
+            </h1>
+            <a href="mes-candidatures.html" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Retour à la liste
+            </a>
+        </div>
+
+        <div id="candidatureDetail" class="candidature-detail-card">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Chargement des détails...</p>
+            </div>
+        </div>
+
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button class="btn btn-primary" id="editBtn">
+                <i class="fas fa-pen-to-square"></i>
+                Modifier la candidature
+            </button>
+            <button class="btn btn-danger" id="deleteBtn">
+                <i class="fas fa-trash"></i>
+                Supprimer la candidature
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-circle-check" id="toastIcon"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="/assets/config.js"></script>
+    <script>
+        // Configuration
+        const API_URL = CONFIG.BASE_URL;
+        const TOKEN = localStorage.getItem('token');
+        const candidatureId = new URLSearchParams(window.location.search).get('id');
+
+        // Fonctions utilitaires
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_URL}/api${endpoint}`;
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN}`
+                }
+            };
+            const config = { ...defaultOptions, ...options };
+
+            try {
+                const response = await fetch(url, config);
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur API:', error);
+                throw error;
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastIcon.className = type === 'success' ? 'fas fa-circle-check' : 'fas fa-circle-exclamation';
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Non définie';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'EN_ATTENTE': 'En attente',
+                'APPROUVE': 'Approuvé',
+                'REJETE': 'Rejeté',
+                'en_attente': 'En attente',
+                'approuve': 'Approuvé',
+                'rejete': 'Rejeté'
+            };
+            return statuses[status] || status;
+        }
+
+        function getElectionTypeLabel(type) {
+            const typeMap = {
+                'SALLE': 'Responsable de Salle',
+                'ECOLE': 'Délégué d\'École',
+                'UNIVERSITE': 'Délégué Universitaire'
+            };
+            return typeMap[type] || type;
+        }
+
+        // Charger les détails de la candidature
+        async function loadCandidatureDetails() {
+            if (!candidatureId) {
+                document.getElementById('candidatureDetail').innerHTML = `
+                    <div class="candidature-header">
+                        <h1 class="candidature-title">Candidature non trouvée</h1>
+                    </div>
+                    <div class="detail-content">
+                        <p>La candidature demandée n'existe pas ou vous n'y avez pas accès.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await apiCall(`/candidats/${candidatureId}`);
+
+                if (response && response.success) {
+                    displayCandidatureDetails(response.candidature);
+                } else {
+                    throw new Error('Candidature non trouvée');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('candidatureDetail').innerHTML = `
+                    <div class="candidature-header">
+                        <h1 class="candidature-title">Erreur</h1>
+                    </div>
+                    <div class="detail-content">
+                        <p>Impossible de charger les détails de la candidature: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayCandidatureDetails(candidature) {
+            const election = candidature.election || {};
+            const statut = candidature.statut || 'en_attente';
+
+            document.getElementById('candidatureDetail').innerHTML = `
+                <div class="candidature-header">
+                    <h1 class="candidature-title">${election.titre || 'Sans titre'}</h1>
+                    <span class="election-type">${getElectionTypeLabel(election.type)}</span>
+                    <div class="candidature-status status-${statut}">
+                        ${getStatusText(statut)}
+                    </div>
+                </div>
+                <div class="detail-content">
+                    <div class="detail-section">
+                        <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Élection</span>
+                                <span class="info-value">${election.titre || 'Non spécifié'}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Type</span>
+                                <span class="info-value">${getElectionTypeLabel(election.type)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">École</span>
+                                <span class="info-value">${election.ecole || 'Non spécifié'}</span>
+                            </div>
+                            ${election.filiere ? `
+                            <div class="info-item">
+                                <span class="info-label">Filière</span>
+                                <span class="info-value">${election.filiere}</span>
+                            </div>
+                            ` : ''}
+                            ${election.annee ? `
+                            <div class="info-item">
+                                <span class="info-label">Année</span>
+                                <span class="info-value">${election.annee}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Date de soumission</span>
+                                <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Dernière modification</span>
+                                <span class="info-value">${formatDate(candidature.updatedAt)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${candidature.slogan ? `
+                    <div class="detail-section">
+                        <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
+                        <div class="slogan-display">
+                            "${candidature.slogan}"
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${candidature.programme ? `
+                    <div class="detail-section">
+                        <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
+                        <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
+                            ${candidature.programme}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Afficher les boutons d'action si la candidature est modifiable
+            if (statut === 'EN_ATTENTE' || statut === 'en_attente') {
+                document.getElementById('actionButtons').style.display = 'flex';
+            }
+        }
+
+        // Gestion des événements
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!TOKEN) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadCandidatureDetails();
+
+            // Bouton de modification
+            document.getElementById('editBtn')?.addEventListener('click', function () {
+                window.location.href = `candidature.html?edit=${candidatureId}`;
+            });
+
+            // Bouton de suppression
+            document.getElementById('deleteBtn')?.addEventListener('click', async function () {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.')) {
+                    try {
+                        const response = await apiCall(`/candidats/${candidatureId}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response && response.success) {
+                            showToast('Candidature supprimée avec succès', 'success');
+                            setTimeout(() => {
+                                window.location.href = 'mes-candidatures.html';
+                            }, 1500);
+                        } else {
+                            throw new Error(response?.message || 'Erreur lors de la suppression');
+                        }
+                    } catch (error) {
+                        console.error('Erreur suppression:', error);
+                        showToast(error.message || 'Erreur lors de la suppression', 'error');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

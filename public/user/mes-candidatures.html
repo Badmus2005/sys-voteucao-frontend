@@ -1474,6 +1474,41 @@
             await loadPageData();
         });
 
+        // Charger une candidature pour modification
+        async function loadCandidatureForEdit(candidatureId) {
+            try {
+                const response = await apiCall(`/candidats/${candidatureId}`);
+
+                if (response && response.success) {
+                    const candidature = response.candidature;
+
+                    // Pré-remplir le formulaire avec les données existantes
+                    document.getElementById('electionId').value = candidature.election?.id || '';
+                    document.getElementById('slogan').value = candidature.slogan || '';
+                    document.getElementById('programme').value = candidature.programme || '';
+
+                    // Mettre à jour l'interface
+                    document.getElementById('formTitle').textContent = 'Modifier ma candidature';
+                    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Mettre à jour';
+
+                    // Afficher les informations de l'élection
+                    if (candidature.election) {
+                        displayElectionInfo(candidature.election);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur chargement candidature:', error);
+                showToast('Erreur lors du chargement de la candidature', 'error');
+            }
+        }
+
+        // Vérifier si on est en mode édition au chargement
+        const urlParams = new URLSearchParams(window.location.search);
+        const editCandidatureId = urlParams.get('edit');
+        if (editCandidatureId) {
+            loadCandidatureForEdit(editCandidatureId);
+        }
+
         // Chargement des données de la page
         async function loadPageData() {
             showLoading();
@@ -1491,11 +1526,10 @@
         }
 
         // Charger les candidatures de l'utilisateur
-        // Charger les candidatures de l'utilisateur
         async function loadUserCandidatures() {
             try {
                 const response = await CandidatureService.getMyCandidatures();
-
+                console.log("Donnée :", response);
                 if (response && response.success && Array.isArray(response.candidatures)) {
                     allCandidatures = response.candidatures;
                     filteredCandidatures = [...allCandidatures];
@@ -1679,38 +1713,49 @@
             });
         }
 
-        // Annuler une candidature
+        // Améliorer la fonction d'annulation
         async function cancelCandidature(candidatureId) {
-            showLoading();
+            if (confirm('Êtes-vous sûr de vouloir annuler cette candidature ?')) {
+                showLoading();
 
-            try {
-                const response = await CandidatureService.cancelCandidature(candidatureId);
+                try {
+                    const response = await CandidatureService.cancelCandidature(candidatureId);
 
-                if (response && response.success) {
-                    // Mettre à jour localement
-                    allCandidatures = allCandidatures.filter(c => c.id != candidatureId);
-                    filteredCandidatures = [...allCandidatures];
+                    if (response && response.success) {
+                        // Mettre à jour localement
+                        allCandidatures = allCandidatures.filter(c => c.id != candidatureId);
+                        filteredCandidatures = [...allCandidatures];
 
-                    displayCandidatures(filteredCandidatures);
-                    calculateStatistics();
-                    updateStatisticsDisplay();
+                        displayCandidatures(filteredCandidatures);
+                        calculateStatistics();
+                        updateStatisticsDisplay();
 
-                    showToast(response.message || 'Candidature annulée avec succès', 'success');
-                } else {
-                    throw new Error(response?.message || 'Erreur lors de l\'annulation');
+                        showToast(response.message || 'Candidature annulée avec succès', 'success');
+
+                        // Mettre à jour les notifications
+                        if (window.notificationService) {
+                            window.notificationService.addNotification({
+                                title: 'Candidature annulée',
+                                message: 'Votre candidature a été annulée avec succès.',
+                                category: 'candidature'
+                            });
+                        }
+                    } else {
+                        throw new Error(response?.message || 'Erreur lors de l\'annulation');
+                    }
+                } catch (error) {
+                    console.error('Erreur annulation candidature:', error);
+                    showToast(error.message || 'Erreur lors de l\'annulation', 'error');
+                } finally {
+                    hideLoading();
                 }
-            } catch (error) {
-                console.error('Erreur annulation candidature:', error);
-                showToast(error.message || 'Erreur lors de l\'annulation', 'error');
-            } finally {
-                hideLoading();
             }
         }
 
         // Afficher les détails d'une candidature
         function showCandidatureDetails(candidature) {
-            // Pour l'instant, rediriger vers la page de modification
-            window.location.href = `candidature.html?edit=${candidature.id}`;
+            // Rediriger vers la page de détails
+            window.location.href = `detail-candidature.html?id=${candidature.id}`;
         }
 
         // Filtrer les candidatures
