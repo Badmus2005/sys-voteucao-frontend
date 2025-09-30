@@ -367,10 +367,8 @@ if (typeof window !== 'undefined') {
 }
 
 // Fonctions utilitaires
-const UTILS = {
-    /**
-     * Formate une date en français
-     */
+/*const UTILS = {
+    
     formatDate: (date, options = {}) => {
         const defaultOptions = {
             year: 'numeric',
@@ -386,54 +384,20 @@ const UTILS = {
         });
     },
 
-    /**
-     * Formate un nombre avec des séparateurs de milliers
-     */
-    formatNumber: (number) => {
-        return new Intl.NumberFormat('fr-FR').format(number);
-    },
+    
+    
 
-    /**
-     * Calcule le pourcentage
-     */
-    calculatePercentage: (value, total) => {
-        if (total === 0) return 0;
-        return ((value / total) * 100).toFixed(2);
-    },
-
-    /**
-     * Vérifie si l'utilisateur est connecté
-     */
-
-
-    /**
-     * Vérifie le rôle de l'utilisateur
-     */
-
-
-    /**
-     * Décode le token JWT
-     */
-
-
-    /**
-     * Génère un ID unique
-     */
+    
     generateId: () => {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     },
 
-    /**
-     * Valide une adresse email
-     */
     isValidEmail: (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     },
 
-    /**
-     * Débounce une fonction
-     */
+    
     debounce: (func, wait) => {
         let timeout;
         return function executedFunction(...args) {
@@ -445,11 +409,11 @@ const UTILS = {
             timeout = setTimeout(later, wait);
         };
     }
-};
+};*/
 
 // Exporter la configuration
 
-window.UTILS = UTILS;
+//window.UTILS = UTILS;
 
 
 
