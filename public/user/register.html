@@ -836,15 +836,6 @@
                             <div class="field-error" id="whatsappError"></div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="phone">Numéro d'appel</label>
-                            <div class="input-with-icon">
-                                <i class="fas fa-phone input-icon"></i>
-                                <input type="tel" id="phone" name="phone" placeholder="+229 XX XX XX XX">
-                            </div>
-                            <div class="field-error" id="phoneError"></div>
-                        </div>
-
                         <div class="form-group full-width">
                             <label for="additionalInfo">Informations supplémentaires</label>
                             <textarea id="additionalInfo" name="additionalInfo"
@@ -911,7 +902,6 @@
                 strengthFill: document.getElementById('strengthFill'),
                 activitiesContainer: document.getElementById('activitiesContainer'),
                 whatsapp: document.getElementById('whatsapp'),
-                phone: document.getElementById('phone'),
                 additionalInfo: document.getElementById('additionalInfo')
             };
         }
@@ -929,7 +919,7 @@
             elements.form.addEventListener('submit', handleSubmit);
 
             // Validation en temps réel
-            const inputs = elements.form.querySelectorAll('input, select');
+            const inputs = elements.form.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
                 input.addEventListener('blur', () => validateField(input));
                 input.addEventListener('input', () => clearFieldError(input));
@@ -1085,15 +1075,19 @@
                 const res = await fetch(`${API_URL}/api/activities`);
                 if (!res.ok) throw new Error(`Erreur ${res.status}`);
 
-                const activities = await res.json();
-                renderActivities(activities);
+                const data = await res.json();
+                if (data.success) {
+                    renderActivities(data.data);
+                } else {
+                    throw new Error(data.message);
+                }
             } catch (error) {
                 console.error("Erreur chargement activités:", error);
                 // En cas d'erreur, afficher des activités par défaut
                 const defaultActivities = [
-                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions" },
-                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre" },
-                    { id: 3, nom: "Technologie", description: "Club tech, programmation, robotique" }
+                    { id: 1, nom: "Sport", description: "Activités sportives et compétitions", icone: "running" },
+                    { id: 2, nom: "Culture", description: "Arts, musique, danse, théâtre", icone: "palette" },
+                    { id: 3, nom: "Technologie", description: "Club tech, programmation, robotique", icone: "laptop-code" }
                 ];
                 renderActivities(defaultActivities);
             }
@@ -1107,7 +1101,7 @@
                 activityCard.className = 'activity-card';
                 activityCard.innerHTML = `
                     <div class="activity-icon">
-                        <i class="fas fa-${getActivityIcon(activity.nom)}"></i>
+                        <i class="fas fa-${activity.icone || getActivityIcon(activity.nom)}"></i>
                     </div>
                     <div class="activity-name">${activity.nom}</div>
                     <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
@@ -1174,8 +1168,8 @@
             } else if (field.id === 'confirmPassword' && field.value !== elements.password.value) {
                 errorMessage = 'Les mots de passe ne correspondent pas';
                 isValid = false;
-            } else if ((field.id === 'whatsapp' || field.id === 'phone') && field.value && !isValidPhone(field.value)) {
-                errorMessage = 'Veuillez entrer un numéro valide';
+            } else if (field.id === 'whatsapp' && field.value && !isValidPhone(field.value)) {
+                errorMessage = 'Veuillez entrer un numéro WhatsApp valide';
                 isValid = false;
             }
 
@@ -1271,7 +1265,6 @@
                 annee: annee,
                 activities: selectedActivities,
                 whatsapp: formData.whatsapp,
-                phone: formData.phone,
                 additionalInfo: formData.additionalInfo
             };
 
@@ -1324,7 +1317,6 @@
                 matricule: document.getElementById('matricule').value.trim(),
                 codeInscription: document.getElementById('codeInscription').value.trim(),
                 whatsapp: document.getElementById('whatsapp').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
                 additionalInfo: document.getElementById('additionalInfo').value.trim()
             };
         }
