@@ -10,12 +10,9 @@
     <style>
         :root {
             --primary: #800020;
-            /* Bordeaux */
             --primary-dark: #5a0017;
             --secondary: #0d1b2a;
-            /* Bleu nuit */
             --accent: #d4af37;
-            /* Or */
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -739,8 +736,6 @@
             white-space: normal;
         }
 
-
-
         .view-program-link {
             color: var(--primary);
             font-weight: 500;
@@ -1147,7 +1142,7 @@
             </div>
 
             <!-- Message d'état quand aucune élection n'est spécifiée -->
-            <div class="state-message" id="noElectionMessage">
+            <div class="state-message" id="noElectionMessage" style="display: none;">
                 <div class="state-icon">
                     <i class="fas fa-hand-point-right"></i>
                 </div>
@@ -1169,20 +1164,20 @@
             </div>
 
             <!-- Candidature Header -->
-            <div class="candidature-header" id="candidatureHeader">
+            <div class="candidature-header" id="candidatureHeader" style="display: none;">
                 <h1 class="candidature-title" id="electionTitle">Déposer sa candidature</h1>
                 <p class="candidature-subtitle" id="electionSubtitle">Remplissez le formulaire pour soumettre votre
                     candidature</p>
             </div>
 
             <!-- Indicateur de chargement -->
-            <div class="loading-state" id="loadingState">
+            <div class="loading-state" id="loadingState" style="display: none;">
                 <div class="spinner"></div>
                 <p>Chargement des informations de l'élection...</p>
             </div>
 
             <!-- Eligibility Alert -->
-            <div class="eligibility-alert" id="eligibilityAlert">
+            <div class="eligibility-alert" id="eligibilityAlert" style="display: none;">
                 <div class="alert-title">
                     <i class="fas fa-exclamation-triangle"></i>
                     Non éligible
@@ -1199,7 +1194,7 @@
             </div>
 
             <!-- Candidature Form -->
-            <div class="form-section" id="candidatureForm">
+            <div class="form-section" id="candidatureForm" style="display: none;">
                 <h2 class="form-title"><i class="fas fa-pen-to-square"></i> Formulaire de candidature</h2>
 
                 <form id="candidatureFormElement">
@@ -1267,7 +1262,7 @@
             </div>
 
             <!-- Section Liste des Candidats -->
-            <div class="form-section" id="candidatesSection">
+            <div class="form-section" id="candidatesSection" style="display: none;">
                 <h2 class="form-title"><i class="fas fa-users"></i> Candidats à cette élection</h2>
 
                 <div id="candidatesList">
@@ -1285,7 +1280,7 @@
             </div>
 
             <!-- Status Message -->
-            <div class="status-message" id="statusMessage">
+            <div class="status-message" id="statusMessage" style="display: none;">
                 <div class="status-icon">
                     <i class="fas fa-hourglass-half"></i>
                 </div>
@@ -1331,6 +1326,7 @@
         let currentElection = null;
         let uploadedImageUrl = null;
         let electionCandidates = [];
+        let userProfile = null;
 
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
@@ -1427,32 +1423,32 @@
         const CandidateCard = {
             create(candidate, options = {}) {
                 return `
-            <div class="candidate-card" data-candidate-id="${candidate.candidatId}">
-                <div class="candidate-header">
-                    <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
-                         alt="${candidate.candidatPrenom} ${candidate.candidatNom}" 
-                         class="candidate-image"
-                         onerror="this.src='https://via.placeholder.com/60'">
-                    <div class="candidate-info">
-                        <div class="candidate-name">${candidate.candidatPrenom} ${candidate.candidatNom}</div>
-                        <div class="candidate-details">
-                            ${candidate.filiere_nom || 'Filière inconnue'} - 
-                            ${candidate.annee ? `Année ${candidate.annee}` : 'Année non précisée'}
+                    <div class="candidate-card" data-candidate-id="${candidate.candidatId}">
+                        <div class="candidate-header">
+                            <img src="${candidate.photoUrl || 'https://via.placeholder.com/60'}" 
+                                 alt="${candidate.candidatPrenom} ${candidate.candidatNom}" 
+                                 class="candidate-image"
+                                 onerror="this.src='https://via.placeholder.com/60'">
+                            <div class="candidate-info">
+                                <div class="candidate-name">${candidate.candidatPrenom} ${candidate.candidatNom}</div>
+                                <div class="candidate-details">
+                                    ${candidate.filiere_nom || 'Filière inconnue'} - 
+                                    ${candidate.annee ? `Année ${candidate.annee}` : 'Année non précisée'}
+                                </div>
+                                <div class="candidate-school">${candidate.ecole_nom || 'École non spécifiée'}</div>
+                            </div>
                         </div>
-                        <div class="candidate-school">${candidate.ecole_nom || 'École non spécifiée'}</div>
+                        <div class="candidate-body">
+                            <div class="candidate-slogan">"${candidate.slogan}"</div>
+                            <div class="candidate-program">${candidate.programme ? candidate.programme : 'Aucun programme disponible'}</div>
+                            ${options.showViewProfile ? `
+                                <a class="view-program-link" data-candidate-id="${candidate.candidatId}">
+                                    <i class="fas fa-eye"></i> Voir le profil complet
+                                </a>
+                            ` : ''}
+                        </div>
                     </div>
-                </div>
-                <div class="candidate-body">
-                    <div class="candidate-slogan">"${candidate.slogan}"</div>
-                    <div class="candidate-program">${candidate.programme ? candidate.programme : 'Aucun programme disponible'}</div>
-                    ${options.showViewProfile ? `
-                        <a class="view-program-link" data-candidate-id="${candidate.candidatId}">
-                            <i class="fas fa-eye"></i> Voir le profil complet
-                        </a>
-                    ` : ''}
-                </div>
-            </div>
-        `;
+                `;
             }
         };
 
@@ -1495,14 +1491,13 @@
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
             // Vérifier que l'utilisateur est connecté
-            // Vérifier l'authentification
-            await authGuard();
+            if (!TOKEN) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-            // Initialiser les services
-            await Promise.all([
-                initializeNotifications(),
-                initializeErrorHandlers()
-            ]);
+            // Initialiser le système de notifications
+            initializeNotifications();
 
             // Initialiser le menu burger
             const burger = document.getElementById('mobileMenuBtn');
@@ -1524,11 +1519,8 @@
                 e.preventDefault();
                 localStorage.removeItem('token');
                 localStorage.removeItem('userProfile');
-                window.location.href = '/user/login';
+                window.location.href = 'login.html';
             });
-
-            // Mettre à jour le nom d'utilisateur
-            updateUserWelcome();
 
             // Masquer tous les états initialement
             hideAllSections();
@@ -1548,15 +1540,6 @@
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
         });
-
-        // Mettre à jour le message de bienvenue
-        function updateUserWelcome() {
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-
-            if (userProfile && userProfile.prenom) {
-                document.getElementById('userName').textContent = userProfile.prenom;
-            }
-        }
 
         // Masquer toutes les sections
         function hideAllSections() {
@@ -1602,6 +1585,9 @@
                 // Mettre à jour l'interface avec les détails de l'élection
                 updateElectionDetails(currentElection);
 
+                // Charger le profil utilisateur
+                await loadUserProfile();
+
                 // Vérifier l'éligibilité
                 await checkEligibility(currentElection);
 
@@ -1615,6 +1601,21 @@
             } finally {
                 hideLoading();
                 document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Charger le profil utilisateur
+        async function loadUserProfile() {
+            try {
+                const response = await UserService.getProfile();
+                userProfile = response.data || response;
+
+                // Mettre à jour le nom d'utilisateur
+                if (userProfile && userProfile.prenom) {
+                    document.getElementById('userName').textContent = userProfile.prenom;
+                }
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
             }
         }
 
@@ -1646,6 +1647,13 @@
                     return;
                 }
 
+                // Vérifier si l'utilisateur est éligible selon les critères de l'élection
+                const isEligible = await checkUserEligibility(election);
+                if (!isEligible) {
+                    showEligibilityError('Vous ne remplissez pas les critères d\'éligibilité pour cette élection.');
+                    return;
+                }
+
                 // Si éligible, afficher le formulaire
                 showCandidatureForm();
 
@@ -1653,6 +1661,28 @@
                 console.error('Erreur vérification éligibilité:', error);
                 showEligibilityError('Erreur lors de la vérification d\'éligibilité');
             }
+        }
+
+        // Vérifier l'éligibilité de l'utilisateur selon les critères de l'élection
+        async function checkUserEligibility(election) {
+            if (!userProfile) return false;
+
+            // Vérifier l'école
+            if (election.ecole && userProfile.ecole !== election.ecole) {
+                return false;
+            }
+
+            // Vérifier la filière
+            if (election.filiere && userProfile.filiere !== election.filiere) {
+                return false;
+            }
+
+            // Vérifier l'année
+            if (election.annee && userProfile.annee !== election.annee) {
+                return false;
+            }
+
+            return true;
         }
 
         // Afficher le message d'erreur d'éligibilité
@@ -1686,8 +1716,15 @@
             try {
                 const response = await CandidateService.getCandidates(electionId);
 
-                if (response && response.candidates && response.candidates.length > 0) {
-                    electionCandidates = response.candidates;
+                let candidates = [];
+                if (response && response.candidates) {
+                    candidates = response.candidates;
+                } else if (response && Array.isArray(response)) {
+                    candidates = response;
+                }
+
+                if (candidates && candidates.length > 0) {
+                    electionCandidates = candidates;
                     renderCandidatesList(electionCandidates);
                 } else {
                     showNoCandidates();
@@ -1872,62 +1909,10 @@
                 // Gestionnaire d'upload d'image
                 initImageUploadHandlers();
 
-                // Gestionnaire de navigation 
-                initNavigationHandlers();
-
-                // Gestionnaire de profil candidat
-                initCandidateProfileHandlers();
-
             } catch (error) {
                 console.error('Erreur initialisation handlers:', error);
                 showToast('Une erreur est survenue lors de l\'initialisation', 'error');
             }
-        }
-
-        // Initialiser les gestionnaires de navigation
-        function initNavigationHandlers() {
-            // Liens de navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    if (item.getAttribute('href')) {
-                        e.preventDefault();
-                        const isDirty = checkFormDirty();
-                        if (isDirty) {
-                            if (confirm('Des modifications non enregistrées seront perdues. Voulez-vous continuer ?')) {
-                                window.location.href = item.getAttribute('href');
-                            }
-                        } else {
-                            window.location.href = item.getAttribute('href');
-                        }
-                    }
-                });
-            });
-        }
-
-        // Initialiser les gestionnaires de profil candidat
-        function initCandidateProfileHandlers() {
-            // Gestionnaires de clic pour voir le profil complet
-            document.querySelectorAll('.view-program-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const candidateId = link.getAttribute('data-candidate-id');
-                    if (candidateId) {
-                        window.location.href = `profil-candidat.html?id=${candidateId}`;
-                    }
-                });
-            });
-        }
-
-        // Vérifier si le formulaire a été modifié
-        function checkFormDirty() {
-            const form = document.getElementById('candidatureFormElement');
-            if (!form) return false;
-
-            const slogan = document.getElementById('slogan').value.trim();
-            const program = document.getElementById('program').value.trim();
-            const motivation = document.getElementById('motivation').value.trim();
-
-            return slogan !== '' || program !== '' || motivation !== '' || uploadedImageUrl !== null;
         }
 
         // Initialiser les gestionnaires d'upload d'image
@@ -2077,18 +2062,14 @@
             showLoading();
 
             try {
-                // Récupérer les informations utilisateur
-                const userProfile = await UserService.getProfile();
-                const userData = userProfile.data || userProfile;
-
                 const formData = {
-                    nom: userData.nom || '',
-                    prenom: userData.prenom || '',
+                    nom: userProfile.nom || '',
+                    prenom: userProfile.prenom || '',
                     slogan: document.getElementById('slogan').value.trim(),
                     programme: document.getElementById('program').value.trim(),
                     motivation: document.getElementById('motivation').value.trim(),
                     photoUrl: uploadedImageUrl,
-                    userId: userData.id || userData.userId,
+                    userId: userProfile.id || userProfile.userId,
                     electionId: currentElection.id,
                     statut: 'EN_ATTENTE'
                 };
