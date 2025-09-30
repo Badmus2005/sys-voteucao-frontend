@@ -826,6 +826,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
+
+        .strength-bar {
+            height: 5px;
+            background: var(--gray-light);
+            border-radius: 3px;
+            margin-top: 0.25rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .strength-bar::after {
+            content: '';
+            display: block;
+            height: 100%;
+            width: var(--strength-width, 0%);
+            background: var(--danger);
+            transition: width 0.3s ease, background-color 0.3s ease;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -970,7 +989,7 @@
                         </div>
                     </div>
 
-                    <!-- Mode édition (masqué par défaut) -->
+                    <!-- Mode édition -->
                     <div class="profile-content" id="profile-edit-section" style="display: none;">
                         <form id="profile-form">
                             <div class="form-group">
@@ -1144,23 +1163,138 @@
             },
 
             async uploadAvatar(formData) {
-                const url = `${API_URL}/api/users/avatar`;
+                const url = `${API_URL}/api/upload/image`; // Ajustez l'endpoint selon votre API
 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${TOKEN}`
+                        // Ne pas mettre Content-Type pour FormData, le navigateur le gère
                     },
                     body: formData
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
                 }
 
                 return await response.json();
             }
-        };
+        }
+        async function changePassword(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Validations
+            if (newPassword !== confirmPassword) {
+                showToast('Les mots de passe ne correspondent pas', 'error');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showToast('Le mot de passe doit contenir au moins 8 caractères', 'error');
+                return;
+            }
+
+            const strength = validatePasswordStrength(newPassword);
+            if (strength.score < 3) {
+                showToast('Le mot de passe est trop faible. ' + strength.feedback.join(', '), 'error');
+                return;
+            }
+
+            try {
+                showLoading();
+                const response = await UserService.changePassword({
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                });
+
+                if (response.success) {
+                    closePasswordModal();
+                    showToast('Mot de passe changé avec succès', 'success');
+                    // Réinitialiser le formulaire
+                    document.getElementById('password-form').reset();
+                } else {
+                    throw new Error(response.message || 'Erreur lors du changement de mot de passe');
+                }
+            } catch (error) {
+                console.error('Erreur changement mot de passe:', error);
+
+                // Messages d'erreur spécifiques
+                if (error.message.includes('current password') || error.message.includes('actuel')) {
+                    showToast('Le mot de passe actuel est incorrect', 'error');
+                } else if (error.message.includes('same') || error.message.includes('identique')) {
+                    showToast('Le nouveau mot de passe doit être différent de l\'ancien', 'error');
+                } else {
+                    showToast(error.message || 'Erreur lors du changement de mot de passe', 'error');
+                }
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Validation de la force du mot de passe
+        function validatePasswordStrength(password) {
+            const strength = {
+                score: 0,
+                feedback: []
+            };
+
+            // Longueur minimale
+            if (password.length >= 8) strength.score++;
+            else strength.feedback.push('Au moins 8 caractères');
+
+            // Contient des minuscules
+            if (/[a-z]/.test(password)) strength.score++;
+            else strength.feedback.push('Au moins une minuscule');
+
+            // Contient des majuscules
+            if (/[A-Z]/.test(password)) strength.score++;
+            else strength.feedback.push('Au moins une majuscule');
+
+            // Contient des chiffres
+            if (/[0-9]/.test(password)) strength.score++;
+            else strength.feedback.push('Au moins un chiffre');
+
+            // Contient des caractères spéciaux
+            if (/[^A-Za-z0-9]/.test(password)) strength.score++;
+            else strength.feedback.push('Au moins un caractère spécial');
+
+            return strength;
+        }
+
+        // Mettre à jour l'affichage de la force du mot de passe
+        function updatePasswordStrength() {
+            const password = document.getElementById('new-password').value;
+            const strength = validatePasswordStrength(password);
+            const strengthBar = document.querySelector('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            // Mettre à jour la barre de progression
+            const width = (strength.score / 5) * 100;
+            strengthBar.style.setProperty('--strength-width', `${width}%`);
+
+            // Mettre à jour la couleur et le texte
+            let color, text;
+            if (strength.score <= 2) {
+                color = '#ef4444'; // Rouge
+                text = 'Faible';
+            } else if (strength.score <= 3) {
+                color = '#f59e0b'; // Orange
+                text = 'Moyen';
+            } else {
+                color = '#10b981'; // Vert
+                text = 'Fort';
+            }
+
+            strengthBar.style.backgroundColor = color;
+            strengthText.textContent = `Force du mot de passe: ${text}`;
+            strengthText.style.color = color;
+        }
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
@@ -1224,6 +1358,9 @@
                 const response = await UserService.getProfile();
                 const userData = response.data;
 
+                // Charger la photo de profil
+                await loadUserProfilePhoto();
+
                 // Mettre à jour l'interface utilisateur
                 updateUserProfile(userData);
 
@@ -1264,11 +1401,16 @@
             document.getElementById('view-program').textContent = userData.filiere || '-';
             document.getElementById('view-year').textContent = userData.annee ? `${userData.annee}ème année` : '-';
 
+            // Mettre à jour la photo de profil
             if (userData.photoUrl) {
-                document.getElementById('profile-avatar-view').src = userData.photoUrl;
+                const photoUrl = userData.photoUrl.startsWith('http')
+                    ? userData.photoUrl
+                    : `${API_URL}${userData.photoUrl}`;
+
+                document.getElementById('profile-avatar-view').src = photoUrl;
+                document.getElementById('userAvatar').src = photoUrl;
             }
         }
-
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
             // Profil - Bouton modifier
@@ -1278,6 +1420,9 @@
             document.getElementById('change-avatar-btn').addEventListener('click', () => {
                 document.getElementById('avatar-upload').click();
             });
+
+            // Écouter les changements du mot de passe pour la force
+            document.getElementById('new-password').addEventListener('input', updatePasswordStrength);
 
             // Formulaire profil
             document.getElementById('profile-form').addEventListener('submit', saveProfile);
@@ -1421,32 +1566,85 @@
             }
         }
 
+        // Fonction pour charger la photo de profil depuis l'API
+        async function loadUserProfilePhoto() {
+            try {
+                const response = await UserService.getProfile();
+                const userData = response.data;
+
+                // Mettre à jour l'avatar dans le header
+                const headerAvatar = document.getElementById('userAvatar');
+                // Mettre à jour l'avatar dans le profil
+                const profileAvatar = document.getElementById('profile-avatar-view');
+
+                if (userData && userData.photoUrl) {
+                    // Construire l'URL complète de la photo
+                    const photoUrl = userData.photoUrl.startsWith('http')
+                        ? userData.photoUrl
+                        : `${API_URL}${userData.photoUrl}`;
+
+                    if (headerAvatar) headerAvatar.src = photoUrl;
+                    if (profileAvatar) profileAvatar.src = photoUrl;
+
+                    // Gérer les erreurs de chargement d'image
+                    const handleImageError = function () {
+                        const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                        if (headerAvatar) headerAvatar.src = defaultAvatar;
+                        if (profileAvatar) profileAvatar.src = defaultAvatar;
+                    };
+
+                    if (headerAvatar) headerAvatar.onerror = handleImageError;
+                    if (profileAvatar) profileAvatar.onerror = handleImageError;
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement de la photo de profil:', error);
+            }
+        }
+
         // Upload avatar
         async function handleAvatarUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Vérifier la taille du fichier (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('La taille du fichier ne doit pas dépasser 2MB', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            // Vérifier le type de fichier
+            if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match('image/jpg')) {
+                showToast('Veuillez sélectionner une image (JPG, PNG)', 'error');
+                e.target.value = '';
+                return;
+            }
 
             // Afficher le nom du fichier
             const fileNameDisplay = document.getElementById('file-name-display');
             fileNameDisplay.textContent = `Fichier sélectionné: ${file.name}`;
             fileNameDisplay.style.display = 'block';
 
-            if (!file.type.match('image.*')) {
-                showToast('Veuillez sélectionner une image', 'error');
-                fileNameDisplay.style.display = 'none';
-                return;
-            }
-
             try {
                 showLoading();
                 const formData = new FormData();
-                formData.append('avatar', file);
+                formData.append('image', file); // Changé de 'avatar' à 'image' pour correspondre à votre API
+                formData.append('userId', window.userData.id); // Ajouter l'ID utilisateur
 
                 const response = await UserService.uploadAvatar(formData);
 
-                if (response.success) {
-                    document.getElementById('profile-avatar-view').src = response.avatarUrl;
-                    showToast('Photo de profil mise à jour', 'success');
+                if (response.success || response.url) {
+                    const avatarUrl = response.url || response.avatarUrl;
+
+                    // Mettre à jour les avatars
+                    document.getElementById('profile-avatar-view').src = avatarUrl;
+                    document.getElementById('userAvatar').src = avatarUrl;
+
+                    // Mettre à jour les données utilisateur
+                    window.userData.photoUrl = avatarUrl;
+
+                    showToast('Photo de profil mise à jour avec succès', 'success');
+
                     // Masquer l'affichage du nom de fichier après succès
                     setTimeout(() => {
                         fileNameDisplay.style.display = 'none';
@@ -1455,11 +1653,22 @@
                     throw new Error(response.message || 'Erreur lors du changement de photo');
                 }
             } catch (error) {
-                showToast(error.message || 'Erreur lors du changement de photo', 'error');
+                console.error('Erreur upload avatar:', error);
+
+                let errorMessage = 'Erreur lors du changement de photo';
+                if (error.message.includes('413')) {
+                    errorMessage = 'Fichier trop volumineux (max 2MB)';
+                } else if (error.message.includes('415')) {
+                    errorMessage = 'Format de fichier non supporté';
+                } else if (error.message.includes('400')) {
+                    errorMessage = 'Fichier invalide';
+                }
+
+                showToast(errorMessage, 'error');
                 fileNameDisplay.style.display = 'none';
             } finally {
                 hideLoading();
-                e.target.value = '';
+                e.target.value = ''; // Réinitialiser l'input file
             }
         }
 
