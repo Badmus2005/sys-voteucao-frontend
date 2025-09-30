@@ -1683,6 +1683,62 @@
         let errorTimeouts = {};
 
         // =============================================
+        // UTILITAIRES GÉNÉRAUX
+        // =============================================
+        const UTILS = {
+            showLoading: () => {
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.add('active');
+            },
+
+            hideLoading: () => {
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.remove('active');
+            },
+
+            safeAddListener: (id, event, handler) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener(event, handler);
+                    return true;
+                }
+                console.error(`Element #${id} not found`);
+                return false;
+            },
+
+            showToast: (message, type = 'info') => {
+                const toastContainer = document.getElementById('toastContainer');
+                if (!toastContainer) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 5000);
+            },
+
+            showAlert: (alertId, message, type = 'success') => {
+                const alertBox = document.getElementById(alertId);
+                if (!alertBox) return;
+
+                alertBox.textContent = message;
+                alertBox.className = `alert alert-${type}`;
+                alertBox.style.display = "flex";
+
+                setTimeout(() => {
+                    alertBox.style.display = "none";
+                }, 4000);
+            }
+        };
+
+        // =============================================
         // AUTHENTIFICATION ET SÉCURITÉ
         // =============================================
         const DASHBOARD_AUTH = {
@@ -1723,62 +1779,6 @@
         };
 
         // =============================================
-        // UTILITAIRES GÉNÉRAUX
-        // =============================================
-        const UTILS = {
-            showLoading: () => {
-                const loader = document.getElementById('loadingOverlay');
-                if (loader) loader.classList.add('active');
-            },
-
-            hideLoading: () => {
-                const loader = document.getElementById('loadingOverlay');
-                if (loader) loader.classList.remove('active');
-            },
-
-            safeAddListener: (id, event, handler) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener(event, handler);
-                    return true;
-                }
-                console.error(`Element #${id} not found`);
-                return false;
-            },
-
-            showToast: (message, type = 'info') => {
-                const toastContainer = document.getElementById('toastContainer');
-                if (!toastContainer) return;
-
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                    ${message}
-                `;
-
-                toastContainer.appendChild(toast);
-
-                setTimeout(() => {
-                    toast.remove();
-                }, 5000);
-            },
-
-            showAlert: (alertId, message, type = 'success') => {
-                const alertBox = document.getElementById(alertId);
-                if (!alertBox) return;
-
-                alertBox.textContent = message;
-                alertBox.className = `alert alert-${type}`;
-                alertBox.style.display = "flex";
-
-                setTimeout(() => {
-                    alertBox.style.display = "none";
-                }, 4000);
-            }
-        };
-
-        // =============================================
         // GESTIONNAIRES D'ÉVÉNEMENTS
         // =============================================
         const EVENT_HANDLERS = {
@@ -1788,13 +1788,13 @@
                 const sidebar = document.getElementById('sidebar');
                 const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-                function toggleSidebar() {
-                    sidebar.classList.toggle('active');
-                    sidebarOverlay.classList.toggle('active');
-                    menuToggle.classList.toggle('active');
-                }
+                if (menuToggle && sidebar && sidebarOverlay) {
+                    const toggleSidebar = () => {
+                        sidebar.classList.toggle('active');
+                        sidebarOverlay.classList.toggle('active');
+                        menuToggle.classList.toggle('active');
+                    };
 
-                if (menuToggle && sidebar) {
                     menuToggle.addEventListener('click', function (e) {
                         e.stopPropagation();
                         toggleSidebar();
@@ -1926,12 +1926,18 @@
             updateNavigationButtons: () => {
                 const currentIndex = sections.indexOf(currentSection);
 
-                document.getElementById("prevBtn").style.display = currentIndex > 0 ? 'flex' : 'none';
-                document.getElementById("nextBtn").style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
-                document.getElementById("submitBtn").style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
+                const prevBtn = document.getElementById("prevBtn");
+                const nextBtn = document.getElementById("nextBtn");
+                const submitBtn = document.getElementById("submitBtn");
+
+                if (prevBtn) prevBtn.style.display = currentIndex > 0 ? 'flex' : 'none';
+                if (nextBtn) nextBtn.style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
+                if (submitBtn) submitBtn.style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
             },
 
             validateField: (field) => {
+                if (!field) return true;
+
                 const errorElement = document.getElementById(field.id + 'Error');
 
                 if (errorElement) {
@@ -1946,32 +1952,41 @@
 
                 // Validation des dates
                 if (field.id === 'dateFinCandidature' && field.value) {
-                    const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
-                    const dateFinCandidature = new Date(field.value);
+                    const dateDebutCandidature = document.getElementById('dateDebutCandidature');
+                    if (dateDebutCandidature && dateDebutCandidature.value) {
+                        const dateDebut = new Date(dateDebutCandidature.value);
+                        const dateFin = new Date(field.value);
 
-                    if (dateFinCandidature <= dateDebutCandidature) {
-                        ELECTION_FORM.showFieldError(field.id, 'La fin des candidatures doit être après le début');
-                        return false;
+                        if (dateFin <= dateDebut) {
+                            ELECTION_FORM.showFieldError(field.id, 'La fin des candidatures doit être après le début');
+                            return false;
+                        }
                     }
                 }
 
                 if (field.id === 'dateDebut' && field.value) {
-                    const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
-                    const dateDebut = new Date(field.value);
+                    const dateFinCandidature = document.getElementById('dateFinCandidature');
+                    if (dateFinCandidature && dateFinCandidature.value) {
+                        const dateFinCandidatureValue = new Date(dateFinCandidature.value);
+                        const dateDebutValue = new Date(field.value);
 
-                    if (dateDebut <= dateFinCandidature) {
-                        ELECTION_FORM.showFieldError(field.id, 'Le début des votes doit être après la fin des candidatures');
-                        return false;
+                        if (dateDebutValue <= dateFinCandidatureValue) {
+                            ELECTION_FORM.showFieldError(field.id, 'Le début des votes doit être après la fin des candidatures');
+                            return false;
+                        }
                     }
                 }
 
                 if (field.id === 'dateFin' && field.value) {
-                    const dateDebut = new Date(document.getElementById('dateDebut').value);
-                    const dateFin = new Date(field.value);
+                    const dateDebut = document.getElementById('dateDebut');
+                    if (dateDebut && dateDebut.value) {
+                        const dateDebutValue = new Date(dateDebut.value);
+                        const dateFinValue = new Date(field.value);
 
-                    if (dateFin <= dateDebut) {
-                        ELECTION_FORM.showFieldError(field.id, 'La fin des votes doit être après le début');
-                        return false;
+                        if (dateFinValue <= dateDebutValue) {
+                            ELECTION_FORM.showFieldError(field.id, 'La fin des votes doit être après le début');
+                            return false;
+                        }
                     }
                 }
 
@@ -1995,81 +2010,81 @@
             },
 
             renderPhaseFields: () => {
-                const phase = document.getElementById("niveau").value;
+                const phase = document.getElementById("niveau");
                 const fields = document.getElementById("phaseFields");
-                if (!fields) return;
+                if (!phase || !fields) return;
 
                 fields.innerHTML = "";
 
-                if (phase === "PHASE1") {
+                if (phase.value === "PHASE1") {
                     fields.innerHTML = `
-                        <div class="form-group">
-                            <label>École :</label>
-                            <select id="ecole" name="ecoleId" required onchange="SCHOOLS.updateFilieres()">
-                                <option value="">-- Chargement... --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="filiere">Filière :</label>
-                            <select id="filiere" name="filiereId" required>
-                                <option value="">-- Choisissez d'abord une école --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="annee">Année :</label>
-                            <select id="annee" name="annee" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="1">Licence 1</option>
-                                <option value="2">Licence 2</option>
-                                <option value="3">Licence 3</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="responsableType">Type de responsable :</label>
-                            <select id="responsableType" name="responsableType" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="PREMIER">Premier Responsable</option>
-                                <option value="DEUXIEME">Deuxième Responsable</option>
-                            </select>
-                        </div>
-                    `;
+                    <div class="form-group">
+                        <label>École :</label>
+                        <select id="ecole" name="ecoleId" required onchange="SCHOOLS.updateFilieres()">
+                            <option value="">-- Chargement... --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filiere">Filière :</label>
+                        <select id="filiere" name="filiereId" required>
+                            <option value="">-- Choisissez d'abord une école --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="annee">Année :</label>
+                        <select id="annee" name="annee" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="1">Licence 1</option>
+                            <option value="2">Licence 2</option>
+                            <option value="3">Licence 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="responsableType">Type de responsable :</label>
+                        <select id="responsableType" name="responsableType" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="PREMIER">Premier Responsable</option>
+                            <option value="DEUXIEME">Deuxième Responsable</option>
+                        </select>
+                    </div>
+                `;
                     SCHOOLS.loadEcolesForSelect("ecole");
-                } else if (phase === "PHASE2") {
+                } else if (phase.value === "PHASE2") {
                     fields.innerHTML = `
-                        <div class="form-group">
-                            <label>École :</label>
-                            <select id="ecole" name="ecoleId" required>
-                                <option value="">-- Chargement... --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="delegueType">Type de délégué :</label>
-                            <select id="delegueType" name="delegueType" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="PREMIER">Premier Délégué (L3)</option>
-                                <option value="DEUXIEME">Deuxième Délégué (L2)</option>
-                            </select>
-                        </div>
-                    `;
+                    <div class="form-group">
+                        <label>École :</label>
+                        <select id="ecole" name="ecoleId" required>
+                            <option value="">-- Chargement... --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="delegueType">Type de délégué :</label>
+                        <select id="delegueType" name="delegueType" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="PREMIER">Premier Délégué (L3)</option>
+                            <option value="DEUXIEME">Deuxième Délégué (L2)</option>
+                        </select>
+                    </div>
+                `;
                     SCHOOLS.loadEcolesForSelect("ecole");
-                } else if (phase === "PHASE3") {
+                } else if (phase.value === "PHASE3") {
                     fields.innerHTML = `
-                        <div class="form-group">
-                            <label for="delegueType">Type de délégué :</label>
-                            <select id="delegueType" name="delegueType" required>
-                                <option value="">-- Choisir --</option>
-                                <option value="PREMIER">Premier Délégué Universitaire</option>
-                                <option value="DEUXIEME">Deuxième Délégué Universitaire</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="tour">Nombre de tours :</label>
-                            <select id="tour" name="tour" required>
-                                <option value="1">1 tour</option>
-                                <option value="2">2 tours</option>
-                            </select>
-                        </div>
-                    `;
+                    <div class="form-group">
+                        <label for="delegueType">Type de délégué :</label>
+                        <select id="delegueType" name="delegueType" required>
+                            <option value="">-- Choisir --</option>
+                            <option value="PREMIER">Premier Délégué Universitaire</option>
+                            <option value="DEUXIEME">Deuxième Délégué Universitaire</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tour">Nombre de tours :</label>
+                        <select id="tour" name="tour" required>
+                            <option value="1">1 tour</option>
+                            <option value="2">2 tours</option>
+                        </select>
+                    </div>
+                `;
                 }
             },
 
@@ -2233,15 +2248,18 @@
 
                     const select = document.getElementById('ecoleSelect');
                     const tableBody = document.querySelector('#tableEcoles tbody');
-                    select.innerHTML = '<option value="">-- Sélectionner une école --</option>';
-                    tableBody.innerHTML = '';
+                    if (select) select.innerHTML = '<option value="">-- Sélectionner une école --</option>';
+                    if (tableBody) tableBody.innerHTML = '';
 
                     ecoles.forEach(ecole => {
-                        const opt = new Option(ecole.nom, ecole.id);
-                        select.add(opt);
+                        if (select) {
+                            const opt = new Option(ecole.nom, ecole.id);
+                            select.add(opt);
+                        }
 
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                        if (tableBody) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
                             <td>${ecole.nom}</td>
                             <td><span class="status-badge ${ecole.actif ? 'status-active' : 'status-inactive'}">${ecole.actif ? 'Actif' : 'Inactif'}</span></td>
                             <td class="table-actions">
@@ -2250,7 +2268,8 @@
                                 </button>
                             </td>
                         `;
-                        tableBody.appendChild(row);
+                            tableBody.appendChild(row);
+                        }
                     });
                 } catch (err) {
                     UTILS.showAlert('schoolAlert', 'Erreur lors du chargement des écoles', 'error');
@@ -2273,6 +2292,8 @@
                     const filieres = await res.json();
 
                     const tableBody = document.querySelector('#tableFilieres tbody');
+                    if (!tableBody) return;
+
                     tableBody.innerHTML = '';
 
                     for (const filiere of filieres) {
@@ -2288,15 +2309,15 @@
 
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${filiere.nom}</td>
-                            <td>${ecole.nom}</td>
-                            <td><span class="status-badge ${filiere.actif ? 'status-active' : 'status-inactive'}">${filiere.actif ? 'Actif' : 'Inactif'}</span></td>
-                            <td class="table-actions">
-                                <button class="btn btn-sm ${filiere.actif ? 'btn-secondary' : 'btn-primary'}" onclick="SCHOOLS.toggleFiliereActif(${filiere.id}, ${!filiere.actif})">
-                                    <i class="fas ${filiere.actif ? 'fa-times' : 'fa-check'}"></i> ${filiere.actif ? 'Désactiver' : 'Activer'}
-                                </button>
-                            </td>
-                        `;
+                        <td>${filiere.nom}</td>
+                        <td>${ecole.nom}</td>
+                        <td><span class="status-badge ${filiere.actif ? 'status-active' : 'status-inactive'}">${filiere.actif ? 'Actif' : 'Inactif'}</span></td>
+                        <td class="table-actions">
+                            <button class="btn btn-sm ${filiere.actif ? 'btn-secondary' : 'btn-primary'}" onclick="SCHOOLS.toggleFiliereActif(${filiere.id}, ${!filiere.actif})">
+                                <i class="fas ${filiere.actif ? 'fa-times' : 'fa-check'}"></i> ${filiere.actif ? 'Désactiver' : 'Activer'}
+                            </button>
+                        </td>
+                    `;
                         tableBody.appendChild(row);
                     }
                 } catch (err) {
@@ -2466,8 +2487,8 @@
                 const ecoleId = document.getElementById("ecole").value;
                 const filiereSelect = document.getElementById("filiere");
 
-                if (!ecoleId) {
-                    filiereSelect.innerHTML = '<option value="">-- Choisissez d\'abord une école --</option>';
+                if (!ecoleId || !filiereSelect) {
+                    if (filiereSelect) filiereSelect.innerHTML = '<option value="">-- Choisissez d\'abord une école --</option>';
                     return;
                 }
 
@@ -2527,12 +2548,13 @@
                     const tableBody = document.querySelector('#tableCategories tbody');
                     const categorySelect = document.getElementById('categorySelect');
 
-                    tableBody.innerHTML = '';
-                    categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
+                    if (tableBody) tableBody.innerHTML = '';
+                    if (categorySelect) categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
 
                     categories.forEach(category => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                        if (tableBody) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     <i class="fas fa-${category.icone} activity-icon-preview"></i>
@@ -2556,15 +2578,19 @@
                                 </button>
                             </td>
                         `;
-                        tableBody.appendChild(row);
+                            tableBody.appendChild(row);
+                        }
 
-                        const option = document.createElement('option');
-                        option.value = category.id;
-                        option.textContent = category.nom;
-                        categorySelect.appendChild(option);
+                        if (categorySelect) {
+                            const option = document.createElement('option');
+                            option.value = category.id;
+                            option.textContent = category.nom;
+                            categorySelect.appendChild(option);
+                        }
                     });
 
-                    document.getElementById('totalCategories').textContent = categories.length;
+                    const totalCategoriesEl = document.getElementById('totalCategories');
+                    if (totalCategoriesEl) totalCategoriesEl.textContent = categories.length;
                 } catch (err) {
                     UTILS.showAlert('activityAlert', 'Erreur lors du chargement des catégories', 'error');
                 }
@@ -2585,6 +2611,8 @@
                     const categories = data.data || data;
 
                     const tableBody = document.querySelector('#tableSubactivities tbody');
+                    if (!tableBody) return;
+
                     tableBody.innerHTML = '';
 
                     let totalSubactivities = 0;
@@ -2596,31 +2624,32 @@
                             category.subactivities.forEach(subactivity => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                                    <td>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
-                                            <span>${subactivity.nom}</span>
-                                        </div>
-                                    </td>
-                                    <td>${subactivity.description || '-'}</td>
-                                    <td>${category.nom}</td>
-                                    <td><code>${subactivity.icone}</code></td>
-                                    <td><span class="status-badge ${subactivity.actif ? 'status-active' : 'status-inactive'}">${subactivity.actif ? 'Actif' : 'Inactif'}</span></td>
-                                    <td class="table-actions">
-                                        <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
-                                            <i class="fas fa-edit"></i> Modifier
-                                        </button>
-                                        <button class="btn btn-sm ${subactivity.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!subactivity.actif})">
-                                            <i class="fas ${subactivity.actif ? 'fa-times' : 'fa-check'}"></i> ${subactivity.actif ? 'Désactiver' : 'Activer'}
-                                        </button>
-                                    </td>
-                                `;
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
+                                        <span>${subactivity.nom}</span>
+                                    </div>
+                                </td>
+                                <td>${subactivity.description || '-'}</td>
+                                <td>${category.nom}</td>
+                                <td><code>${subactivity.icone}</code></td>
+                                <td><span class="status-badge ${subactivity.actif ? 'status-active' : 'status-inactive'}">${subactivity.actif ? 'Actif' : 'Inactif'}</span></td>
+                                <td class="table-actions">
+                                    <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </button>
+                                    <button class="btn btn-sm ${subactivity.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!subactivity.actif})">
+                                        <i class="fas ${subactivity.actif ? 'fa-times' : 'fa-check'}"></i> ${subactivity.actif ? 'Désactiver' : 'Activer'}
+                                    </button>
+                                </td>
+                            `;
                                 tableBody.appendChild(row);
                             });
                         }
                     });
 
-                    document.getElementById('totalSubactivities').textContent = totalSubactivities;
+                    const totalSubactivitiesEl = document.getElementById('totalSubactivities');
+                    if (totalSubactivitiesEl) totalSubactivitiesEl.textContent = totalSubactivities;
                 } catch (err) {
                     UTILS.showAlert('activityAlert', 'Erreur lors du chargement des sous-activités', 'error');
                 }
@@ -2641,6 +2670,8 @@
                     const stats = data.data;
 
                     const tableBody = document.querySelector('#tableActivityStats tbody');
+                    if (!tableBody) return;
+
                     tableBody.innerHTML = '';
 
                     if (stats && stats.activities) {
@@ -2651,27 +2682,28 @@
 
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <i class="fas fa-${activity.icone} activity-icon-preview"></i>
-                                        <span>${activity.nom}</span>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-${activity.icone} activity-icon-preview"></i>
+                                    <span>${activity.nom}</span>
+                                </div>
+                            </td>
+                            <td>${activity.student_count}</td>
+                            <td>${activity.school_count}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
+                                        <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
                                     </div>
-                                </td>
-                                <td>${activity.student_count}</td>
-                                <td>${activity.school_count}</td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
-                                            <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
-                                        </div>
-                                        <span>${participationRate}%</span>
-                                    </div>
-                                </td>
-                            `;
+                                    <span>${participationRate}%</span>
+                                </div>
+                            </td>
+                        `;
                             tableBody.appendChild(row);
                         });
 
-                        document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+                        const totalStudentsEl = document.getElementById('totalStudents');
+                        if (totalStudentsEl) totalStudentsEl.textContent = stats.totalStudents || 0;
                     }
                 } catch (err) {
                     console.error('Erreur chargement statistiques:', err);
@@ -2844,7 +2876,7 @@
             const isAuth = DASHBOARD_AUTH.isAuthenticated();
 
             if (!isAuth) {
-                console.log('Non authentifié, redirection vers /admin/login');
+                console.log('Non authentifié, redirection vers /admin');
                 window.location.href = '/admin';
                 return;
             }
