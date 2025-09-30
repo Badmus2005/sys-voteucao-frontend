@@ -150,11 +150,44 @@ class NotificationService {
         });
     }
 
+    async fetchNewNotifications() {
+        try {
+            const response = await fetch(`${this.API_URL}/api/notifications?unreadOnly=true`, {
+                headers: {
+                    'Authorization': `Bearer ${this.TOKEN}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur de récupération des nouvelles notifications');
+            }
+
+            const data = await response.json();
+            const newNotifications = data.notifications || [];
+
+            // Ajouter seulement les notifications qui n'existent pas déjà
+            for (const notification of newNotifications) {
+                if (!this.notifications.find(n => n.id === notification.id)) {
+                    this.notifications.unshift(notification);
+                }
+            }
+
+            this.notifySubscribers();
+            return newNotifications;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des nouvelles notifications:', error);
+            return [];
+        }
+    }
+
     startPolling() {
         // Vérifier les nouvelles notifications toutes les 30 secondes
         setInterval(async () => {
-            await this.fetchNotifications();
-            this.notifySubscribers();
+            try {
+                await this.fetchNewNotifications();
+            } catch (error) {
+                console.error('Erreur polling notifications:', error);
+            }
         }, 30000);
     }
 
