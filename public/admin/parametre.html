@@ -1013,6 +1013,57 @@
                 opacity: 1;
             }
         }
+
+        /* Styles pour les activités */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--blue-night);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .activity-icon-preview {
+            font-size: 1.5rem;
+            color: var(--bordeaux);
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -1149,21 +1200,14 @@
                         <i class="fas fa-school"></i>
                         <span>Écoles & Filières</span>
                     </div>
-                    <div class="settings-nav-item" data-target="system-settings">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>Paramètres Système</span>
-                    </div>
-                    <div class="settings-nav-item" data-target="user-settings">
-                        <i class="fas fa-user-cog"></i>
-                        <span>Paramètres Utilisateur</span>
-                    </div>
+
                     <div class="settings-nav-item" data-target="notification-settings">
                         <i class="fas fa-bell"></i>
                         <span>Notifications</span>
                     </div>
-                    <div class="settings-nav-item" data-target="security-settings">
+                    <div class="settings-nav-item" data-target="">
                         <i class="fas fa-shield-alt"></i>
-                        <span>Sécurité</span>
+                        <span>Activité Para Universitaire</span>
                     </div>
                 </div>
 
@@ -1408,23 +1452,185 @@
                         </div>
                     </div>
 
-                    <!-- Autres sections de paramètres -->
-                    <div class="settings-section" id="system-settings">
+                    <!-- Section Activités Para-Universitaires -->
+                    <div class="settings-section" id="activity-settings">
                         <h2 class="settings-section-title">
-                            <i class="fas fa-sliders-h"></i> Paramètres Système
+                            <i class="fas fa-running"></i> Gestion des Activités Para-Universitaires
                         </h2>
-                        <p>Configuration des paramètres généraux du système.</p>
-                        <!-- Contenu des paramètres système -->
+
+                        <div id="activityAlert" class="alert" style="display: none;"></div>
+
+                        <!-- Gestion des Catégories Principales -->
+                        <div class="card" style="box-shadow: var(--shadow); margin-bottom: 25px;">
+                            <div class="card-header"
+                                style="padding: 16px 20px; background: white; border-bottom: 1px solid var(--light-gray); display: flex; align-items: center; justify-content: space-between;">
+                                <h3 class="card-title"
+                                    style="font-size: 18px; font-weight: 600; color: var(--blue-night); display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-layer-group"></i> Catégories Principales
+                                </h3>
+                            </div>
+                            <div class="card-body" style="padding: 20px;">
+                                <form id="formAddCategory">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="categoryName">Nom de la catégorie</label>
+                                            <input type="text" id="categoryName" name="categoryName" required
+                                                placeholder="Ex: Sport, Culture, Technologie">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="categoryIcon">Icône FontAwesome</label>
+                                            <input type="text" id="categoryIcon" name="categoryIcon" required
+                                                placeholder="Ex: running, palette, laptop-code">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="categoryDescription">Description</label>
+                                        <textarea id="categoryDescription" name="categoryDescription"
+                                            placeholder="Description de la catégorie..."></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="hasSubactivities" name="hasSubactivities"
+                                                checked>
+                                            <span>Cette catégorie a des sous-activités</span>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="btnAddCategory">
+                                        <i class="fas fa-plus"></i> Ajouter la catégorie
+                                    </button>
+                                </form>
+
+                                <div class="table-container" style="margin-top: 20px;">
+                                    <table id="tableCategories">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Description</th>
+                                                <th>Icône</th>
+                                                <th>Sous-activités</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gestion des Sous-Activités -->
+                        <div class="card" style="box-shadow: var(--shadow); margin-bottom: 25px;">
+                            <div class="card-header"
+                                style="padding: 16px 20px; background: white; border-bottom: 1px solid var(--light-gray); display: flex; align-items: center; justify-content: space-between;">
+                                <h3 class="card-title"
+                                    style="font-size: 18px; font-weight: 600; color: var(--blue-night); display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-list-alt"></i> Sous-Activités
+                                </h3>
+                            </div>
+                            <div class="card-body" style="padding: 20px;">
+                                <form id="formAddSubactivity">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="categorySelect">Catégorie</label>
+                                            <select id="categorySelect" required>
+                                                <option value="">-- Sélectionner une catégorie --</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="subactivityName">Nom de la sous-activité</label>
+                                            <input type="text" id="subactivityName" name="subactivityName" required
+                                                placeholder="Ex: Football, Musique, Programmation">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="subactivityIcon">Icône FontAwesome</label>
+                                            <input type="text" id="subactivityIcon" name="subactivityIcon" required
+                                                placeholder="Ex: futbol, music, code">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="subactivityDescription">Description</label>
+                                            <input type="text" id="subactivityDescription" name="subactivityDescription"
+                                                placeholder="Description courte...">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="btnAddSubactivity">
+                                        <i class="fas fa-plus"></i> Ajouter la sous-activité
+                                    </button>
+                                </form>
+
+                                <div class="table-container" style="margin-top: 20px;">
+                                    <table id="tableSubactivities">
+                                        <thead>
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Description</th>
+                                                <th>Catégorie</th>
+                                                <th>Icône</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistiques des Activités -->
+                        <div class="card" style="box-shadow: var(--shadow);">
+                            <div class="card-header"
+                                style="padding: 16px 20px; background: white; border-bottom: 1px solid var(--light-gray);">
+                                <h3 class="card-title"
+                                    style="font-size: 18px; font-weight: 600; color: var(--blue-night); display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-chart-bar"></i> Statistiques des Activités
+                                </h3>
+                            </div>
+                            <div class="card-body" style="padding: 20px;">
+                                <div class="stats-grid"
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                                    <div class="stat-card"
+                                        style="background: var(--light-bg); padding: 20px; border-radius: var(--border-radius); text-align: center;">
+                                        <div class="stat-number"
+                                            style="font-size: 2rem; font-weight: bold; color: var(--blue-night);"
+                                            id="totalCategories">0</div>
+                                        <div class="stat-label" style="color: var(--text-muted);">Catégories</div>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: var(--light-bg); padding: 20px; border-radius: var(--border-radius); text-align: center;">
+                                        <div class="stat-number"
+                                            style="font-size: 2rem; font-weight: bold; color: var(--bordeaux);"
+                                            id="totalSubactivities">0</div>
+                                        <div class="stat-label" style="color: var(--text-muted);">Sous-activités</div>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: var(--light-bg); padding: 20px; border-radius: var(--border-radius); text-align: center;">
+                                        <div class="stat-number"
+                                            style="font-size: 2rem; font-weight: bold; color: var(--success);"
+                                            id="totalStudents">0</div>
+                                        <div class="stat-label" style="color: var(--text-muted);">Étudiants inscrits
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-container">
+                                    <table id="tableActivityStats">
+                                        <thead>
+                                            <tr>
+                                                <th>Activité</th>
+                                                <th>Étudiants inscrits</th>
+                                                <th>Écoles représentées</th>
+                                                <th>Taux de participation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="settings-section" id="user-settings">
-                        <h2 class="settings-section-title">
-                            <i class="fas fa-user-cog"></i> Paramètres Utilisateur
-                        </h2>
-                        <p>Gestion des préférences utilisateur.</p>
-                        <!-- Contenu des paramètres utilisateur -->
-                    </div>
-
+                    <!-- Section Notifications -->
                     <div class="settings-section" id="notification-settings">
                         <h2 class="settings-section-title">
                             <i class="fas fa-bell"></i> Paramètres de Notification
@@ -1465,20 +1671,26 @@
     </div>
     <script src="/assets/config.js"></script>
     <script>
-        // Configuration des API
+        // =============================================
+        // CONFIGURATION ET CONSTANTES
+        // =============================================
         const API_BASE = CONFIG.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/elections';
 
-        // Fonction pour récupérer le token
-        function getToken() {
-            return localStorage.getItem('token');
-        }
+        // Variables globales
+        let currentSection = 'config';
+        const sections = ['config', 'candidacy', 'voting', 'results'];
+        let errorTimeouts = {};
 
-        // Fonctions d'authentification pour le dashboard
+        // =============================================
+        // AUTHENTIFICATION ET SÉCURITÉ
+        // =============================================
         const DASHBOARD_AUTH = {
+            getToken: () => localStorage.getItem('token'),
+
             isAuthenticated: () => {
                 try {
-                    const token = getToken();
+                    const token = DASHBOARD_AUTH.getToken();
                     if (!token) return false;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -1492,7 +1704,7 @@
 
             getUserRole: () => {
                 try {
-                    const token = getToken();
+                    const token = DASHBOARD_AUTH.getToken();
                     if (!token) return null;
 
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -1509,6 +1721,1122 @@
                 window.location.href = '/admin';
             }
         };
+
+        // =============================================
+        // UTILITAIRES GÉNÉRAUX
+        // =============================================
+        const UTILS = {
+            showLoading: () => {
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.add('active');
+            },
+
+            hideLoading: () => {
+                const loader = document.getElementById('loadingOverlay');
+                if (loader) loader.classList.remove('active');
+            },
+
+            safeAddListener: (id, event, handler) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener(event, handler);
+                    return true;
+                }
+                console.error(`Element #${id} not found`);
+                return false;
+            },
+
+            showToast: (message, type = 'info') => {
+                const toastContainer = document.getElementById('toastContainer');
+                if (!toastContainer) return;
+
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    ${message}
+                `;
+
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 5000);
+            },
+
+            showAlert: (alertId, message, type = 'success') => {
+                const alertBox = document.getElementById(alertId);
+                if (!alertBox) return;
+
+                alertBox.textContent = message;
+                alertBox.className = `alert alert-${type}`;
+                alertBox.style.display = "flex";
+
+                setTimeout(() => {
+                    alertBox.style.display = "none";
+                }, 4000);
+            }
+        };
+
+        // =============================================
+        // GESTIONNAIRES D'ÉVÉNEMENTS
+        // =============================================
+        const EVENT_HANDLERS = {
+            setupNavigation: () => {
+                // Navigation sidebar
+                const menuToggle = document.getElementById('menuToggle');
+                const sidebar = document.getElementById('sidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+                function toggleSidebar() {
+                    sidebar.classList.toggle('active');
+                    sidebarOverlay.classList.toggle('active');
+                    menuToggle.classList.toggle('active');
+                }
+
+                if (menuToggle && sidebar) {
+                    menuToggle.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        toggleSidebar();
+                    });
+
+                    sidebarOverlay.addEventListener('click', toggleSidebar);
+                    sidebar.addEventListener('click', (e) => e.stopPropagation());
+                }
+
+                // Menu utilisateur
+                const userToggle = document.getElementById('userToggle');
+                const userDropdown = document.getElementById('userDropdown');
+
+                if (userToggle && userDropdown) {
+                    userToggle.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        userDropdown.classList.toggle('active');
+                    });
+
+                    document.addEventListener('click', function (e) {
+                        if (userDropdown.classList.contains('active') &&
+                            !userToggle.contains(e.target) &&
+                            !userDropdown.contains(e.target)) {
+                            userDropdown.classList.remove('active');
+                        }
+                    });
+                }
+
+                // Déconnexion
+                UTILS.safeAddListener('logoutBtn', 'click', function (e) {
+                    e.preventDefault();
+                    DASHBOARD_AUTH.logout();
+                });
+
+                // Navigation paramètres
+                document.querySelectorAll('.settings-nav-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const target = this.getAttribute('data-target');
+
+                        document.querySelectorAll('.settings-nav-item').forEach(i => {
+                            i.classList.remove('active');
+                        });
+                        this.classList.add('active');
+
+                        document.querySelectorAll('.settings-section').forEach(section => {
+                            section.classList.remove('active');
+                        });
+                        document.getElementById(target).classList.add('active');
+                    });
+                });
+
+                // Navigation création élection
+                document.querySelectorAll('.timeline-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const section = item.getAttribute('data-section');
+                        ELECTION_FORM.showSection(section);
+                    });
+                });
+            },
+
+            setupElectionForm: () => {
+                UTILS.safeAddListener("nextBtn", 'click', ELECTION_FORM.nextSection);
+                UTILS.safeAddListener("prevBtn", 'click', ELECTION_FORM.prevSection);
+                UTILS.safeAddListener("electionForm", 'submit', ELECTION_FORM.handleSubmit);
+            },
+
+            setupSchoolForms: () => {
+                UTILS.safeAddListener("formAddEcole", 'submit', SCHOOLS.handleAddEcole);
+                UTILS.safeAddListener("formAddFiliere", 'submit', SCHOOLS.handleAddFiliere);
+            },
+
+            setupActivityForms: () => {
+                UTILS.safeAddListener("formAddCategory", 'submit', ACTIVITIES.handleAddCategory);
+                UTILS.safeAddListener("formAddSubactivity", 'submit', ACTIVITIES.handleAddSubactivity);
+            },
+
+            setupRealTimeValidation: () => {
+                const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea');
+                textInputs.forEach(input => {
+                    input.addEventListener('blur', () => ELECTION_FORM.validateField(input));
+                });
+
+                const selects = document.querySelectorAll('select');
+                selects.forEach(select => {
+                    select.addEventListener('change', () => ELECTION_FORM.validateField(select));
+                });
+
+                const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
+                dateInputs.forEach(input => {
+                    input.addEventListener('change', () => ELECTION_FORM.validateField(input));
+                });
+            }
+        };
+
+        // =============================================
+        // GESTION DES ÉLECTIONS
+        // =============================================
+        const ELECTION_FORM = {
+            showSection: (section) => {
+                document.querySelectorAll('.form-section').forEach(sec => {
+                    sec.classList.remove('active');
+                });
+
+                document.getElementById(`${section}-section`).classList.add('active');
+
+                document.querySelectorAll('.timeline-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
+
+                currentSection = section;
+                ELECTION_FORM.updateNavigationButtons();
+            },
+
+            nextSection: () => {
+                const currentIndex = sections.indexOf(currentSection);
+                if (currentIndex < sections.length - 1) {
+                    ELECTION_FORM.showSection(sections[currentIndex + 1]);
+                }
+            },
+
+            prevSection: () => {
+                const currentIndex = sections.indexOf(currentSection);
+                if (currentIndex > 0) {
+                    ELECTION_FORM.showSection(sections[currentIndex - 1]);
+                }
+            },
+
+            updateNavigationButtons: () => {
+                const currentIndex = sections.indexOf(currentSection);
+
+                document.getElementById("prevBtn").style.display = currentIndex > 0 ? 'flex' : 'none';
+                document.getElementById("nextBtn").style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
+                document.getElementById("submitBtn").style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
+            },
+
+            validateField: (field) => {
+                const errorElement = document.getElementById(field.id + 'Error');
+
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                    errorElement.textContent = '';
+                }
+
+                if (field.required && !field.value.trim()) {
+                    ELECTION_FORM.showFieldError(field.id, 'Ce champ est obligatoire');
+                    return false;
+                }
+
+                // Validation des dates
+                if (field.id === 'dateFinCandidature' && field.value) {
+                    const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
+                    const dateFinCandidature = new Date(field.value);
+
+                    if (dateFinCandidature <= dateDebutCandidature) {
+                        ELECTION_FORM.showFieldError(field.id, 'La fin des candidatures doit être après le début');
+                        return false;
+                    }
+                }
+
+                if (field.id === 'dateDebut' && field.value) {
+                    const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
+                    const dateDebut = new Date(field.value);
+
+                    if (dateDebut <= dateFinCandidature) {
+                        ELECTION_FORM.showFieldError(field.id, 'Le début des votes doit être après la fin des candidatures');
+                        return false;
+                    }
+                }
+
+                if (field.id === 'dateFin' && field.value) {
+                    const dateDebut = new Date(document.getElementById('dateDebut').value);
+                    const dateFin = new Date(field.value);
+
+                    if (dateFin <= dateDebut) {
+                        ELECTION_FORM.showFieldError(field.id, 'La fin des votes doit être après le début');
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+
+            showFieldError: (fieldId, message) => {
+                if (errorTimeouts[fieldId]) {
+                    clearTimeout(errorTimeouts[fieldId]);
+                }
+
+                const errorElement = document.getElementById(fieldId + 'Error');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+
+                    errorTimeouts[fieldId] = setTimeout(() => {
+                        errorElement.style.display = 'none';
+                    }, 5000);
+                }
+            },
+
+            renderPhaseFields: () => {
+                const phase = document.getElementById("niveau").value;
+                const fields = document.getElementById("phaseFields");
+                if (!fields) return;
+
+                fields.innerHTML = "";
+
+                if (phase === "PHASE1") {
+                    fields.innerHTML = `
+                        <div class="form-group">
+                            <label>École :</label>
+                            <select id="ecole" name="ecoleId" required onchange="SCHOOLS.updateFilieres()">
+                                <option value="">-- Chargement... --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filiere">Filière :</label>
+                            <select id="filiere" name="filiereId" required>
+                                <option value="">-- Choisissez d'abord une école --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annee">Année :</label>
+                            <select id="annee" name="annee" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="1">Licence 1</option>
+                                <option value="2">Licence 2</option>
+                                <option value="3">Licence 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="responsableType">Type de responsable :</label>
+                            <select id="responsableType" name="responsableType" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="PREMIER">Premier Responsable</option>
+                                <option value="DEUXIEME">Deuxième Responsable</option>
+                            </select>
+                        </div>
+                    `;
+                    SCHOOLS.loadEcolesForSelect("ecole");
+                } else if (phase === "PHASE2") {
+                    fields.innerHTML = `
+                        <div class="form-group">
+                            <label>École :</label>
+                            <select id="ecole" name="ecoleId" required>
+                                <option value="">-- Chargement... --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="delegueType">Type de délégué :</label>
+                            <select id="delegueType" name="delegueType" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="PREMIER">Premier Délégué (L3)</option>
+                                <option value="DEUXIEME">Deuxième Délégué (L2)</option>
+                            </select>
+                        </div>
+                    `;
+                    SCHOOLS.loadEcolesForSelect("ecole");
+                } else if (phase === "PHASE3") {
+                    fields.innerHTML = `
+                        <div class="form-group">
+                            <label for="delegueType">Type de délégué :</label>
+                            <select id="delegueType" name="delegueType" required>
+                                <option value="">-- Choisir --</option>
+                                <option value="PREMIER">Premier Délégué Universitaire</option>
+                                <option value="DEUXIEME">Deuxième Délégué Universitaire</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tour">Nombre de tours :</label>
+                            <select id="tour" name="tour" required>
+                                <option value="1">1 tour</option>
+                                <option value="2">2 tours</option>
+                            </select>
+                        </div>
+                    `;
+                }
+            },
+
+            handleSubmit: async (e) => {
+                e.preventDefault();
+
+                document.querySelectorAll('.field-error').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                let isValid = true;
+                const requiredFields = [
+                    'titre', 'niveau', 'dateDebutCandidature',
+                    'dateFinCandidature', 'dateDebut', 'dateFin'
+                ];
+
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field && field.required && !field.value.trim()) {
+                        ELECTION_FORM.showFieldError(fieldId, 'Ce champ est obligatoire');
+                        isValid = false;
+                    }
+                });
+
+                const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
+                const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
+                const dateDebut = new Date(document.getElementById('dateDebut').value);
+                const dateFin = new Date(document.getElementById('dateFin').value);
+
+                if (dateFinCandidature <= dateDebutCandidature) {
+                    ELECTION_FORM.showFieldError('dateFinCandidature', 'La fin des candidatures doit être après le début');
+                    isValid = false;
+                }
+
+                if (dateDebut <= dateFinCandidature) {
+                    ELECTION_FORM.showFieldError('dateDebut', 'Le début des votes doit être après la fin des candidatures');
+                    isValid = false;
+                }
+
+                if (dateFin <= dateDebut) {
+                    ELECTION_FORM.showFieldError('dateFin', 'La fin des votes doit être après le début');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    ELECTION_FORM.showMessage('error', 'Veuillez corriger les erreurs dans le formulaire');
+                    return;
+                }
+
+                const electionId = document.getElementById("electionId").value;
+                const isEdit = !!electionId;
+
+                const candidacyStartISO = new Date(document.getElementById("dateDebutCandidature").value).toISOString();
+                const candidacyEndISO = new Date(document.getElementById("dateFinCandidature").value).toISOString();
+                const votingStartISO = new Date(document.getElementById("dateDebut").value).toISOString();
+                const votingEndISO = new Date(document.getElementById("dateFin").value).toISOString();
+
+                const niveau = document.getElementById("niveau").value;
+
+                let type = "SALLE";
+                if (niveau === "PHASE2") type = "ECOLE";
+                if (niveau === "PHASE3") type = "UNIVERSITE";
+
+                const data = {
+                    titre: document.getElementById("titre").value,
+                    description: document.getElementById("description").value,
+                    dateDebutCandidature: candidacyStartISO,
+                    dateFinCandidature: candidacyEndISO,
+                    dateDebut: votingStartISO,
+                    dateFin: votingEndISO,
+                    isActive: true,
+                    niveau: niveau,
+                    type: type,
+                    resultsVisibility: document.getElementById("resultsVisibility").value || "IMMEDIATE"
+                };
+
+                if (niveau === "PHASE1") {
+                    data.filiereId = document.getElementById("filiere").value || 0;
+                    data.annee = parseInt(document.getElementById("annee").value) || 0;
+                    data.ecoleId = document.getElementById("ecole").value || 0;
+                    data.responsableType = document.getElementById("responsableType").value;
+                } else if (niveau === "PHASE2") {
+                    data.delegueType = document.getElementById("delegueType").value;
+                    data.ecoleId = document.getElementById("ecole").value || 0;
+                } else if (niveau === "PHASE3") {
+                    data.delegueType = document.getElementById("delegueType").value;
+                    data.tour = parseInt(document.getElementById("tour").value) || 1;
+                }
+
+                try {
+                    UTILS.showLoading();
+                    const token = DASHBOARD_AUTH.getToken();
+                    const url = isEdit
+                        ? `${API_BASE}${ELECTIONS_ENDPOINT}/${electionId}`
+                        : `${API_BASE}${ELECTIONS_ENDPOINT}`;
+
+                    const method = isEdit ? 'PUT' : 'POST';
+
+                    const res = await fetch(url, {
+                        method: method,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Erreur ${isEdit ? 'modification' : 'création'}`);
+                    }
+
+                    UTILS.showToast(`Élection ${isEdit ? 'modifiée' : 'créée'} avec succès !`, 'success');
+                    ELECTION_FORM.resetForm();
+                } catch (err) {
+                    UTILS.showToast(err.message, 'error');
+                } finally {
+                    UTILS.hideLoading();
+                }
+            },
+
+            resetForm: () => {
+                document.getElementById("electionForm").reset();
+                document.getElementById("electionId").value = "";
+                document.getElementById("phaseFields").innerHTML = "";
+                ELECTION_FORM.showSection('config');
+            },
+
+            showMessage: (type, message) => {
+                const messageEl = document.getElementById("electionFormMessage");
+                if (!messageEl) return;
+
+                messageEl.textContent = message;
+                messageEl.className = `alert alert-${type}`;
+                messageEl.style.display = "block";
+
+                setTimeout(() => {
+                    messageEl.style.display = "none";
+                }, 5000);
+            }
+        };
+
+        // =============================================
+        // GESTION DES ÉCOLES ET FILIÈRES
+        // =============================================
+        const SCHOOLS = {
+            loadEcoles: async () => {
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/ecoles?actif=true`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors du chargement des écoles");
+                    }
+
+                    const ecoles = await res.json();
+
+                    const select = document.getElementById('ecoleSelect');
+                    const tableBody = document.querySelector('#tableEcoles tbody');
+                    select.innerHTML = '<option value="">-- Sélectionner une école --</option>';
+                    tableBody.innerHTML = '';
+
+                    ecoles.forEach(ecole => {
+                        const opt = new Option(ecole.nom, ecole.id);
+                        select.add(opt);
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${ecole.nom}</td>
+                            <td><span class="status-badge ${ecole.actif ? 'status-active' : 'status-inactive'}">${ecole.actif ? 'Actif' : 'Inactif'}</span></td>
+                            <td class="table-actions">
+                                <button class="btn btn-sm ${ecole.actif ? 'btn-secondary' : 'btn-primary'}" onclick="SCHOOLS.toggleEcoleActif(${ecole.id}, ${!ecole.actif})">
+                                    <i class="fas ${ecole.actif ? 'fa-times' : 'fa-check'}"></i> ${ecole.actif ? 'Désactiver' : 'Activer'}
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors du chargement des écoles', 'error');
+                }
+            },
+
+            loadFilieres: async () => {
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/filieres?actif=true`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors du chargement des filières");
+                    }
+
+                    const filieres = await res.json();
+
+                    const tableBody = document.querySelector('#tableFilieres tbody');
+                    tableBody.innerHTML = '';
+
+                    for (const filiere of filieres) {
+                        const resEcole = await fetch(`${API_BASE}/api/ecoles/${filiere.ecoleId}`, {
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
+
+                        if (!resEcole.ok) continue;
+
+                        const ecole = await resEcole.json();
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${filiere.nom}</td>
+                            <td>${ecole.nom}</td>
+                            <td><span class="status-badge ${filiere.actif ? 'status-active' : 'status-inactive'}">${filiere.actif ? 'Actif' : 'Inactif'}</span></td>
+                            <td class="table-actions">
+                                <button class="btn btn-sm ${filiere.actif ? 'btn-secondary' : 'btn-primary'}" onclick="SCHOOLS.toggleFiliereActif(${filiere.id}, ${!filiere.actif})">
+                                    <i class="fas ${filiere.actif ? 'fa-times' : 'fa-check'}"></i> ${filiere.actif ? 'Désactiver' : 'Activer'}
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    }
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors du chargement des filières', 'error');
+                }
+            },
+
+            handleAddEcole: async (e) => {
+                e.preventDefault();
+                const nom = document.getElementById('nomEcole').value.trim();
+                const btn = document.getElementById('btnAddEcole');
+
+                if (!nom) return;
+
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
+                btn.disabled = true;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/ecoles`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ nom })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors de l'ajout de l'école");
+                    }
+
+                    UTILS.showAlert('schoolAlert', 'École ajoutée avec succès');
+                    document.getElementById('formAddEcole').reset();
+                    SCHOOLS.loadEcoles();
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors de l\'ajout de l\'école', 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            },
+
+            handleAddFiliere: async (e) => {
+                e.preventDefault();
+                const nom = document.getElementById('nomFiliere').value.trim();
+                const ecoleId = document.getElementById('ecoleSelect').value;
+                const btn = document.getElementById('btnAddFiliere');
+
+                if (!nom || !ecoleId) return;
+
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
+                btn.disabled = true;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/filieres`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ nom, ecoleId })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors de l'ajout de la filière");
+                    }
+
+                    UTILS.showAlert('schoolAlert', 'Filière ajoutée avec succès');
+                    document.getElementById('formAddFiliere').reset();
+                    SCHOOLS.loadFilieres();
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors de l\'ajout de la filière', 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            },
+
+            toggleEcoleActif: async (id, actif) => {
+                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette école ?`)) {
+                    return;
+                }
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/ecoles/${id}/actif`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ actif })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors de la mise à jour de l'école");
+                    }
+
+                    UTILS.showAlert('schoolAlert', `École ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    SCHOOLS.loadEcoles();
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors de la mise à jour de l\'école', 'error');
+                }
+            },
+
+            toggleFiliereActif: async (id, actif) => {
+                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette filière ?`)) {
+                    return;
+                }
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/filieres/${id}/actif`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ actif })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Erreur lors de la mise à jour de la filière");
+                    }
+
+                    UTILS.showAlert('schoolAlert', `Filière ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    SCHOOLS.loadFilieres();
+                } catch (err) {
+                    UTILS.showAlert('schoolAlert', 'Erreur lors de la mise à jour de la filière', 'error');
+                }
+            },
+
+            loadEcolesForSelect: async (selectId = "ecole") => {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+
+                select.innerHTML = '<option value="">-- Chargement... --</option>';
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/ecoles?actif=true`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        const ecoles = await res.json();
+                        select.innerHTML = '<option value="">-- Choisir --</option>';
+                        ecoles.forEach(ecole => {
+                            const option = document.createElement("option");
+                            option.value = ecole.id;
+                            option.textContent = ecole.nom;
+                            select.appendChild(option);
+                        });
+                    }
+                } catch (err) {
+                    console.error("Erreur chargement écoles:", err);
+                }
+            },
+
+            updateFilieres: async () => {
+                const ecoleId = document.getElementById("ecole").value;
+                const filiereSelect = document.getElementById("filiere");
+
+                if (!ecoleId) {
+                    filiereSelect.innerHTML = '<option value="">-- Choisissez d\'abord une école --</option>';
+                    return;
+                }
+
+                filiereSelect.innerHTML = '<option value="">-- Chargement... --</option>';
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/filieres?ecoleId=${ecoleId}&actif=true`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        const filieres = await res.json();
+                        filiereSelect.innerHTML = '<option value="">-- Choisir une filière --</option>';
+                        filieres.forEach(filiere => {
+                            const option = document.createElement("option");
+                            option.value = filiere.id;
+                            option.textContent = filiere.nom;
+                            filiereSelect.appendChild(option);
+                        });
+                    } else {
+                        filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
+                    }
+                } catch (err) {
+                    console.error("Erreur chargement filières:", err);
+                    filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
+                }
+            }
+        };
+
+        // =============================================
+        // GESTION DES ACTIVITÉS PARA-UNIVERSITAIRES
+        // =============================================
+        const ACTIVITIES = {
+            loadActivitySettings: async () => {
+                await ACTIVITIES.loadCategories();
+                await ACTIVITIES.loadSubactivities();
+                await ACTIVITIES.loadActivityStats();
+            },
+
+            loadCategories: async () => {
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors du chargement des catégories");
+
+                    const data = await res.json();
+                    const categories = data.data || data;
+
+                    const tableBody = document.querySelector('#tableCategories tbody');
+                    const categorySelect = document.getElementById('categorySelect');
+
+                    tableBody.innerHTML = '';
+                    categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
+
+                    categories.forEach(category => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-${category.icone} activity-icon-preview"></i>
+                                    <span>${category.nom}</span>
+                                </div>
+                            </td>
+                            <td>${category.description || '-'}</td>
+                            <td><code>${category.icone}</code></td>
+                            <td>
+                                <span class="status-badge ${category.has_subactivities ? 'status-active' : 'status-inactive'}">
+                                    ${category.has_subactivities ? 'Oui' : 'Non'}
+                                </span>
+                            </td>
+                            <td><span class="status-badge ${category.actif ? 'status-active' : 'status-inactive'}">${category.actif ? 'Actif' : 'Inactif'}</span></td>
+                            <td class="table-actions">
+                                <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editCategory(${category.id})">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </button>
+                                <button class="btn btn-sm ${category.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!category.actif})">
+                                    <i class="fas ${category.actif ? 'fa-times' : 'fa-check'}"></i> ${category.actif ? 'Désactiver' : 'Activer'}
+                                </button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.nom;
+                        categorySelect.appendChild(option);
+                    });
+
+                    document.getElementById('totalCategories').textContent = categories.length;
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des catégories', 'error');
+                }
+            },
+
+            loadSubactivities: async () => {
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities/all/with-subactivities`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors du chargement des sous-activités");
+
+                    const data = await res.json();
+                    const categories = data.data || data;
+
+                    const tableBody = document.querySelector('#tableSubactivities tbody');
+                    tableBody.innerHTML = '';
+
+                    let totalSubactivities = 0;
+
+                    categories.forEach(category => {
+                        if (category.subactivities && category.subactivities.length > 0) {
+                            totalSubactivities += category.subactivities.length;
+
+                            category.subactivities.forEach(subactivity => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
+                                            <span>${subactivity.nom}</span>
+                                        </div>
+                                    </td>
+                                    <td>${subactivity.description || '-'}</td>
+                                    <td>${category.nom}</td>
+                                    <td><code>${subactivity.icone}</code></td>
+                                    <td><span class="status-badge ${subactivity.actif ? 'status-active' : 'status-inactive'}">${subactivity.actif ? 'Actif' : 'Inactif'}</span></td>
+                                    <td class="table-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <button class="btn btn-sm ${subactivity.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!subactivity.actif})">
+                                            <i class="fas ${subactivity.actif ? 'fa-times' : 'fa-check'}"></i> ${subactivity.actif ? 'Désactiver' : 'Activer'}
+                                        </button>
+                                    </td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        }
+                    });
+
+                    document.getElementById('totalSubactivities').textContent = totalSubactivities;
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des sous-activités', 'error');
+                }
+            },
+
+            loadActivityStats: async () => {
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities/stats`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors du chargement des statistiques");
+
+                    const data = await res.json();
+                    const stats = data.data;
+
+                    const tableBody = document.querySelector('#tableActivityStats tbody');
+                    tableBody.innerHTML = '';
+
+                    if (stats && stats.activities) {
+                        stats.activities.forEach(activity => {
+                            const participationRate = stats.totalStudents > 0
+                                ? Math.round((activity.student_count / stats.totalStudents) * 100)
+                                : 0;
+
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-${activity.icone} activity-icon-preview"></i>
+                                        <span>${activity.nom}</span>
+                                    </div>
+                                </td>
+                                <td>${activity.student_count}</td>
+                                <td>${activity.school_count}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
+                                            <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
+                                        </div>
+                                        <span>${participationRate}%</span>
+                                    </div>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+
+                        document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+                    }
+                } catch (err) {
+                    console.error('Erreur chargement statistiques:', err);
+                }
+            },
+
+            handleAddCategory: async (e) => {
+                e.preventDefault();
+
+                const formData = {
+                    nom: document.getElementById('categoryName').value.trim(),
+                    description: document.getElementById('categoryDescription').value.trim(),
+                    icone: document.getElementById('categoryIcon').value.trim(),
+                    has_subactivities: document.getElementById('hasSubactivities').checked
+                };
+
+                if (!formData.nom || !formData.icone) {
+                    UTILS.showAlert('activityAlert', 'Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('btnAddCategory');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
+                btn.disabled = true;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors de l'ajout de la catégorie");
+
+                    UTILS.showAlert('activityAlert', 'Catégorie ajoutée avec succès');
+                    document.getElementById('formAddCategory').reset();
+                    await ACTIVITIES.loadCategories();
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors de l\'ajout de la catégorie', 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            },
+
+            handleAddSubactivity: async (e) => {
+                e.preventDefault();
+
+                const formData = {
+                    nom: document.getElementById('subactivityName').value.trim(),
+                    description: document.getElementById('subactivityDescription').value.trim(),
+                    icone: document.getElementById('subactivityIcon').value.trim(),
+                    activity_id: document.getElementById('categorySelect').value
+                };
+
+                if (!formData.nom || !formData.icone || !formData.activity_id) {
+                    UTILS.showAlert('activityAlert', 'Veuillez remplir tous les champs obligatoires', 'error');
+                    return;
+                }
+
+                const btn = document.getElementById('btnAddSubactivity');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
+                btn.disabled = true;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities/${formData.activity_id}/subactivities`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors de l'ajout de la sous-activité");
+
+                    UTILS.showAlert('activityAlert', 'Sous-activité ajoutée avec succès');
+                    document.getElementById('formAddSubactivity').reset();
+                    await ACTIVITIES.loadSubactivities();
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors de l\'ajout de la sous-activité', 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            },
+
+            toggleCategoryActif: async (id, actif) => {
+                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette catégorie ?`)) return;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities/${id}/actif`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ actif })
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+
+                    UTILS.showAlert('activityAlert', `Catégorie ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    await ACTIVITIES.loadCategories();
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour', 'error');
+                }
+            },
+
+            toggleSubactivityActif: async (id, actif) => {
+                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette sous-activité ?`)) return;
+
+                try {
+                    const token = DASHBOARD_AUTH.getToken();
+                    const res = await fetch(`${API_BASE}/api/activities/subactivities/${id}/actif`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ actif })
+                    });
+
+                    if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+
+                    UTILS.showAlert('activityAlert', `Sous-activité ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    await ACTIVITIES.loadSubactivities();
+                } catch (err) {
+                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour', 'error');
+                }
+            },
+
+            editCategory: (id) => {
+                UTILS.showAlert('activityAlert', 'Fonctionnalité de modification à implémenter', 'info');
+            },
+
+            editSubactivity: (id) => {
+                UTILS.showAlert('activityAlert', 'Fonctionnalité de modification à implémenter', 'info');
+            }
+        };
+
+        // =============================================
+        // INITIALISATION
+        // =============================================
+        function initializeSettingsPage() {
+            EVENT_HANDLERS.setupNavigation();
+            EVENT_HANDLERS.setupElectionForm();
+            EVENT_HANDLERS.setupSchoolForms();
+            EVENT_HANDLERS.setupActivityForms();
+            EVENT_HANDLERS.setupRealTimeValidation();
+
+            SCHOOLS.loadEcoles();
+            SCHOOLS.loadFilieres();
+            ACTIVITIES.loadActivitySettings();
+
+            ELECTION_FORM.updateNavigationButtons();
+        }
 
         // Vérification de l'authentification au chargement de la page
         document.addEventListener('DOMContentLoaded', function () {
@@ -1527,812 +2855,8 @@
                 return;
             }
 
-            // Si l'utilisateur est authentifié et a le bon rôle, initialiser la page
             initializeSettingsPage();
         });
-
-        function initializeSettingsPage() {
-            // Initialiser les gestionnaires d'événements
-            setupEventListeners();
-
-            // Charger les données nécessaires
-            loadEcoles();
-            loadFilieres();
-        }
-
-        // ------------ UTILS ------------
-        function showLoading() {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) loader.classList.add('active');
-        }
-
-        function hideLoading() {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) loader.classList.remove('active');
-        }
-
-        // Fonction utilitaire pour gérer les event listeners
-        function safeAddListener(id, event, handler) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener(event, handler);
-                return true;
-            }
-            console.error(`Element #${id} not found`);
-            return false;
-        }
-
-        // Fonction pour créer des toasts
-        function showToast(message, type = 'info') {
-            const toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) return;
-
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                ${message}
-            `;
-
-            toastContainer.appendChild(toast);
-
-            // Supprimer le toast après 5 secondes
-            setTimeout(() => {
-                toast.remove();
-            }, 5000);
-        }
-
-        // Variables pour la création d'élection
-        let currentSection = 'config';
-        const sections = ['config', 'candidacy', 'voting', 'results'];
-        let errorTimeouts = {};
-
-        function setupEventListeners() {
-            // Gestion du menu mobile
-            const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-            function toggleSidebar() {
-                sidebar.classList.toggle('active');
-                sidebarOverlay.classList.toggle('active');
-                menuToggle.classList.toggle('active');
-            }
-
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    toggleSidebar();
-                });
-
-                sidebarOverlay.addEventListener('click', function () {
-                    toggleSidebar();
-                });
-
-                // Empêcher la fermeture lors du clic dans la sidebar
-                sidebar.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                });
-            }
-
-            // Gestion du menu utilisateur
-            const userToggle = document.getElementById('userToggle');
-            const userDropdown = document.getElementById('userDropdown');
-
-            if (userToggle && userDropdown) {
-                userToggle.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('active');
-                });
-
-                // Fermer le dropdown en cliquant à l'extérieur
-                document.addEventListener('click', function (e) {
-                    if (userDropdown.classList.contains('active') && !userToggle.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('active');
-                    }
-                });
-            }
-
-            // Gestionnaire de déconnexion
-            safeAddListener('logoutBtn', 'click', function (e) {
-                e.preventDefault();
-                DASHBOARD_AUTH.logout();
-            });
-
-            // Navigation dans les paramètres
-            document.querySelectorAll('.settings-nav-item').forEach(item => {
-                item.addEventListener('click', function () {
-                    const target = this.getAttribute('data-target');
-
-                    // Mettre à jour la navigation
-                    document.querySelectorAll('.settings-nav-item').forEach(i => {
-                        i.classList.remove('active');
-                    });
-                    this.classList.add('active');
-
-                    // Afficher la section correspondante
-                    document.querySelectorAll('.settings-section').forEach(section => {
-                        section.classList.remove('active');
-                    });
-                    document.getElementById(target).classList.add('active');
-                });
-            });
-
-            // Navigation dans le formulaire de création d'élection
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const section = item.getAttribute('data-section');
-                    showSection(section);
-                });
-            });
-
-            // Gestion des boutons de navigation du formulaire
-            safeAddListener("nextBtn", 'click', nextSection);
-            safeAddListener("prevBtn", 'click', prevSection);
-            safeAddListener("electionForm", 'submit', handleElectionSubmit);
-
-            // Gestion des formulaires écoles et filières
-            safeAddListener("formAddEcole", 'submit', handleAddEcole);
-            safeAddListener("formAddFiliere", 'submit', handleAddFiliere);
-
-            // Validation en temps réel
-            setupRealTimeValidation();
-        }
-
-        function setupRealTimeValidation() {
-            // Validation en temps réel pour les champs de texte
-            const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea');
-            textInputs.forEach(input => {
-                input.addEventListener('blur', () => validateField(input));
-            });
-
-            // Validation pour les selects
-            const selects = document.querySelectorAll('select');
-            selects.forEach(select => {
-                select.addEventListener('change', () => validateField(select));
-            });
-
-            // Validation pour les dates
-            const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
-            dateInputs.forEach(input => {
-                input.addEventListener('change', () => validateField(input));
-            });
-        }
-
-        function validateField(field) {
-            const errorElement = document.getElementById(field.id + 'Error');
-
-            // Réinitialiser le message d'erreur
-            if (errorElement) {
-                errorElement.style.display = 'none';
-                errorElement.textContent = '';
-            }
-
-            // Valider selon le type de champ
-            if (field.required && !field.value.trim()) {
-                showFieldError(field.id, 'Ce champ est obligatoire');
-                return false;
-            }
-
-            // Validation des dates
-            if (field.id === 'dateFinCandidature' && field.value) {
-                const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
-                const dateFinCandidature = new Date(field.value);
-
-                if (dateFinCandidature <= dateDebutCandidature) {
-                    showFieldError(field.id, 'La fin des candidatures doit être après le début');
-                    return false;
-                }
-            }
-
-            if (field.id === 'dateDebut' && field.value) {
-                const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
-                const dateDebut = new Date(field.value);
-
-                if (dateDebut <= dateFinCandidature) {
-                    showFieldError(field.id, 'Le début des votes doit être après la fin des candidatures');
-                    return false;
-                }
-            }
-
-            if (field.id === 'dateFin' && field.value) {
-                const dateDebut = new Date(document.getElementById('dateDebut').value);
-                const dateFin = new Date(field.value);
-
-                if (dateFin <= dateDebut) {
-                    showFieldError(field.id, 'La fin des votes doit être après le début');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function showFieldError(fieldId, message) {
-            // Annuler le timeout précédent s'il existe
-            if (errorTimeouts[fieldId]) {
-                clearTimeout(errorTimeouts[fieldId]);
-            }
-
-            const errorElement = document.getElementById(fieldId + 'Error');
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-
-                // Masquer le message après 5 secondes
-                errorTimeouts[fieldId] = setTimeout(() => {
-                    errorElement.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-        // 🔔 Affichage des alertes pour écoles/filières
-        function showSchoolAlert(message, type = 'success') {
-            const alertBox = document.getElementById("schoolAlert");
-            alertBox.textContent = message;
-            alertBox.className = `alert alert-${type}`;
-            alertBox.style.display = "flex";
-            setTimeout(() => {
-                alertBox.style.display = "none";
-            }, 4000);
-        }
-
-        // Chargement des écoles
-        async function loadEcoles() {
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/ecoles?actif=true`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors du chargement des écoles");
-                }
-
-                const ecoles = await res.json();
-
-                const select = document.getElementById('ecoleSelect');
-                const tableBody = document.querySelector('#tableEcoles tbody');
-                select.innerHTML = '<option value="">-- Sélectionner une école --</option>';
-                tableBody.innerHTML = '';
-
-                ecoles.forEach(ecole => {
-                    // Ajout dans le select
-                    const opt = new Option(ecole.nom, ecole.id);
-                    select.add(opt);
-
-                    // Ajout dans le tableau
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${ecole.nom}</td>
-                        <td><span class="status-badge ${ecole.actif ? 'status-active' : 'status-inactive'}">${ecole.actif ? 'Actif' : 'Inactif'}</span></td>
-                        <td class="table-actions">
-                            <button class="btn btn-sm ${ecole.actif ? 'btn-secondary' : 'btn-primary'}" onclick="toggleEcoleActif(${ecole.id}, ${!ecole.actif})">
-                                <i class="fas ${ecole.actif ? 'fa-times' : 'fa-check'}"></i> ${ecole.actif ? 'Désactiver' : 'Activer'}
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (err) {
-                showSchoolAlert('Erreur lors du chargement des écoles', 'error');
-            }
-        }
-
-        // Chargement des filières
-        async function loadFilieres() {
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/filieres?actif=true`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors du chargement des filières");
-                }
-
-                const filieres = await res.json();
-
-                const tableBody = document.querySelector('#tableFilieres tbody');
-                tableBody.innerHTML = '';
-
-                for (const filiere of filieres) {
-                    // Récupérer le nom de l'école liée
-                    const resEcole = await fetch(`${API_BASE}/api/ecoles/${filiere.ecoleId}`, {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    });
-
-                    if (!resEcole.ok) continue;
-
-                    const ecole = await resEcole.json();
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${filiere.nom}</td>
-                        <td>${ecole.nom}</td>
-                        <td><span class="status-badge ${filiere.actif ? 'status-active' : 'status-inactive'}">${filiere.actif ? 'Actif' : 'Inactif'}</span></td>
-                        <td class="table-actions">
-                            <button class="btn btn-sm ${filiere.actif ? 'btn-secondary' : 'btn-primary'}" onclick="toggleFiliereActif(${filiere.id}, ${!filiere.actif})">
-                                <i class="fas ${filiere.actif ? 'fa-times' : 'fa-check'}"></i> ${filiere.actif ? 'Désactiver' : 'Activer'}
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                }
-            } catch (err) {
-                showSchoolAlert('Erreur lors du chargement des filières', 'error');
-            }
-        }
-
-        // Ajout école
-        async function handleAddEcole(e) {
-            e.preventDefault();
-            const nom = document.getElementById('nomEcole').value.trim();
-            const btn = document.getElementById('btnAddEcole');
-
-            if (!nom) return;
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
-            btn.disabled = true;
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/ecoles`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ nom })
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors de l'ajout de l'école");
-                }
-
-                showSchoolAlert('École ajoutée avec succès');
-                document.getElementById('formAddEcole').reset();
-                loadEcoles();
-            } catch (err) {
-                showSchoolAlert('Erreur lors de l\'ajout de l\'école', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // Ajout filière
-        async function handleAddFiliere(e) {
-            e.preventDefault();
-            const nom = document.getElementById('nomFiliere').value.trim();
-            const ecoleId = document.getElementById('ecoleSelect').value;
-            const btn = document.getElementById('btnAddFiliere');
-
-            if (!nom || !ecoleId) return;
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
-            btn.disabled = true;
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/filieres`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ nom, ecoleId })
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors de l'ajout de la filière");
-                }
-
-                showSchoolAlert('Filière ajoutée avec succès');
-                document.getElementById('formAddFiliere').reset();
-                loadFilieres();
-            } catch (err) {
-                showSchoolAlert('Erreur lors de l\'ajout de la filière', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // Activation/désactivation école
-        async function toggleEcoleActif(id, actif) {
-            if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette école ?`)) {
-                return;
-            }
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/ecoles/${id}/actif`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ actif })
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors de la mise à jour de l'école");
-                }
-
-                showSchoolAlert(`École ${actif ? 'activée' : 'désactivée'} avec succès`);
-                loadEcoles();
-            } catch (err) {
-                showSchoolAlert('Erreur lors de la mise à jour de l\'école', 'error');
-            }
-        }
-
-        // Activation/désactivation filière
-        async function toggleFiliereActif(id, actif) {
-            if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette filière ?`)) {
-                return;
-            }
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/filieres/${id}/actif`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ actif })
-                });
-
-                if (!res.ok) {
-                    throw new Error("Erreur lors de la mise à jour de la filière");
-                }
-
-                showSchoolAlert(`Filière ${actif ? 'activée' : 'désactivée'} avec succès`);
-                loadFilieres();
-            } catch (err) {
-                showSchoolAlert('Erreur lors de la mise à jour de la filière', 'error');
-            }
-        }
-
-        async function loadEcolesForSelect(selectId = "ecole") {
-            const select = document.getElementById(selectId);
-            if (!select) return;
-
-            select.innerHTML = '<option value="">-- Chargement... --</option>';
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/ecoles?actif=true`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (res.ok) {
-                    const ecoles = await res.json();
-                    select.innerHTML = '<option value="">-- Choisir --</option>';
-                    ecoles.forEach(ecole => {
-                        const option = document.createElement("option");
-                        option.value = ecole.id;
-                        option.textContent = ecole.nom;
-                        select.appendChild(option);
-                    });
-                }
-            } catch (err) {
-                console.error("Erreur chargement écoles:", err);
-            }
-        }
-
-        async function updateFilieres() {
-            const ecoleId = document.getElementById("ecole").value;
-            const filiereSelect = document.getElementById("filiere");
-
-            if (!ecoleId) {
-                filiereSelect.innerHTML = '<option value="">-- Choisissez d\'abord une école --</option>';
-                return;
-            }
-
-            filiereSelect.innerHTML = '<option value="">-- Chargement... --</option>';
-
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}/api/filieres?ecoleId=${ecoleId}&actif=true`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (res.ok) {
-                    const filieres = await res.json();
-                    filiereSelect.innerHTML = '<option value="">-- Choisir une filière --</option>';
-                    filieres.forEach(filiere => {
-                        const option = document.createElement("option");
-                        option.value = filiere.id;
-                        option.textContent = filiere.nom;
-                        filiereSelect.appendChild(option);
-                    });
-                } else {
-                    filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
-                }
-            } catch (err) {
-                console.error("Erreur chargement filières:", err);
-                filiereSelect.innerHTML = '<option value="">-- Erreur de chargement --</option>';
-            }
-        }
-
-        function renderPhaseFields() {
-            const phase = document.getElementById("niveau").value;
-            const fields = document.getElementById("phaseFields");
-            if (!fields) return;
-
-            fields.innerHTML = "";
-
-            if (phase === "PHASE1") {
-                fields.innerHTML = `
-            <div class="form-group">
-                <label>École :</label>
-                <select id="ecole" name="ecoleId" required onchange="updateFilieres()">
-                    <option value="">-- Chargement... --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="filiere">Filière :</label>
-                <select id="filiere" name="filiereId" required>
-                    <option value="">-- Choisissez d'abord une école --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="annee">Année :</label>
-                <select id="annee" name="annee" required>
-                    <option value="">-- Choisir --</option>
-                    <option value="1">Licence 1</option>
-                    <option value="2">Licence 2</option>
-                    <option value="3">Licence 3</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="responsableType">Type de responsable :</label>
-                <select id="responsableType" name="responsableType" required>
-                    <option value="">-- Choisir --</option>
-                    <option value="PREMIER">Premier Responsable</option>
-                    <option value="DEUXIEME">Deuxième Responsable</option>
-                </select>
-            </div>
-        `;
-                loadEcolesForSelect("ecole");
-            } else if (phase === "PHASE2") {
-                fields.innerHTML = `
-                    <div class="form-group">
-                        <label>École :</label>
-                        <select id="ecole" name="ecoleId" required>
-                            <option value="">-- Chargement... --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="delegueType">Type de délégué :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier Délégué (L3)</option>
-                            <option value="DEUXIEME">Deuxième Délégué (L2)</option>
-                        </select>
-                    </div>
-                `;
-                loadEcolesForSelect("ecole");
-            } else if (phase === "PHASE3") {
-                fields.innerHTML = `
-                    <div class="form-group">
-                        <label for="delegueType">Type de délégué :</label>
-                        <select id="delegueType" name="delegueType" required>
-                            <option value="">-- Choisir --</option>
-                            <option value="PREMIER">Premier Délégué Universitaire</option>
-                            <option value="DEUXIEME">Deuxième Délégué Universitaire</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tour">Nombre de tours :</label>
-                        <select id="tour" name="tour" required>
-                            <option value="1">1 tour</option>
-                            <option value="2">2 tours</option>
-                        </select>
-                    </div>
-                `;
-            }
-        }
-
-        function showSection(section) {
-            document.querySelectorAll('.form-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-
-            document.getElementById(`${section}-section`).classList.add('active');
-
-            document.querySelectorAll('.timeline-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.querySelector(`.timeline-item[data-section="${section}"]`).classList.add('active');
-
-            currentSection = section;
-            updateNavigationButtons();
-        }
-
-        function nextSection() {
-            const currentIndex = sections.indexOf(currentSection);
-            if (currentIndex < sections.length - 1) {
-                showSection(sections[currentIndex + 1]);
-            }
-        }
-
-        function prevSection() {
-            const currentIndex = sections.indexOf(currentSection);
-            if (currentIndex > 0) {
-                showSection(sections[currentIndex - 1]);
-            }
-        }
-
-        function updateNavigationButtons() {
-            const currentIndex = sections.indexOf(currentSection);
-
-            document.getElementById("prevBtn").style.display = currentIndex > 0 ? 'flex' : 'none';
-            document.getElementById("nextBtn").style.display = currentIndex < sections.length - 1 ? 'flex' : 'none';
-            document.getElementById("submitBtn").style.display = currentIndex < sections.length - 1 ? 'none' : 'flex';
-        }
-
-        async function handleElectionSubmit(e) {
-            e.preventDefault();
-
-            // Masquer tous les messages d'erreur de champ
-            document.querySelectorAll('.field-error').forEach(el => {
-                el.style.display = 'none';
-            });
-
-            // Valider tous les champs
-            let isValid = true;
-            const requiredFields = [
-                'titre', 'niveau', 'dateDebutCandidature',
-                'dateFinCandidature', 'dateDebut', 'dateFin'
-            ];
-
-            requiredFields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field && field.required && !field.value.trim()) {
-                    showFieldError(fieldId, 'Ce champ est obligatoire');
-                    isValid = false;
-                }
-            });
-
-            // Validation des dates
-            const dateDebutCandidature = new Date(document.getElementById('dateDebutCandidature').value);
-            const dateFinCandidature = new Date(document.getElementById('dateFinCandidature').value);
-            const dateDebut = new Date(document.getElementById('dateDebut').value);
-            const dateFin = new Date(document.getElementById('dateFin').value);
-
-            if (dateFinCandidature <= dateDebutCandidature) {
-                showFieldError('dateFinCandidature', 'La fin des candidatures doit être après le début');
-                isValid = false;
-            }
-
-            if (dateDebut <= dateFinCandidature) {
-                showFieldError('dateDebut', 'Le début des votes doit être après la fin des candidatures');
-                isValid = false;
-            }
-
-            if (dateFin <= dateDebut) {
-                showFieldError('dateFin', 'La fin des votes doit être après le début');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                showMessage('error', 'Veuillez corriger les erreurs dans le formulaire');
-                return;
-            }
-
-            const electionId = document.getElementById("electionId").value;
-            const isEdit = !!electionId;
-
-            const candidacyStartISO = new Date(document.getElementById("dateDebutCandidature").value).toISOString();
-            const candidacyEndISO = new Date(document.getElementById("dateFinCandidature").value).toISOString();
-            const votingStartISO = new Date(document.getElementById("dateDebut").value).toISOString();
-            const votingEndISO = new Date(document.getElementById("dateFin").value).toISOString();
-
-            // Phase sélectionnée
-            const niveau = document.getElementById("niveau").value;
-
-            // Déterminer le type en fonction de la phase
-            let type = "SALLE";
-            if (niveau === "PHASE2") type = "ECOLE";
-            if (niveau === "PHASE3") type = "UNIVERSITE";
-
-            // Construction des données de base
-            const data = {
-                titre: document.getElementById("titre").value,
-                description: document.getElementById("description").value,
-                dateDebutCandidature: candidacyStartISO,
-                dateFinCandidature: candidacyEndISO,
-                dateDebut: votingStartISO,
-                dateFin: votingEndISO,
-                isActive: true,
-                niveau: niveau,
-                type: type,
-                resultsVisibility: document.getElementById("resultsVisibility").value || "IMMEDIATE"
-            };
-
-            // Champs spécifiques selon la phase
-            if (niveau === "PHASE1") {
-                data.filiereId = document.getElementById("filiere").value || 0;
-                data.annee = parseInt(document.getElementById("annee").value) || 0;
-                data.ecoleId = document.getElementById("ecole").value || 0;
-                data.responsableType = document.getElementById("responsableType").value;
-            } else if (niveau === "PHASE2") {
-                data.delegueType = document.getElementById("delegueType").value;
-                data.ecoleId = document.getElementById("ecole").value || 0;
-            } else if (niveau === "PHASE3") {
-                data.delegueType = document.getElementById("delegueType").value;
-                data.tour = parseInt(document.getElementById("tour").value) || 1;
-            }
-
-            try {
-                showLoading();
-                const token = getToken();
-                const url = isEdit
-                    ? `${API_BASE}${ELECTIONS_ENDPOINT}/${electionId}`
-                    : `${API_BASE}${ELECTIONS_ENDPOINT}`;
-
-                const method = isEdit ? 'PUT' : 'POST';
-
-                const res = await fetch(url, {
-                    method: method,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    throw new Error(errorData.error || `Erreur ${isEdit ? 'modification' : 'création'}`);
-                }
-
-                showToast(`Élection ${isEdit ? 'modifiée' : 'créée'} avec succès !`, 'success');
-                resetElectionForm();
-            } catch (err) {
-                showToast(err.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function resetElectionForm() {
-            document.getElementById("electionForm").reset();
-            document.getElementById("electionId").value = "";
-            document.getElementById("phaseFields").innerHTML = "";
-            showSection('config');
-        }
-
-        function showMessage(type, message) {
-            const messageEl = document.getElementById("electionFormMessage");
-            if (!messageEl) return;
-
-            messageEl.textContent = message;
-            messageEl.className = `alert alert-${type}`;
-            messageEl.style.display = "block";
-
-            setTimeout(() => {
-                messageEl.style.display = "none";
-            }, 5000);
-        }
-
-        // Initial navigation buttons
-        updateNavigationButtons();
     </script>
 </body>
 
