@@ -1188,10 +1188,11 @@
         // Configuration des endpoints API
         const API_BASE = CONFIG.BASE_URL;
         const ADMIN_ME_ENDPOINT = '/api/admin/me';
-        const ELECTION_LIST_ENDPOINT = '/api/elections';
-        const ELECTION_RESULTS_ENDPOINT = '/api/elections/results';
-        const PUBLISH_RESULTS_ENDPOINT = '/api/elections/publish';
-        const UNPUBLISH_RESULTS_ENDPOINT = '/api/elections/unpublish';
+        const ELECTION_LIST_ENDPOINT = '/api/votes/elections/completed';
+        const ELECTION_RESULTS_ENDPOINT = '/api/votes/results-detailed';
+        const PUBLISH_RESULTS_ENDPOINT = '/api/votes/publish';
+        const UNPUBLISH_RESULTS_ENDPOINT = '/api/votes/unpublish';
+        const ELECTION_STATS_ENDPOINT = '/api/votes/elections/stats';
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1337,19 +1338,17 @@
                 const result = await response.json();
 
                 // Vérifier le format de la réponse
-                if (result.success && result.data) {
+                if (result.data) {
                     elections = Array.isArray(result.data) ? result.data : [];
                     populateElectionSelect();
                 } else {
                     console.warn('Format de réponse inattendu:', result);
                     elections = [];
-                    // Charger des données de démonstration
                     loadDemoElections();
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement des élections:', error);
                 showToast('Erreur lors du chargement des élections', 'error');
-                // Charger des données de démonstration en cas d'erreur
                 loadDemoElections();
             } finally {
                 hideLoading();
@@ -1564,16 +1563,29 @@
 
             if (!statusDot || !statusText || !publishBtn) return;
 
-            if (electionResults.published) {
+            const isAutomatic = currentElection.resultsVisibility === 'automatique';
+            const isPublished = electionResults.published;
+
+            if (isAutomatic && isPublished) {
                 statusDot.className = 'status-dot status-published';
-                statusText.textContent = 'Résultats publiés';
+                statusText.textContent = 'Résultats publiés (automatique)';
+                publishBtn.style.display = 'none'; // Cacher le bouton pour les automatiques
+            } else if (isAutomatic && !isPublished) {
+                statusDot.className = 'status-dot status-hidden';
+                statusText.textContent = 'Publication automatique à la fin';
+                publishBtn.style.display = 'none';
+            } else if (!isAutomatic && isPublished) {
+                statusDot.className = 'status-dot status-published';
+                statusText.textContent = 'Résultats publiés (manuel)';
                 publishBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Masquer les résultats';
                 publishBtn.onclick = unpublishResults;
+                publishBtn.style.display = 'block';
             } else {
                 statusDot.className = 'status-dot status-draft';
-                statusText.textContent = 'Résultats non publiés';
+                statusText.textContent = 'Résultats non publiés (attente manuelle)';
                 publishBtn.innerHTML = '<i class="fas fa-bullhorn"></i> Publier les résultats';
                 publishBtn.onclick = publishResults;
+                publishBtn.style.display = 'block';
             }
         }
 
