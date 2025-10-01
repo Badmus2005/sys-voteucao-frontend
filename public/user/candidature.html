@@ -1614,26 +1614,36 @@
 
                 // Mettre à jour l'avatar dans le header
                 const headerAvatar = document.getElementById('userAvatar');
+                const userName = document.getElementById('userName');
 
-                if (userData && userData.photoUrl) {
-                    // Construire l'URL complète de la photo
-                    const photoUrl = userData.photoUrl.startsWith('http')
-                        ? userData.photoUrl
-                        : `${API_URL}${userData.photoUrl}`;
+                if (userData) {
+                    // Mettre à jour le nom
+                    if (userData.prenom) {
+                        userName.textContent = userData.prenom + ' ' + (userData.nom || '');
+                    }
 
-                    if (headerAvatar) {
-                        headerAvatar.src = photoUrl;
+                    // Mettre à jour la photo
+                    if (userData.photoUrl) {
+                        // Construire l'URL complète de la photo
+                        const photoUrl = userData.photoUrl.startsWith('http')
+                            ? userData.photoUrl
+                            : `${API_URL}${userData.photoUrl}`;
 
-                        // Gérer les erreurs de chargement d'image
-                        headerAvatar.onerror = function () {
-                            this.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
-                        };
+                        if (headerAvatar) {
+                            headerAvatar.src = photoUrl;
+
+                            // Gérer les erreurs de chargement d'image
+                            headerAvatar.onerror = function () {
+                                this.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                            };
+                        }
                     }
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement de la photo de profil:', error);
             }
         }
+
         // Charger le profil utilisateur
         async function loadUserProfile() {
             try {
@@ -1651,7 +1661,6 @@
                 console.error('Erreur chargement profil:', error);
             }
         }
-
         // Mettre à jour les détails de l'élection dans l'interface
         function updateElectionDetails(election) {
             document.getElementById('electionTitle').textContent = `Candidature: ${election.titre}`;
