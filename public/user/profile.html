@@ -1307,24 +1307,43 @@
                     body: JSON.stringify(data)
                 });
             },
-
             async uploadAvatar(formData) {
                 const url = `${API_URL}/api/upload/image`;
 
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${TOKEN}`
-                    },
-                    body: formData
-                });
+                console.log('Starting avatar upload...');
+                console.log('FormData entries:');
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
+                // Debug: afficher le contenu du FormData
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ', pair[1]);
                 }
 
-                return await response.json();
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${TOKEN}`
+                            // NE PAS mettre 'Content-Type' pour FormData
+                        },
+                        body: formData
+                    });
+
+                    console.log('Upload response status:', response.status);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Upload error response:', errorText);
+                        throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('Upload successful:', result);
+                    return result;
+
+                } catch (error) {
+                    console.error('Upload fetch error:', error);
+                    throw error;
+                }
             }
         };
 
@@ -1889,6 +1908,12 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            console.log('File selected:', {
+                name: file.name,
+                type: file.type,
+                size: file.size
+            });
+
             // Vérifier la taille du fichier (max 2MB)
             if (file.size > 2 * 1024 * 1024) {
                 showToast('La taille du fichier ne doit pas dépasser 2MB', 'error');
@@ -1911,17 +1936,27 @@
             try {
                 showLoading();
                 const formData = new FormData();
-                formData.append('image', file);
-                formData.append('userId', window.userData.id);
+                formData.append('image', file); // Le nom 'image' doit correspondre à upload.single('image')
 
+                // Ajouter l'ID utilisateur si nécessaire
+                if (window.userData && window.userData.id) {
+                    formData.append('userId', window.userData.id);
+                }
+
+                console.log('Sending upload request...');
                 const response = await UserService.uploadAvatar(formData);
 
-                if (response.success || response.url) {
-                    const avatarUrl = response.url || response.avatarUrl;
+                console.log('Upload response:', response);
 
-                    // Mettre à jour les avatars
-                    document.getElementById('profile-avatar-view').src = avatarUrl;
-                    document.getElementById('userAvatar').src = avatarUrl;
+                if (response.success && response.url) {
+                    const avatarUrl = response.url;
+
+                    // Mettre à jour les avatars avec un timestamp pour éviter le cache
+                    const timestamp = new Date().getTime();
+                    const avatarUrlWithTimestamp = `${avatarUrl}?t=${timestamp}`;
+
+                    document.getElementById('profile-avatar-view').src = avatarUrlWithTimestamp;
+                    document.getElementById('userAvatar').src = avatarUrlWithTimestamp;
 
                     // Mettre à jour les données utilisateur
                     window.userData.photoUrl = avatarUrl;
@@ -1936,7 +1971,7 @@
                     throw new Error(response.message || 'Erreur lors du changement de photo');
                 }
             } catch (error) {
-                console.error('Erreur upload avatar:', error);
+                console.error('Upload avatar error:', error);
 
                 let errorMessage = 'Erreur lors du changement de photo';
                 if (error.message.includes('413')) {
@@ -1954,7 +1989,6 @@
                 e.target.value = '';
             }
         }
-
         // Utilitaires
         function showLoading() {
             document.getElementById('loading-overlay').style.display = 'flex';
