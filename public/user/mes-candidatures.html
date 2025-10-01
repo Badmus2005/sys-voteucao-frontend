@@ -1629,7 +1629,6 @@
             },
 
             async cancelCandidature(id) {
-                // CORRECTION : Vérifier l'ID avant de faire l'appel
                 if (!id || id === 'undefined') {
                     throw new Error('ID de candidature invalide');
                 }
@@ -1639,7 +1638,6 @@
             },
 
             async updateCandidature(id, data) {
-                // CORRECTION : Vérifier l'ID avant de faire l'appel
                 if (!id || id === 'undefined') {
                     throw new Error('ID de candidature invalide');
                 }
@@ -1650,7 +1648,6 @@
             },
 
             async getCandidatureDetails(id) {
-                // CORRECTION : Vérifier l'ID avant de faire l'appel
                 if (!id || id === 'undefined') {
                     throw new Error('ID de candidature invalide');
                 }
@@ -1658,47 +1655,12 @@
             },
 
             async getElectionDetails(electionId) {
-                // CORRECTION : Vérifier l'ID avant de faire l'appel
                 if (!electionId || electionId === 'undefined') {
                     throw new Error('ID d\'élection invalide');
                 }
                 return await apiCall(`/elections/${electionId}`);
             }
         };
-
-        async function loadElectionsDetails() {
-            showLoading();
-
-            try {
-                // Pour chaque candidature, récupérer les détails de l'élection
-                for (let i = 0; i < allCandidatures.length; i++) {
-                    const candidature = allCandidatures[i];
-
-                    // Vérifier si l'ID d'élection existe
-                    if (candidature.electionId) {
-                        try {
-                            const electionResponse = await CandidatureService.getElectionDetails(candidature.electionId);
-                            if (electionResponse && electionResponse.success) {
-                                // Ajouter les données de l'élection à la candidature
-                                allCandidatures[i].election = electionResponse.election;
-                                console.log(`Détails élection chargés pour ${candidature.electionId}:`, electionResponse.election);
-                            }
-                        } catch (error) {
-                            console.warn(`Impossible de charger les détails de l'élection ${candidature.electionId}:`, error);
-                            // Créer un objet élection vide pour éviter les erreurs
-                            allCandidatures[i].election = {};
-                        }
-                    } else {
-                        console.warn("Candidature sans electionId:", candidature);
-                        allCandidatures[i].election = {};
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement des détails des élections:', error);
-            } finally {
-                hideLoading();
-            }
-        }
 
         // Fonctions d'affichage
         function showLoading() {
@@ -1880,15 +1842,18 @@
                     allCandidatures = response.candidatures;
                     console.log("Candidatures brutes:", allCandidatures);
 
-                    // CORRECTION : Afficher la structure complète de chaque candidature
+                    // Afficher la structure complète de chaque candidature
                     allCandidatures.forEach((candidature, index) => {
                         console.log(`Candidature ${index}:`, candidature);
-                        console.log(`ID de la candidature:`, candidature.id);
-                        console.log(`ID de l'élection:`, candidature.electionId);
-                        console.log(`Données élection:`, candidature.election);
+                        console.log(`Candidature ID:`, candidature.candidatureId);
+                        console.log(`ID standard:`, candidature.id);
+                        console.log(`Election ID:`, candidature.electionId);
+                        console.log(`Statut:`, candidature.statut);
+                        console.log(`Slogan:`, candidature.slogan);
+                        console.log(`---`);
                     });
 
-                    // CORRECTION : Essayer de récupérer les données d'élection si elles existent
+                    // Essayer de récupérer les données d'élection si elles existent
                     await tryLoadElectionsDetails();
 
                     filteredCandidatures = [...allCandidatures];
@@ -1912,27 +1877,52 @@
             for (let i = 0; i < allCandidatures.length; i++) {
                 const candidature = allCandidatures[i];
 
-                // CORRECTION : Vérifier que l'ID existe et n'est pas undefined
-                if (candidature.electionId && candidature.id) {
+                // CORRECTION : Utiliser candidature.candidatureId au lieu de candidature.id
+                const candidatureId = candidature.candidatureId || candidature.id;
+
+                if (candidature.electionId && candidatureId) {
                     try {
                         // Essayer de récupérer les détails de l'élection
                         const electionResponse = await CandidatureService.getElectionDetails(candidature.electionId);
-                        console.log(`Réponse élection pour electionId ${candidature.electionId}:`, electionResponse);
-                        if (electionResponse && electionResponse.success && electionResponse.election) {
-                            allCandidatures[i].election = electionResponse.election;
-                            console.log(`✅ Détails élection chargés pour electionId: ${candidature.electionId}`, electionResponse.election);
+                        console.log("Réponse élection:", electionResponse);
+
+                        // CORRECTION : Votre API renvoie { data: election } au lieu de { success: true, election: ... }
+                        if (electionResponse && electionResponse.data) {
+                            allCandidatures[i].election = electionResponse.data;
+                            console.log(`✅ Détails élection chargés pour electionId: ${candidature.electionId}`, electionResponse.data);
+                        } else {
+                            console.warn(`❌ Format de réponse inattendu pour l'élection ${candidature.electionId}:`, electionResponse);
+                            allCandidatures[i].election = createDefaultElectionData(candidature.electionId);
                         }
                     } catch (error) {
                         console.warn(`❌ Impossible de charger les détails de l'élection ${candidature.electionId}:`, error);
-                        // Créer des données d'élection par défaut
                         allCandidatures[i].election = createDefaultElectionData(candidature.electionId);
                     }
                 } else {
-                    console.warn(`⚠️ Candidature sans ID valide - ID: ${candidature.id}, ElectionID: ${candidature.electionId}`);
-                    // Créer des données d'élection par défaut
+                    console.warn(`⚠️ Candidature sans ID valide - CandidatureID: ${candidature.candidatureId}, ElectionID: ${candidature.electionId}`);
                     allCandidatures[i].election = createDefaultElectionData(candidature.electionId);
                 }
+
+                // CORRECTION : S'assurer que l'ID de la candidature est défini
+                if (!allCandidatures[i].id && allCandidatures[i].candidatureId) {
+                    allCandidatures[i].id = allCandidatures[i].candidatureId;
+                }
             }
+        }
+
+        // NOUVELLE FONCTION : Créer des données d'élection par défaut
+        function createDefaultElectionData(electionId) {
+            const electionTypes = ['SALLE', 'ECOLE', 'UNIVERSITE'];
+            const defaultType = electionTypes[Math.floor(Math.random() * electionTypes.length)];
+
+            return {
+                titre: `Élection ${electionId || 'Non spécifiée'}`,
+                type: defaultType,
+                ecole: 'UCAO',
+                filiere: 'Informatique',
+                annee: '2024',
+                description: `Élection pour le poste de ${ElectionService.getElectionTypeLabel(defaultType)}`
+            };
         }
 
         // Afficher les candidatures avec plus d'informations
@@ -1946,12 +1936,10 @@
             }
 
             container.innerHTML = candidatures.map(candidature => {
-                // CORRECTION RENFORCÉE : Gestion robuste des données
+                // CORRECTION : Utiliser candidatureId comme ID principal
+                const candidatureId = candidature.candidatureId || candidature.id || 'id-indefini';
                 const election = candidature.election || createDefaultElectionData(candidature.electionId);
                 const statut = candidature.statut || 'en_attente';
-
-                // CORRECTION : Vérifier que l'ID existe avant de l'utiliser
-                const candidatureId = candidature.id || 'id-indefini';
 
                 const electionTitre = election.titre || `Élection ${candidature.electionId || 'Non spécifiée'}`;
                 const electionType = election.type || 'Type non spécifié';
@@ -1959,113 +1947,105 @@
                 const filiere = election.filiere || null;
                 const annee = election.annee || null;
 
-                console.log("✅ Affichage candidature valide:", {
-                    id: candidatureId,
+                console.log("✅ Affichage candidature:", {
+                    candidatureId: candidatureId,
                     electionId: candidature.electionId,
                     election: election
                 });
 
                 return `
-<div class="candidature-card" data-candidature-id="${candidatureId}">
-    <div class="candidature-card-header">
-        <div class="candidature-info">
-            <h3 class="candidature-card-title">${electionTitre}</h3>
-            <div class="candidature-card-subtitle">
-                ${ElectionService.getElectionTypeLabel(electionType)} •
-                ${ecoleNom}
+    <div class="candidature-card" data-candidature-id="${candidatureId}">
+        <div class="candidature-card-header">
+            <div class="candidature-info">
+                <h3 class="candidature-card-title">${electionTitre}</h3>
+                <div class="candidature-card-subtitle">
+                    ${ElectionService.getElectionTypeLabel(electionType)} •
+                    ${ecoleNom}
+                </div>
+                ${filiere ? `<div class="candidature-card-subtitle">Filière: ${filiere}</div>` : ''}
             </div>
-            ${filiere ? `<div class="candidature-card-subtitle">Filière: ${filiere}</div>` : ''}
+            <span class="candidature-status status-${statut.toLowerCase()}">
+                ${getStatusText(statut)}
+            </span>
         </div>
-        <span class="candidature-status status-${statut.toLowerCase()}">
-            ${getStatusText(statut)}
-        </span>
+    
+        <div class="candidature-card-content">
+            <div class="candidature-card-meta">
+                <div class="meta-item">
+                    <i class="fas fa-university"></i>
+                    <strong>École:</strong> ${ecoleNom}
+                </div>
+                ${filiere ? `
+                <div class="meta-item">
+                    <i class="fas fa-layer-group"></i>
+                    <strong>Filière:</strong> ${filiere}
+                </div>
+                ` : ''}
+                ${annee ? `
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <strong>Année:</strong> ${annee}
+                </div>
+                ` : ''}
+                <div class="meta-item">
+                    <i class="fas fa-calendar-days"></i>
+                    <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
+                </div>
+                ${candidature.electionId ? `
+                <div class="meta-item">
+                    <i class="fas fa-hashtag"></i>
+                    <strong>ID Élection:</strong> ${candidature.electionId}
+                </div>
+                ` : ''}
+                ${candidature.candidatureId ? `
+                <div class="meta-item">
+                    <i class="fas fa-hashtag"></i>
+                    <strong>ID Candidature:</strong> ${candidature.candidatureId}
+                </div>
+                ` : ''}
+            </div>
+    
+            ${candidature.slogan ? `
+            <div class="candidature-card-slogan">
+                <i class="fas fa-quote-left"></i>
+                "${candidature.slogan}"
+            </div>
+            ` : ''}
+    
+            <div class="candidature-card-actions">
+                ${candidatureId && candidatureId !== 'id-indefini' ? `
+                <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidatureId}">
+                    <i class="fas fa-eye"></i>
+                    Voir détails
+                </button>
+                ` : `
+                <button class="btn btn-secondary" disabled>
+                    <i class="fas fa-eye"></i>
+                    Détails indisponibles
+                </button>
+                `}
+    
+                ${(candidatureId && candidatureId !== 'id-indefini' && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
+                <button class="btn btn-warning edit-btn" data-candidature-id="${candidatureId}">
+                    <i class="fas fa-pen-to-square"></i>
+                    Modifier
+                </button>
+                ` : ''}
+    
+                ${(candidatureId && candidatureId !== 'id-indefini' && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
+                <button class="btn btn-danger cancel-btn" data-candidature-id="${candidatureId}">
+                    <i class="fas fa-trash"></i>
+                    Annuler
+                </button>
+                ` : ''}
+            </div>
+        </div>
     </div>
-
-    <div class="candidature-card-content">
-        <div class="candidature-card-meta">
-            <div class="meta-item">
-                <i class="fas fa-university"></i>
-                <strong>École:</strong> ${ecoleNom}
-            </div>
-            ${filiere ? `
-            <div class="meta-item">
-                <i class="fas fa-layer-group"></i>
-                <strong>Filière:</strong> ${filiere}
-            </div>
-            ` : ''}
-            ${annee ? `
-            <div class="meta-item">
-                <i class="fas fa-calendar"></i>
-                <strong>Année:</strong> ${annee}
-            </div>
-            ` : ''}
-            <div class="meta-item">
-                <i class="fas fa-calendar-days"></i>
-                <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
-            </div>
-            ${candidature.electionId ? `
-            <div class="meta-item">
-                <i class="fas fa-hashtag"></i>
-                <strong>ID Élection:</strong> ${candidature.electionId}
-            </div>
-            ` : ''}
-        </div>
-
-        ${candidature.slogan ? `
-        <div class="candidature-card-slogan">
-            <i class="fas fa-quote-left"></i>
-            "${candidature.slogan}"
-        </div>
-        ` : ''}
-
-        <div class="candidature-card-actions">
-            ${candidature.id ? `
-            <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
-                <i class="fas fa-eye"></i>
-                Voir détails
-            </button>
-            ` : `
-            <button class="btn btn-secondary" disabled>
-                <i class="fas fa-eye"></i>
-                Détails indisponibles
-            </button>
-            `}
-
-            ${(candidature.id && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
-            <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
-                <i class="fas fa-pen-to-square"></i>
-                Modifier
-            </button>
-            ` : ''}
-
-            ${(candidature.id && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
-            <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
-                <i class="fas fa-trash"></i>
-                Annuler
-            </button>
-            ` : ''}
-        </div>
-    </div>
-</div>
-`;
+    `;
             }).join('');
 
             // Ajouter les événements
             attachCandidatureEvents();
-        }
-
-        function createDefaultElectionData(electionId) {
-            const electionTypes = ['SALLE', 'ECOLE', 'UNIVERSITE'];
-            const defaultType = electionTypes[Math.floor(Math.random() * electionTypes.length)];
-
-            return {
-                titre: `Élection ${electionId || 'Non spécifiée'}`,
-                type: defaultType,
-                ecole: 'UCAO',
-                filiere: 'Informatique',
-                annee: '2024',
-                description: `Élection pour le poste de ${ElectionService.getElectionTypeLabel(defaultType)}`
-            };
         }
 
         // Afficher les détails d'une candidature dans la modale
@@ -2094,81 +2074,81 @@
 
                     const modalBody = document.getElementById('detailModalBody');
                     modalBody.innerHTML = `
-<div class="detail-section">
-    <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
-    <div class="info-grid">
-        <div class="info-item">
-            <span class="info-label">Élection</span>
-            <span class="info-value">${electionTitre}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Type</span>
-            <span class="info-value">${ElectionService.getElectionTypeLabel(electionType)}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">École</span>
-            <span class="info-value">${ecoleNom}</span>
-        </div>
-        ${filiere ? `
-        <div class="info-item">
-            <span class="info-label">Filière</span>
-            <span class="info-value">${filiere}</span>
-        </div>
-        ` : ''}
-        ${annee ? `
-        <div class="info-item">
-            <span class="info-label">Année</span>
-            <span class="info-value">${annee}</span>
-        </div>
-        ` : ''}
-        ${candidature.electionId ? `
-        <div class="info-item">
-            <span class="info-label">ID Élection</span>
-            <span class="info-value">${candidature.electionId}</span>
-        </div>
-        ` : ''}
-    </div>
-</div>
-
-<div class="detail-section">
-    <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
-    <div class="info-grid">
-        <div class="info-item">
-            <span class="info-label">Date de soumission</span>
-            <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
-        </div>
-        <div class="info-item">
-            <span class="info-label">Dernière modification</span>
-            <span class="info-value">${formatDate(candidature.updatedAt)}</span>
+    <div class="detail-section">
+        <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Élection</span>
+                <span class="info-value">${electionTitre}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Type</span>
+                <span class="info-value">${ElectionService.getElectionTypeLabel(electionType)}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">École</span>
+                <span class="info-value">${ecoleNom}</span>
+            </div>
+            ${filiere ? `
+            <div class="info-item">
+                <span class="info-label">Filière</span>
+                <span class="info-value">${filiere}</span>
+            </div>
+            ` : ''}
+            ${annee ? `
+            <div class="info-item">
+                <span class="info-label">Année</span>
+                <span class="info-value">${annee}</span>
+            </div>
+            ` : ''}
+            ${candidature.electionId ? `
+            <div class="info-item">
+                <span class="info-label">ID Élection</span>
+                <span class="info-value">${candidature.electionId}</span>
+            </div>
+            ` : ''}
         </div>
     </div>
-</div>
-
-<div class="detail-section">
-    <h3><i class="fas fa-chart-bar"></i> Statut</h3>
-    <div class="candidature-status status-${statut.toLowerCase()}">
-        ${getStatusText(statut)}
+    
+    <div class="detail-section">
+        <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Date de soumission</span>
+                <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Dernière modification</span>
+                <span class="info-value">${formatDate(candidature.updatedAt)}</span>
+            </div>
+        </div>
     </div>
-</div>
-
-${candidature.slogan ? `
-<div class="detail-section">
-    <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
-    <div class="slogan-display">
-        "${candidature.slogan}"
+    
+    <div class="detail-section">
+        <h3><i class="fas fa-chart-bar"></i> Statut</h3>
+        <div class="candidature-status status-${statut.toLowerCase()}">
+            ${getStatusText(statut)}
+        </div>
     </div>
-</div>
-` : ''}
-
-${candidature.programme ? `
-<div class="detail-section">
-    <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
-    <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
-        ${candidature.programme}
+    
+    ${candidature.slogan ? `
+    <div class="detail-section">
+        <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
+        <div class="slogan-display">
+            "${candidature.slogan}"
+        </div>
     </div>
-</div>
-` : ''}
-`;
+    ` : ''}
+    
+    ${candidature.programme ? `
+    <div class="detail-section">
+        <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
+        <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
+            ${candidature.programme}
+        </div>
+    </div>
+    ` : ''}
+    `;
 
                     openModal('detailModal');
                 } else {
@@ -2181,9 +2161,13 @@ ${candidature.programme ? `
                 hideLoading();
             }
         }
+
         // Ouvrir la modale d'édition
         function openEditModal(candidatureId) {
-            const candidature = allCandidatures.find(c => c.id == candidatureId);
+            const candidature = allCandidatures.find(c =>
+                (c.candidatureId && c.candidatureId == candidatureId) ||
+                (c.id && c.id == candidatureId)
+            );
 
             if (candidature) {
                 currentEditingCandidature = candidature;
@@ -2207,13 +2191,16 @@ ${candidature.programme ? `
 
             try {
                 const response = await CandidatureService.updateCandidature(
-                    currentEditingCandidature.id,
+                    currentEditingCandidature.candidatureId || currentEditingCandidature.id,
                     { slogan, programme }
                 );
 
                 if (response && response.success) {
                     // Mettre à jour localement
-                    const index = allCandidatures.findIndex(c => c.id === currentEditingCandidature.id);
+                    const index = allCandidatures.findIndex(c =>
+                        (c.candidatureId && c.candidatureId === currentEditingCandidature.candidatureId) ||
+                        (c.id && c.id === currentEditingCandidature.id)
+                    );
                     if (index !== -1) {
                         allCandidatures[index].slogan = slogan;
                         allCandidatures[index].programme = programme;
@@ -2323,7 +2310,10 @@ ${candidature.programme ? `
 
                     if (response && response.success) {
                         // Mettre à jour localement
-                        allCandidatures = allCandidatures.filter(c => c.id != candidatureId);
+                        allCandidatures = allCandidatures.filter(c =>
+                            (c.candidatureId && c.candidatureId != candidatureId) ||
+                            (c.id && c.id != candidatureId)
+                        );
                         filteredCandidatures = [...allCandidatures];
 
                         displayCandidatures(filteredCandidatures);
@@ -2407,22 +2397,22 @@ ${candidature.programme ? `
             function displayNotifications() {
                 const notifications = notificationService.getNotifications();
                 notificationsList.innerHTML = notifications.length ? notifications.map(notif => `
-    <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-        <div class="notification-icon">
-            <i class="${getNotificationIcon(notif.category)}"></i>
-        </div>
-        <div class="notification-content">
-            <div class="notification-title">${notif.title}</div>
-            <div class="notification-message">${notif.message}</div>
-            <div class="notification-meta">
-                <span class="notification-time">${formatNotificationDate(notif.timestamp)}</span>
-                <span class="notification-category">${notif.category}</span>
+        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+            <div class="notification-icon">
+                <i class="${getNotificationIcon(notif.category)}"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">${notif.title}</div>
+                <div class="notification-message">${notif.message}</div>
+                <div class="notification-meta">
+                    <span class="notification-time">${formatNotificationDate(notif.timestamp)}</span>
+                    <span class="notification-category">${notif.category}</span>
+                </div>
             </div>
         </div>
-    </div>
-    `).join('') : `<div class="empty-state" style="padding: 2rem; text-align: center;"><i class="fas fa-bell-slash"></i>
-        <p>Aucune notification</p>
-    </div>`;
+        `).join('') : `<div class="empty-state" style="padding: 2rem; text-align: center;"><i class="fas fa-bell-slash"></i>
+            <p>Aucune notification</p>
+        </div>`;
             }
 
             // Formater la date des notifications
