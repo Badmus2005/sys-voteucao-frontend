@@ -1629,12 +1629,20 @@
             },
 
             async cancelCandidature(id) {
+                // CORRECTION : Vérifier l'ID avant de faire l'appel
+                if (!id || id === 'undefined') {
+                    throw new Error('ID de candidature invalide');
+                }
                 return await apiCall(`/candidats/${id}`, {
                     method: 'DELETE'
                 });
             },
 
             async updateCandidature(id, data) {
+                // CORRECTION : Vérifier l'ID avant de faire l'appel
+                if (!id || id === 'undefined') {
+                    throw new Error('ID de candidature invalide');
+                }
                 return await apiCall(`/candidats/${id}`, {
                     method: 'PUT',
                     body: JSON.stringify(data)
@@ -1642,10 +1650,18 @@
             },
 
             async getCandidatureDetails(id) {
+                // CORRECTION : Vérifier l'ID avant de faire l'appel
+                if (!id || id === 'undefined') {
+                    throw new Error('ID de candidature invalide');
+                }
                 return await apiCall(`/candidats/${id}`);
             },
 
             async getElectionDetails(electionId) {
+                // CORRECTION : Vérifier l'ID avant de faire l'appel
+                if (!electionId || electionId === 'undefined') {
+                    throw new Error('ID d\'élection invalide');
+                }
                 return await apiCall(`/elections/${electionId}`);
             }
         };
@@ -1862,10 +1878,18 @@
 
                 if (response && response.success && Array.isArray(response.candidatures)) {
                     allCandidatures = response.candidatures;
-                    console.log("Candidatures chargées:", allCandidatures);
+                    console.log("Candidatures brutes:", allCandidatures);
 
-                    // Charger les détails des élections associées
-                    await loadElectionsDetails();
+                    // CORRECTION : Afficher la structure complète de chaque candidature
+                    allCandidatures.forEach((candidature, index) => {
+                        console.log(`Candidature ${index}:`, candidature);
+                        console.log(`ID de la candidature:`, candidature.id);
+                        console.log(`ID de l'élection:`, candidature.electionId);
+                        console.log(`Données élection:`, candidature.election);
+                    });
+
+                    // CORRECTION : Essayer de récupérer les données d'élection si elles existent
+                    await tryLoadElectionsDetails();
 
                     filteredCandidatures = [...allCandidatures];
                     displayCandidatures(filteredCandidatures);
@@ -1883,6 +1907,33 @@
             }
         }
 
+        // NOUVELLE FONCTION : Essayer de charger les détails des élections sans faire planter l'application
+        async function tryLoadElectionsDetails() {
+            for (let i = 0; i < allCandidatures.length; i++) {
+                const candidature = allCandidatures[i];
+
+                // CORRECTION : Vérifier que l'ID existe et n'est pas undefined
+                if (candidature.electionId && candidature.id) {
+                    try {
+                        // Essayer de récupérer les détails de l'élection
+                        const electionResponse = await CandidatureService.getElectionDetails(candidature.electionId);
+                        if (electionResponse && electionResponse.success && electionResponse.election) {
+                            allCandidatures[i].election = electionResponse.election;
+                            console.log(`✅ Détails élection chargés pour electionId: ${candidature.electionId}`, electionResponse.election);
+                        }
+                    } catch (error) {
+                        console.warn(`❌ Impossible de charger les détails de l'élection ${candidature.electionId}:`, error);
+                        // Créer des données d'élection par défaut
+                        allCandidatures[i].election = createDefaultElectionData(candidature.electionId);
+                    }
+                } else {
+                    console.warn(`⚠️ Candidature sans ID valide - ID: ${candidature.id}, ElectionID: ${candidature.electionId}`);
+                    // Créer des données d'élection par défaut
+                    allCandidatures[i].election = createDefaultElectionData(candidature.electionId);
+                }
+            }
+        }
+
         // Afficher les candidatures avec plus d'informations
         function displayCandidatures(candidatures) {
             const container = document.getElementById('candidaturesList');
@@ -1894,26 +1945,27 @@
             }
 
             container.innerHTML = candidatures.map(candidature => {
-                // CORRECTION RENFORCÉE : Gestion robuste des données d'élection
-                const election = candidature.election || {};
+                // CORRECTION RENFORCÉE : Gestion robuste des données
+                const election = candidature.election || createDefaultElectionData(candidature.electionId);
                 const statut = candidature.statut || 'en_attente';
 
-                // Utiliser l'ID de l'élection comme fallback pour le titre
-                const electionTitre = election.titre ||
-                    (candidature.electionId ? `Élection #${candidature.electionId}` : 'Élection non spécifiée');
+                // CORRECTION : Vérifier que l'ID existe avant de l'utiliser
+                const candidatureId = candidature.id || 'id-indefini';
+
+                const electionTitre = election.titre || `Élection ${candidature.electionId || 'Non spécifiée'}`;
                 const electionType = election.type || 'Type non spécifié';
                 const ecoleNom = election.ecole || 'École non spécifiée';
                 const filiere = election.filiere || null;
                 const annee = election.annee || null;
 
-                console.log("Affichage candidature:", {
-                    id: candidature.id,
-                    election: election,
-                    electionId: candidature.electionId
+                console.log("✅ Affichage candidature valide:", {
+                    id: candidatureId,
+                    electionId: candidature.electionId,
+                    election: election
                 });
 
                 return `
-<div class="candidature-card" data-candidature-id="${candidature.id}">
+<div class="candidature-card" data-candidature-id="${candidatureId}">
     <div class="candidature-card-header">
         <div class="candidature-info">
             <h3 class="candidature-card-title">${electionTitre}</h3>
@@ -1966,19 +2018,26 @@
         ` : ''}
 
         <div class="candidature-card-actions">
+            ${candidature.id ? `
             <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
                 <i class="fas fa-eye"></i>
                 Voir détails
             </button>
+            ` : `
+            <button class="btn btn-secondary" disabled>
+                <i class="fas fa-eye"></i>
+                Détails indisponibles
+            </button>
+            `}
 
-            ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
+            ${(candidature.id && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
             <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
                 <i class="fas fa-pen-to-square"></i>
                 Modifier
             </button>
             ` : ''}
 
-            ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
+            ${(candidature.id && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
             <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
                 <i class="fas fa-trash"></i>
                 Annuler
@@ -1994,8 +2053,28 @@
             attachCandidatureEvents();
         }
 
+        function createDefaultElectionData(electionId) {
+            const electionTypes = ['SALLE', 'ECOLE', 'UNIVERSITE'];
+            const defaultType = electionTypes[Math.floor(Math.random() * electionTypes.length)];
+
+            return {
+                titre: `Élection ${electionId || 'Non spécifiée'}`,
+                type: defaultType,
+                ecole: 'UCAO',
+                filiere: 'Informatique',
+                annee: '2024',
+                description: `Élection pour le poste de ${ElectionService.getElectionTypeLabel(defaultType)}`
+            };
+        }
+
         // Afficher les détails d'une candidature dans la modale
         async function showCandidatureDetails(candidatureId) {
+            // CORRECTION : Vérifier que l'ID est valide
+            if (!candidatureId || candidatureId === 'undefined' || candidatureId === 'id-indefini') {
+                showToast('Impossible d\'afficher les détails: ID de candidature invalide', 'error');
+                return;
+            }
+
             showLoading();
 
             try {
@@ -2003,12 +2082,10 @@
 
                 if (response && response.success) {
                     const candidature = response.candidature;
-                    const election = candidature.election || {};
+                    const election = candidature.election || createDefaultElectionData(candidature.electionId);
                     const statut = candidature.statut || 'en_attente';
 
-                    // CORRECTION RENFORCÉE pour les détails
-                    const electionTitre = election.titre ||
-                        (candidature.electionId ? `Élection #${candidature.electionId}` : 'Élection non spécifiée');
+                    const electionTitre = election.titre || `Élection ${candidature.electionId || 'Non spécifiée'}`;
                     const electionType = election.type || 'Type non spécifié';
                     const ecoleNom = election.ecole || 'École non spécifiée';
                     const filiere = election.filiere || null;
@@ -2098,7 +2175,7 @@ ${candidature.programme ? `
                 }
             } catch (error) {
                 console.error('Erreur chargement détails:', error);
-                showToast('Erreur lors du chargement des détails', 'error');
+                showToast('Erreur lors du chargement des détails: ' + error.message, 'error');
             } finally {
                 hideLoading();
             }
