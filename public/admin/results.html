@@ -1386,16 +1386,18 @@
             populateElectionSelect();
         }
 
-        // Fonction pour peupler le sélecteur d'élections
         function populateElectionSelect() {
             const electionSelect = document.getElementById('electionSelect');
             if (!electionSelect) return;
 
-            // Vider le sélecteur
             electionSelect.innerHTML = '<option value="">-- Sélectionnez une élection --</option>';
 
-            // Ajouter les élections terminées
-            const completedElections = elections.filter(e => e.status === 'completed');
+            // Filtrer les élections terminées (si dateFin est disponible)
+            const now = new Date();
+            const completedElections = elections.filter(e => {
+                const dateFin = new Date(e.dateFin); // ← Assure-toi que ce champ existe
+                return dateFin < now;
+            });
 
             if (completedElections.length === 0) {
                 electionSelect.innerHTML += '<option value="" disabled>Aucune élection terminée</option>';
@@ -1405,7 +1407,7 @@
             completedElections.forEach(election => {
                 const option = document.createElement('option');
                 option.value = election.id;
-                option.textContent = election.name;
+                option.textContent = election.titre; // ← Corrigé ici
                 electionSelect.appendChild(option);
             });
         }
