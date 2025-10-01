@@ -1059,6 +1059,34 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .winner-name {
+                font-size: 1.8rem;
+            }
+
+            .detail-value {
+                font-size: 1.8rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .ranking-table {
+                font-size: 0.85rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
         /* Mobile menu */
         .mobile-menu-btn {
             display: none;
@@ -1104,46 +1132,32 @@
             background: #a8a8a8;
         }
     </style>
-
-    <link rel="stylesheet" href="/assets/notifications.css">
 </head>
 
 <body>
     <div class="dashboard-container">
         <!-- Header -->
         <header class="main-header">
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Ouvrir le menu">
                 <i class="fas fa-bars"></i>
             </button>
 
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Rechercher...">
+                    <input type="text" class="search-input" placeholder="Rechercher..." aria-label="Rechercher">
                 </div>
             </div>
 
             <div class="header-actions">
                 <div class="notifications-container">
-                    <button class="notification-btn" id="notificationBtn">
+                    <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge" id="notificationBadge">0</span>
                     </button>
-
-                    <div class="notifications-panel" id="notificationsPanel">
-                        <div class="notifications-header">
-                            <h3>Notifications</h3>
-                            <button class="mark-all-read" id="markAllReadBtn">
-                                <i class="fas fa-check-double"></i> Tout marquer comme lu
-                            </button>
-                        </div>
-                        <div class="notifications-body" id="notificationsList">
-                            <!-- Les notifications seront insérées ici -->
-                        </div>
-                    </div>
                 </div>
 
-                <div class="user-menu">
+                <div class="user-menu" id="userMenu">
                     <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
                         alt="Photo de profil" class="user-avatar" id="userAvatar">
                     <div class="user-info">
@@ -1153,7 +1167,6 @@
                 </div>
             </div>
         </header>
-
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -1220,7 +1233,7 @@
                     <i class="fas fa-chart-bar"></i>
                     Résultats des élections
                 </h2>
-                <button class="refresh-btn" id="refreshResults">
+                <button class="refresh-btn" id="refreshResults" aria-label="Actualiser les résultats">
                     <i class="fas fa-arrows-rotate"></i>
                     Actualiser
                 </button>
@@ -1233,8 +1246,8 @@
                 </div>
                 <div class="filters-content">
                     <div class="filter-group">
-                        <label>Type d'élection</label>
-                        <select class="filter-select" id="filter-type">
+                        <label for="filter-type">Type d'élection</label>
+                        <select class="filter-select" id="filter-type" aria-label="Filtrer par type d'élection">
                             <option value="">Tous</option>
                             <option value="SALLE">Responsables de Salle</option>
                             <option value="ECOLE">Délégués d'École</option>
@@ -1242,8 +1255,8 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>École/Faculté</label>
-                        <select class="filter-select" id="filter-ecole">
+                        <label for="filter-ecole">École/Faculté</label>
+                        <select class="filter-select" id="filter-ecole" aria-label="Filtrer par école">
                             <option value="">Tous</option>
                             <option value="EGEI">EGEI</option>
                             <option value="ESMEA">ESMEA</option>
@@ -1252,8 +1265,8 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Année</label>
-                        <select class="filter-select" id="filter-annee">
+                        <label for="filter-annee">Année</label>
+                        <select class="filter-select" id="filter-annee" aria-label="Filtrer par année">
                             <option value="">Toutes</option>
                             <option value="1">Licence 1</option>
                             <option value="2">Licence 2</option>
@@ -1360,13 +1373,16 @@
                     <div class="chart-card">
                         <h3>Répartition des votes</h3>
                         <div class="chart-container">
-                            <canvas id="votesChart"></canvas>
+                            <canvas id="votesChart" aria-label="Graphique circulaire montrant la répartition des votes"
+                                role="img"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
                         <h3>Comparaison des candidats</h3>
                         <div class="chart-container">
-                            <canvas id="comparisonChart"></canvas>
+                            <canvas id="comparisonChart"
+                                aria-label="Graphique à barres comparant les pourcentages des candidats"
+                                role="img"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1416,57 +1432,119 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
-    ript src="/assets/config.js"></script>
+
+    <script src="/assets/config.js"></script>
     <script src="/assets/js/common.js"></script>
-    <script src="/assets/js/notificationService.js"></script>
-    <script src="/assets/initNotifications.js"></script>
     <script>
         // Variables globales pour cette page
         let allElections = [];
         let currentResults = null;
         let votesChart = null;
         let comparisonChart = null;
+        let filterTimeout = null;
+
+        // Configuration API
+        const API_BASE = CONFIG.BASE_URL;
+        const COMPLETED_ELECTIONS_ENDPOINT = '/api/votes/elections/completed';
+        const RESULTS_ENDPOINT = '/api/votes/results';
+        const VISIBILITY_ENDPOINT = '/api/votes';
 
         // Services spécifiques à résultats
         const ElectionService = {
-            async getElections(filters = {}) {
-                let endpoint = '/elections';
-                const queryParams = new URLSearchParams();
+            async getCompletedElections(filters = {}) {
+                try {
+                    const queryParams = new URLSearchParams();
 
-                // Ajouter les filtres aux paramètres de requête
-                Object.keys(filters).forEach(key => {
-                    if (filters[key]) {
-                        queryParams.append(key, filters[key]);
+                    // Ajouter les filtres aux paramètres de requête
+                    Object.keys(filters).forEach(key => {
+                        if (filters[key]) {
+                            queryParams.append(key, filters[key]);
+                        }
+                    });
+
+                    let endpoint = `${API_BASE}${COMPLETED_ELECTIONS_ENDPOINT}`;
+                    if (queryParams.toString()) {
+                        endpoint += `?${queryParams.toString()}`;
                     }
-                });
 
-                if (queryParams.toString()) {
-                    endpoint += `?${queryParams.toString()}`;
+                    const response = await fetch(endpoint, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des élections');
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Erreur ElectionService:', error);
+                    throw error;
                 }
-
-                return await BaseService.apiCall(endpoint);
-            },
-
-            async getElectionById(id) {
-                return await BaseService.apiCall(`/elections/${id}`);
             }
         };
 
         const VoteService = {
             async getResults(electionId) {
-                return await BaseService.apiCall(`/votes/results/${electionId}`);
+                try {
+                    const response = await fetch(`${API_BASE}${RESULTS_ENDPOINT}/${electionId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des résultats');
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Erreur VoteService:', error);
+                    throw error;
+                }
+            },
+
+            async checkVisibility(electionId) {
+                try {
+                    const response = await fetch(`${API_BASE}${VISIBILITY_ENDPOINT}/${electionId}/visibility`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur de vérification de visibilité');
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Erreur de vérification de visibilité:', error);
+                    // En cas d'erreur, on suppose que les résultats sont visibles
+                    return { success: true, data: { canDisplay: true } };
+                }
             }
         };
 
         // Fonction utilitaire pour formater les dates
         function formatDate(dateString) {
             if (!dateString) return 'Non définie';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } catch (error) {
+                return dateString;
+            }
         }
 
         // Initialisation de la page
@@ -1476,7 +1554,6 @@
             // Initialiser les éléments communs
             Common.initCommonElements();
             await Common.loadUserProfileInHeader();
-            initializeNotifications();
 
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
@@ -1485,134 +1562,18 @@
             await loadPageData();
         });
 
-        // Initialiser le service de notifications
-        function initializeNotifications() {
-            const notificationService = new NotificationService();
-            const notificationBtn = document.getElementById('notificationBtn');
-            const notificationsPanel = document.getElementById('notificationsPanel');
-            const markAllReadBtn = document.getElementById('markAllReadBtn');
-
-            // Gestionnaire de clic sur le bouton de notifications
-            notificationBtn.addEventListener('click', () => {
-                notificationsPanel.classList.toggle('show');
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-            });
-
-            // Fermer le panneau si on clique en dehors
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.notifications-container')) {
-                    notificationsPanel.classList.remove('show');
-                }
-            });
-
-            // Marquer toutes les notifications comme lues
-            markAllReadBtn.addEventListener('click', () => {
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-                renderNotifications();
-            });
-
-            // Fonction pour mettre à jour le badge
-            function updateNotificationBadge() {
-                const unreadCount = notificationService.getUnreadCount();
-                const badge = document.getElementById('notificationBadge');
-                badge.textContent = unreadCount;
-                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-            }
-
-            // Fonction pour afficher les notifications
-            function renderNotifications() {
-                const notifications = notificationService.getNotifications();
-                const container = document.getElementById('notificationsList');
-
-                if (notifications.length === 0) {
-                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
-                    return;
-                }
-
-                container.innerHTML = notifications
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map(notif => `
-                    <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                        <div class="notification-icon">
-                            <i class="fas ${getNotificationIcon(notif.type)}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-text">${notif.message}</div>
-                            <div class="notification-time">${formatNotificationDate(notif.date)}</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Ajouter les gestionnaires de clic pour chaque notification
-                container.querySelectorAll('.notification-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const notifId = item.dataset.id;
-                        notificationService.markAsRead(notifId);
-                        item.classList.remove('unread');
-                        updateNotificationBadge();
-                    });
-                });
-            }
-
-            // Fonction utilitaire pour obtenir l'icône selon le type
-            function getNotificationIcon(type) {
-                const icons = {
-                    'success': 'fa-check-circle',
-                    'warning': 'fa-exclamation-triangle',
-                    'error': 'fa-times-circle',
-                    'info': 'fa-info-circle',
-                    'election': 'fa-vote-yea',
-                    'candidature': 'fa-file-signature',
-                    'profile': 'fa-user',
-                    'system': 'fa-cog'
-                };
-                return icons[type] || 'fa-bell';
-            }
-
-            // Fonction utilitaire pour formater la date
-            function formatNotificationDate(date) {
-                const now = new Date();
-                const notifDate = new Date(date);
-                const diff = now - notifDate;
-                const diffMinutes = Math.floor(diff / 60000);
-                const diffHours = Math.floor(diff / 3600000);
-                const diffDays = Math.floor(diff / 86400000);
-
-                if (diffMinutes < 60) {
-                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
-                } else if (diffHours < 24) {
-                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
-                } else if (diffDays < 7) {
-                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
-                } else {
-                    return notifDate.toLocaleDateString();
-                }
-            }
-
-            // Faire le rendu initial et démarrer la mise à jour automatique
-            renderNotifications();
-            updateNotificationBadge();
-            setInterval(() => {
-                notificationService.fetchNewNotifications().then(() => {
-                    renderNotifications();
-                    updateNotificationBadge();
-                });
-            }, 30000); // Actualiser toutes les 30 secondes
-        }
-
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
             // Gestionnaire de rafraîchissement
             document.getElementById('refreshResults').addEventListener('click', async function () {
                 await loadPageData();
-                Common.showToast('Résultats actualisés avec succès', 'success');
+                showToast('Résultats actualisés avec succès', 'success');
             });
 
-            // Gestionnaire de filtres
-            document.getElementById('applyFilters').addEventListener('click', async function () {
-                await applyFilters();
+            // Gestionnaire de filtres avec debounce
+            document.getElementById('applyFilters').addEventListener('click', function () {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(() => applyFilters(), 300);
             });
 
             document.getElementById('resetFilters').addEventListener('click', async function () {
@@ -1621,11 +1582,64 @@
 
             // Gestionnaire d'export
             document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
+
+            // Menu mobile
+            document.getElementById('mobileMenuBtn').addEventListener('click', function () {
+                document.getElementById('sidebar').classList.toggle('active');
+                document.getElementById('overlay').classList.toggle('active');
+            });
+
+            document.getElementById('overlay').addEventListener('click', function () {
+                document.getElementById('sidebar').classList.remove('active');
+                this.classList.remove('active');
+            });
+
+            // Déconnexion
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                Common.logout();
+            });
+        }
+
+        // Fonction utilitaire pour afficher les toasts
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Mettre à jour le contenu et le style
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+
+            // Mettre à jour l'icône
+            const icons = {
+                'success': 'fa-circle-check',
+                'error': 'fa-circle-exclamation',
+                'warning': 'fa-triangle-exclamation',
+                'info': 'fa-circle-info'
+            };
+            toastIcon.className = `fa-solid ${icons[type] || 'fa-circle-info'}`;
+
+            // Afficher le toast
+            toast.classList.add('show');
+
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // Fonction utilitaire pour afficher/masquer le chargement
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
 
         // Chargement des données de la page
         async function loadPageData() {
-            Common.showLoading();
+            showLoading();
 
             try {
                 // Charger les élections terminées
@@ -1646,9 +1660,9 @@
 
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                Common.showToast('Erreur de chargement des données', 'error');
+                showToast('Erreur de chargement des données', 'error');
             } finally {
-                Common.hideLoading();
+                hideLoading();
             }
         }
 
@@ -1664,7 +1678,7 @@
                 if (ecoleFilter) filters.ecole = ecoleFilter;
                 if (anneeFilter) filters.annee = anneeFilter;
 
-                const response = await ElectionService.getElections(filters);
+                const response = await ElectionService.getCompletedElections(filters);
 
                 // Gérer différentes structures de réponse
                 let elections = [];
@@ -1677,16 +1691,12 @@
                 }
 
                 if (elections && Array.isArray(elections)) {
-                    // Filtrer les élections terminées
-                    const now = new Date();
-                    allElections = elections.filter(election => {
-                        if (!election.dateFin) return false;
-                        const endDate = new Date(election.dateFin);
-                        return endDate < now;
-                    });
+                    allElections = elections;
 
                     if (allElections.length === 0) {
-                        showNoResults();
+                        showNoResults(true);
+                    } else {
+                        document.getElementById('noResultsMessage').style.display = 'none';
                     }
                 } else {
                     showNoResults();
@@ -1699,33 +1709,47 @@
 
         // Charger les résultats d'une élection
         async function loadElectionResults(electionId) {
-            Common.showLoading();
+            showLoading();
 
             try {
-                const data = await VoteService.getResults(electionId);
+                // Vérifier d'abord la visibilité
+                const visibilityResponse = await VoteService.checkVisibility(electionId);
 
-                if (data && data.resultats) {
-                    currentResults = data;
-                    displayResults(data);
+                if (!visibilityResponse.success || !visibilityResponse.data.canDisplay) {
+                    showToast('Les résultats de cette élection ne sont pas encore disponibles', 'warning');
+                    showNoResults();
+                    return;
+                }
+
+                const response = await VoteService.getResults(electionId);
+
+                if (response && response.success && response.data && response.data.resultats) {
+                    currentResults = response.data;
+                    displayResults(response.data);
                     document.getElementById('noResultsMessage').style.display = 'none';
                 } else {
                     showNoResults();
                 }
             } catch (error) {
                 console.error('Erreur chargement résultats:', error);
-                Common.showToast('Erreur de chargement des résultats', 'error');
+                showToast('Erreur de chargement des résultats', 'error');
                 showNoResults();
             } finally {
-                Common.hideLoading();
+                hideLoading();
             }
         }
 
         // Afficher les résultats
         function displayResults(results) {
+            if (!results || !results.resultats || !Array.isArray(results.resultats)) {
+                showNoResults();
+                return;
+            }
+
             const { election, resultats, statistiques } = results;
 
             // Mettre à jour les informations de l'élection
-            document.getElementById('electionTitle').textContent = `Résultats: ${election.titre}`;
+            document.getElementById('electionTitle').textContent = `Résultats: ${election.titre || 'Élection'}`;
             document.getElementById('electionDescription').textContent = election.description || 'Aucune description disponible';
             document.getElementById('resultsDate').textContent = `Date de publication: ${formatDate(new Date())}`;
             document.getElementById('totalVoters').textContent = `Électeurs: ${statistiques.totalInscrits || 0}`;
@@ -1741,6 +1765,8 @@
             const winner = resultats[0];
             if (winner) {
                 displayWinner(winner, statistiques);
+            } else {
+                document.getElementById('winnerBanner').style.display = 'none';
             }
 
             // Afficher le classement
@@ -1755,8 +1781,8 @@
             const winnerBanner = document.getElementById('winnerBanner');
             winnerBanner.style.display = 'block';
 
-            document.getElementById('winnerName').textContent = `${winner.prenom} ${winner.nom}`;
-            document.getElementById('winnerVotes').textContent = winner.details.totalVotes || 0;
+            document.getElementById('winnerName').textContent = `${winner.prenom || ''} ${winner.nom || 'Candidat'}`;
+            document.getElementById('winnerVotes').textContent = winner.details?.totalVotes || 0;
             document.getElementById('winnerPercentage').textContent = `${winner.scoreFinal || 0}%`;
             document.getElementById('winnerSlogan').textContent = `"${winner.slogan || 'Aucun slogan'}"`;
         }
@@ -1765,6 +1791,11 @@
         function displayRanking(candidates) {
             const rankingBody = document.getElementById('rankingBody');
             rankingBody.innerHTML = '';
+
+            if (!candidates || candidates.length === 0) {
+                rankingBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Aucun candidat</td></tr>';
+                return;
+            }
 
             candidates.forEach((candidate, index) => {
                 const row = document.createElement('tr');
@@ -1780,16 +1811,16 @@
                 <td>
                     <div class="candidate-info">
                         <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
-                             alt="${candidate.prenom} ${candidate.nom}" 
+                             alt="${candidate.prenom || ''} ${candidate.nom || ''}" 
                              class="candidate-avatar"
                              onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'">
                         <div>
-                            <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                            <div class="candidate-name">${candidate.prenom || ''} ${candidate.nom || ''}</div>
                             <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
                         </div>
                     </div>
                 </td>
-                <td class="vote-count">${candidate.details.totalVotes || 0}</td>
+                <td class="vote-count">${candidate.details?.totalVotes || 0}</td>
                 <td class="vote-percentage">${candidate.scoreFinal || 0}%</td>
                 <td>
                     <div class="progress-bar">
@@ -1815,9 +1846,13 @@
             if (votesChart) votesChart.destroy();
             if (comparisonChart) comparisonChart.destroy();
 
+            if (!candidates || candidates.length === 0) {
+                return;
+            }
+
             // Données pour les graphiques
-            const labels = candidates.map(c => `${c.prenom} ${c.nom}`);
-            const votesData = candidates.map(c => c.details.totalVotes || 0);
+            const labels = candidates.map(c => `${c.prenom || ''} ${c.nom || ''}`.trim() || 'Candidat');
+            const votesData = candidates.map(c => c.details?.totalVotes || 0);
             const percentages = candidates.map(c => c.scoreFinal || 0);
             const colors = generateColors(candidates.length);
 
@@ -1942,8 +1977,20 @@
         }
 
         // Afficher le message d'absence de résultats
-        function showNoResults() {
-            document.getElementById('noResultsMessage').style.display = 'block';
+        function showNoResults(filtersApplied = false) {
+            const message = document.getElementById('noResultsMessage');
+            message.innerHTML = `
+                <i class="fas fa-inbox"></i>
+                <h3>${filtersApplied ? 'Aucun résultat avec ces filtres' : 'Aucun résultat disponible'}</h3>
+                <p>${filtersApplied ?
+                    'Aucune élection terminée ne correspond à vos critères de recherche.' :
+                    'Aucun résultat n\'est disponible pour le moment. Les résultats seront affichés ici une fois les élections terminées et publiées.'}
+                </p>
+                ${filtersApplied ? '<button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 1rem;">Réinitialiser les filtres</button>' : ''}
+            `;
+            message.style.display = 'block';
+
+            // Masquer les autres sections
             document.getElementById('winnerBanner').style.display = 'none';
         }
 
@@ -1953,9 +2000,9 @@
 
             if (allElections.length > 0) {
                 await loadElectionResults(allElections[0].id);
-                Common.showToast('Filtres appliqués avec succès', 'success');
+                showToast('Filtres appliqués avec succès', 'success');
             } else {
-                showNoResults();
+                showNoResults(true);
             }
         }
 
@@ -1966,21 +2013,24 @@
             document.getElementById('filter-annee').value = '';
 
             await loadPageData();
-            Common.showToast('Filtres réinitialisés', 'success');
+            showToast('Filtres réinitialisés', 'success');
         }
 
         // Exporter les résultats
         function exportResults() {
-            if (!currentResults) return;
+            if (!currentResults) {
+                showToast('Aucun résultat à exporter', 'warning');
+                return;
+            }
 
             const { election, resultats, statistiques } = currentResults;
 
             // Créer le contenu CSV
-            let csvContent = "Résultats de l'élection: " + election.titre + "\n\n";
+            let csvContent = "Résultats de l'élection: " + (election.titre || 'Élection') + "\n\n";
             csvContent += "Classement,Nom,Prénom,Votes,Pourcentage\n";
 
             resultats.forEach((candidate, index) => {
-                csvContent += `${index + 1},${candidate.nom},${candidate.prenom},${candidate.details.totalVotes || 0},${candidate.scoreFinal || 0}%\n`;
+                csvContent += `${index + 1},${candidate.nom || ''},${candidate.prenom || ''},${candidate.details?.totalVotes || 0},${candidate.scoreFinal || 0}%\n`;
             });
 
             csvContent += "\nStatistiques:\n";
@@ -1995,18 +2045,19 @@
             const url = URL.createObjectURL(blob);
 
             link.setAttribute('href', url);
-            link.setAttribute('download', `resultats-${election.titre.replace(/\s+/g, '-').toLowerCase()}.csv`);
+            link.setAttribute('download', `resultats-${(election.titre || 'election').replace(/\s+/g, '-').toLowerCase()}.csv`);
             link.style.visibility = 'hidden';
 
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            Common.showToast('Résultats exportés avec succès', 'success');
+            showToast('Résultats exportés avec succès', 'success');
         }
 
         // Exposer les fonctions globales pour cette page
         window.loadPageData = loadPageData;
+        window.resetFilters = resetFilters;
     </script>
 </body>
 
