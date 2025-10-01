@@ -1424,7 +1424,7 @@
         </div>
     </div>
 
-    <script src="/assets/config.js"></script>
+    ript src="/assets/config.js"></script>
     <script src="/assets/js/common.js"></script>
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
@@ -1547,17 +1547,17 @@
                 const endDate = new Date(election.dateFin).toLocaleDateString('fr-FR');
 
                 return `
-                    <div class="election-card" data-election-id="${election.id}">
-                        <div class="election-header">
-                            <h3 class="election-title">${election.titre}</h3>
-                            <div class="election-date">${startDate} - ${endDate}</div>
-                        </div>
-                        <div class="election-body">
-                            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
-                            <span class="election-status ${statusClass}">${statusText}</span>
-                        </div>
+                <div class="election-card" data-election-id="${election.id}">
+                    <div class="election-header">
+                        <h3 class="election-title">${election.titre}</h3>
+                        <div class="election-date">${startDate} - ${endDate}</div>
                     </div>
-                `;
+                    <div class="election-body">
+                        <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                        <span class="election-status ${statusClass}">${statusText}</span>
+                    </div>
+                </div>
+            `;
             }
         };
 
@@ -1568,36 +1568,36 @@
                 const candidateId = candidate.id || candidate.candidatId;
 
                 return `
-                    <div class="candidate-card" data-candidate-id="${candidateId}" data-election-id="${electionId}">
-                        <div class="candidate-header">
-                            <div class="candidate-avatar">
-                                ${candidate.photoUrl ?
+                <div class="candidate-card" data-candidate-id="${candidateId}" data-election-id="${electionId}">
+                    <div class="candidate-header">
+                        <div class="candidate-avatar">
+                            ${candidate.photoUrl ?
                         `<img src="${candidate.photoUrl}" alt="${candidate.prenom} ${candidate.nom}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
                         `<i class="fa-solid fa-user"></i>`
                     }
-                            </div>
-                            <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                            <div class="candidate-role">${candidate.filiere || 'Étudiant'}</div>
                         </div>
-                        <div class="candidate-body">
-                            ${candidate.slogan ? `<p><strong>Slogan:</strong> ${candidate.slogan}</p>` : ''}
-                            ${showProgram && candidate.programme ? `
-                                <div class="candidate-program">
-                                    <div class="candidate-program-title">Programme</div>
-                                    <div class="candidate-program-text">${candidate.programme.substring(0, 150)}${candidate.programme.length > 150 ? '...' : ''}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                        ${showVote ? `
-                            <div class="candidate-footer">
-                                <button class="candidate-action action-vote">
-                                    <i class="fa-solid fa-vote-yea"></i>
-                                    Voter pour ce candidat
-                                </button>
+                        <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
+                        <div class="candidate-role">${candidate.filiere || 'Étudiant'}</div>
+                    </div>
+                    <div class="candidate-body">
+                        ${candidate.slogan ? `<p><strong>Slogan:</strong> ${candidate.slogan}</p>` : ''}
+                        ${showProgram && candidate.programme ? `
+                            <div class="candidate-program">
+                                <div class="candidate-program-title">Programme</div>
+                                <div class="candidate-program-text">${candidate.programme.substring(0, 150)}${candidate.programme.length > 150 ? '...' : ''}</div>
                             </div>
                         ` : ''}
                     </div>
-                `;
+                    ${showVote ? `
+                        <div class="candidate-footer">
+                            <button class="candidate-action action-vote">
+                                <i class="fa-solid fa-vote-yea"></i>
+                                Voter pour ce candidat
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
             }
         };
 
@@ -1627,21 +1627,36 @@
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            if (!Common.checkAuth()) return;
+            if (!Common.checkAuth()) {
+                // Rediriger vers la page de connexion si non authentifié
+                window.location.href = 'login.html';
+                return;
+            }
 
-            // Initialiser les éléments communs
-            Common.initCommonElements();
-            await Common.loadUserProfileInHeader();
-            initializeNotifications();
+            try {
+                // Initialiser les éléments communs
+                Common.initCommonElements();
+                await Common.loadUserProfileInHeader();
 
-            // Charger les informations de l'étudiant
-            await loadStudentInfo();
+                // Initialiser les notifications avec gestion d'erreur
+                try {
+                    initializeNotifications();
+                } catch (notifError) {
+                    console.warn('Notifications non disponibles:', notifError);
+                }
 
-            // Initialiser les gestionnaires d'événements
-            initEventHandlers();
+                // Charger les informations de l'étudiant
+                await loadStudentInfo();
 
-            // Charger les données
-            await loadPageData();
+                // Initialiser les gestionnaires d'événements
+                initEventHandlers();
+
+                // Charger les données
+                await loadPageData();
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation de la page:', error);
+                Common.showToast('Erreur lors du chargement de la page', 'error');
+            }
         });
 
         // Charger les informations de l'étudiant
@@ -1730,12 +1745,12 @@
 
             if (elections.length === 0) {
                 container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        <h3>Aucune élection en cours</h3>
-                        <p>Vous n'avez aucune élection en cours où vous pouvez voter.</p>
-                    </div>
-                `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <h3>Aucune élection en cours</h3>
+                    <p>Vous n'avez aucune élection en cours où vous pouvez voter.</p>
+                </div>
+            `;
                 return;
             }
 
@@ -1747,12 +1762,12 @@
 
             if (activeElections.length === 0) {
                 container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        <h3>Aucune élection active</h3>
-                        <p>Il n'y a actuellement aucune élection en cours.</p>
-                    </div>
-                `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <h3>Aucune élection active</h3>
+                    <p>Il n'y a actuellement aucune élection en cours.</p>
+                </div>
+            `;
                 return;
             }
 
@@ -1770,7 +1785,10 @@
 
         // Attacher les événements aux cartes d'élection
         function attachElectionCardEvents() {
-            document.querySelectorAll('.election-card').forEach(card => {
+            const electionCards = document.querySelectorAll('.election-card');
+            if (!electionCards.length) return;
+
+            electionCards.forEach(card => {
                 card.addEventListener('click', async function () {
                     const electionId = this.dataset.electionId;
                     const election = allElections.find(e => e.id == electionId);
@@ -1819,46 +1837,46 @@
 
             // Afficher la section des candidats
             section.innerHTML = `
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fa-solid fa-users"></i>
-                        Candidats - ${election.titre}
-                    </h2>
-                </div>
-                <div class="election-info">
-                    <div class="election-info-title">Informations sur l'élection</div>
-                    <div class="election-info-details">
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                            <span>${election.nomEcole || election.ecole || 'Non spécifié'}</span>
-                        </div>
-                        ${election.nomFiliere || election.filiere ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-layer-group"></i>
-                            <span>${election.nomFiliere || election.filiere}</span>
-                        </div>
-                        ` : ''}
-                        ${election.annee ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-calendar"></i>
-                            <span>Année ${election.annee}</span>
-                        </div>
-                        ` : ''}
-                        ${election.delegueType ? `
-                        <div class="election-info-item">
-                            <i class="fa-solid fa-user-tie"></i>
-                            <span>${election.delegueType}</span>
-                        </div>
-                        ` : ''}
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fa-solid fa-users"></i>
+                    Candidats - ${election.titre}
+                </h2>
+            </div>
+            <div class="election-info">
+                <div class="election-info-title">Informations sur l'élection</div>
+                <div class="election-info-details">
+                    <div class="election-info-item">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>${election.nomEcole || election.ecole || 'Non spécifié'}</span>
                     </div>
-                </div>
-                <div class="candidates-list" id="candidatesList">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Chargement des candidats...</p>
+                    ${election.nomFiliere || election.filiere ? `
+                    <div class="election-info-item">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>${election.nomFiliere || election.filiere}</span>
                     </div>
+                    ` : ''}
+                    ${election.annee ? `
+                    <div class="election-info-item">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span>Année ${election.annee}</span>
+                    </div>
+                    ` : ''}
+                    ${election.delegueType ? `
+                    <div class="election-info-item">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span>${election.delegueType}</span>
+                    </div>
+                    ` : ''}
                 </div>
-            `;
+            </div>
+            <div class="candidates-list" id="candidatesList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des candidats...</p>
+                </div>
+            </div>
+        `;
 
             const candidatesList = document.getElementById('candidatesList');
 
@@ -1880,12 +1898,12 @@
 
                 if (electionCandidates.length === 0) {
                     candidatesList.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fa-solid fa-user-slash"></i>
-                            <h3>Aucun candidat pour cette élection</h3>
-                            <p>Aucun candidat ne s'est présenté pour cette élection.</p>
-                        </div>
-                    `;
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-user-slash"></i>
+                        <h3>Aucun candidat pour cette élection</h3>
+                        <p>Aucun candidat ne s'est présenté pour cette élection.</p>
+                    </div>
+                `;
                     return;
                 }
 
@@ -1911,18 +1929,21 @@
             } catch (error) {
                 console.error('Erreur affichage candidats:', error);
                 candidatesList.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>Erreur de chargement</h3>
-                        <p>Impossible de charger les candidats: ${error.message}</p>
-                    </div>
-                `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>Erreur de chargement</h3>
+                    <p>Impossible de charger les candidats: ${error.message}</p>
+                </div>
+            `;
             }
         }
 
         // Attacher les événements de sélection des candidats
         function attachCandidateSelectionEvents() {
-            document.querySelectorAll('.candidate-card').forEach(card => {
+            const candidateCards = document.querySelectorAll('.candidate-card');
+            if (!candidateCards.length) return;
+
+            candidateCards.forEach(card => {
                 card.addEventListener('click', function () {
                     const candidateId = this.dataset.candidateId;
                     const electionId = this.dataset.electionId;
@@ -1964,11 +1985,11 @@
 
             if (Object.keys(selectedCandidates).length === 0) {
                 container.innerHTML = `
-                    <div class="empty-summary">
-                        <i class="fa-solid fa-inbox"></i>
-                        <p>Aucun vote sélectionné pour le moment</p>
-                    </div>
-                `;
+                <div class="empty-summary">
+                    <i class="fa-solid fa-inbox"></i>
+                    <p>Aucun vote sélectionné pour le moment</p>
+                </div>
+            `;
                 if (submitBtn) submitBtn.disabled = true;
                 return;
             }
@@ -1989,17 +2010,17 @@
                     const summaryItem = document.createElement('div');
                     summaryItem.className = 'summary-item';
                     summaryItem.innerHTML = `
-                        <div class="summary-election">${election.titre}</div>
-                        <div class="summary-candidate">
-                            <div class="summary-candidate-avatar">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <span>${candidateName}</span>
+                    <div class="summary-election">${election.titre}</div>
+                    <div class="summary-candidate">
+                        <div class="summary-candidate-avatar">
+                            <i class="fa-solid fa-user"></i>
                         </div>
-                        <button class="summary-remove" data-election-id="${electionId}">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    `;
+                        <span>${candidateName}</span>
+                    </div>
+                    <button class="summary-remove" data-election-id="${electionId}">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
 
                     container.appendChild(summaryItem);
                 }
@@ -2095,11 +2116,11 @@
 
                     if (tokenActions) {
                         tokenActions.innerHTML = `
-                            <div class="loading">
-                                <div class="spinner"></div>
-                                <p>Obtention du jeton...</p>
-                            </div>
-                        `;
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Obtention du jeton...</p>
+                        </div>
+                    `;
                     }
 
                     if (tokenModal) tokenModal.classList.add('active');
@@ -2178,11 +2199,11 @@
             const candidatesSection = document.getElementById('candidatesSection');
             if (candidatesSection) {
                 candidatesSection.innerHTML = `
-                    <div class="no-election-selected">
-                        <i class="fa-solid fa-hand-pointer"></i>
-                        <p>Sélectionnez une élection pour voir les candidats</p>
-                    </div>
-                `;
+                <div class="no-election-selected">
+                    <i class="fa-solid fa-hand-pointer"></i>
+                    <p>Sélectionnez une élection pour voir les candidats</p>
+                </div>
+            `;
             }
 
             updateVoteSummary();
@@ -2194,128 +2215,154 @@
             if (!container) return;
 
             container.innerHTML = `
-                <div class="no-data-message">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                </div>
-            `;
+            <div class="no-data-message">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                <h3>${message}</h3>
+            </div>
+        `;
         }
 
         // Initialiser le service de notifications
         function initializeNotifications() {
-            const notificationService = new NotificationService();
-            const notificationBtn = document.getElementById('notificationBtn');
-            const notificationsPanel = document.getElementById('notificationsPanel');
-            const markAllReadBtn = document.getElementById('markAllReadBtn');
+            try {
+                const notificationService = new NotificationService();
+                const notificationBtn = document.querySelector('.notification-btn');
+                const notificationsPanel = document.getElementById('notificationsPanel');
+                const markAllReadBtn = document.getElementById('markAllRead');
+                const notificationsList = document.getElementById('notificationsList');
 
-            // Gestionnaire de clic sur le bouton de notifications
-            notificationBtn.addEventListener('click', () => {
-                notificationsPanel.classList.toggle('show');
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-            });
-
-            // Fermer le panneau si on clique en dehors
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.notifications-container')) {
-                    notificationsPanel.classList.remove('show');
-                }
-            });
-
-            // Marquer toutes les notifications comme lues
-            markAllReadBtn.addEventListener('click', () => {
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-                renderNotifications();
-            });
-
-            // Fonction pour mettre à jour le badge
-            function updateNotificationBadge() {
-                const unreadCount = notificationService.getUnreadCount();
-                const badge = document.getElementById('notificationBadge');
-                badge.textContent = unreadCount;
-                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-            }
-
-            // Fonction pour afficher les notifications
-            function renderNotifications() {
-                const notifications = notificationService.getNotifications();
-                const container = document.getElementById('notificationsList');
-
-                if (notifications.length === 0) {
-                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                // Vérifier que les éléments existent
+                if (!notificationBtn || !notificationsPanel) {
+                    console.warn('Éléments de notifications non trouvés dans le DOM');
                     return;
                 }
 
-                container.innerHTML = notifications
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map(notif => `
+                // Gestionnaire de clic sur le bouton de notifications
+                notificationBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    notificationsPanel.classList.toggle('active');
+                    if (notificationService.markAllAsRead) {
+                        notificationService.markAllAsRead();
+                    }
+                    updateNotificationBadge();
+                });
+
+                // Fermer le panneau si on clique en dehors
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.notifications-panel') && !e.target.closest('.notification-btn')) {
+                        notificationsPanel.classList.remove('active');
+                    }
+                });
+
+                // Marquer toutes les notifications comme lues
+                if (markAllReadBtn) {
+                    markAllReadBtn.addEventListener('click', () => {
+                        if (notificationService.markAllAsRead) {
+                            notificationService.markAllAsRead();
+                        }
+                        updateNotificationBadge();
+                        renderNotifications();
+                    });
+                }
+
+                // Fonction pour mettre à jour le badge
+                function updateNotificationBadge() {
+                    if (notificationService.getUnreadCount) {
+                        const unreadCount = notificationService.getUnreadCount();
+                        const badge = document.querySelector('.notification-badge');
+                        if (badge) {
+                            badge.textContent = unreadCount;
+                            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                        }
+                    }
+                }
+
+                // Fonction pour afficher les notifications
+                function renderNotifications() {
+                    if (!notificationsList || !notificationService.getNotifications) return;
+
+                    const notifications = notificationService.getNotifications();
+
+                    if (notifications.length === 0) {
+                        notificationsList.innerHTML = '<div class="empty-state">Aucune notification</div>';
+                        return;
+                    }
+
+                    notificationsList.innerHTML = notifications
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .map(notif => `
                         <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
                             <div class="notification-icon">
-                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                                <i class="fas ${getNotificationIcon(notif.category || notif.type)}"></i>
                             </div>
                             <div class="notification-content">
-                                <div class="notification-text">${notif.message}</div>
-                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                                <div class="notification-title">${notif.title || 'Notification'}</div>
+                                <div class="notification-message">${notif.message}</div>
+                                <div class="notification-meta">
+                                    <span class="notification-time">${formatNotificationDate(notif.date || notif.createdAt)}</span>
+                                    ${notif.category ? `<span class="notification-category">${notif.category}</span>` : ''}
+                                </div>
                             </div>
                         </div>
                     `).join('');
 
-                // Ajouter les gestionnaires de clic pour chaque notification
-                container.querySelectorAll('.notification-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const notifId = item.dataset.id;
-                        notificationService.markAsRead(notifId);
-                        item.classList.remove('unread');
-                        updateNotificationBadge();
+                    // Ajouter les gestionnaires de clic pour chaque notification
+                    notificationsList.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const notifId = item.dataset.id;
+                            if (notificationService.markAsRead) {
+                                notificationService.markAsRead(notifId);
+                            }
+                            item.classList.remove('unread');
+                            updateNotificationBadge();
+                        });
                     });
-                });
-            }
-
-            // Fonction utilitaire pour obtenir l'icône selon le type
-            function getNotificationIcon(type) {
-                const icons = {
-                    'success': 'fa-check-circle',
-                    'warning': 'fa-exclamation-triangle',
-                    'error': 'fa-times-circle',
-                    'info': 'fa-info-circle',
-                    'election': 'fa-vote-yea',
-                    'candidature': 'fa-file-signature',
-                    'profile': 'fa-user',
-                    'system': 'fa-cog'
-                };
-                return icons[type] || 'fa-bell';
-            }
-
-            // Fonction utilitaire pour formater la date
-            function formatNotificationDate(date) {
-                const now = new Date();
-                const notifDate = new Date(date);
-                const diff = now - notifDate;
-                const diffMinutes = Math.floor(diff / 60000);
-                const diffHours = Math.floor(diff / 3600000);
-                const diffDays = Math.floor(diff / 86400000);
-
-                if (diffMinutes < 60) {
-                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
-                } else if (diffHours < 24) {
-                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
-                } else if (diffDays < 7) {
-                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
-                } else {
-                    return notifDate.toLocaleDateString();
                 }
-            }
 
-            // Faire le rendu initial et démarrer la mise à jour automatique
-            renderNotifications();
-            updateNotificationBadge();
-            setInterval(() => {
-                notificationService.fetchNewNotifications().then(() => {
-                    renderNotifications();
-                    updateNotificationBadge();
-                });
-            }, 30000); // Actualiser toutes les 30 secondes
+                // Fonction utilitaire pour obtenir l'icône selon le type
+                function getNotificationIcon(type) {
+                    const icons = {
+                        'success': 'fa-check-circle',
+                        'warning': 'fa-exclamation-triangle',
+                        'error': 'fa-times-circle',
+                        'info': 'fa-info-circle',
+                        'election': 'fa-vote-yea',
+                        'candidature': 'fa-file-signature',
+                        'profile': 'fa-user',
+                        'system': 'fa-cog'
+                    };
+                    return icons[type] || 'fa-bell';
+                }
+
+                // Fonction utilitaire pour formater la date
+                function formatNotificationDate(date) {
+                    if (!date) return 'Date inconnue';
+
+                    const now = new Date();
+                    const notifDate = new Date(date);
+                    const diff = now - notifDate;
+                    const diffMinutes = Math.floor(diff / 60000);
+                    const diffHours = Math.floor(diff / 3600000);
+                    const diffDays = Math.floor(diff / 86400000);
+
+                    if (diffMinutes < 60) {
+                        return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                    } else if (diffHours < 24) {
+                        return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                    } else if (diffDays < 7) {
+                        return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                    } else {
+                        return notifDate.toLocaleDateString('fr-FR');
+                    }
+                }
+
+                // Faire le rendu initial
+                renderNotifications();
+                updateNotificationBadge();
+
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation des notifications:', error);
+            }
         }
 
         // Initialiser les gestionnaires d'événements
