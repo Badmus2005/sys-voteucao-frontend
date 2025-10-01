@@ -1369,13 +1369,10 @@
         <span id="toastMessage"></span>
     </div>
     <script src="/assets/config.js"></script>
+    <script src="/assets/js/common.js"></script>
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
     <script>
-        // Configuration et constantes
-        const API_URL = CONFIG.BASE_URL;
-        const TOKEN = localStorage.getItem('token');
-
         // Variables globales pour cette page
         let currentElections = [];
         let electionDates = [];
@@ -1386,47 +1383,14 @@
             elections: 0
         };
 
-        // Fonctions utilitaires pour les appels API
-        async function apiCall(endpoint, options = {}) {
-            const url = `${API_URL}/api${endpoint}`;
-
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${TOKEN}`
-                }
-            };
-
-            const config = { ...defaultOptions, ...options };
-
-            try {
-                const response = await fetch(url, config);
-
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur API:', error);
-                throw error;
-            }
-        }
-
-        // Services
-        const UserService = {
-            async getProfile() {
-                return await apiCall('/users/profile');
-            }
-        };
-
+        // Services spécifiques à dashboard
         const ElectionService = {
             async getElections() {
-                return await apiCall('/elections/active');
+                return await BaseService.apiCall('/elections/active');
             },
 
             async getElectionById(id) {
-                return await apiCall(`/elections/${id}`);
+                return await BaseService.apiCall(`/elections/${id}`);
             },
 
             getElectionStatus(election) {
@@ -1442,44 +1406,25 @@
 
         const CandidateService = {
             async getCandidates(electionId) {
-                return await apiCall(`/candidates/election/${electionId}`);
+                return await BaseService.apiCall(`/candidates/election/${electionId}`);
             },
 
             async getMyCandidatures() {
-                return await apiCall('/candidats/my-candidature');
-            },
-
-            async submitCandidature(data) {
-                return await apiCall('/candidats', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
+                return await BaseService.apiCall('/candidats/my-candidature');
             }
         };
 
         const VoteService = {
-            async castVote(electionId, candidateId) {
-                return await apiCall('/votes/cast', {
-                    method: 'POST',
-                    body: JSON.stringify({ electionId, candidateId })
-                });
-            },
-
             async getMyVotes() {
-                return await apiCall('/votes/my-votes');
-            },
-
-            async getResults(electionId) {
-                return await apiCall(`/votes/results/${electionId}`);
+                return await BaseService.apiCall('/votes/my-votes');
             }
         };
 
         const ActivityService = {
             async getActivity(studentId, page = 1, limit = 5) {
-                return await apiCall(`/activity/recent?userId=${studentId}&page=${page}&limit=${limit}`);
+                return await BaseService.apiCall(`/activity/recent?userId=${studentId}&page=${page}&limit=${limit}`);
             }
         };
-
 
         // Composant ElectionCard
         const ElectionCard = {
@@ -1528,119 +1473,30 @@
             }
         };
 
-        // Fonctions d'affichage
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            // Changer l'icône selon le type
-            switch (type) {
-                case 'success':
-                    toastIcon.className = 'fa-solid fa-circle-check';
-                    break;
-                case 'error':
-                    toastIcon.className = 'fa-solid fa-circle-exclamation';
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
-                    break;
-            }
-
-            toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
-
-            // Cacher après 3 secondes
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
-        }
-
-        // Initialisation de la page
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Initialiser le système de notifications
-            initializeNotifications();
-
-            // Initialiser le menu burger
-            const burger = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            burger.addEventListener('click', function () {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
-
-            overlay.addEventListener('click', function () {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
-
-            // Gestion de la déconnexion
-            document.getElementById('logoutBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                localStorage.removeItem('userProfile');
-                window.location.href = 'login.html';
-            });
-
-            // Charger les données
-            await loadPageData();
-
-            // Initialiser les gestionnaires d'événements
-            initEventHandlers();
-
-            // Initialiser le calendrier
-            renderCalendar();
-        });
-
-        // Chargement des données de la page
+        // Fonctions spécifiques à dashboard
         async function loadPageData() {
-            showLoading();
+            Common.showLoading();
 
             try {
-                await loadUserProfilePhoto();
                 // Charger les élections en cours
                 await loadCurrentElections();
-
                 // Charger l'activité récente
                 await loadRecentActivity();
-
                 // Charger les statistiques utilisateur
                 await loadUserStatistics();
-
-                // Mettre à jour le nom d'utilisateur
-                await updateUserWelcome();
-
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                showToast('Erreur de chargement des données', 'error');
+                Common.showToast('Erreur de chargement des données', 'error');
             } finally {
-                hideLoading();
+                Common.hideLoading();
             }
         }
 
-        // Charger les élections en cours
         async function loadCurrentElections() {
             try {
                 const response = await ElectionService.getElections();
                 const data = response.data;
                 if (data && Array.isArray(data)) {
-                    // Filtrer les élections en cours
                     const now = new Date();
                     currentElections = data.filter(election => {
                         if (!election.dateDebut || !election.dateFin) return false;
@@ -1649,13 +1505,10 @@
                         return now >= startDate && now <= endDate;
                     });
 
-                    // Mettre à jour le compteur d'élections
                     userStats.elections = currentElections.length;
                     document.getElementById('statElections').textContent = userStats.elections;
 
-                    // Extraire les dates pour le calendrier
                     electionDates = data.map(e => new Date(e.dateDebut));
-
                     displayCurrentElections(currentElections);
                 } else {
                     showElectionsError('Aucune élection en cours');
@@ -1666,7 +1519,6 @@
             }
         }
 
-        // Afficher les élections en cours
         function displayCurrentElections(elections) {
             const container = document.getElementById('electionList');
             if (!container) return;
@@ -1743,9 +1595,7 @@
             if (currentPage < totalPages) loadRecentActivity(currentPage + 1);
         });
 
-
         function mapActivityLogToDisplay(log) {
-            // Adapter selon la structure de vos logs d'activité
             const actionType = log.actionType || log.type || 'INFO';
             const action = log.action || log.description || 'Action inconnue';
             const details = log.details || log.message || `Action effectuée`;
@@ -1774,7 +1624,6 @@
             }
         }
 
-        // Afficher l'activité récente
         function displayRecentActivity(activities) {
             const container = document.getElementById('activityContent');
             if (!container) return;
@@ -1806,21 +1655,17 @@
             `).join('');
         }
 
-        // Charger les statistiques utilisateur
         async function loadUserStatistics() {
             try {
-                // Récupérer les votes de l'utilisateur
                 const votesResponse = await VoteService.getMyVotes();
                 userStats.votes = votesResponse.data?.length || 0;
 
-                // Récupérer les candidatures de l'utilisateur
                 const candidaturesResponse = await CandidateService.getMyCandidatures();
                 userStats.candidatures = candidaturesResponse.data?.length || 0;
 
                 updateStatisticsDisplay();
             } catch (error) {
                 console.error('Erreur chargement statistiques:', error);
-                // Valeurs par défaut en cas d'erreur
                 userStats = {
                     candidatures: 3,
                     votes: 5,
@@ -1830,14 +1675,12 @@
             }
         }
 
-        // Mettre à jour l'affichage des statistiques
         function updateStatisticsDisplay() {
             document.getElementById('statCandidatures').textContent = userStats.candidatures;
             document.getElementById('statVotes').textContent = userStats.votes;
             document.getElementById('statElections').textContent = userStats.elections;
         }
 
-        // Rendre le calendrier
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -1846,24 +1689,18 @@
 
             if (!calendarDays || !calendarMonth) return;
 
-            // Mettre à jour le titre du mois
             const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
                 "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
             ];
             calendarMonth.textContent = `${monthNames[month]} ${year}`;
 
-            // Premier jour du mois
             const firstDay = new Date(year, month, 1);
-            // Dernier jour du mois
             const lastDay = new Date(year, month + 1, 0);
 
-            // Jours de la semaine
             const daysOfWeek = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
-            // Vider le calendrier
             calendarDays.innerHTML = '';
 
-            // Ajouter les en-têtes des jours
             daysOfWeek.forEach(day => {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
@@ -1871,26 +1708,22 @@
                 calendarDays.appendChild(dayElement);
             });
 
-            // Ajouter les cases vides avant le premier jour
             for (let i = 0; i < (firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1); i++) {
                 const emptyElement = document.createElement('div');
                 emptyElement.className = 'calendar-date';
                 calendarDays.appendChild(emptyElement);
             }
 
-            // Ajouter les jours du mois
             const today = new Date();
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const dateElement = document.createElement('div');
                 dateElement.className = 'calendar-date';
                 dateElement.textContent = day;
 
-                // Vérifier si c'est aujourd'hui
                 if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
                     dateElement.classList.add('current');
                 }
 
-                // Vérifier si ce jour a une élection
                 const currentDateObj = new Date(year, month, day);
                 const hasElection = electionDates.some(electionDate =>
                     electionDate.getDate() === currentDateObj.getDate() &&
@@ -1907,12 +1740,10 @@
             }
         }
 
-        // Attacher les événements aux cartes d'élection
         function attachElectionCardEvents() {
             document.querySelectorAll('.election-card').forEach(card => {
                 card.addEventListener('click', function () {
                     const electionId = this.dataset.electionId;
-                    // Rediriger vers la page de détails ou voter selon le statut
                     const election = currentElections.find(e => e.id == electionId);
                     if (election) {
                         const status = ElectionService.getElectionStatus(election);
@@ -1926,7 +1757,6 @@
             });
         }
 
-        // Afficher une erreur pour les élections
         function showElectionsError(message) {
             const container = document.getElementById('electionList');
             if (!container) return;
@@ -1939,7 +1769,6 @@
             `;
         }
 
-        // Afficher une erreur pour l'activité
         function showActivityError(message) {
             const container = document.getElementById('activityContent');
             if (!container) return;
@@ -1952,35 +1781,30 @@
             `;
         }
 
-        // Initialiser le système de notifications
         function initializeNotifications() {
             const notificationService = new NotificationService();
             const notificationBtn = document.getElementById('notificationBtn');
             const notificationsPanel = document.getElementById('notificationsPanel');
             const markAllReadBtn = document.getElementById('markAllReadBtn');
 
-            // Gestionnaire de clic sur le bouton de notifications
             notificationBtn.addEventListener('click', () => {
                 notificationsPanel.classList.toggle('show');
                 notificationService.markAllAsRead();
                 updateNotificationBadge();
             });
 
-            // Fermer le panneau si on clique en dehors
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.notifications-container')) {
                     notificationsPanel.classList.remove('show');
                 }
             });
 
-            // Marquer toutes les notifications comme lues
             markAllReadBtn.addEventListener('click', () => {
                 notificationService.markAllAsRead();
                 updateNotificationBadge();
                 renderNotifications();
             });
 
-            // Fonction pour mettre à jour le badge
             function updateNotificationBadge() {
                 const unreadCount = notificationService.getUnreadCount();
                 const badge = document.getElementById('notificationBadge');
@@ -1988,7 +1812,6 @@
                 badge.style.display = unreadCount > 0 ? 'flex' : 'none';
             }
 
-            // Fonction pour afficher les notifications
             function renderNotifications() {
                 const notifications = notificationService.getNotifications();
                 const container = document.getElementById('notificationsList');
@@ -2012,7 +1835,6 @@
                         </div>
                     `).join('');
 
-                // Ajouter les gestionnaires de clic pour chaque notification
                 container.querySelectorAll('.notification-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const notifId = item.dataset.id;
@@ -2023,7 +1845,6 @@
                 });
             }
 
-            // Fonction utilitaire pour obtenir l'icône selon le type
             function getNotificationIcon(type) {
                 const icons = {
                     'success': 'fa-check-circle',
@@ -2038,7 +1859,6 @@
                 return icons[type] || 'fa-bell';
             }
 
-            // Fonction utilitaire pour formater la date
             function formatNotificationDate(date) {
                 const now = new Date();
                 const notifDate = new Date(date);
@@ -2058,7 +1878,6 @@
                 }
             }
 
-            // Faire le rendu initial et démarrer la mise à jour automatique
             renderNotifications();
             updateNotificationBadge();
             setInterval(() => {
@@ -2066,18 +1885,15 @@
                     renderNotifications();
                     updateNotificationBadge();
                 });
-            }, 30000); // Actualiser toutes les 30 secondes
+            }, 30000);
         }
 
-        // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
-            // Gestionnaire de rafraîchissement
             document.getElementById('refreshElections').addEventListener('click', async function () {
                 await loadCurrentElections();
-                showToast('Liste actualisée avec succès', 'success');
+                Common.showToast('Liste actualisée avec succès', 'success');
             });
 
-            // Gestionnaire de navigation du calendrier
             document.getElementById('prevMonth').addEventListener('click', function () {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 renderCalendar();
@@ -2088,7 +1904,6 @@
                 renderCalendar();
             });
 
-            // Gestionnaire des boutons d'action
             document.getElementById('btnVote').addEventListener('click', function () {
                 window.location.href = 'vote.html';
             });
@@ -2098,56 +1913,20 @@
             });
         }
 
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', async function () {
+            if (!Common.checkAuth()) return;
 
-        // Fonction pour charger la photo de profil depuis l'API
-        async function loadUserProfilePhoto() {
-            try {
-                const userProfile = await UserService.getProfile();
-                const userData = userProfile.data;
+            // Initialiser les éléments communs
+            Common.initCommonElements();
+            await Common.loadUserProfileInHeader();
+            initializeNotifications();
 
-                // Mettre à jour l'avatar si une photo existe
-                const avatarElement = document.getElementById('userAvatar');
-                if (userData && userData.photoUrl) {
-                    // Construire l'URL complète de la photo
-                    const photoUrl = userData.photoUrl.startsWith('http')
-                        ? userData.photoUrl
-                        : `${API_URL}${userData.photoUrl}`;
-
-                    avatarElement.src = photoUrl;
-                } else {
-                    avatarElement.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
-                }
-
-                // Mettre à jour le nom d'utilisateur
-                if (userData && userData.prenom) {
-                    document.getElementById('userName').textContent = userData.prenom + ' ' + userData.nom;
-                }
-
-            } catch (error) {
-                console.error('Erreur lors du chargement de la photo de profil:', error);
-            }
-        }
-        // Mettre à jour le message de bienvenue 
-        async function updateUserWelcome() {
-            try {
-                const userProfile = await UserService.getProfile();
-                const userData = userProfile.data;
-
-                // Charger la photo de profil
-                await loadUserProfilePhoto();
-
-                if (userData && userData.prenom) {
-                    document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userData.prenom} !`;
-
-                    if (userData.filiere && userData.annee) {
-                        document.getElementById('welcomeSubtitle').textContent =
-                            `${userData.filiere} - ${userData.annee}ème année`;
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement du profil:', error);
-            }
-        }
+            // Charger les données spécifiques
+            await loadPageData();
+            initEventHandlers();
+            renderCalendar();
+        });
     </script>
 </body>
 
