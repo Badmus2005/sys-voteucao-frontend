@@ -1565,7 +1565,7 @@
         async function updateCandidateStatus() {
             const candidateId = document.getElementById('modalCandidateId').value;
             const newStatus = document.getElementById('statusSelect').value;
-            const updateBtn = document.getElementById('statusUpdateBtn');
+            const updateBtn = document.getElementById('saveStatusBtn'); // CORRECTION : Utiliser le bon ID
 
             if (!candidateId || !newStatus) {
                 showToast('Veuillez sélectionner un statut valide', 'warning');
@@ -1579,6 +1579,7 @@
             }
 
             updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mise à jour...';
             showLoading();
 
             try {
@@ -1594,16 +1595,19 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
+                    // Mettre à jour les données locales
                     const index = allCandidatures.findIndex(c => c.id == candidateId || c.candidateId == candidateId);
                     if (index !== -1) {
                         allCandidatures[index].statut = newStatus;
                     }
 
+                    // Mettre à jour l'interface
                     filterCandidatures();
                     renderTable();
                     updateTableCount();
                     loadStats();
 
+                    // Fermer le modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
                     if (modal) modal.hide();
 
@@ -1617,9 +1621,9 @@
             } finally {
                 hideLoading();
                 updateBtn.disabled = false;
+                updateBtn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
             }
         }
-
     </script>
 </body>
 
