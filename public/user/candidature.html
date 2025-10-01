@@ -1614,8 +1614,6 @@
 
                 // Mettre à jour l'avatar dans le header
                 const headerAvatar = document.getElementById('userAvatar');
-                // Mettre à jour l'avatar dans le profil
-                const profileAvatar = document.getElementById('profile-avatar-view');
 
                 if (userData && userData.photoUrl) {
                     // Construire l'URL complète de la photo
@@ -1623,34 +1621,30 @@
                         ? userData.photoUrl
                         : `${API_URL}${userData.photoUrl}`;
 
-                    if (headerAvatar) headerAvatar.src = photoUrl;
-                    if (profileAvatar) profileAvatar.src = photoUrl;
+                    if (headerAvatar) {
+                        headerAvatar.src = photoUrl;
 
-                    // Gérer les erreurs de chargement d'image
-                    const handleImageError = function () {
-                        const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
-                        if (headerAvatar) headerAvatar.src = defaultAvatar;
-                        if (profileAvatar) profileAvatar.src = defaultAvatar;
-                    };
-
-                    if (headerAvatar) headerAvatar.onerror = handleImageError;
-                    if (profileAvatar) profileAvatar.onerror = handleImageError;
+                        // Gérer les erreurs de chargement d'image
+                        headerAvatar.onerror = function () {
+                            this.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                        };
+                    }
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement de la photo de profil:', error);
             }
         }
-
         // Charger le profil utilisateur
         async function loadUserProfile() {
             try {
                 const response = await UserService.getProfile();
                 userProfile = response.data || response;
 
-                // Mettre à jour le nom d'utilisateur
+                // Mettre à jour le nom d'utilisateur DANS LE MENU HEADER
                 if (userProfile && userProfile.prenom) {
-                    document.getElementById('userName').textContent = userProfile.prenom;
+                    document.getElementById('userName').textContent = userProfile.prenom + ' ' + (userProfile.nom || '');
 
+                    // Charger la photo de profil
                     await loadUserProfilePhoto();
                 }
             } catch (error) {
