@@ -1,26 +1,49 @@
 // Configuration et constantes
 const API_URL = CONFIG.BASE_URL;
-const TOKEN = localStorage.getItem('token');
+
+// Récupérer le token dynamiquement
+function getToken() {
+    return localStorage.getItem('token');
+}
 
 // Services de base
 const BaseService = {
     async apiCall(endpoint, options = {}) {
+        const token = getToken();
         const url = `${API_URL}/api${endpoint}`;
 
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TOKEN}`
+                ...options.headers
             }
         };
+
+        // Ajouter l'autorisation seulement si le token existe
+        if (token) {
+            defaultOptions.headers.Authorization = `Bearer ${token}`;
+        }
 
         const config = { ...defaultOptions, ...options };
 
         try {
+            console.log(`API Call: ${url}`, config);
+
             const response = await fetch(url, config);
 
             if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
+                // Essayer de récupérer le message d'erreur du backend
+                let errorMessage = `Erreur HTTP: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorData.error || errorMessage;
+                    console.error('Détails erreur backend:', errorData);
+                } catch (e) {
+                    // Si la réponse n'est pas du JSON
+                    const errorText = await response.text();
+                    errorMessage = errorText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
 
             return await response.json();
