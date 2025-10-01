@@ -1433,8 +1433,17 @@
             try {
                 const response = await UserService.getProfile();
                 userProfile = response.data || response;
+
+                console.log('Profil utilisateur chargé:', userProfile);
+
+                // Vérifier que nom et prenom sont présents
+                if (!userProfile.nom || !userProfile.prenom) {
+                    console.warn('Nom ou prénom manquant dans le profil utilisateur');
+                    Common.showToast('Votre profil est incomplet. Veuillez le compléter avant de candidater.', 'warning');
+                }
             } catch (error) {
                 console.error('Erreur chargement profil:', error);
+                Common.showToast('Erreur lors du chargement du profil', 'error');
             }
         }
 
