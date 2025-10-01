@@ -1430,7 +1430,7 @@
                 }
 
                 const result = await response.json();
-
+                console.log('Résultat des résultats:', result);
                 // Vérifier le format de la réponse
                 if (result.success && result.data) {
                     electionResults = result.data;
@@ -1490,9 +1490,17 @@
             displayElectionResults();
         }
 
-        // Fonction pour afficher les résultats d'une élection
         function displayElectionResults() {
             if (!electionResults || !currentElection) return;
+
+            const stats = electionResults.statistiques;
+            const candidates = electionResults.resultats;
+
+            if (!Array.isArray(candidates)) {
+                console.warn('Résultats mal formatés:', electionResults);
+                showToast('Aucun résultat disponible', 'warning');
+                return;
+            }
 
             // Afficher les sections
             document.getElementById('electionStats').style.display = 'grid';
@@ -1505,55 +1513,50 @@
             const totalCandidates = document.getElementById('totalCandidates');
             const participationRate = document.getElementById('participationRate');
 
-            if (totalVoters) totalVoters.textContent = electionResults.totalVoters;
-            if (totalVotes) totalVotes.textContent = electionResults.totalVotes;
-            if (totalCandidates) totalCandidates.textContent = electionResults.candidates.length;
+            if (totalVoters) totalVoters.textContent = stats.totalInscrits;
+            if (totalVotes) totalVotes.textContent = stats.totalVotes;
+            if (totalCandidates) totalCandidates.textContent = candidates.length;
 
-            const participation = ((electionResults.totalVotes / electionResults.totalVoters) * 100).toFixed(1);
-            if (participationRate) participationRate.textContent = `${participation}%`;
+            if (participationRate) participationRate.textContent = `${stats.tauxParticipation}%`;
 
-            // Mettre à jour les barres de progression
+            // Barres de progression
             document.getElementById('votersProgress').style.width = '100%';
-            document.getElementById('votesProgress').style.width = `${participation}%`;
+            document.getElementById('votesProgress').style.width = `${stats.tauxParticipation}%`;
             document.getElementById('candidatesProgress').style.width = '100%';
-            document.getElementById('participationProgress').style.width = `${participation}%`;
+            document.getElementById('participationProgress').style.width = `${stats.tauxParticipation}%`;
 
-            // Mettre à jour le tableau des résultats
+            // Tableau des résultats
             const tableBody = document.getElementById('resultsTableBody');
             if (!tableBody) return;
 
             tableBody.innerHTML = '';
 
-            // Trier les candidats par nombre de voix (décroissant)
-            const sortedCandidates = [...electionResults.candidates].sort((a, b) => b.votes - a.votes);
+            const sortedCandidates = [...candidates].sort((a, b) => b.scoreFinal - a.scoreFinal);
 
             sortedCandidates.forEach((candidate, index) => {
                 const row = document.createElement('tr');
                 const isWinner = index === 0;
 
                 row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>
-                        <div class="candidate-info">
-                            <img src="${candidate.photo}" alt="${candidate.name}" class="candidate-photo">
-                            <div>
-                                <div class="candidate-name">${candidate.name}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>${candidate.party}</td>
-                    <td class="vote-count">${candidate.votes}</td>
-                    <td class="vote-percentage">${candidate.percentage}%</td>
-                    <td>${isWinner ? '<span class="winner-badge">Gagnant</span>' : ''}</td>
-                `;
+            <td>${index + 1}</td>
+            <td>
+                <div class="candidate-info">
+                    <img src="${candidate.photo || 'default.jpg'}" alt="${candidate.nom}" class="candidate-photo">
+                    <div>
+                        <div class="candidate-name">${candidate.nom} ${candidate.prenom || ''}</div>
+                    </div>
+                </div>
+            </td>
+            <td>${candidate.party || '-'}</td>
+            <td class="vote-count">${candidate.details.totalVotes}</td>
+            <td class="vote-percentage">${candidate.scoreFinal}%</td>
+            <td>${isWinner ? '<span class="winner-badge">Gagnant</span>' : ''}</td>
+        `;
 
                 tableBody.appendChild(row);
             });
 
-            // Mettre à jour le statut de publication
             updatePublicationStatus();
-
-            // Générer les graphiques
             generateCharts();
         }
 
