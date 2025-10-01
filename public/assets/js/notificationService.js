@@ -191,21 +191,7 @@ class NotificationService {
         }, 30000);
     }
 
-    // Méthode pour ajouter une notification (pour les tests)
-    addTestNotification() {
-        const newNotification = {
-            id: Date.now().toString(),
-            title: 'Notification de test',
-            message: 'Ceci est une notification de test',
-            category: 'system',
-            timestamp: new Date().toISOString(),
-            read: false
-        };
-
-        this.notifications.unshift(newNotification);
-        this.notifySubscribers();
-    }
 }
 
-// Créer une instance unique du service
+
 const notificationService = new NotificationService();
