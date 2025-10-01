@@ -1425,12 +1425,10 @@
     </div>
 
     <script src="/assets/config.js"></script>
+    <script src="/assets/js/common.js"></script>
     <script src="/assets/js/notificationService.js"></script>
+    <script src="/assets/initNotifications.js"></script>
     <script>
-        // Configuration et constantes
-        const API_URL = CONFIG.BASE_URL;
-        const TOKEN = localStorage.getItem('token');
-
         // Variables globales pour cette page
         let allElections = [];
         let allCandidates = [];
@@ -1439,42 +1437,14 @@
         let voteToken = null;
         let studentInfo = null;
 
-        // Fonctions utilitaires pour les appels API
-        async function apiCall(endpoint, options = {}) {
-            const url = `${API_URL}${endpoint}`;
-
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${TOKEN}`
-                }
-            };
-
-            const config = { ...defaultOptions, ...options };
-
-            try {
-                const response = await fetch(url, config);
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur API:', error);
-                throw error;
-            }
-        }
-
-        // Services
+        // Services spécifiques à vote
         const ElectionService = {
             async getActiveElections() {
-                return await apiCall('/api/elections/active');
+                return await BaseService.apiCall('/elections/active');
             },
 
             async getElectionById(id) {
-                return await apiCall(`/api/elections/${id}`);
+                return await BaseService.apiCall(`/elections/${id}`);
             },
 
             getElectionStatus(election) {
@@ -1499,17 +1469,17 @@
 
         const CandidateService = {
             async getCandidatesByElection(electionId) {
-                return await apiCall(`/api/candidats/elections/${electionId}`);
+                return await BaseService.apiCall(`/candidats/elections/${electionId}`);
             }
         };
 
         const VoteService = {
             async getVoteToken(electionId) {
-                return await apiCall(`/api/votes/token/${electionId}`);
+                return await BaseService.apiCall(`/votes/token/${electionId}`);
             },
 
             async validateToken(token, electionId) {
-                return await apiCall('/api/votes/validate-token', {
+                return await BaseService.apiCall('/votes/validate-token', {
                     method: 'POST',
                     body: JSON.stringify({
                         voteToken: token,
@@ -1519,7 +1489,7 @@
             },
 
             async submitVote(voteData) {
-                return await apiCall('/api/votes', {
+                return await BaseService.apiCall('/votes', {
                     method: 'POST',
                     body: JSON.stringify(voteData)
                 });
@@ -1527,7 +1497,7 @@
 
             async hasVoted(electionId) {
                 try {
-                    const response = await apiCall(`/api/votes/my-votes/election/${electionId}`);
+                    const response = await BaseService.apiCall(`/votes/my-votes/election/${electionId}`);
 
                     if (response && response.success) {
                         return response.hasVoted;
@@ -1541,7 +1511,7 @@
 
             async getMyVotesHistory() {
                 try {
-                    const response = await apiCall('/api/votes/my-votes');
+                    const response = await BaseService.apiCall('/votes/my-votes');
                     return response;
                 } catch (error) {
                     console.error('Erreur récupération historique votes:', error);
@@ -1551,7 +1521,7 @@
 
             async getVoteStats() {
                 try {
-                    const response = await apiCall('/api/votes/my-votes/stats');
+                    const response = await BaseService.apiCall('/votes/my-votes/stats');
                     return response;
                 } catch (error) {
                     console.error('Erreur récupération stats votes:', error);
@@ -1562,7 +1532,7 @@
 
         const StudentService = {
             async getStudentInfo() {
-                return await apiCall('/api/users/profile');
+                return await BaseService.apiCall('/users/profile');
             }
         };
 
@@ -1631,42 +1601,6 @@
             }
         };
 
-        // Fonctions d'affichage
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            // Changer l'icône selon le type
-            switch (type) {
-                case 'success':
-                    toastIcon.className = 'fa-solid fa-circle-check';
-                    break;
-                case 'error':
-                    toastIcon.className = 'fa-solid fa-circle-exclamation';
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fa-solid fa-triangle-exclamation';
-                    break;
-            }
-
-            toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
-
-            // Cacher après 3 secondes
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
-        }
-
         // Vérifier si l'étudiant est concerné par l'élection
         function isStudentEligibleForElection(election) {
             if (!studentInfo || !studentInfo.data) return false;
@@ -1693,55 +1627,12 @@
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            // Vérifier que l'utilisateur est connecté
-            if (!TOKEN) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!Common.checkAuth()) return;
 
-            // Initialiser le service de notifications
-            const notificationBtn = document.querySelector('.notification-btn');
-            const notificationPanel = document.getElementById('notificationPanel');
-            const notificationService = new NotificationService(notificationBtn, notificationPanel);
-            await notificationService.initialize();
-
-            // Gestion du clic en dehors du panneau de notifications
-            document.addEventListener('click', function (e) {
-                const notificationPanel = document.getElementById('notificationPanel');
-                const notificationBtn = document.querySelector('.notification-btn');
-
-                if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
-                    notificationPanel.classList.remove('active');
-                }
-            });
-
-            // Initialiser le menu burger
-            const burger = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            if (burger && sidebar && overlay) {
-                burger.addEventListener('click', function () {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
-
-                overlay.addEventListener('click', function () {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-            }
-
-            // Gestion de la déconnexion
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userProfile');
-                    window.location.href = 'login.html';
-                });
-            }
+            // Initialiser les éléments communs
+            Common.initCommonElements();
+            await Common.loadUserProfileInHeader();
+            initializeNotifications();
 
             // Charger les informations de l'étudiant
             await loadStudentInfo();
@@ -1781,16 +1672,16 @@
 
         // Chargement des données de la page
         async function loadPageData() {
-            showLoading();
+            Common.showLoading();
 
             try {
                 // Charger les élections actives
                 await loadElections();
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                showToast('Erreur de chargement des données', 'error');
+                Common.showToast('Erreur de chargement des données', 'error');
             } finally {
-                hideLoading();
+                Common.hideLoading();
             }
         }
 
@@ -1895,7 +1786,7 @@
         async function selectElection(election) {
             // Vérifier l'éligibilité
             if (!isStudentEligibleForElection(election)) {
-                showToast('Vous n\'êtes pas éligible pour cette élection', 'warning');
+                Common.showToast('Vous n\'êtes pas éligible pour cette élection', 'warning');
                 return;
             }
 
@@ -1903,7 +1794,7 @@
             const hasVoted = await VoteService.hasVoted(election.id);
 
             if (hasVoted) {
-                showToast('Vous avez déjà voté pour cette élection', 'warning');
+                Common.showToast('Vous avez déjà voté pour cette élection', 'warning');
                 return;
             }
 
@@ -2041,7 +1932,7 @@
                     // Vérifier que l'ID est valide
                     if (!candidateId || candidateId === 'undefined') {
                         console.error('ID de candidat invalide:', candidateId);
-                        showToast('Erreur de sélection du candidat', 'error');
+                        Common.showToast('Erreur de sélection du candidat', 'error');
                         return;
                     }
 
@@ -2262,7 +2153,7 @@
                 const tokenModal = document.getElementById('tokenValidationModal');
                 if (tokenModal) tokenModal.classList.remove('active');
 
-                showToast(error.message || 'Une erreur est survenue lors de l\'enregistrement de votre vote', 'error');
+                Common.showToast(error.message || 'Une erreur est survenue lors de l\'enregistrement de votre vote', 'error');
 
                 // Réactiver le bouton
                 if (submitBtn) {
@@ -2310,6 +2201,123 @@
             `;
         }
 
+        // Initialiser le service de notifications
+        function initializeNotifications() {
+            const notificationService = new NotificationService();
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            // Gestionnaire de clic sur le bouton de notifications
+            notificationBtn.addEventListener('click', () => {
+                notificationsPanel.classList.toggle('show');
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+            });
+
+            // Fermer le panneau si on clique en dehors
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notifications-container')) {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+
+            // Marquer toutes les notifications comme lues
+            markAllReadBtn.addEventListener('click', () => {
+                notificationService.markAllAsRead();
+                updateNotificationBadge();
+                renderNotifications();
+            });
+
+            // Fonction pour mettre à jour le badge
+            function updateNotificationBadge() {
+                const unreadCount = notificationService.getUnreadCount();
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+            }
+
+            // Fonction pour afficher les notifications
+            function renderNotifications() {
+                const notifications = notificationService.getNotifications();
+                const container = document.getElementById('notificationsList');
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                // Ajouter les gestionnaires de clic pour chaque notification
+                container.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const notifId = item.dataset.id;
+                        notificationService.markAsRead(notifId);
+                        item.classList.remove('unread');
+                        updateNotificationBadge();
+                    });
+                });
+            }
+
+            // Fonction utilitaire pour obtenir l'icône selon le type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'success': 'fa-check-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'error': 'fa-times-circle',
+                    'info': 'fa-info-circle',
+                    'election': 'fa-vote-yea',
+                    'candidature': 'fa-file-signature',
+                    'profile': 'fa-user',
+                    'system': 'fa-cog'
+                };
+                return icons[type] || 'fa-bell';
+            }
+
+            // Fonction utilitaire pour formater la date
+            function formatNotificationDate(date) {
+                const now = new Date();
+                const notifDate = new Date(date);
+                const diff = now - notifDate;
+                const diffMinutes = Math.floor(diff / 60000);
+                const diffHours = Math.floor(diff / 3600000);
+                const diffDays = Math.floor(diff / 86400000);
+
+                if (diffMinutes < 60) {
+                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 24) {
+                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                } else if (diffDays < 7) {
+                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                } else {
+                    return notifDate.toLocaleDateString();
+                }
+            }
+
+            // Faire le rendu initial et démarrer la mise à jour automatique
+            renderNotifications();
+            updateNotificationBadge();
+            setInterval(() => {
+                notificationService.fetchNewNotifications().then(() => {
+                    renderNotifications();
+                    updateNotificationBadge();
+                });
+            }, 30000); // Actualiser toutes les 30 secondes
+        }
+
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
             // Gestionnaire de soumission de vote
@@ -2355,7 +2363,7 @@
                     if (spinner) spinner.style.display = 'none';
                     button.disabled = false;
 
-                    showToast('Liste actualisée avec succès', 'success');
+                    Common.showToast('Liste actualisée avec succès', 'success');
                 });
             }
 

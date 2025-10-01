@@ -1154,36 +1154,6 @@
             </div>
         </header>
 
-        <script>
-            // Fonction pour charger la photo de profil et le nom
-            async function loadUserProfilePhoto() {
-                try {
-                    let userData = null;
-                    if (window.UserService && UserService.getProfile) {
-                        const response = await UserService.getProfile();
-                        userData = response.data || response;
-                    } else if (window.StudentService && StudentService.getStudentInfo) {
-                        const response = await StudentService.getStudentInfo();
-                        userData = response.data || response;
-                    }
-                    const avatarElement = document.getElementById('userAvatar');
-                    if (userData && userData.photoUrl && avatarElement) {
-                        const photoUrl = userData.photoUrl.startsWith('http') ? userData.photoUrl : (window.API_URL ? window.API_URL + userData.photoUrl : userData.photoUrl);
-                        avatarElement.src = photoUrl;
-                        avatarElement.onerror = function () {
-                            this.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
-                        };
-                    }
-                    if (userData && userData.prenom) {
-                        const userName = document.getElementById('userName');
-                        if (userName) userName.textContent = userData.prenom + ' ' + (userData.nom || '');
-                    }
-                } catch (error) {
-                    console.error('Erreur chargement profil:', error);
-                }
-            }
-            document.addEventListener('DOMContentLoaded', loadUserProfilePhoto);
-        </script>
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -1446,48 +1416,18 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
-    <script src="/assets/config.js"></script>
+    ript src="/assets/config.js"></script>
+    <script src="/assets/js/common.js"></script>
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
     <script>
-        // Configuration et constantes
-        const API_URL = CONFIG.BASE_URL;
-        const TOKEN = localStorage.getItem('token');
-
         // Variables globales pour cette page
         let allElections = [];
         let currentResults = null;
         let votesChart = null;
         let comparisonChart = null;
 
-        // Fonctions utilitaires pour les appels API
-        async function apiCall(endpoint, options = {}) {
-            const url = `${API_URL}/api${endpoint}`;
-
-            const defaultOptions = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${TOKEN}`
-                }
-            };
-
-            const config = { ...defaultOptions, ...options };
-
-            try {
-                const response = await fetch(url, config);
-
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erreur API:', error);
-                throw error;
-            }
-        }
-
-        // Services
+        // Services spécifiques à résultats
         const ElectionService = {
             async getElections(filters = {}) {
                 let endpoint = '/elections';
@@ -1504,55 +1444,19 @@
                     endpoint += `?${queryParams.toString()}`;
                 }
 
-                return await apiCall(endpoint);
+                return await BaseService.apiCall(endpoint);
             },
 
             async getElectionById(id) {
-                return await apiCall(`/elections/${id}`);
+                return await BaseService.apiCall(`/elections/${id}`);
             }
         };
 
         const VoteService = {
             async getResults(electionId) {
-                return await apiCall(`/votes/results/${electionId}`);
+                return await BaseService.apiCall(`/votes/results/${electionId}`);
             }
         };
-
-        // Fonctions d'affichage
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            // Changer l'icône selon le type
-            switch (type) {
-                case 'success':
-                    toastIcon.className = 'fas fa-circle-check';
-                    break;
-                case 'error':
-                    toastIcon.className = 'fas fa-circle-exclamation';
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fas fa-triangle-exclamation';
-                    break;
-            }
-
-            toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
-
-            // Cacher après 3 secondes
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
-        }
 
         // Fonction utilitaire pour formater les dates
         function formatDate(dateString) {
@@ -1567,37 +1471,12 @@
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            // Vérifier que l'utilisateur est connecté
-            if (!localStorage.getItem('token')) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!Common.checkAuth()) return;
 
-            // Initialiser le système de notifications
+            // Initialiser les éléments communs
+            Common.initCommonElements();
+            await Common.loadUserProfileInHeader();
             initializeNotifications();
-
-            // Initialiser le menu burger
-            const burger = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            burger.addEventListener('click', function () {
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
-
-            overlay.addEventListener('click', function () {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
-
-            // Gestion de la déconnexion
-            document.getElementById('logoutBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                localStorage.removeItem('userProfile');
-                window.location.href = 'login.html';
-            });
 
             // Initialiser les gestionnaires d'événements
             initEventHandlers();
@@ -1606,7 +1485,7 @@
             await loadPageData();
         });
 
-        // Initialiser le système de notifications
+        // Initialiser le service de notifications
         function initializeNotifications() {
             const notificationService = new NotificationService();
             const notificationBtn = document.getElementById('notificationBtn');
@@ -1655,16 +1534,16 @@
                 container.innerHTML = notifications
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .map(notif => `
-                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                            <div class="notification-icon">
-                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-text">${notif.message}</div>
-                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
-                            </div>
+                    <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                        <div class="notification-icon">
+                            <i class="fas ${getNotificationIcon(notif.type)}"></i>
                         </div>
-                    `).join('');
+                        <div class="notification-content">
+                            <div class="notification-text">${notif.message}</div>
+                            <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                        </div>
+                    </div>
+                `).join('');
 
                 // Ajouter les gestionnaires de clic pour chaque notification
                 container.querySelectorAll('.notification-item').forEach(item => {
@@ -1728,7 +1607,7 @@
             // Gestionnaire de rafraîchissement
             document.getElementById('refreshResults').addEventListener('click', async function () {
                 await loadPageData();
-                showToast('Résultats actualisés avec succès', 'success');
+                Common.showToast('Résultats actualisés avec succès', 'success');
             });
 
             // Gestionnaire de filtres
@@ -1746,7 +1625,7 @@
 
         // Chargement des données de la page
         async function loadPageData() {
-            showLoading();
+            Common.showLoading();
 
             try {
                 // Charger les élections terminées
@@ -1767,9 +1646,9 @@
 
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                showToast('Erreur de chargement des données', 'error');
+                Common.showToast('Erreur de chargement des données', 'error');
             } finally {
-                hideLoading();
+                Common.hideLoading();
             }
         }
 
@@ -1820,7 +1699,7 @@
 
         // Charger les résultats d'une élection
         async function loadElectionResults(electionId) {
-            showLoading();
+            Common.showLoading();
 
             try {
                 const data = await VoteService.getResults(electionId);
@@ -1834,10 +1713,10 @@
                 }
             } catch (error) {
                 console.error('Erreur chargement résultats:', error);
-                showToast('Erreur de chargement des résultats', 'error');
+                Common.showToast('Erreur de chargement des résultats', 'error');
                 showNoResults();
             } finally {
-                hideLoading();
+                Common.hideLoading();
             }
         }
 
@@ -1897,27 +1776,27 @@
                 else if (index === 2) rankClass = 'rank-3';
 
                 row.innerHTML = `
-                    <td class="candidate-rank ${rankClass}">${index + 1}</td>
-                    <td>
-                        <div class="candidate-info">
-                            <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
-                                 alt="${candidate.prenom} ${candidate.nom}" 
-                                 class="candidate-avatar"
-                                 onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'">
-                            <div>
-                                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
-                                <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
-                            </div>
+                <td class="candidate-rank ${rankClass}">${index + 1}</td>
+                <td>
+                    <div class="candidate-info">
+                        <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
+                             alt="${candidate.prenom} ${candidate.nom}" 
+                             class="candidate-avatar"
+                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'">
+                        <div>
+                            <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                            <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
                         </div>
-                    </td>
-                    <td class="vote-count">${candidate.details.totalVotes || 0}</td>
-                    <td class="vote-percentage">${candidate.scoreFinal || 0}%</td>
-                    <td>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${candidate.scoreFinal || 0}%"></div>
-                        </div>
-                    </td>
-                `;
+                    </div>
+                </td>
+                <td class="vote-count">${candidate.details.totalVotes || 0}</td>
+                <td class="vote-percentage">${candidate.scoreFinal || 0}%</td>
+                <td>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${candidate.scoreFinal || 0}%"></div>
+                    </div>
+                </td>
+            `;
 
                 rankingBody.appendChild(row);
             });
@@ -2074,7 +1953,7 @@
 
             if (allElections.length > 0) {
                 await loadElectionResults(allElections[0].id);
-                showToast('Filtres appliqués avec succès', 'success');
+                Common.showToast('Filtres appliqués avec succès', 'success');
             } else {
                 showNoResults();
             }
@@ -2087,7 +1966,7 @@
             document.getElementById('filter-annee').value = '';
 
             await loadPageData();
-            showToast('Filtres réinitialisés', 'success');
+            Common.showToast('Filtres réinitialisés', 'success');
         }
 
         // Exporter les résultats
@@ -2123,7 +2002,7 @@
             link.click();
             document.body.removeChild(link);
 
-            showToast('Résultats exportés avec succès', 'success');
+            Common.showToast('Résultats exportés avec succès', 'success');
         }
 
         // Exposer les fonctions globales pour cette page
