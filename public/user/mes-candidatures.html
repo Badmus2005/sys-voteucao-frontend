@@ -1643,8 +1643,46 @@
 
             async getCandidatureDetails(id) {
                 return await apiCall(`/candidats/${id}`);
+            },
+
+            async getElectionDetails(electionId) {
+                return await apiCall(`/elections/${electionId}`);
             }
         };
+
+        async function loadElectionsDetails() {
+            showLoading();
+
+            try {
+                // Pour chaque candidature, récupérer les détails de l'élection
+                for (let i = 0; i < allCandidatures.length; i++) {
+                    const candidature = allCandidatures[i];
+
+                    // Vérifier si l'ID d'élection existe
+                    if (candidature.electionId) {
+                        try {
+                            const electionResponse = await CandidatureService.getElectionDetails(candidature.electionId);
+                            if (electionResponse && electionResponse.success) {
+                                // Ajouter les données de l'élection à la candidature
+                                allCandidatures[i].election = electionResponse.election;
+                                console.log(`Détails élection chargés pour ${candidature.electionId}:`, electionResponse.election);
+                            }
+                        } catch (error) {
+                            console.warn(`Impossible de charger les détails de l'élection ${candidature.electionId}:`, error);
+                            // Créer un objet élection vide pour éviter les erreurs
+                            allCandidatures[i].election = {};
+                        }
+                    } else {
+                        console.warn("Candidature sans electionId:", candidature);
+                        allCandidatures[i].election = {};
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des détails des élections:', error);
+            } finally {
+                hideLoading();
+            }
+        }
 
         // Fonctions d'affichage
         function showLoading() {
@@ -1826,11 +1864,8 @@
                     allCandidatures = response.candidatures;
                     console.log("Candidatures chargées:", allCandidatures);
 
-                    // Vérifiez la structure de la première candidature
-                    if (allCandidatures.length > 0) {
-                        console.log("Structure d'une candidature:", allCandidatures[0]);
-                        console.log("Données élection:", allCandidatures[0].election);
-                    }
+                    // Charger les détails des élections associées
+                    await loadElectionsDetails();
 
                     filteredCandidatures = [...allCandidatures];
                     displayCandidatures(filteredCandidatures);
@@ -1859,87 +1894,100 @@
             }
 
             container.innerHTML = candidatures.map(candidature => {
-                // CORRECTION : Accéder aux données de l'élection correctement
+                // CORRECTION RENFORCÉE : Gestion robuste des données d'élection
                 const election = candidature.election || {};
                 const statut = candidature.statut || 'en_attente';
 
-                // CORRECTION : Vérifications plus robustes
-                const electionTitre = election.titre || 'Titre non spécifié';
+                // Utiliser l'ID de l'élection comme fallback pour le titre
+                const electionTitre = election.titre ||
+                    (candidature.electionId ? `Élection #${candidature.electionId}` : 'Élection non spécifiée');
                 const electionType = election.type || 'Type non spécifié';
                 const ecoleNom = election.ecole || 'École non spécifiée';
                 const filiere = election.filiere || null;
                 const annee = election.annee || null;
 
+                console.log("Affichage candidature:", {
+                    id: candidature.id,
+                    election: election,
+                    electionId: candidature.electionId
+                });
+
                 return `
-    <div class="candidature-card" data-candidature-id="${candidature.id}">
-        <div class="candidature-card-header">
-            <div class="candidature-info">
-                <h3 class="candidature-card-title">${electionTitre}</h3>
-                <div class="candidature-card-subtitle">
-                    ${ElectionService.getElectionTypeLabel(electionType)} •
-                    ${ecoleNom}
-                </div>
-                ${filiere ? `<div class="candidature-card-subtitle">Filière: ${filiere}</div>` : ''}
+<div class="candidature-card" data-candidature-id="${candidature.id}">
+    <div class="candidature-card-header">
+        <div class="candidature-info">
+            <h3 class="candidature-card-title">${electionTitre}</h3>
+            <div class="candidature-card-subtitle">
+                ${ElectionService.getElectionTypeLabel(electionType)} •
+                ${ecoleNom}
             </div>
-            <span class="candidature-status status-${statut.toLowerCase()}">
-                ${getStatusText(statut)}
-            </span>
+            ${filiere ? `<div class="candidature-card-subtitle">Filière: ${filiere}</div>` : ''}
         </div>
-    
-        <div class="candidature-card-content">
-            <div class="candidature-card-meta">
-                <div class="meta-item">
-                    <i class="fas fa-university"></i>
-                    <strong>École:</strong> ${ecoleNom}
-                </div>
-                ${filiere ? `
-                <div class="meta-item">
-                    <i class="fas fa-layer-group"></i>
-                    <strong>Filière:</strong> ${filiere}
-                </div>
-                ` : ''}
-                ${annee ? `
-                <div class="meta-item">
-                    <i class="fas fa-calendar"></i>
-                    <strong>Année:</strong> ${annee}
-                </div>
-                ` : ''}
-                <div class="meta-item">
-                    <i class="fas fa-calendar-days"></i>
-                    <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
-                </div>
+        <span class="candidature-status status-${statut.toLowerCase()}">
+            ${getStatusText(statut)}
+        </span>
+    </div>
+
+    <div class="candidature-card-content">
+        <div class="candidature-card-meta">
+            <div class="meta-item">
+                <i class="fas fa-university"></i>
+                <strong>École:</strong> ${ecoleNom}
             </div>
-    
-            ${candidature.slogan ? `
-            <div class="candidature-card-slogan">
-                <i class="fas fa-quote-left"></i>
-                "${candidature.slogan}"
+            ${filiere ? `
+            <div class="meta-item">
+                <i class="fas fa-layer-group"></i>
+                <strong>Filière:</strong> ${filiere}
             </div>
             ` : ''}
-    
-            <div class="candidature-card-actions">
-                <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
-                    <i class="fas fa-eye"></i>
-                    Voir détails
-                </button>
-    
-                ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
-                <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
-                    <i class="fas fa-pen-to-square"></i>
-                    Modifier
-                </button>
-                ` : ''}
-    
-                ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
-                <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
-                    <i class="fas fa-trash"></i>
-                    Annuler
-                </button>
-                ` : ''}
+            ${annee ? `
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <strong>Année:</strong> ${annee}
             </div>
+            ` : ''}
+            <div class="meta-item">
+                <i class="fas fa-calendar-days"></i>
+                <strong>Soumis le:</strong> ${formatDate(candidature.createdAt || candidature.dateSoumission)}
+            </div>
+            ${candidature.electionId ? `
+            <div class="meta-item">
+                <i class="fas fa-hashtag"></i>
+                <strong>ID Élection:</strong> ${candidature.electionId}
+            </div>
+            ` : ''}
+        </div>
+
+        ${candidature.slogan ? `
+        <div class="candidature-card-slogan">
+            <i class="fas fa-quote-left"></i>
+            "${candidature.slogan}"
+        </div>
+        ` : ''}
+
+        <div class="candidature-card-actions">
+            <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-eye"></i>
+                Voir détails
+            </button>
+
+            ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
+            <button class="btn btn-warning edit-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-pen-to-square"></i>
+                Modifier
+            </button>
+            ` : ''}
+
+            ${(statut === 'EN_ATTENTE' || statut === 'en_attente') ? `
+            <button class="btn btn-danger cancel-btn" data-candidature-id="${candidature.id}">
+                <i class="fas fa-trash"></i>
+                Annuler
+            </button>
+            ` : ''}
         </div>
     </div>
-    `;
+</div>
+`;
             }).join('');
 
             // Ajouter les événements
@@ -1958,84 +2006,91 @@
                     const election = candidature.election || {};
                     const statut = candidature.statut || 'en_attente';
 
-                    // CORRECTION : Vérifications robustes pour les détails
-                    const electionTitre = election.titre || 'Non spécifié';
-                    const electionType = election.type || 'Non spécifié';
-                    const ecoleNom = election.ecole || 'Non spécifié';
+                    // CORRECTION RENFORCÉE pour les détails
+                    const electionTitre = election.titre ||
+                        (candidature.electionId ? `Élection #${candidature.electionId}` : 'Élection non spécifiée');
+                    const electionType = election.type || 'Type non spécifié';
+                    const ecoleNom = election.ecole || 'École non spécifiée';
                     const filiere = election.filiere || null;
                     const annee = election.annee || null;
 
                     const modalBody = document.getElementById('detailModalBody');
                     modalBody.innerHTML = `
-    <div class="detail-section">
-        <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Élection</span>
-                <span class="info-value">${electionTitre}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Type</span>
-                <span class="info-value">${ElectionService.getElectionTypeLabel(electionType)}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">École</span>
-                <span class="info-value">${ecoleNom}</span>
-            </div>
-            ${filiere ? `
-            <div class="info-item">
-                <span class="info-label">Filière</span>
-                <span class="info-value">${filiere}</span>
-            </div>
-            ` : ''}
-            ${annee ? `
-            <div class="info-item">
-                <span class="info-label">Année</span>
-                <span class="info-value">${annee}</span>
-            </div>
-            ` : ''}
+<div class="detail-section">
+    <h3><i class="fas fa-info-circle"></i> Informations générales</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Élection</span>
+            <span class="info-value">${electionTitre}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Type</span>
+            <span class="info-value">${ElectionService.getElectionTypeLabel(electionType)}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">École</span>
+            <span class="info-value">${ecoleNom}</span>
+        </div>
+        ${filiere ? `
+        <div class="info-item">
+            <span class="info-label">Filière</span>
+            <span class="info-value">${filiere}</span>
+        </div>
+        ` : ''}
+        ${annee ? `
+        <div class="info-item">
+            <span class="info-label">Année</span>
+            <span class="info-value">${annee}</span>
+        </div>
+        ` : ''}
+        ${candidature.electionId ? `
+        <div class="info-item">
+            <span class="info-label">ID Élection</span>
+            <span class="info-value">${candidature.electionId}</span>
+        </div>
+        ` : ''}
+    </div>
+</div>
+
+<div class="detail-section">
+    <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-label">Date de soumission</span>
+            <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Dernière modification</span>
+            <span class="info-value">${formatDate(candidature.updatedAt)}</span>
         </div>
     </div>
-    
-    <div class="detail-section">
-        <h3><i class="fas fa-calendar"></i> Dates importantes</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Date de soumission</span>
-                <span class="info-value">${formatDate(candidature.createdAt || candidature.dateSoumission)}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Dernière modification</span>
-                <span class="info-value">${formatDate(candidature.updatedAt)}</span>
-            </div>
-        </div>
+</div>
+
+<div class="detail-section">
+    <h3><i class="fas fa-chart-bar"></i> Statut</h3>
+    <div class="candidature-status status-${statut.toLowerCase()}">
+        ${getStatusText(statut)}
     </div>
-    
-    <div class="detail-section">
-        <h3><i class="fas fa-chart-bar"></i> Statut</h3>
-        <div class="candidature-status status-${statut.toLowerCase()}">
-            ${getStatusText(statut)}
-        </div>
+</div>
+
+${candidature.slogan ? `
+<div class="detail-section">
+    <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
+    <div class="slogan-display">
+        "${candidature.slogan}"
     </div>
-    
-    ${candidature.slogan ? `
-    <div class="detail-section">
-        <h3><i class="fas fa-quote-left"></i> Slogan de campagne</h3>
-        <div class="slogan-display">
-            "${candidature.slogan}"
-        </div>
+</div>
+` : ''}
+
+${candidature.programme ? `
+<div class="detail-section">
+    <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
+    <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
+        ${candidature.programme}
     </div>
-    ` : ''}
-    
-    ${candidature.programme ? `
-    <div class="detail-section">
-        <h3><i class="fas fa-file-alt"></i> Programme électoral</h3>
-        <div style="white-space: pre-line; line-height: 1.6; padding: 1rem; background: var(--light); border-radius: 8px;">
-            ${candidature.programme}
-        </div>
-    </div>
-    ` : ''}
-    `;
+</div>
+` : ''}
+`;
 
                     openModal('detailModal');
                 } else {
@@ -2048,7 +2103,6 @@
                 hideLoading();
             }
         }
-
         // Ouvrir la modale d'édition
         function openEditModal(candidatureId) {
             const candidature = allCandidatures.find(c => c.id == candidatureId);
