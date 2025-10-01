@@ -1337,8 +1337,7 @@
 
                 const result = await response.json();
 
-                // Vérifier le format de la réponse
-                if (result.data) {
+                if (result.success && result.data) {
                     elections = Array.isArray(result.data) ? result.data : [];
                     populateElectionSelect();
                 } else {
@@ -1346,6 +1345,7 @@
                     elections = [];
                     loadDemoElections();
                 }
+
             } catch (error) {
                 console.error('Erreur lors du chargement des élections:', error);
                 showToast('Erreur lors du chargement des élections', 'error');
