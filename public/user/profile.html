@@ -1904,6 +1904,7 @@
         }
 
         // Upload avatar
+        // Upload avatar - CORRIGÉ
         async function handleAvatarUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1928,7 +1929,6 @@
                 return;
             }
 
-            // Afficher le nom du fichier
             const fileNameDisplay = document.getElementById('file-name-display');
             fileNameDisplay.textContent = `Fichier sélectionné: ${file.name}`;
             fileNameDisplay.style.display = 'block';
@@ -1936,37 +1936,25 @@
             try {
                 showLoading();
                 const formData = new FormData();
-                formData.append('image', file); // Le nom 'image' doit correspondre à upload.single('image')
-
-                // Ajouter l'ID utilisateur si nécessaire
-                if (window.userData && window.userData.id) {
-                    formData.append('userId', window.userData.id);
-                }
+                formData.append('image', file);
 
                 console.log('Sending upload request...');
                 const response = await UserService.uploadAvatar(formData);
 
                 console.log('Upload response:', response);
 
-                if (response.success && response.url) {
-                    const avatarUrl = response.url;
+                if (response.success && response.data && response.data.photoUrl) {
+                    const avatarUrl = response.data.photoUrl;
 
-                    // Mettre à jour les avatars avec un timestamp pour éviter le cache
-                    const timestamp = new Date().getTime();
-                    const avatarUrlWithTimestamp = `${avatarUrl}?t=${timestamp}`;
-
-                    document.getElementById('profile-avatar-view').src = avatarUrlWithTimestamp;
-                    document.getElementById('userAvatar').src = avatarUrlWithTimestamp;
-
-                    // Mettre à jour les données utilisateur
-                    window.userData.photoUrl = avatarUrl;
+                    // FORCER le rechargement complet des données utilisateur
+                    await loadUserData();
 
                     showToast('Photo de profil mise à jour avec succès', 'success');
 
-                    // Masquer l'affichage du nom de fichier après succès
                     setTimeout(() => {
                         fileNameDisplay.style.display = 'none';
                     }, 3000);
+
                 } else {
                     throw new Error(response.message || 'Erreur lors du changement de photo');
                 }
