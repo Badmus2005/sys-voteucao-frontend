@@ -1609,31 +1609,35 @@
         // Fonction pour charger la photo de profil depuis l'API
         async function loadUserProfilePhoto() {
             try {
-                const userProfile = await UserService.getProfile();
-                const userData = userProfile.data;
+                const response = await UserService.getProfile();
+                const userData = response.data;
 
-                // Mettre à jour l'avatar si une photo existe
-                const avatarElement = document.getElementById('userAvatar');
+                // Mettre à jour l'avatar dans le header
+                const headerAvatar = document.getElementById('userAvatar');
+                // Mettre à jour l'avatar dans le profil
+                const profileAvatar = document.getElementById('profile-avatar-view');
+
                 if (userData && userData.photoUrl) {
                     // Construire l'URL complète de la photo
                     const photoUrl = userData.photoUrl.startsWith('http')
                         ? userData.photoUrl
                         : `${API_URL}${userData.photoUrl}`;
 
-                    avatarElement.src = photoUrl;
-                } else {
-                    // Photo par défaut si aucune photo n'est définie
-                    avatarElement.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
-                }
+                    if (headerAvatar) headerAvatar.src = photoUrl;
+                    if (profileAvatar) profileAvatar.src = photoUrl;
 
-                // Mettre à jour le nom d'utilisateur
-                if (userData && userData.prenom) {
-                    document.getElementById('userName').textContent = userData.prenom + ' ' + userData.nom;
-                }
+                    // Gérer les erreurs de chargement d'image
+                    const handleImageError = function () {
+                        const defaultAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                        if (headerAvatar) headerAvatar.src = defaultAvatar;
+                        if (profileAvatar) profileAvatar.src = defaultAvatar;
+                    };
 
+                    if (headerAvatar) headerAvatar.onerror = handleImageError;
+                    if (profileAvatar) profileAvatar.onerror = handleImageError;
+                }
             } catch (error) {
                 console.error('Erreur lors du chargement de la photo de profil:', error);
-                // Garder l'image par défaut en cas d'erreur
             }
         }
 
@@ -1832,15 +1836,15 @@
             emptyElement.style.display = 'none';
 
             container.innerHTML = `
-        <div class="candidates-grid">
-            ${candidates.map(candidate =>
+                <div class="candidates-grid">
+                    ${candidates.map(candidate =>
                 CandidateCard.create(candidate, {
                     showProgram: true,
                     showViewProfile: true
                 })
             ).join('')}
-        </div>
-    `;
+                </div>
+            `;
 
             // Attacher les événements après le rendu
             attachCandidateCardEvents();
@@ -2270,15 +2274,14 @@
             if (candidate) {
                 // Afficher une modale ou rediriger vers la page de profil
                 const message = `
-            ${candidate.candidatPrenom} ${candidate.candidatNom}
-            ${candidate.filiere_nom ? `\nFilière: ${candidate.filiere_nom}` : ''}
-            ${candidate.annee ? `\nAnnée: ${candidate.annee}` : ''}
-            ${candidate.slogan ? `\nSlogan: "${candidate.slogan}"` : ''}
-        `;
+                    ${candidate.candidatPrenom} ${candidate.candidatNom}
+                    ${candidate.filiere_nom ? `\nFilière: ${candidate.filiere_nom}` : ''}
+                    ${candidate.annee ? `\nAnnée: ${candidate.annee}` : ''}
+                    ${candidate.slogan ? `\nSlogan: "${candidate.slogan}"` : ''}
+                `;
                 alert(message);
             }
         }
-
     </script>
 </body>
 
