@@ -2051,18 +2051,28 @@
             Common.showLoading();
 
             try {
-                // STRUCTURE DE TEST - Données minimales
+                // STRUCTURE CORRECTE selon votre backend
                 const candidatureData = {
                     electionId: currentElection.id,
                     slogan: document.getElementById('slogan').value.trim(),
                     programme: document.getElementById('program').value.trim(),
                     motivation: document.getElementById('motivation').value.trim(),
-                    photoUrl: uploadedImageUrl
+                    photoUrl: uploadedImageUrl,
+                    // AJOUT DES CHAMPS OBLIGATOIRES manquants
+                    nom: userProfile.nom,
+                    prenom: userProfile.prenom
                 };
 
-                console.log('Données de candidature envoyées:', candidatureData);
+                console.log('Données complètes envoyées:', candidatureData);
 
-                // Utiliser directement fetch pour mieux déboguer
+                // Vérifier que tous les champs obligatoires sont présents
+                const requiredFields = ['nom', 'prenom', 'slogan', 'programme', 'motivation', 'photoUrl', 'electionId'];
+                const missingFields = requiredFields.filter(field => !candidatureData[field]);
+
+                if (missingFields.length > 0) {
+                    throw new Error(`Champs manquants: ${missingFields.join(', ')}`);
+                }
+
                 const token = getToken();
                 const response = await fetch(`${API_URL}/api/candidats`, {
                     method: 'POST',
@@ -2106,9 +2116,11 @@
                 let userMessage = error.message;
 
                 if (error.message.includes('400')) {
-                    userMessage = 'Données invalides. Vérifiez les informations saisies.';
+                    userMessage = 'Données incomplètes. Vérifiez que tous les champs sont remplis.';
                 } else if (error.message.includes('déjà candidat') || error.message.includes('already')) {
                     userMessage = 'Vous êtes déjà candidat à cette élection';
+                } else if (error.message.includes('Champs manquants')) {
+                    userMessage = 'Informations manquantes. Veuillez compléter votre profil.';
                 } else if (error.message.includes('401')) {
                     userMessage = 'Session expirée. Veuillez vous reconnecter.';
                     setTimeout(() => window.location.href = '/login', 2000);
