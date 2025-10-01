@@ -1486,31 +1486,74 @@
 
         async function checkEligibility(election) {
             try {
+                // Vérifier d'abord si déjà candidat
                 const isAlreadyCandidate = await CandidateService.isCandidate(election.id);
-
                 if (isAlreadyCandidate) {
                     showEligibilityError('Vous êtes déjà candidat à cette élection.');
                     return;
                 }
 
+                // Vérifier la période de candidature
                 const status = ElectionService.getElectionStatus(election);
                 if (status !== 'active') {
-                    showEligibilityError('La période de candidature pour cette élection est terminée ou n\'a pas encore commencé.');
+                    const message = status === 'upcoming'
+                        ? 'La période de candidature pour cette élection n\'a pas encore commencé.'
+                        : 'La période de candidature pour cette élection est terminée.';
+                    showEligibilityError(message);
                     return;
                 }
 
-                const isEligible = await checkUserEligibility(election);
+                // Vérification d'éligibilité basique (sans API)
+                const isEligible = await checkBasicEligibility(election);
                 if (!isEligible) {
                     showEligibilityError('Vous ne remplissez pas les critères d\'éligibilité pour cette élection.');
                     return;
                 }
 
+                // Si toutes les vérifications passent, afficher le formulaire
                 showCandidatureForm();
 
             } catch (error) {
                 console.error('Erreur vérification éligibilité:', error);
-                showEligibilityError('Erreur lors de la vérification d\'éligibilité');
+                // En cas d'erreur, on laisse quand même l'utilisateur tenter de soumettre
+                // car certaines vérifications peuvent échuer à cause de problèmes techniques
+                showCandidatureForm();
+                Common.showToast('Note: Certaines vérifications techniques ont échoué. Vous pouvez quand même soumettre votre candidature.', 'warning');
             }
+        }
+
+        // Vérification d'éligibilité basique sans appel API
+        async function checkBasicEligibility(election) {
+            if (!userProfile) {
+                console.error('Profil utilisateur non chargé');
+                return false;
+            }
+
+            // Vérifications basiques sans appel API
+            if (!userProfile.ecoleId || !userProfile.filiereId || !userProfile.annee) {
+                console.warn('Profil utilisateur incomplet');
+                return false;
+            }
+
+            // Vérifier l'école si spécifiée dans l'élection
+            if (election.ecoleId && userProfile.ecoleId !== election.ecoleId) {
+                console.log('École non éligible');
+                return false;
+            }
+
+            // Vérifier la filière si spécifiée
+            if (election.filiereId && userProfile.filiereId !== election.filiereId) {
+                console.log('Filière non éligible');
+                return false;
+            }
+
+            // Vérifier l'année si requise
+            if (election.anneeRequise && userProfile.annee < election.anneeRequise) {
+                console.log('Année non éligible');
+                return false;
+            }
+
+            return true;
         }
 
         async function checkUserEligibility(election) {
@@ -1632,6 +1675,123 @@
             if (container && emptyElement) {
                 container.innerHTML = '';
                 emptyElement.style.display = 'block';
+            }
+        }
+
+        function initializeNotifications() {
+            try {
+                const notificationService = new NotificationService();
+                const notificationBtn = document.getElementById('notificationBtn');
+                const notificationsPanel = document.getElementById('notificationsPanel');
+                const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+                notificationBtn.addEventListener('click', () => {
+                    notificationsPanel.classList.toggle('show');
+                    notificationService.markAllAsRead();
+                    updateNotificationBadge();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.notifications-container')) {
+                        notificationsPanel.classList.remove('show');
+                    }
+                });
+
+                markAllReadBtn.addEventListener('click', () => {
+                    notificationService.markAllAsRead();
+                    updateNotificationBadge();
+                    renderNotifications();
+                });
+
+                function updateNotificationBadge() {
+                    const unreadCount = notificationService.getUnreadCount();
+                    const badge = document.getElementById('notificationBadge');
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                }
+
+                function renderNotifications() {
+                    const notifications = notificationService.getNotifications();
+                    const container = document.getElementById('notificationsList');
+
+                    if (notifications.length === 0) {
+                        container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                        return;
+                    }
+
+                    container.innerHTML = notifications
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    container.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const notifId = item.dataset.id;
+                            notificationService.markAsRead(notifId);
+                            item.classList.remove('unread');
+                            updateNotificationBadge();
+                        });
+                    });
+                }
+
+                function getNotificationIcon(type) {
+                    const icons = {
+                        'success': 'fa-check-circle',
+                        'warning': 'fa-exclamation-triangle',
+                        'error': 'fa-times-circle',
+                        'info': 'fa-info-circle',
+                        'election': 'fa-vote-yea',
+                        'candidature': 'fa-file-signature',
+                        'profile': 'fa-user',
+                        'system': 'fa-cog'
+                    };
+                    return icons[type] || 'fa-bell';
+                }
+
+                function formatNotificationDate(date) {
+                    const now = new Date();
+                    const notifDate = new Date(date);
+                    const diff = now - notifDate;
+                    const diffMinutes = Math.floor(diff / 60000);
+                    const diffHours = Math.floor(diff / 3600000);
+                    const diffDays = Math.floor(diff / 86400000);
+
+                    if (diffMinutes < 60) {
+                        return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                    } else if (diffHours < 24) {
+                        return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                    } else if (diffDays < 7) {
+                        return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                    } else {
+                        return notifDate.toLocaleDateString();
+                    }
+                }
+
+                renderNotifications();
+                updateNotificationBadge();
+                setInterval(() => {
+                    notificationService.fetchNewNotifications().then(() => {
+                        renderNotifications();
+                        updateNotificationBadge();
+                    });
+                }, 30000);
+
+            } catch (error) {
+                console.warn('Notifications non disponibles:', error);
+                // Masquer le badge de notifications en cas d'erreur
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.style.display = 'none';
+                }
             }
         }
 
@@ -1826,19 +1986,48 @@
                 const formData = new FormData();
                 formData.append('image', file);
 
+                const token = localStorage.getItem('token');
+                const API_URL = CONFIG.BASE_URL;
+
+                console.log('Tentative d\'upload vers:', `${API_URL}/api/upload/image`);
+
                 const response = await fetch(`${API_URL}/api/upload/image`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${TOKEN}`
+                        'Authorization': `Bearer ${token}`
+                        // Ne pas mettre Content-Type pour FormData
                     },
                     body: formData
                 });
 
+                console.log('Statut de la réponse:', response.status);
+
+                if (!response.ok) {
+                    let errorMessage = `Erreur ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        // Si la réponse n'est pas du JSON
+                        const errorText = await response.text();
+                        errorMessage = errorText || errorMessage;
+                    }
+                    throw new Error(errorMessage);
+                }
+
                 const result = await response.json();
+                console.log('Réponse complète:', result);
 
+                // ADAPTATION: Vérifier la structure de réponse de votre backend
                 if (result.success) {
-                    uploadedImageUrl = result.url;
+                    // Votre backend retourne probablement {success: true, data: {photoUrl: ...}}
+                    uploadedImageUrl = result.data?.photoUrl || result.photoUrl || result.url;
 
+                    if (!uploadedImageUrl) {
+                        throw new Error('URL de l\'image non reçue du serveur');
+                    }
+
+                    // Afficher l'aperçu
                     document.getElementById('previewImage').src = uploadedImageUrl;
                     document.getElementById('uploadPreview').style.display = 'block';
                     document.getElementById('uploadArea').style.display = 'none';
@@ -1850,9 +2039,22 @@
                 }
 
             } catch (error) {
-                console.error('Erreur upload:', error);
+                console.error('Erreur détaillée upload:', error);
                 resetImageUpload();
-                Common.showToast(error.message || 'Erreur lors du téléchargement de l\'image', 'error');
+
+                // Messages d'erreur plus spécifiques
+                let userMessage = error.message || 'Erreur lors du téléchargement de l\'image';
+                if (error.message.includes('401') || error.message.includes('token')) {
+                    userMessage = 'Session expirée. Veuillez vous reconnecter.';
+                } else if (error.message.includes('413') || error.message.includes('taille')) {
+                    userMessage = 'Fichier trop volumineux (max 2MB)';
+                } else if (error.message.includes('400') || error.message.includes('format')) {
+                    userMessage = 'Format de fichier non supporté';
+                } else if (error.message.includes('500')) {
+                    userMessage = 'Erreur serveur. Veuillez réessayer.';
+                }
+
+                Common.showToast(userMessage, 'error');
                 return false;
             }
         }
@@ -1875,21 +2077,31 @@
 
             if (uploadArea) {
                 uploadArea.innerHTML = `
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-arrow-up"></i>
-                    </div>
-                    <div class="upload-text">Glissez-déposez votre photo ici ou cliquez pour sélectionner</div>
-                    <div class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</div>
-                    <input type="file" id="photoUpload" accept="image/jpeg,image/png" style="display: none;">
-                `;
+            <div class="upload-icon">
+                <i class="fas fa-cloud-arrow-up"></i>
+            </div>
+            <div class="upload-text">Glissez-déposez votre photo ici ou cliquez pour sélectionner</div>
+            <div class="upload-hint">Formats acceptés: JPG, PNG (max. 2MB)</div>
+        `;
                 uploadArea.style.display = 'block';
+
+                // Réinitialiser l'input file
+                const photoUpload = document.getElementById('photoUpload');
+                if (photoUpload) {
+                    photoUpload.value = '';
+                }
             }
 
             if (uploadPreview) {
                 uploadPreview.style.display = 'none';
             }
 
-            initImageUploadHandlers();
+            uploadedImageUrl = null;
+
+            // Réattacher les événements
+            setTimeout(() => {
+                initImageUploadHandlers();
+            }, 100);
         }
 
         async function handleFormSubmit(e) {
@@ -1907,43 +2119,67 @@
             Common.showLoading();
 
             try {
+                // ADAPTATION: Structure des données attendue par votre backend
                 const formData = {
+                    electionId: currentElection.id,
+                    userId: userProfile.id || userProfile.userId,
                     nom: userProfile.nom || '',
                     prenom: userProfile.prenom || '',
                     slogan: document.getElementById('slogan').value.trim(),
                     programme: document.getElementById('program').value.trim(),
                     motivation: document.getElementById('motivation').value.trim(),
                     photoUrl: uploadedImageUrl,
-                    userId: userProfile.id || userProfile.userId,
-                    electionId: currentElection.id,
-                    statut: 'EN_ATTENTE',
+                    // Inclure les informations étudiantes nécessaires
                     etudiantId: userProfile.id,
                     matricule: userProfile.matricule,
                     codeInscription: userProfile.codeInscription,
                     annee: userProfile.annee,
                     filiereId: userProfile.filiereId,
-                    ecoleId: userProfile.ecoleId
+                    ecoleId: userProfile.ecoleId,
+                    statut: 'EN_ATTENTE' // Statut par défaut
                 };
 
-                console.log('Données soumises:', formData);
+                console.log('Données envoyées:', formData);
 
                 const response = await CandidateService.submitCandidature(formData);
 
-                if (response && (response.success || response.id)) {
+                // ADAPTATION: Gérer différentes structures de réponse
+                if (response && (response.success === true || response.id || response.candidateId)) {
                     Common.showToast('Candidature soumise avec succès !', 'success');
                     showSuccessMessage();
 
+                    // Recharger la liste des candidats après un délai
                     setTimeout(() => {
-                        loadElectionCandidates(currentElection.id);
-                    }, 1000);
+                        if (currentElection && currentElection.id) {
+                            loadElectionCandidates(currentElection.id);
+                        }
+                    }, 2000);
 
                 } else {
-                    throw new Error(response?.message || 'Erreur lors de la soumission');
+                    // Si la réponse n'indique pas un succès clair
+                    const errorMsg = response?.message || 'Réponse inattendue du serveur';
+                    throw new Error(errorMsg);
                 }
 
             } catch (error) {
                 console.error('Erreur soumission candidature:', error);
-                Common.handleApiError(error, 'soumission candidature');
+
+                // Messages d'erreur adaptés
+                let userMessage = error.message;
+                if (error.message.includes('déjà candidat') || error.message.includes('already')) {
+                    userMessage = 'Vous êtes déjà candidat à cette élection';
+                } else if (error.message.includes('éligible') || error.message.includes('eligible')) {
+                    userMessage = 'Vous n\'êtes pas éligible pour cette élection';
+                } else if (error.message.includes('période') || error.message.includes('period')) {
+                    userMessage = 'La période de candidature est terminée';
+                } else if (error.message.includes('401') || error.message.includes('token')) {
+                    userMessage = 'Session expirée. Veuillez vous reconnecter.';
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+
+                Common.showToast(userMessage, 'error');
             } finally {
                 Common.hideLoading();
                 submitBtn.innerHTML = originalText;
@@ -1952,32 +2188,63 @@
         }
 
         function validateForm() {
-            const slogan = document.getElementById('slogan').value;
-            const program = document.getElementById('program').value;
-            const motivation = document.getElementById('motivation').value;
+            const slogan = document.getElementById('slogan').value.trim();
+            const program = document.getElementById('program').value.trim();
+            const motivation = document.getElementById('motivation').value.trim();
 
+            // Vérification de l'image
             if (!uploadedImageUrl) {
                 Common.showToast('Veuillez uploader une photo de profil', 'error');
                 return false;
             }
 
-            if (!slogan || !program || !motivation) {
-                Common.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+            // Vérification des champs obligatoires
+            if (!slogan) {
+                Common.showToast('Veuillez saisir un slogan', 'error');
+                document.getElementById('slogan').focus();
                 return false;
             }
 
+            if (!program) {
+                Common.showToast('Veuillez saisir votre programme électoral', 'error');
+                document.getElementById('program').focus();
+                return false;
+            }
+
+            if (!motivation) {
+                Common.showToast('Veuillez saisir votre lettre de motivation', 'error');
+                document.getElementById('motivation').focus();
+                return false;
+            }
+
+            // Validation des longueurs
             if (slogan.length > 100) {
                 Common.showToast('Le slogan ne doit pas dépasser 100 caractères', 'error');
+                document.getElementById('slogan').focus();
                 return false;
             }
 
-            if (program.length < 50 || program.length > 2000) {
-                Common.showToast('Le programme doit contenir entre 50 et 2000 caractères', 'error');
+            if (program.length < 50) {
+                Common.showToast('Le programme doit contenir au moins 50 caractères', 'error');
+                document.getElementById('program').focus();
                 return false;
             }
 
-            if (motivation.length < 100 || motivation.length > 1000) {
-                Common.showToast('La motivation doit contenir entre 100 et 1000 caractères', 'error');
+            if (program.length > 2000) {
+                Common.showToast('Le programme ne doit pas dépasser 2000 caractères', 'error');
+                document.getElementById('program').focus();
+                return false;
+            }
+
+            if (motivation.length < 100) {
+                Common.showToast('La lettre de motivation doit contenir au moins 100 caractères', 'error');
+                document.getElementById('motivation').focus();
+                return false;
+            }
+
+            if (motivation.length > 1000) {
+                Common.showToast('La lettre de motivation ne doit pas dépasser 1000 caractères', 'error');
+                document.getElementById('motivation').focus();
                 return false;
             }
 
