@@ -1443,11 +1443,10 @@
         let comparisonChart = null;
         let filterTimeout = null;
 
-        // Configuration API
+        // Configuration API - MODIFIÉ pour utiliser la route étudiante
         const API_BASE = CONFIG.BASE_URL;
         const COMPLETED_ELECTIONS_ENDPOINT = '/api/votes/elections/completed';
-        const RESULTS_ENDPOINT = '/api/votes/student/results';
-        const VISIBILITY_ENDPOINT = '/api/votes';
+        const RESULTS_ENDPOINT = '/api/votes/student/results'; // Nouvelle route étudiante
 
         // Services spécifiques à résultats
         const ElectionService = {
@@ -1497,6 +1496,12 @@
                         }
                     });
 
+                    // Gestion spécifique des erreurs HTTP
+                    if (response.status === 403) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Résultats non disponibles');
+                    }
+
                     if (!response.ok) {
                         throw new Error('Erreur lors du chargement des résultats');
                     }
@@ -1506,28 +1511,6 @@
                 } catch (error) {
                     console.error('Erreur VoteService:', error);
                     throw error;
-                }
-            },
-
-            async checkVisibility(electionId) {
-                try {
-                    const response = await fetch(`${API_BASE}${VISIBILITY_ENDPOINT}/${electionId}/visibility`, {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Erreur de vérification de visibilité');
-                    }
-
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error('Erreur de vérification de visibilité:', error);
-                    // En cas d'erreur, on suppose que les résultats sont visibles
-                    return { success: true, data: { canDisplay: true } };
                 }
             }
         };
@@ -1545,6 +1528,34 @@
             } catch (error) {
                 return dateString;
             }
+        }
+
+        // Fonction pour transformer les données du backend vers le format frontend
+        function transformBackendData(backendData) {
+            if (!backendData || !backendData.resultats) return backendData;
+
+            return {
+                election: backendData.election,
+                statistiques: {
+                    totalVotes: backendData.statistiques.totalVotes,
+                    totalInscrits: backendData.statistiques.totalInscrits,
+                    tauxParticipation: backendData.statistiques.tauxParticipation,
+                    nombreCandidats: backendData.resultats.length
+                },
+                resultats: backendData.resultats.map(candidate => ({
+                    id: candidate.candidateId || candidate.id,
+                    nom: candidate.nom,
+                    prenom: candidate.prenom,
+                    photoUrl: candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80',
+                    filiere: candidate.filiere || 'Non spécifié',
+                    annee: candidate.annee || 'N/A',
+                    slogan: candidate.slogan || 'Aucun slogan',
+                    scoreFinal: candidate.scoreFinal,
+                    details: {
+                        totalVotes: candidate.details?.totalVotes || 0
+                    }
+                }))
+            };
         }
 
         // Initialisation de la page
@@ -1712,27 +1723,25 @@
             showLoading();
 
             try {
-                // Vérifier d'abord la visibilité
-                const visibilityResponse = await VoteService.checkVisibility(electionId);
-
-                if (!visibilityResponse.success || !visibilityResponse.data.canDisplay) {
-                    showToast('Les résultats de cette élection ne sont pas encore disponibles', 'warning');
-                    showNoResults();
-                    return;
-                }
-
                 const response = await VoteService.getResults(electionId);
-                console.log('Résultats reçus:', response);
-                if (response && response.success && response.data && response.data.resultats) {
-                    currentResults = response.data;
-                    displayResults(response.data);
+
+                if (response && response.success && response.data) {
+                    // Transformer les données du backend vers le format frontend
+                    const transformedData = transformBackendData(response.data);
+                    currentResults = transformedData;
+                    displayResults(transformedData);
                     document.getElementById('noResultsMessage').style.display = 'none';
                 } else {
                     showNoResults();
                 }
             } catch (error) {
                 console.error('Erreur chargement résultats:', error);
-                showToast('Erreur de chargement des résultats', 'error');
+
+                if (error.message.includes('non disponibles') || error.message.includes('403')) {
+                    showToast(error.message, 'warning');
+                } else {
+                    showToast('Erreur de chargement des résultats', 'error');
+                }
                 showNoResults();
             } finally {
                 hideLoading();
