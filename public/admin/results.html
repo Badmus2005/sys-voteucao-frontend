@@ -1668,14 +1668,15 @@
             }
         }
 
-        // Fonction pour générer les graphiques
         function generateCharts() {
-            if (!electionResults) return;
+            if (!electionResults || !Array.isArray(electionResults.resultats)) return;
 
-            // Données pour les graphiques
-            const labels = electionResults.candidates.map(c => c.name);
-            const votes = electionResults.candidates.map(c => c.votes);
-            const percentages = electionResults.candidates.map(c => c.percentage);
+            const candidates = electionResults.resultats;
+
+            const labels = candidates.map(c => `${c.nom} ${c.prenom || ''}`);
+            const votes = candidates.map(c => c.details.totalVotes);
+            const percentages = candidates.map(c => c.scoreFinal);
+
             const colors = [
                 'rgba(139, 0, 0, 0.7)',
                 'rgba(10, 25, 49, 0.7)',
@@ -1700,9 +1701,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                        },
+                        legend: { position: 'right' },
                         title: {
                             display: true,
                             text: 'Répartition des voix (%)'
@@ -1728,18 +1727,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         title: {
                             display: true,
                             text: 'Nombre de voix par candidat'
                         }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
             });
