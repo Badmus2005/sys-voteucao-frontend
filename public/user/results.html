@@ -1448,6 +1448,10 @@
         const COMPLETED_ELECTIONS_ENDPOINT = '/api/votes/elections/completed';
         const RESULTS_ENDPOINT = '/api/votes/student/results';
 
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
         // Services spécifiques à résultats
         const ElectionService = {
             async getCompletedElections(filters = {}) {
@@ -1489,9 +1493,10 @@
         const VoteService = {
             async getResults(electionId) {
                 try {
+                    const token = getToken();
                     const response = await fetch(`${API_BASE}${RESULTS_ENDPOINT}/${electionId}`, {
                         headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
                         }
                     });
