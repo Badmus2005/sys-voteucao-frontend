@@ -1973,7 +1973,7 @@
                         </div>
                     </div>
 
-                    <!-- Section Activités Para-Universitaires -->
+                    <!-- Section Activités Para-Universitaires - CORRIGÉE -->
                     <div class="settings-section" id="activity-settings">
                         <h2 class="settings-section-title">
                             <i class="fas fa-running"></i> Gestion des Activités Para-Universitaires
@@ -2191,7 +2191,10 @@
         const API_BASE = CONFIG.BASE_URL;
         const ELECTIONS_ENDPOINT = '/api/elections';
 
-        // Variables globales
+
+        // =============================================
+        // VARIABLES GLOBALES
+        // =============================================
         let currentSection = 'config';
         const sections = ['config', 'candidacy', 'voting', 'results'];
         let errorTimeouts = {};
@@ -3080,9 +3083,22 @@
         };
 
         // =============================================
-        // GESTION DES ACTIVITÉS PARA-UNIVERSITAIRES
+        // GESTION DES ACTIVITÉS PARA-UNIVERSITAIRES 
         // =============================================
         const ACTIVITIES = {
+            // Fonction utilitaire pour déterminer correctement le statut
+            isActive: (item) => {
+                // Gestion de différentes représentations possibles de "actif"
+                if (item.actif === true || item.actif === 1 || item.actif === 'true' || item.actif === '1') {
+                    return true;
+                }
+                if (item.actif === false || item.actif === 0 || item.actif === 'false' || item.actif === '0') {
+                    return false;
+                }
+                // Par défaut, considérer comme actif si la propriété existe
+                return item.actif !== undefined;
+            },
+
             loadActivitySettings: async () => {
                 await ACTIVITIES.loadCategories();
                 await ACTIVITIES.loadSubactivities();
@@ -3101,7 +3117,7 @@
                     if (!res.ok) throw new Error("Erreur lors du chargement des catégories");
 
                     const data = await res.json();
-                    console.log('Données catégories reçues:', data); // DEBUG
+                    console.log('Données catégories reçues:', data);
 
                     // Gestion différente selon la structure de réponse
                     let categories = [];
@@ -3121,43 +3137,43 @@
                     if (categorySelect) categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
 
                     categories.forEach(category => {
-                        // DEBUG: Vérifier la structure de chaque catégorie
-                        console.log('Catégorie:', category);
-
-                        const isActive = category.actif === true || category.actif === 1 || category.actif === 'true';
+                        // CORRECTION: Utilisation de la fonction isActive corrigée
+                        const isActive = ACTIVITIES.isActive(category);
 
                         if (tableBody) {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-${category.icone} activity-icon-preview"></i>
-                            <span>${category.nom}</span>
-                        </div>
-                    </td>
-                    <td>${category.description || '-'}</td>
-                    <td><code>${category.icone}</code></td>
-                    <td>
-                        <span class="status-badge ${category.has_subactivities ? 'status-active' : 'status-inactive'}">
-                            ${category.has_subactivities ? 'Oui' : 'Non'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                            ${isActive ? 'Actif' : 'Inactif'}
-                        </span>
-                    </td>
-                    <td class="table-actions">
-                        <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editCategory(${category.id})">
-                            <i class="fas fa-edit"></i> Modifier
-                        </button>
-                        <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
-                                onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!isActive})">
-                            <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
-                            ${isActive ? 'Désactiver' : 'Activer'}
-                        </button>
-                    </td>
-                `;
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-${category.icone} activity-icon-preview"></i>
+                                        <span>${category.nom}</span>
+                                    </div>
+                                </td>
+                                <td>${category.description || '-'}</td>
+                                <td><code>${category.icone}</code></td>
+                                <td>
+                                    <span class="activity-status-badge ${category.has_subactivities ? 'activity-status-active' : 'activity-status-inactive'}">
+                                        ${category.has_subactivities ? 'Oui' : 'Non'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- CORRECTION: Affichage correct du statut -->
+                                    <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
+                                        ${isActive ? 'Actif' : 'Inactif'}
+                                    </span>
+                                </td>
+                                <td class="table-actions">
+                                    <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editCategory(${category.id})">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </button>
+                                    <!-- CORRECTION: Bouton avec logique inversée corrigée -->
+                                    <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
+                                            onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!isActive})">
+                                        <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
+                                        ${isActive ? 'Désactiver' : 'Activer'}
+                                    </button>
+                                </td>
+                            `;
                             tableBody.appendChild(row);
                         }
 
@@ -3189,7 +3205,7 @@
                     if (!res.ok) throw new Error("Erreur lors du chargement des sous-activités");
 
                     const data = await res.json();
-                    console.log('Données sous-activités reçues:', data); // DEBUG
+                    console.log('Données sous-activités reçues:', data);
 
                     let categories = [];
                     if (data.data && Array.isArray(data.data)) {
@@ -3213,38 +3229,38 @@
                             totalSubactivities += category.subactivities.length;
 
                             category.subactivities.forEach(subactivity => {
-                                // DEBUG: Vérifier la structure de chaque sous-activité
-                                console.log('Sous-activité:', subactivity);
-
-                                const isActive = subactivity.actif === true || subactivity.actif === 1 || subactivity.actif === 'true';
+                                // CORRECTION: Utilisation de la fonction isActive corrigée
+                                const isActive = ACTIVITIES.isActive(subactivity);
 
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
-                                <span>${subactivity.nom}</span>
-                            </div>
-                        </td>
-                        <td>${subactivity.description || '-'}</td>
-                        <td>${category.nom}</td>
-                        <td><code>${subactivity.icone}</code></td>
-                        <td>
-                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                                ${isActive ? 'Actif' : 'Inactif'}
-                            </span>
-                        </td>
-                        <td class="table-actions">
-                            <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
-                                <i class="fas fa-edit"></i> Modifier
-                            </button>
-                            <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
-                                    onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!isActive})">
-                                <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
-                                ${isActive ? 'Désactiver' : 'Activer'}
-                            </button>
-                        </td>
-                    `;
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
+                                            <span>${subactivity.nom}</span>
+                                        </div>
+                                    </td>
+                                    <td>${subactivity.description || '-'}</td>
+                                    <td>${category.nom}</td>
+                                    <td><code>${subactivity.icone}</code></td>
+                                    <td>
+                                        <!-- CORRECTION: Affichage correct du statut -->
+                                        <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
+                                            ${isActive ? 'Actif' : 'Inactif'}
+                                        </span>
+                                    </td>
+                                    <td class="table-actions">
+                                        <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
+                                            <i class="fas fa-edit"></i> Modifier
+                                        </button>
+                                        <!-- CORRECTION: Bouton avec logique inversée corrigée -->
+                                        <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
+                                                onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!isActive})">
+                                            <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
+                                            ${isActive ? 'Désactiver' : 'Activer'}
+                                        </button>
+                                    </td>
+                                `;
                                 tableBody.appendChild(row);
                             });
                         }
@@ -3285,23 +3301,23 @@
 
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-${activity.icone} activity-icon-preview"></i>
-                            <span>${activity.nom}</span>
-                        </div>
-                    </td>
-                    <td>${activity.student_count}</td>
-                    <td>${activity.school_count}</td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
-                                <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
-                            </div>
-                            <span>${participationRate}%</span>
-                        </div>
-                    </td>
-                `;
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-${activity.icone} activity-icon-preview"></i>
+                                        <span>${activity.nom}</span>
+                                    </div>
+                                </td>
+                                <td>${activity.student_count}</td>
+                                <td>${activity.school_count}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
+                                            <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
+                                        </div>
+                                        <span>${participationRate}%</span>
+                                    </div>
+                                </td>
+                            `;
                             tableBody.appendChild(row);
                         });
 
@@ -3313,6 +3329,7 @@
                 }
             },
 
+            // Les autres méthodes restent inchangées
             createActivity: async (formData) => {
                 try {
                     const token = DASHBOARD_AUTH.getToken();
@@ -3496,6 +3513,8 @@
                 UTILS.showAlert('activityAlert', 'Fonctionnalité de modification à implémenter', 'info');
             }
         };
+
+
         // =============================================
         // INITIALISATION
         // =============================================
