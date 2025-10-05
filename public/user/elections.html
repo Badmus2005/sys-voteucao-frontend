@@ -1934,32 +1934,32 @@
             }
         };
 
-        // CandidateCard corrigée
+        // CandidateCard corrigée avec la bonne structure de données
         const CandidateCard = {
             create(candidate, options = {}) {
                 const { showVote = false, electionId = null } = options;
 
-                // Photo avec fallback
+                // Photo avec fallback - utiliser l'ID du candidat pour construire l'URL si nécessaire
                 const photoUrl = candidate.photoUrl ||
-                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+                    `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80`;
 
-                // Informations complètes du candidat
+                // Informations basées sur la structure réelle des données
                 const infos = [
-                    { label: 'École', value: candidate.ecoleNom || candidate.ecole || 'N/A' },
-                    { label: 'Filière', value: candidate.filiereNom || candidate.filiere || 'Non spécifiée' },
+                    { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
+                    { label: 'Filière', value: candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
                     { label: 'Année', value: candidate.annee || 'N/A' },
-                    { label: 'Votes', value: candidate.votes || candidate.nbVotes || '0' }
+                    { label: 'Statut', value: candidate.statut || 'En attente' }
                 ];
 
                 return `
-            <div class="candidate-card" data-candidate-id="${candidate.id}">
+            <div class="candidate-card" data-candidate-id="${candidate.candidateId || candidate.id}">
                 <div class="candidate-header">
                     <div class="candidate-photo-container">
                         <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
                              class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
                     </div>
                     <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                    <div class="candidate-role">${candidate.poste || candidate.nomPoste || 'Candidat'}</div>
+                    <div class="candidate-role">Candidat</div>
                 </div>
                 
                 <div class="candidate-body">
@@ -1972,24 +1972,23 @@
                         `).join('')}
                     </div>
                     
-                    ${candidate.programme || candidate.description ? `
-                        <div class="candidate-program">
-                            <div class="candidate-program-title">
-                                <i class="fas fa-bullhorn"></i>Programme
-                            </div>
-                            <div class="candidate-program-text">
-                                ${candidate.programme || candidate.description || 'Aucun programme spécifié'}
-                            </div>
+                    <div class="candidate-program">
+                        <div class="candidate-program-title">
+                            <i class="fas fa-bullhorn"></i>Informations
                         </div>
-                    ` : ''}
+                        <div class="candidate-program-text">
+                            ${candidate.email ? `Email: ${candidate.email}<br>` : ''}
+                            ${candidate.statut ? `Statut: ${candidate.statut}` : 'Candidature approuvée'}
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="candidate-footer">
-                    <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.id}')">
+                    <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.candidateId || candidate.id}')">
                         <i class="fas fa-eye"></i>Voir profil
                     </button>
                     ${showVote && electionId ? `
-                        <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.id}')">
+                        <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.candidateId || candidate.id}')">
                             <i class="fas fa-vote-yea"></i>Voter
                         </button>
                     ` : ''}
@@ -2608,16 +2607,21 @@
                 // Si aucun candidat trouvé, charger depuis l'API
                 if (electionCandidates.length === 0) {
                     const response = await CandidateService.getCandidates(election.id);
-                    console.log('Candidats chargés:', response);
+                    console.log('Candidats chargés pour élection', election.id, ':', response);
 
+                    // Adapter aux différentes structures de réponse possibles
                     if (response && Array.isArray(response)) {
                         electionCandidates = response;
                     } else if (response && response.candidates && Array.isArray(response.candidates)) {
                         electionCandidates = response.candidates;
                     } else if (response && response.data && Array.isArray(response.data)) {
                         electionCandidates = response.data;
+                    } else if (response && Array.isArray(response)) {
+                        electionCandidates = response;
                     }
                 }
+
+                console.log('Candidats filtrés pour affichage:', electionCandidates);
 
                 if (electionCandidates.length === 0) {
                     container.innerHTML = `
@@ -2751,36 +2755,46 @@
             }
         }
 
-        // Fonctions pour gérer le modal
         function viewCandidateProfile(candidateId) {
-            const candidate = allCandidates.find(c => c.id == candidateId);
+            console.log('Recherche du candidat avec ID:', candidateId);
+
+            // Rechercher le candidat avec différents identifiants possibles
+            const candidate = allCandidates.find(c =>
+                c.candidateId == candidateId ||
+                c.id == candidateId
+            );
+
             if (!candidate) {
+                console.log('Candidat non trouvé dans allCandidates:', allCandidates);
                 showToast('Candidat non trouvé', 'error');
                 return;
             }
 
+            console.log('Candidat trouvé:', candidate);
             openCandidateModal(candidate);
         }
 
         function openCandidateModal(candidate) {
             const modal = document.getElementById('candidateModal');
+
+            // Photo avec fallback
             const photoUrl = candidate.photoUrl ||
                 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
 
             // Mettre à jour les informations du modal
             document.getElementById('modalPhoto').src = photoUrl;
             document.getElementById('modalName').textContent = `${candidate.prenom} ${candidate.nom}`;
-            document.getElementById('modalRole').textContent = candidate.poste || candidate.nomPoste || 'Candidat';
+            document.getElementById('modalRole').textContent = 'Candidat';
 
-            // Informations détaillées
+            // Informations détaillées basées sur la structure réelle
             const infoGrid = document.getElementById('modalInfoGrid');
             const infos = [
-                { label: 'École', value: candidate.ecoleNom || candidate.ecole || 'N/A' },
-                { label: 'Filière', value: candidate.filiereNom || candidate.filiere || 'Non spécifiée' },
+                { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
+                { label: 'Filière', value: candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
                 { label: 'Année', value: candidate.annee || 'N/A' },
                 { label: 'Email', value: candidate.email || 'Non disponible' },
-                { label: 'Téléphone', value: candidate.telephone || 'Non disponible' },
-                { label: 'Votes', value: candidate.votes || candidate.nbVotes || '0' }
+                { label: 'Statut', value: candidate.statut || 'En attente' },
+                { label: 'Date de candidature', value: candidate.dateSoumission ? new Date(candidate.dateSoumission).toLocaleDateString('fr-FR') : 'Non disponible' }
             ];
 
             infoGrid.innerHTML = infos.map(info => `
@@ -2790,10 +2804,10 @@
         </div>
     `).join('');
 
-            // Programme électoral
+            // Programme électoral - adapter selon les données disponibles
             const programElement = document.getElementById('modalProgram');
             programElement.textContent = candidate.programme || candidate.description ||
-                'Aucun programme électoral spécifié pour le moment.';
+                'Ce candidat n\'a pas encore publié son programme électoral.';
 
             // Afficher le modal
             modal.style.display = 'block';
@@ -2832,11 +2846,6 @@
 
         function redirectToResults(electionId) {
             window.location.href = `results.html?electionId=${electionId}`;
-        }
-
-        // Fonctions utilitaires pour les interactions
-        function viewCandidateProfile(candidateId) {
-            window.location.href = `profil-candidat.html?id=${candidateId}`;
         }
 
         function castVote(electionId, candidateId) {
