@@ -1251,6 +1251,225 @@
                 justify-content: center;
             }
         }
+
+        /* Styles pour le modal */
+        .candidate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            overflow-y: auto;
+        }
+
+        .candidate-modal-content {
+            background: white;
+            margin: 2rem auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-photo-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            border: 4px solid white;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .modal-role {
+            font-size: 1.1em;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-section {
+            margin-bottom: 2rem;
+        }
+
+        .modal-section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .modal-info-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-info-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-program {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        /* Réduire la taille des cartes dans la liste */
+        .candidate-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            max-width: 100%;
+            border: 1px solid #e0e6ed;
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            /* Hauteur réduite */
+        }
+
+        .candidate-card .candidate-header {
+            padding: 1.5rem 1rem 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .candidate-card .candidate-photo-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 0.75rem;
+        }
+
+        .candidate-card .candidate-name {
+            font-size: 1.2em;
+            margin: 0.25rem 0;
+        }
+
+        .candidate-card .candidate-role {
+            font-size: 0.85em;
+            padding: 0.25rem 0.75rem;
+        }
+
+        .candidate-card .candidate-body {
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .candidate-card .candidate-info-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .candidate-card .info-item {
+            padding: 0.5rem;
+            font-size: 0.85em;
+        }
+
+        .candidate-card .candidate-program {
+            border-top: 1px solid #e9ecef;
+            padding-top: 0.75rem;
+            margin-top: auto;
+        }
+
+        .candidate-card .candidate-program-text {
+            max-height: 60px;
+            font-size: 0.9em;
+        }
+
+        .candidate-card .candidate-footer {
+            padding: 1rem;
+            gap: 0.5rem;
+        }
     </style>
 
     <link rel="stylesheet" href="/assets/notifications.css">
@@ -1450,6 +1669,49 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
+
+    <!-- Modal pour les détails du candidat -->
+    <div id="candidateModal" class="candidate-modal">
+        <div class="candidate-modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeCandidateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-photo-container">
+                    <img id="modalPhoto" class="modal-photo" alt="Photo du candidat">
+                </div>
+                <h2 id="modalName" class="modal-name"></h2>
+                <div id="modalRole" class="modal-role"></div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3 class="modal-section-title">
+                        <i class="fas fa-info-circle"></i>Informations
+                    </h3>
+                    <div id="modalInfoGrid" class="modal-info-grid">
+                        <!-- Les informations seront insérées ici -->
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3 class="modal-section-title">
+                        <i class="fas fa-bullhorn"></i>Programme électoral
+                    </h3>
+                    <div id="modalProgram" class="modal-program">
+                        <!-- Le programme sera inséré ici -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeCandidateModal()">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="/assets/config.js"></script>
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
@@ -1672,67 +1934,70 @@
             }
         };
 
-        // CandidateCard 
+        // CandidateCard corrigée
         const CandidateCard = {
             create(candidate, options = {}) {
                 const { showVote = false, electionId = null } = options;
 
-                // Gestion de la photo (remplacer par l'URL réelle de la photo)
-                const photoUrl = candidate.photoUrl || 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80';
+                // Photo avec fallback
+                const photoUrl = candidate.photoUrl || candidate.photo ||
+                    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
 
-                // Informations supplémentaires
+                // Informations complètes du candidat
                 const infos = [
-                    { label: 'Ecole', value: candidate.ecole_nom || 'N/A' },
-                    { label: 'Filière', value: candidate.filiere_nom || 'Non spécifiée' },
+                    { label: 'École', value: candidate.ecole_nom || candidate.ecole || 'N/A' },
+                    { label: 'Filière', value: candidate.filiere_nom || candidate.filiere || 'Non spécifiée' },
                     { label: 'Année', value: candidate.annee || 'N/A' },
-                    { label: 'Votes', value: candidate.votes || '0' }
+                    { label: 'Votes', value: candidate.votes || candidate.nbVotes || '0' }
                 ];
 
                 return `
-                    <div class="candidate-card" data-candidate-id="${candidate.id}">
-                        <div class="candidate-header">
-                            <div class="candidate-photo-container">
-                                <img src="${candidate.photoUrl}" alt="${candidate.prenom} ${candidate.nom}" class="candidate-photo">
-                            </div>
-                            <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                            <div class="candidate-role">${candidate.poste || 'Candidat'}</div>
-                        </div>
-                        
-                        <div class="candidate-body">
-                            <div class="candidate-info-grid">
-                                ${infos.map(info => `
-                                    <div class="info-item">
-                                        <div class="info-label">${info.label}</div>
-                                        <div class="info-value">${info.value}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            
-                            ${candidate.programme ? `
-                                <div class="candidate-program">
-                                    <div class="candidate-program-title">
-                                        <i class="fas fa-bullhorn"></i>Programme
-                                    </div>
-                                    <div class="candidate-program-text">${candidate.programme}</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <div class="candidate-footer">
-                            <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.id}')">
-                                <i class="fas fa-eye"></i>Voir profil
-                            </button>
-                            ${showVote && electionId ? `
-                                <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.id}')">
-                                    <i class="fas fa-vote-yea"></i>Voter
-                                </button>
-                            ` : ''}
-                        </div>
+            <div class="candidate-card" data-candidate-id="${candidate.id}">
+                <div class="candidate-header">
+                    <div class="candidate-photo-container">
+                        <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
+                             class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
                     </div>
-                `;
+                    <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
+                    <div class="candidate-role">${candidate.poste || candidate.nomPoste || 'Candidat'}</div>
+                </div>
+                
+                <div class="candidate-body">
+                    <div class="candidate-info-grid">
+                        ${infos.map(info => `
+                            <div class="info-item">
+                                <div class="info-label">${info.label}</div>
+                                <div class="info-value">${info.value}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    ${candidate.programme || candidate.description ? `
+                        <div class="candidate-program">
+                            <div class="candidate-program-title">
+                                <i class="fas fa-bullhorn"></i>Programme
+                            </div>
+                            <div class="candidate-program-text">
+                                ${candidate.programme || candidate.description || 'Aucun programme spécifié'}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="candidate-footer">
+                    <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.id}')">
+                        <i class="fas fa-eye"></i>Voir profil
+                    </button>
+                    ${showVote && electionId ? `
+                        <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.id}')">
+                            <i class="fas fa-vote-yea"></i>Voter
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
             }
         };
-
 
         // Fonctions d'affichage
         function showLoading() {
@@ -2315,7 +2580,6 @@
             await displayElectionCandidates(election);
         }
 
-        // Afficher les candidats d'une élection
         async function displayElectionCandidates(election) {
             const container = document.getElementById('candidatesGrid');
             const section = document.getElementById('candidatesSection');
@@ -2324,27 +2588,32 @@
 
             section.style.display = 'block';
             container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Chargement des candidats...</p>
-                </div>
-            `;
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Chargement des candidats...</p>
+        </div>
+    `;
 
             try {
-                // Récupérer les candidats pour cette élection
                 let electionCandidates = [];
 
-                // Essayer d'abord avec les candidats déjà chargés
+                // Essayer différentes méthodes pour récupérer les candidats
                 if (allCandidates.length > 0) {
-                    electionCandidates = allCandidates.filter(c => c.electionId == election.id);
+                    electionCandidates = allCandidates.filter(c =>
+                        c.electionId == election.id ||
+                        c.idElection == election.id
+                    );
                 }
 
                 // Si aucun candidat trouvé, charger depuis l'API
                 if (electionCandidates.length === 0) {
                     const response = await CandidateService.getCandidates(election.id);
-                    console.log('Réponse brute des candidats pour l\'élection:', response);
+                    console.log('Candidats chargés:', response);
+
                     if (response && Array.isArray(response)) {
                         electionCandidates = response;
+                    } else if (response && response.candidates && Array.isArray(response.candidates)) {
+                        electionCandidates = response.candidates;
                     } else if (response && response.data && Array.isArray(response.data)) {
                         electionCandidates = response.data;
                     }
@@ -2352,16 +2621,16 @@
 
                 if (electionCandidates.length === 0) {
                     container.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fas fa-user-slash"></i>
-                            <h3>Aucun candidat pour cette élection</h3>
-                            <p>Soyez le premier à vous porter candidat !</p>
-                        </div>
-                    `;
+                <div class="no-data-message">
+                    <i class="fas fa-user-slash"></i>
+                    <h3>Aucun candidat pour cette élection</h3>
+                    <p>Soyez le premier à vous porter candidat !</p>
+                </div>
+            `;
                     return;
                 }
 
-                // Afficher les candidats
+                // Afficher les candidats avec toutes leurs informations
                 const status = ElectionService.getElectionStatus(election);
                 const isEligible = isStudentEligibleForElection(election);
 
@@ -2375,12 +2644,12 @@
             } catch (error) {
                 console.error('Erreur affichage candidats:', error);
                 container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Erreur de chargement</h3>
-                        <p>Impossible de charger les candidats.</p>
-                    </div>
-                `;
+            <div class="no-data-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Erreur de chargement</h3>
+                <p>Impossible de charger les candidats: ${error.message}</p>
+            </div>
+        `;
             }
         }
 
@@ -2481,6 +2750,76 @@
                 hideLoading();
             }
         }
+
+        // Fonctions pour gérer le modal
+        function viewCandidateProfile(candidateId) {
+            const candidate = allCandidates.find(c => c.id == candidateId);
+            if (!candidate) {
+                showToast('Candidat non trouvé', 'error');
+                return;
+            }
+
+            openCandidateModal(candidate);
+        }
+
+        function openCandidateModal(candidate) {
+            const modal = document.getElementById('candidateModal');
+            const photoUrl = candidate.photoUrl || candidate.photo ||
+                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+
+            // Mettre à jour les informations du modal
+            document.getElementById('modalPhoto').src = photoUrl;
+            document.getElementById('modalName').textContent = `${candidate.prenom} ${candidate.nom}`;
+            document.getElementById('modalRole').textContent = candidate.poste || candidate.nomPoste || 'Candidat';
+
+            // Informations détaillées
+            const infoGrid = document.getElementById('modalInfoGrid');
+            const infos = [
+                { label: 'École', value: candidate.ecole_nom || candidate.ecole || 'N/A' },
+                { label: 'Filière', value: candidate.filiere_nom || candidate.filiere || 'Non spécifiée' },
+                { label: 'Année', value: candidate.annee || 'N/A' },
+                { label: 'Email', value: candidate.email || 'Non disponible' },
+                { label: 'Téléphone', value: candidate.telephone || 'Non disponible' },
+                { label: 'Votes', value: candidate.votes || candidate.nbVotes || '0' }
+            ];
+
+            infoGrid.innerHTML = infos.map(info => `
+        <div class="modal-info-item">
+            <div class="modal-info-label">${info.label}</div>
+            <div class="modal-info-value">${info.value}</div>
+        </div>
+    `).join('');
+
+            // Programme électoral
+            const programElement = document.getElementById('modalProgram');
+            programElement.textContent = candidate.programme || candidate.description ||
+                'Aucun programme électoral spécifié pour le moment.';
+
+            // Afficher le modal
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCandidateModal() {
+            const modal = document.getElementById('candidateModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Fermer le modal en cliquant à l'extérieur
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('candidateModal');
+            if (event.target === modal) {
+                closeCandidateModal();
+            }
+        });
+
+        // Fermer le modal avec la touche Échap
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeCandidateModal();
+            }
+        });
 
         // Redirection vers les pages de candidature ou de vote
         function redirectToCandidature(electionId) {
