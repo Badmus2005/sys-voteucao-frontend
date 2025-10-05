@@ -1467,52 +1467,9 @@
             } catch (error) {
                 console.error('Erreur lors du chargement des résultats:', error);
                 showToast('Erreur lors du chargement des résultats', 'error');
-                // Charger des données de démonstration
-                loadDemoResults(electionId);
             } finally {
                 hideLoading();
             }
-        }
-
-        // Fonction pour charger des résultats de démonstration
-        function loadDemoResults(electionId) {
-            currentElection = elections.find(e => e.id === parseInt(electionId));
-
-            // Données de démonstration
-            electionResults = {
-                election: currentElection,
-                totalVoters: 1250,
-                totalVotes: 980,
-                candidates: [
-                    {
-                        id: 1,
-                        name: "Jean Koffi",
-                        party: "Alliance Étudiante",
-                        photo: "https://randomuser.me/api/portraits/men/32.jpg",
-                        votes: 450,
-                        percentage: 45.9
-                    },
-                    {
-                        id: 2,
-                        name: "Marie N'Diaye",
-                        party: "Mouvement Progressiste",
-                        photo: "https://randomuser.me/api/portraits/women/44.jpg",
-                        votes: 320,
-                        percentage: 32.7
-                    },
-                    {
-                        id: 3,
-                        name: "Pierre Traoré",
-                        party: "Union Démocratique",
-                        photo: "https://randomuser.me/api/portraits/men/67.jpg",
-                        votes: 210,
-                        percentage: 21.4
-                    }
-                ],
-                published: currentElection.published
-            };
-
-            displayElectionResults();
         }
 
         function displayElectionResults() {
@@ -1566,7 +1523,7 @@
             <td>${index + 1}</td>
             <td>
                 <div class="candidate-info">
-                    <img src="${candidate.photo || 'default.jpg'}" alt="${candidate.nom}" class="candidate-photo">
+                    <img src="${candidate.photoUrl}" alt="${candidate.nom}" class="candidate-photo">
                     <div>
                         <div class="candidate-name">${candidate.nom} ${candidate.prenom || ''}</div>
                     </div>

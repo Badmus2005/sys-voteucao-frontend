@@ -1628,8 +1628,7 @@
 
                     // Gestion spécifique des erreurs HTTP
                     if (response.status === 403) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Résultats non disponibles');
+                        throw new Error('Les résultats ne sont pas encore disponibles. Veuillez patienter jusqu’à leur publication officielle.');
                     }
 
                     if (!response.ok) {
@@ -1676,7 +1675,7 @@
                     id: candidate.candidateId || candidate.id,
                     nom: candidate.nom,
                     prenom: candidate.prenom,
-                    photoUrl: candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80',
+                    photoUrl: candidate.photoUrl,
                     filiere: candidate.filiere || 'Non spécifié',
                     annee: candidate.annee || 'N/A',
                     slogan: candidate.slogan || 'Aucun slogan',
@@ -1993,8 +1992,7 @@
                     <div class="candidate-info">
                         <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
                              alt="${candidate.prenom || ''} ${candidate.nom || ''}" 
-                             class="candidate-avatar"
-                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'">
+                             class="candidate-avatar">
                         <div>
                             <div class="candidate-name">${candidate.prenom || ''} ${candidate.nom || ''}</div>
                             <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
