@@ -3101,7 +3101,18 @@
                     if (!res.ok) throw new Error("Erreur lors du chargement des catégories");
 
                     const data = await res.json();
-                    const categories = data.data || data;
+                    console.log('Données catégories reçues:', data); // DEBUG
+
+                    // Gestion différente selon la structure de réponse
+                    let categories = [];
+                    if (data.data && Array.isArray(data.data)) {
+                        categories = data.data;
+                    } else if (Array.isArray(data)) {
+                        categories = data;
+                    } else {
+                        console.error('Structure de données inattendue:', data);
+                        throw new Error('Structure de données invalide');
+                    }
 
                     const tableBody = document.querySelector('#tableCategories tbody');
                     const categorySelect = document.getElementById('categorySelect');
@@ -3110,6 +3121,11 @@
                     if (categorySelect) categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
 
                     categories.forEach(category => {
+                        // DEBUG: Vérifier la structure de chaque catégorie
+                        console.log('Catégorie:', category);
+
+                        const isActive = category.actif === true || category.actif === 1 || category.actif === 'true';
+
                         if (tableBody) {
                             const row = document.createElement('tr');
                             row.innerHTML = `
@@ -3126,13 +3142,19 @@
                             ${category.has_subactivities ? 'Oui' : 'Non'}
                         </span>
                     </td>
-                    <td><span class="status-badge ${category.actif ? 'status-active' : 'status-inactive'}">${category.actif ? 'Actif' : 'Inactif'}</span></td>
+                    <td>
+                        <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                            ${isActive ? 'Actif' : 'Inactif'}
+                        </span>
+                    </td>
                     <td class="table-actions">
                         <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editCategory(${category.id})">
                             <i class="fas fa-edit"></i> Modifier
                         </button>
-                        <button class="btn btn-sm ${category.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!category.actif})">
-                            <i class="fas ${category.actif ? 'fa-times' : 'fa-check'}"></i> ${category.actif ? 'Désactiver' : 'Activer'}
+                        <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
+                                onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!isActive})">
+                            <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
+                            ${isActive ? 'Désactiver' : 'Activer'}
                         </button>
                     </td>
                 `;
@@ -3150,7 +3172,8 @@
                     const totalCategoriesEl = document.getElementById('totalCategories');
                     if (totalCategoriesEl) totalCategoriesEl.textContent = categories.length;
                 } catch (err) {
-                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des catégories', 'error');
+                    console.error('Erreur détaillée chargement catégories:', err);
+                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des catégories: ' + err.message, 'error');
                 }
             },
 
@@ -3166,7 +3189,17 @@
                     if (!res.ok) throw new Error("Erreur lors du chargement des sous-activités");
 
                     const data = await res.json();
-                    const categories = data.data || data;
+                    console.log('Données sous-activités reçues:', data); // DEBUG
+
+                    let categories = [];
+                    if (data.data && Array.isArray(data.data)) {
+                        categories = data.data;
+                    } else if (Array.isArray(data)) {
+                        categories = data;
+                    } else {
+                        console.error('Structure de données inattendue:', data);
+                        throw new Error('Structure de données invalide');
+                    }
 
                     const tableBody = document.querySelector('#tableSubactivities tbody');
                     if (!tableBody) return;
@@ -3180,6 +3213,11 @@
                             totalSubactivities += category.subactivities.length;
 
                             category.subactivities.forEach(subactivity => {
+                                // DEBUG: Vérifier la structure de chaque sous-activité
+                                console.log('Sous-activité:', subactivity);
+
+                                const isActive = subactivity.actif === true || subactivity.actif === 1 || subactivity.actif === 'true';
+
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
                         <td>
@@ -3191,13 +3229,19 @@
                         <td>${subactivity.description || '-'}</td>
                         <td>${category.nom}</td>
                         <td><code>${subactivity.icone}</code></td>
-                        <td><span class="status-badge ${subactivity.actif ? 'status-active' : 'status-inactive'}">${subactivity.actif ? 'Actif' : 'Inactif'}</span></td>
+                        <td>
+                            <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                                ${isActive ? 'Actif' : 'Inactif'}
+                            </span>
+                        </td>
                         <td class="table-actions">
                             <button class="btn btn-sm btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
                                 <i class="fas fa-edit"></i> Modifier
                             </button>
-                            <button class="btn btn-sm ${subactivity.actif ? 'btn-secondary' : 'btn-primary'}" onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!subactivity.actif})">
-                                <i class="fas ${subactivity.actif ? 'fa-times' : 'fa-check'}"></i> ${subactivity.actif ? 'Désactiver' : 'Activer'}
+                            <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-primary'}" 
+                                    onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!isActive})">
+                                <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
+                                ${isActive ? 'Désactiver' : 'Activer'}
                             </button>
                         </td>
                     `;
@@ -3209,7 +3253,8 @@
                     const totalSubactivitiesEl = document.getElementById('totalSubactivities');
                     if (totalSubactivitiesEl) totalSubactivitiesEl.textContent = totalSubactivities;
                 } catch (err) {
-                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des sous-activités', 'error');
+                    console.error('Erreur détaillée chargement sous-activités:', err);
+                    UTILS.showAlert('activityAlert', 'Erreur lors du chargement des sous-activités: ' + err.message, 'error');
                 }
             },
 
@@ -3369,13 +3414,18 @@
                         body: JSON.stringify(formData)
                     });
 
-                    if (!res.ok) throw new Error("Erreur lors de l'ajout de la sous-activité");
+                    const data = await res.json();
 
-                    UTILS.showAlert('activityAlert', 'Sous-activité ajoutée avec succès');
+                    if (!res.ok) {
+                        throw new Error(data.message || "Erreur lors de l'ajout de la sous-activité");
+                    }
+
+                    UTILS.showAlert('activityAlert', 'Sous-activité ajoutée avec succès', 'success');
                     document.getElementById('formAddSubactivity').reset();
                     await ACTIVITIES.loadSubactivities();
                 } catch (err) {
-                    UTILS.showAlert('activityAlert', 'Erreur lors de l\'ajout de la sous-activité', 'error');
+                    console.error('Erreur détaillée ajout sous-activité:', err);
+                    UTILS.showAlert('activityAlert', 'Erreur lors de l\'ajout de la sous-activité: ' + err.message, 'error');
                 } finally {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
@@ -3396,12 +3446,17 @@
                         body: JSON.stringify({ actif })
                     });
 
-                    if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+                    const data = await res.json();
 
-                    UTILS.showAlert('activityAlert', `Catégorie ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    if (!res.ok) {
+                        throw new Error(data.message || "Erreur lors de la mise à jour");
+                    }
+
+                    UTILS.showAlert('activityAlert', `Catégorie ${actif ? 'activée' : 'désactivée'} avec succès`, 'success');
                     await ACTIVITIES.loadCategories();
                 } catch (err) {
-                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour', 'error');
+                    console.error('Erreur détaillée toggle catégorie:', err);
+                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour: ' + err.message, 'error');
                 }
             },
 
@@ -3419,12 +3474,17 @@
                         body: JSON.stringify({ actif })
                     });
 
-                    if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+                    const data = await res.json();
 
-                    UTILS.showAlert('activityAlert', `Sous-activité ${actif ? 'activée' : 'désactivée'} avec succès`);
+                    if (!res.ok) {
+                        throw new Error(data.message || "Erreur lors de la mise à jour");
+                    }
+
+                    UTILS.showAlert('activityAlert', `Sous-activité ${actif ? 'activée' : 'désactivée'} avec succès`, 'success');
                     await ACTIVITIES.loadSubactivities();
                 } catch (err) {
-                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour', 'error');
+                    console.error('Erreur détaillée toggle sous-activité:', err);
+                    UTILS.showAlert('activityAlert', 'Erreur lors de la mise à jour: ' + err.message, 'error');
                 }
             },
 
@@ -3436,7 +3496,6 @@
                 UTILS.showAlert('activityAlert', 'Fonctionnalité de modification à implémenter', 'info');
             }
         };
-
         // =============================================
         // INITIALISATION
         // =============================================
