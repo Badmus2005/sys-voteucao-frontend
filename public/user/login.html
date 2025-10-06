@@ -455,10 +455,10 @@
             transform: none;
         }
 
-        /* Styles pour les activités */
+        /* Styles pour les activités (repris de register.html) */
         .activities-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -467,10 +467,11 @@
             border: 2px solid var(--gray-light);
             border-radius: 10px;
             padding: 1rem;
-            text-align: center;
             cursor: pointer;
             transition: var(--transition);
+            text-align: center;
             background: white;
+            position: relative;
         }
 
         .activity-card:hover {
@@ -484,41 +485,54 @@
             background: rgba(128, 0, 32, 0.05);
         }
 
+        .activity-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--accent);
+            color: var(--secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
         .activity-icon {
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
 
         .activity-name {
             font-weight: 600;
+            color: var(--secondary);
             margin-bottom: 0.25rem;
         }
 
         .activity-description {
             font-size: 0.8rem;
             color: var(--gray);
-            margin-bottom: 0.5rem;
-        }
-
-        .activity-badge {
-            font-size: 0.7rem;
-            background: var(--accent);
-            color: var(--dark);
-            padding: 0.25rem 0.5rem;
-            border-radius: 20px;
-            display: inline-block;
+            line-height: 1.4;
         }
 
         .subactivities-section {
             margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--gray-light);
+            padding: 1.5rem;
+            background: rgba(128, 0, 32, 0.02);
+            border-radius: 10px;
+            border: 1px solid var(--gray-light);
         }
 
         .subactivities-section h4 {
             color: var(--secondary);
             margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .subactivities-section p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -553,7 +567,7 @@
             }
 
             .activities-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                grid-template-columns: 1fr;
             }
         }
 
@@ -583,7 +597,7 @@
             }
 
             .activities-grid {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -950,7 +964,7 @@
                         return;
                     }
 
-                    // Vérifier si l'utilisateur a déjà des activités
+                    // Vérifier si l'utilisateur a déjà des activités AVANT d'afficher le modal
                     await checkUserActivities(token);
                 } else {
                     showMessage(data.message || 'Email/identifiant ou mot de passe incorrect', 'error');
@@ -963,7 +977,7 @@
             }
         }
 
-        // Vérifier si l'utilisateur a déjà des activités
+        // Vérifier si l'utilisateur a déjà des activités (utilisant la route que vous avez fournie)
         async function checkUserActivities(token) {
             try {
                 const res = await fetch(`${API_URL}/api/activities/my-activities`, {
@@ -976,25 +990,25 @@
                 if (res.ok) {
                     const data = await res.json();
 
-                    // Si l'utilisateur a déjà des activités, rediriger directement
-                    if (data.data && data.data.activities && data.data.activities.length > 0) {
-                        console.log('Utilisateur a déjà des activités, redirection directe');
+                    // Vérifier si l'étudiant a déjà des activités
+                    if (data.data && data.data.length > 0) {
+                        console.log('Étudiant a déjà des activités, redirection directe vers le dashboard');
                         setTimeout(() => {
                             window.location.replace('dashboard.html');
                         }, 500);
                     } else {
-                        // Sinon, afficher le modal de sélection
-                        console.log('Utilisateur n\'a pas d\'activités, affichage du modal');
+                        // L'étudiant n'a pas encore d'activités, afficher le modal de choix
+                        console.log('Étudiant n\'a pas encore d\'activités, affichage du modal de choix');
                         await showActivitiesModal();
                     }
                 } else {
-                    // En cas d'erreur, afficher le modal par défaut
+                    // En cas d'erreur, afficher le modal par défaut (pour permettre le choix)
                     console.log('Erreur vérification activités, affichage modal par défaut');
                     await showActivitiesModal();
                 }
             } catch (error) {
                 console.error('Erreur vérification activités:', error);
-                // En cas d'erreur, afficher le modal
+                // En cas d'erreur, afficher le modal (pour permettre le choix)
                 await showActivitiesModal();
             }
         }
@@ -1035,7 +1049,7 @@
             }
         }
 
-        // ----------------- Système complet des activités -----------------
+        // ----------------- SYSTÈME COMPLET DES ACTIVITÉS (identique à register.html) -----------------
         let selectedActivities = [];
         let selectedSubactivities = {};
         let activitiesWithSubs = {};
@@ -1075,7 +1089,7 @@
                 }
             } catch (error) {
                 console.error('Erreur chargement activités:', error);
-                // Données de démonstration avec sous-activités
+                // Données de démonstration AVEC has_subactivities
                 const defaultActivities = [
                     {
                         id: 1,
@@ -1097,6 +1111,20 @@
                         description: "Club tech, programmation, robotique",
                         icone: "laptop-code",
                         has_subactivities: true
+                    },
+                    {
+                        id: 4,
+                        nom: "Musique",
+                        description: "Pratique musicale",
+                        icone: "music",
+                        has_subactivities: false
+                    },
+                    {
+                        id: 5,
+                        nom: "Théâtre",
+                        description: "Art dramatique",
+                        icone: "theater-masks",
+                        has_subactivities: false
                     }
                 ];
                 renderActivities(defaultActivities);
@@ -1111,7 +1139,7 @@
                 const activityCard = document.createElement('div');
                 activityCard.className = 'activity-card';
 
-                // Vérification améliorée de has_subactivities
+                // Vérification améliorée de has_subactivities (identique à register.html)
                 const hasSubactivities = activity.has_subactivities === true ||
                     activity.has_subactivities === 'true' ||
                     activity.has_subactivities === 1;
@@ -1131,7 +1159,7 @@
                     const wasSelected = activityCard.classList.contains('selected');
                     const activityId = activity.id;
 
-                    // Gérer la sélection/désélection
+                    // Gérer la sélection/désélection (identique à register.html)
                     activityCard.classList.toggle('selected');
 
                     if (activityCard.classList.contains('selected')) {
@@ -1142,17 +1170,17 @@
                         // Si l'activité a des sous-activités, les afficher
                         if (hasSubactivities) {
                             currentActivityId = activityId;
-                            elements.subactivitiesContainer.style.display = 'block';
+                            document.getElementById('subactivitiesContainer').style.display = 'block';
                             populateSubactivities(activityId, activity.nom, activity.description);
                         } else {
-                            elements.subactivitiesContainer.style.display = 'none';
+                            document.getElementById('subactivitiesContainer').style.display = 'none';
                         }
                     } else {
                         selectedActivities = selectedActivities.filter(id => id !== activityId);
 
                         // Si on désélectionne une activité avec sous-activités
                         if (hasSubactivities && currentActivityId === activityId) {
-                            elements.subactivitiesContainer.style.display = 'none';
+                            document.getElementById('subactivitiesContainer').style.display = 'none';
                         }
                     }
                 });
@@ -1185,7 +1213,7 @@
                 }
             } catch (error) {
                 console.error(`Erreur chargement sous-activités pour ${activityName}:`, error);
-                // Utiliser des sous-activités par défaut selon le type
+                // Utiliser des sous-activités par défaut selon le type (identique à register.html)
                 const defaultSubs = getDefaultSubactivities(activityName);
                 activitiesWithSubs[activityId] = defaultSubs;
                 renderSubactivities(defaultSubs);
@@ -1205,9 +1233,7 @@
                 const subCard = document.createElement('div');
                 subCard.className = 'activity-card';
                 subCard.innerHTML = `
-                    <div class="activity-icon">
-                        <i class="fas fa-${subactivity.icone || 'circle'}"></i>
-                    </div>
+                    <div class="activity-icon"><i class="fas fa-${subactivity.icone || 'circle'}"></i></div>
                     <div class="activity-name">${subactivity.nom}</div>
                     <div class="activity-description">${subactivity.description || ''}</div>
                 `;
