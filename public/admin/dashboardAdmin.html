@@ -1973,6 +1973,32 @@
             }
         }
 
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        // Fonction parseFileData améliorée pour gérer fileName
+        function parseFileData(data, fileType, fileName = '') {
+            // Vérifier si fileName est défini
+            const fileNameSafe = fileName || '';
+
+            if (fileType.includes('csv') || fileType.includes('text') || fileNameSafe.endsWith('.csv')) {
+                return parseCSVData(data);
+            } else if (fileType.includes('spreadsheet') || fileType.includes('excel') ||
+                fileNameSafe.endsWith('.xlsx') || fileNameSafe.endsWith('.xls')) {
+                throw new Error('Les fichiers Excel doivent être convertis en CSV. Utilisez "Enregistrer sous" > format CSV.');
+            } else {
+                throw new Error('Format de fichier non supporté. Utilisez CSV.');
+            }
+        }
+
+        // Modifier l'appel dans importStudentsFile
         async function importStudentsFile() {
             const fileInput = document.getElementById('fileInput');
             if (!fileInput || !fileInput.files[0]) {
@@ -1985,7 +2011,8 @@
             try {
                 // Lire le fichier
                 const text = await readFileAsText(file);
-                const etudiants = await parseFileData(text, file.type);
+                // Passer le nom du fichier en paramètre
+                const etudiants = await parseFileData(text, file.type, file.name);
 
                 // Importer les étudiants
                 await importStudents(etudiants);
@@ -1993,29 +2020,6 @@
             } catch (error) {
                 console.error('Erreur de traitement du fichier:', error);
                 showToast('Erreur lors du traitement du fichier: ' + error.message, 'error');
-            }
-        }
-
-        function readFileAsText(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = e => resolve(e.target.result);
-                reader.onerror = reject;
-                reader.readAsText(file);
-            });
-        }
-
-        // Fonction parseFileData 
-        function parseFileData(data, fileType, fileName) {
-            if (fileType.includes('csv') || fileType.includes('text') || fileName.endsWith('.csv')) {
-                return parseCSVData(data);
-            } else if (fileType.includes('spreadsheet') || fileType.includes('excel') ||
-                fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-                // Pour les fichiers Excel, on ne peut pas les parser directement sans bibliothèque
-                // On retourne un message d'erreur explicite
-                throw new Error('Les fichiers Excel doivent être convertis en CSV. Utilisez "Enregistrer sous" > format CSV.');
-            } else {
-                throw new Error('Format de fichier non supporté. Utilisez CSV.');
             }
         }
 
@@ -2105,6 +2109,8 @@
             return values;
         }
 
+
+        // Ajouter un log pour debugger
         async function importStudents(etudiants) {
             if (!Array.isArray(etudiants) || etudiants.length === 0) {
                 showToast('Aucun étudiant à importer', 'error');
@@ -2123,6 +2129,9 @@
                 showLoading();
                 const token = getToken();
 
+                console.log('URL appelée:', `${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`);
+                console.log('Données envoyées:', { etudiants: etudiants.slice(0, 2) }); // Log seulement les 2 premiers pour debug
+
                 const response = await fetch(`${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`, {
                     method: 'POST',
                     headers: {
@@ -2132,11 +2141,23 @@
                     body: JSON.stringify({ etudiants })
                 });
 
-                const data = await response.json();
+                console.log('Statut de la réponse:', response.status);
+                console.log('Headers de la réponse:', response.headers);
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Erreur lors de l\'importation');
+                    let errorMessage = `Erreur ${response.status}`;
+                    try {
+                        const errorData = await response.text();
+                        console.error('Réponse d\'erreur:', errorData);
+                        errorMessage = errorData || `Erreur ${response.status}: ${response.statusText}`;
+                    } catch (e) {
+                        errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
                 }
+
+                const data = await response.json();
+                console.log('Réponse réussie:', data);
 
                 // Afficher les résultats
                 displayImportResults(data);
@@ -2147,7 +2168,18 @@
 
             } catch (error) {
                 console.error('Erreur importation étudiants:', error);
-                showToast(error.message || 'Échec de l\'importation', 'error');
+
+                // Message d'erreur plus explicite
+                let userMessage = error.message;
+                if (error.message.includes('404')) {
+                    userMessage = 'Endpoint d\'importation non trouvé. Vérifiez la configuration du serveur.';
+                } else if (error.message.includes('401')) {
+                    userMessage = 'Non autorisé. Vérifiez votre connexion.';
+                } else if (error.message.includes('500')) {
+                    userMessage = 'Erreur serveur. Contactez l\'administrateur.';
+                }
+
+                showToast(userMessage, 'error');
             } finally {
                 if (importBtn) {
                     importBtn.innerHTML = originalBtnText;
