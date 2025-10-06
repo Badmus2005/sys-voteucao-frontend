@@ -159,6 +159,7 @@
             z-index: 20;
             height: 100vh;
             overflow-y: auto;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
@@ -831,6 +832,137 @@
             display: block;
         }
 
+        /* Mobile menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(128, 0, 32, 0.05);
+        }
+
+        /* Notifications Panel */
+        .notifications-container {
+            position: relative;
+        }
+
+        .notifications-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 350px;
+            max-height: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .notifications-panel.show {
+            display: flex;
+        }
+
+        .notifications-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .notifications-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        .notification-item.unread {
+            background: rgba(128, 0, 32, 0.08);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(128, 0, 32, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .no-notifications {
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
+        }
+
         /* Responsive Styles */
         @media (max-width: 1200px) {
             .main-grid {
@@ -888,11 +1020,6 @@
                 padding: 0 1rem;
             }
 
-            .search-container {
-                margin: 0 1rem;
-                max-width: 300px;
-            }
-
             .user-info {
                 display: none;
             }
@@ -926,6 +1053,11 @@
             .section {
                 padding: 1.25rem;
             }
+
+            .notifications-panel {
+                width: 300px;
+                right: -50px;
+            }
         }
 
         @media (max-width: 640px) {
@@ -947,8 +1079,9 @@
                 gap: 1rem;
             }
 
-            .search-container {
-                max-width: 200px;
+            .notifications-panel {
+                width: 280px;
+                right: -80px;
             }
         }
 
@@ -993,13 +1126,14 @@
                 left: 20px;
                 top: 60px;
             }
+
+            .notifications-panel {
+                width: 260px;
+                right: -100px;
+            }
         }
 
         @media (max-width: 380px) {
-            .search-container {
-                display: none;
-            }
-
             .header-actions {
                 margin-left: auto;
             }
@@ -1008,32 +1142,10 @@
                 font-size: 0.85rem;
                 padding: 0.6rem 1rem;
             }
-        }
 
-        /* Mobile menu */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--dark);
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .mobile-menu-btn:hover {
-            background-color: rgba(128, 0, 32, 0.05);
-        }
-
-
-        @media (max-width: 1024px) {
-            .mobile-menu-btn {
-                display: flex;
+            .notifications-panel {
+                width: 240px;
+                right: -120px;
             }
         }
 
@@ -1056,8 +1168,6 @@
             background: #a8a8a8;
         }
     </style>
-
-    <link rel="stylesheet" href="/assets/notifications.css">
 </head>
 
 <body>
@@ -1332,11 +1442,108 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
-    <script src="/assets/config.js"></script>
-    <script src="/assets/js/common.js"></script>
-    <script src="/assets/js/notificationService.js"></script>
-    <script src="/assets/initNotifications.js"></script>
+
     <script>
+        // Services et utilitaires de base
+        const BaseService = {
+            async apiCall(endpoint, options = {}) {
+                try {
+                    const response = await fetch(endpoint, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erreur API:', error);
+                    throw error;
+                }
+            }
+        };
+
+        const UserService = {
+            async getProfile() {
+                return { data: { id: 1, name: 'Étudiant' } }; // Simulation
+            }
+        };
+
+        const Common = {
+            checkAuth() {
+                return true; // Simulation
+            },
+
+            showLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.style.display = 'flex';
+            },
+
+            hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) overlay.style.display = 'none';
+            },
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                const toastIcon = document.getElementById('toastIcon');
+
+                if (!toast || !toastMessage || !toastIcon) return;
+
+                // Changer l'icône selon le type
+                const icons = {
+                    success: 'fa-circle-check',
+                    error: 'fa-circle-exclamation',
+                    warning: 'fa-triangle-exclamation'
+                };
+
+                toastIcon.className = `fa-solid ${icons[type] || icons.success}`;
+                toastMessage.textContent = message;
+                toast.className = `toast ${type} show`;
+
+                // Masquer après 3 secondes
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            },
+
+            initCommonElements() {
+                // Initialiser le bouton de déconnexion
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                            window.location.href = 'login.html';
+                        }
+                    });
+                }
+            },
+
+            async loadUserProfileInHeader() {
+                try {
+                    const profile = await UserService.getProfile();
+                    const userName = document.getElementById('userName');
+                    const welcomeTitle = document.getElementById('welcomeTitle');
+
+                    if (userName && profile.data) {
+                        userName.textContent = profile.data.name || 'Étudiant';
+                    }
+
+                    if (welcomeTitle && profile.data) {
+                        welcomeTitle.textContent = `Bienvenue, ${profile.data.name || 'Étudiant'} !`;
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement profil:', error);
+                }
+            }
+        };
+
         // Variables globales pour cette page
         let currentElections = [];
         let electionDates = [];
@@ -1350,7 +1557,27 @@
         // Services spécifiques à dashboard
         const ElectionService = {
             async getElections() {
-                return await BaseService.apiCall('/elections/active');
+                // Simulation de données
+                return {
+                    data: [
+                        {
+                            id: 1,
+                            titre: "Élection BDE",
+                            description: "Élection du Bureau des Étudiants",
+                            dateDebut: "2023-10-15",
+                            dateFin: "2023-10-20",
+                            candidatesCount: 5
+                        },
+                        {
+                            id: 2,
+                            titre: "Élection Représentants",
+                            description: "Élection des représentants étudiants",
+                            dateDebut: "2023-10-25",
+                            dateFin: "2023-10-30",
+                            candidatesCount: 3
+                        }
+                    ]
+                };
             },
 
             async getElectionById(id) {
@@ -1374,23 +1601,39 @@
             },
 
             async getMyCandidatures() {
-                return await BaseService.apiCall('/candidats/my-candidature');
+                return { data: [] }; // Simulation
             }
         };
 
         const VoteService = {
             async getMyVotes() {
-                return await BaseService.apiCall('/votes/my-votes');
+                return { data: [] }; // Simulation
             },
 
             async getMyResult() {
-                return await BaseService.apiCall('/votes/elections/wins');
+                return { data: [] }; // Simulation
             }
         };
 
         const ActivityService = {
             async getActivity(studentId, page = 1, limit = 5) {
-                return await BaseService.apiCall(`/activity/recent?userId=${studentId}&page=${page}&limit=${limit}`);
+                // Simulation de données
+                return {
+                    logs: [
+                        {
+                            action: "Connexion réussie",
+                            createdAt: new Date().toISOString()
+                        },
+                        {
+                            action: "Vote soumis - Élection BDE",
+                            createdAt: new Date(Date.now() - 3600000).toISOString()
+                        }
+                    ],
+                    pagination: {
+                        currentPage: 1,
+                        totalPages: 1
+                    }
+                };
             }
         };
 
@@ -1441,6 +1684,52 @@
             }
         };
 
+        // Service de notifications
+        class NotificationService {
+            constructor() {
+                this.notifications = [
+                    {
+                        id: 1,
+                        type: 'election',
+                        message: 'Nouvelle élection disponible',
+                        date: new Date(Date.now() - 300000),
+                        read: false
+                    },
+                    {
+                        id: 2,
+                        type: 'info',
+                        message: 'Votre candidature a été validée',
+                        date: new Date(Date.now() - 1800000),
+                        read: true
+                    }
+                ];
+            }
+
+            getNotifications() {
+                return this.notifications;
+            }
+
+            getUnreadCount() {
+                return this.notifications.filter(n => !n.read).length;
+            }
+
+            markAsRead(id) {
+                const notification = this.notifications.find(n => n.id === parseInt(id));
+                if (notification) {
+                    notification.read = true;
+                }
+            }
+
+            markAllAsRead() {
+                this.notifications.forEach(n => n.read = true);
+            }
+
+            async fetchNewNotifications() {
+                // Simulation de récupération de nouvelles notifications
+                return Promise.resolve();
+            }
+        }
+
         // Fonction pour le menu mobile
         function initMobileMenu() {
             const burger = document.getElementById('mobileMenuBtn');
@@ -1450,14 +1739,6 @@
             // Vérifier si les éléments existent
             if (!burger || !sidebar || !overlay) {
                 console.log('Éléments du menu non trouvés');
-                return;
-            }
-
-            // Vérifier si on est sur mobile
-            const isMobile = window.matchMedia('(max-width: 1024px)').matches;
-
-            if (!isMobile) {
-                console.log('Mode desktop - menu mobile désactivé');
                 return;
             }
 
