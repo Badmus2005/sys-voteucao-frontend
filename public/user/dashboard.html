@@ -1421,23 +1421,61 @@
                 }
 
                 return `
-                    <div class="election-card" data-election-id="${election.id}">
-                        <div class="election-header">
-                            <h3 class="election-title">${election.titre}</h3>
-                            <div class="election-date">${startDate} - ${endDate}</div>
+                        <div class="election-card" data-election-id="${election.id}">
+                            <div class="election-header">
+                                <h3 class="election-title">${election.titre}</h3>
+                                <div class="election-date">${startDate} - ${endDate}</div>
+                            </div>
+                            <div class="election-body">
+                                <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                                <span class="election-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="election-footer">
+                                <div class="election-info">${election.candidatesCount || 0} candidats</div>
+                                ${actionButton}
+                            </div>
                         </div>
-                        <div class="election-body">
-                            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
-                            <span class="election-status ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="election-footer">
-                            <div class="election-info">${election.candidatesCount || 0} candidats</div>
-                            ${actionButton}
-                        </div>
-                    </div>
-                `;
+                    `;
             }
         };
+
+        // Fonction pour fermer le menu au clic extérieur
+        function initMobileMenu() {
+            const burger = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            // Ouvrir/fermer le menu
+            burger.addEventListener('click', function () {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            // Fermer le menu en cliquant sur l'overlay
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Fermer le menu en cliquant n'importe où en dehors
+            document.addEventListener('click', function (event) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnMenuButton = burger.contains(event.target);
+
+                if (sidebar.classList.contains('active') && !isClickInsideSidebar && !isClickOnMenuButton) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
+
+            // Fermer avec la touche Échap
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
+        }
 
         // Fonctions spécifiques à dashboard
         async function loadPageData() {
@@ -1491,12 +1529,12 @@
 
             if (!elections || elections.length === 0) {
                 container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        <h3>Aucune élection en cours</h3>
-                        <p>Il n'y a aucune élection en cours pour le moment.</p>
-                    </div>
-                `;
+                        <div class="no-data-message">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <h3>Aucune élection en cours</h3>
+                            <p>Il n'y a aucune élection en cours pour le moment.</p>
+                        </div>
+                    `;
                 return;
             }
 
@@ -1596,29 +1634,29 @@
 
             if (!activities || activities.length === 0) {
                 container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        <h3>Aucune activité récente</h3>
-                        <p>Vos activités récentes apparaîtront ici.</p>
-                    </div>
-                `;
+                        <div class="no-data-message">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <h3>Aucune activité récente</h3>
+                            <p>Vos activités récentes apparaîtront ici.</p>
+                        </div>
+                    `;
                 return;
             }
 
             const mapped = activities.slice(0, 5).map(mapActivityLogToDisplay);
 
             container.innerHTML = mapped.map(activity => `
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <i class="fa-solid ${activity.icon}"></i>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">
+                            <i class="fa-solid ${activity.icon}"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${activity.title}</h3>
+                            <p class="timeline-desc">${activity.description}</p>
+                            <span class="timeline-time">${activity.time}</span>
+                        </div>
                     </div>
-                    <div class="timeline-content">
-                        <h3 class="timeline-title">${activity.title}</h3>
-                        <p class="timeline-desc">${activity.description}</p>
-                        <span class="timeline-time">${activity.time}</span>
-                    </div>
-                </div>
-            `).join('');
+                `).join('');
         }
 
         async function loadUserStatistics() {
@@ -1732,11 +1770,11 @@
             if (!container) return;
 
             container.innerHTML = `
-                <div class="no-data-message">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                </div>
-            `;
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>${message}</h3>
+                    </div>
+                `;
         }
 
         function showActivityError(message) {
@@ -1744,11 +1782,11 @@
             if (!container) return;
 
             container.innerHTML = `
-                <div class="no-data-message">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <h3>${message}</h3>
-                </div>
-            `;
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <h3>${message}</h3>
+                    </div>
+                `;
         }
 
         function initializeNotifications() {
@@ -1794,16 +1832,16 @@
                 container.innerHTML = notifications
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .map(notif => `
-                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                            <div class="notification-icon">
-                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                                <div class="notification-icon">
+                                    <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-text">${notif.message}</div>
+                                    <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                                </div>
                             </div>
-                            <div class="notification-content">
-                                <div class="notification-text">${notif.message}</div>
-                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
-                            </div>
-                        </div>
-                    `).join('');
+                        `).join('');
 
                 container.querySelectorAll('.notification-item').forEach(item => {
                     item.addEventListener('click', () => {
@@ -1891,6 +1929,9 @@
             Common.initCommonElements();
             await Common.loadUserProfileInHeader();
             initializeNotifications();
+
+            // Initialiser le menu mobile avec fermeture au clic extérieur
+            initMobileMenu();
 
             // Charger les données spécifiques
             await loadPageData();
