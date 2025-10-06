@@ -584,6 +584,31 @@
         </div>
     </div>
 
+    <!-- Modal: Choix des activités après connexion -->
+    <div class="modal" id="activitiesModal">
+        <div class="modal-content" style="max-width:900px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Choisissez vos activités</h3>
+                <button class="modal-close" id="activitiesModalClose">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height:60vh; overflow:auto;">
+                <p id="activitiesIntro">Sélectionnez les activités et options qui vous intéressent. Vous pourrez les
+                    modifier plus tard.</p>
+                <div class="activities-grid" id="activitiesContainer"></div>
+
+                <div class="subactivities-section" id="subactivitiesContainer" style="display:none; margin-top:1rem;">
+                    <h4 id="subactivitiesTitle">Options</h4>
+                    <p id="subactivitiesDescription">Choisissez parmi les options</p>
+                    <div class="activities-grid" id="subactivitiesGrid"></div>
+                </div>
+            </div>
+            <div class="modal-actions" style="padding:1rem; display:flex; gap:1rem; justify-content:flex-end;">
+                <button class="btn-modal btn-cancel" id="skipActivities">Passer</button>
+                <button class="btn-modal btn-submit" id="saveActivitiesBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de réinitialisation de mot de passe -->
     <div class="modal" id="resetModal">
         <div class="modal-content">
@@ -845,9 +870,16 @@
 
                     showMessage('Connexion réussie ! Redirection...', 'success');
 
-                    setTimeout(() => {
-                        window.location.replace(data.data.requirePasswordChange ? 'change-password.html' : 'dashboard.html');
-                    }, 1500);
+                    // Si changement de mot de passe requis -> redirection
+                    if (data.data.requirePasswordChange) {
+                        setTimeout(() => {
+                            window.location.replace('change-password.html');
+                        }, 1000);
+                        return;
+                    }
+
+                    // Sinon, afficher le modal de sélection d'activités avant d'aller au dashboard
+                    await showActivitiesModal();
                 } else {
                     showMessage(data.message || 'Email/identifiant ou mot de passe incorrect', 'error');
                 }
@@ -892,6 +924,193 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Envoyer les instructions';
+            }
+        }
+
+        // ----------------- Activités & Sous-activités (repris de register.html) -----------------
+        let selectedActivities = [];
+        let selectedSubactivities = {};
+        let activitiesWithSubs = {};
+        let currentActivityId = null;
+
+        async function showActivitiesModal() {
+            const modal = document.getElementById('activitiesModal');
+            modal.classList.add('active');
+            await populateActivities();
+            setupActivitiesModalEvents();
+        }
+
+        function setupActivitiesModalEvents() {
+            document.getElementById('activitiesModalClose').addEventListener('click', () => {
+                document.getElementById('activitiesModal').classList.remove('active');
+                window.location.replace('dashboard.html');
+            });
+
+            document.getElementById('skipActivities').addEventListener('click', () => {
+                document.getElementById('activitiesModal').classList.remove('active');
+                window.location.replace('dashboard.html');
+            });
+
+            document.getElementById('saveActivitiesBtn').addEventListener('click', saveActivitiesSelection);
+        }
+
+        async function populateActivities() {
+            try {
+                const res = await fetch(`${API_URL}/api/activities`);
+                if (!res.ok) throw new Error(`Erreur ${res.status}`);
+
+                const data = await res.json();
+                if (data.success) {
+                    renderActivities(data.data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Erreur chargement activités:', error);
+                const defaultActivities = [
+                    { id: 1, nom: 'Sport', description: 'Activités sportives', icone: 'running', has_subactivities: true },
+                    { id: 2, nom: 'Culture', description: 'Arts et culture', icone: 'palette', has_subactivities: true }
+                ];
+                renderActivities(defaultActivities);
+            }
+        }
+
+        function renderActivities(activities) {
+            const container = document.getElementById('activitiesContainer');
+            container.innerHTML = '';
+
+            activities.forEach(activity => {
+                const activityCard = document.createElement('div');
+                activityCard.className = 'activity-card';
+
+                const hasSubactivities = activity.has_subactivities === true || activity.has_subactivities === 'true' || activity.has_subactivities === 1;
+                activityCard.dataset.hasSubactivities = hasSubactivities;
+
+                activityCard.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="fas fa-${activity.icone || 'star'}"></i>
+                    </div>
+                    <div class="activity-name">${activity.nom}</div>
+                    <div class="activity-description">${activity.description || ''}</div>
+                    ${hasSubactivities ? '<div class="activity-badge"><i class="fas fa-chevron-down"></i> Options</div>' : ''}
+                `;
+
+                activityCard.addEventListener('click', () => {
+                    const activityId = activity.id;
+                    activityCard.classList.toggle('selected');
+
+                    if (activityCard.classList.contains('selected')) {
+                        if (!selectedActivities.includes(activityId)) selectedActivities.push(activityId);
+                        if (hasSubactivities) {
+                            currentActivityId = activityId;
+                            document.getElementById('subactivitiesContainer').style.display = 'block';
+                            populateSubactivities(activityId, activity.nom, activity.description);
+                        }
+                    } else {
+                        selectedActivities = selectedActivities.filter(id => id !== activityId);
+                        if (hasSubactivities && currentActivityId === activityId) {
+                            document.getElementById('subactivitiesContainer').style.display = 'none';
+                        }
+                    }
+                });
+
+                container.appendChild(activityCard);
+            });
+        }
+
+        async function populateSubactivities(activityId, activityName, activityDescription) {
+            const title = document.getElementById('subactivitiesTitle');
+            const desc = document.getElementById('subactivitiesDescription');
+            title.textContent = `Sélectionnez vos ${activityName.toLowerCase()} préférés`;
+            desc.textContent = activityDescription || '';
+
+            if (activitiesWithSubs[activityId]) {
+                renderSubactivities(activitiesWithSubs[activityId]);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/activities/${activityId}/subactivities`);
+                if (!res.ok) throw new Error(`Erreur ${res.status}`);
+                const data = await res.json();
+                if (data.success) {
+                    activitiesWithSubs[activityId] = data.data;
+                    renderSubactivities(data.data);
+                } else throw new Error(data.message);
+            } catch (error) {
+                console.error('Erreur chargement sous-activités:', error);
+                activitiesWithSubs[activityId] = [];
+                renderSubactivities([]);
+            }
+        }
+
+        function renderSubactivities(subactivities) {
+            const grid = document.getElementById('subactivitiesGrid');
+            grid.innerHTML = '';
+            if (subactivities.length === 0) {
+                grid.innerHTML = '<p style="color:var(--gray); text-align:center;">Aucune option disponible</p>';
+                return;
+            }
+
+            subactivities.forEach(sub => {
+                const subCard = document.createElement('div');
+                subCard.className = 'activity-card';
+                subCard.innerHTML = `
+                    <div class="activity-icon"><i class="fas fa-${sub.icone || 'circle'}"></i></div>
+                    <div class="activity-name">${sub.nom}</div>
+                    <div class="activity-description">${sub.description || ''}</div>
+                `;
+
+                subCard.addEventListener('click', () => {
+                    subCard.classList.toggle('selected');
+                    const subId = sub.id;
+                    if (subCard.classList.contains('selected')) {
+                        if (!selectedSubactivities[currentActivityId]) selectedSubactivities[currentActivityId] = [];
+                        if (!selectedSubactivities[currentActivityId].includes(subId)) selectedSubactivities[currentActivityId].push(subId);
+                    } else {
+                        if (selectedSubactivities[currentActivityId]) {
+                            selectedSubactivities[currentActivityId] = selectedSubactivities[currentActivityId].filter(id => id !== subId);
+                        }
+                    }
+                });
+
+                grid.appendChild(subCard);
+            });
+        }
+
+        async function saveActivitiesSelection() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showMessage('Token manquant. Veuillez vous reconnecter.', 'error');
+                return;
+            }
+
+            const payload = {
+                activities: selectedActivities,
+                subactivities: selectedSubactivities
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/activities/my-activities`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showMessage('Vos activités ont été enregistrées', 'success');
+                    document.getElementById('activitiesModal').classList.remove('active');
+                    setTimeout(() => window.location.replace('dashboard.html'), 800);
+                } else {
+                    showMessage(data.message || 'Erreur enregistrement activités', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur sauvegarde activités:', error);
+                showMessage('Erreur de connexion. Veuillez réessayer.', 'error');
             }
         }
     </script>
