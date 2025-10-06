@@ -455,6 +455,72 @@
             transform: none;
         }
 
+        /* Styles pour les activités */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .activity-card {
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .activity-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-card.selected {
+            border-color: var(--primary);
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        .activity-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-badge {
+            font-size: 0.7rem;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .subactivities-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .subactivities-section h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .login-container {
                 max-width: 100%;
@@ -485,6 +551,10 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            .activities-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
         }
 
         @media (max-width: 480px) {
@@ -510,6 +580,10 @@
 
             .modal-content {
                 padding: 1.25rem;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -577,8 +651,6 @@
             <div class="login-footer">
                 <p>Mot de passe oublié ? <a href="#" id="forgot-password-link"><i class="fas fa-key"></i>
                         Réinitialiser</a></p>
-                <p>Pas encore de compte ? <a href="register.html"><i class="fas fa-user-plus"></i> Créer un compte</a>
-                </p>
                 <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
             </div>
         </div>
@@ -635,8 +707,19 @@
         </div>
     </div>
 
-    <script src="/assets/config.js"></script>
     <script>
+        // Configuration par défaut si config.js n'est pas disponible
+        const CONFIG = {
+            BASE_URL: window.location.origin,
+            API: {
+                ENDPOINTS: {
+                    AUTH: {
+                        FORGOT_PASSWORD: '/api/forgot-password'
+                    }
+                }
+            }
+        };
+
         const API_URL = CONFIG.BASE_URL;
         const LOGIN_ENDPOINT = '/api/userLogin';
 
