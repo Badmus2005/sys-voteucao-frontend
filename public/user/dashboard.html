@@ -158,8 +158,6 @@
             flex-direction: column;
             z-index: 20;
             height: 100vh;
-            position: fixed;
-            width: 280px;
             overflow-y: auto;
         }
 
@@ -855,24 +853,27 @@
             }
 
             .sidebar {
-                display: none;
                 position: fixed;
                 top: 0;
                 left: 0;
-                height: 100vh;
-                z-index: 1000;
                 width: 280px;
+                height: 100vh;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                z-index: 1000;
             }
 
             .sidebar.active {
-                display: flex;
                 transform: translateX(0);
+            }
+
+            .mobile-menu-btn {
+                display: flex;
             }
 
             .main-content {
                 padding: 1.5rem;
+                margin-left: 0;
             }
         }
 
@@ -1028,6 +1029,7 @@
         .mobile-menu-btn:hover {
             background-color: rgba(128, 0, 32, 0.05);
         }
+
 
         @media (max-width: 1024px) {
             .mobile-menu-btn {
@@ -1445,22 +1447,33 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
-            // Vérifier si on est sur mobile (media query)
+            // Vérifier si les éléments existent
+            if (!burger || !sidebar || !overlay) {
+                console.log('Éléments du menu non trouvés');
+                return;
+            }
+
+            // Vérifier si on est sur mobile
             const isMobile = window.matchMedia('(max-width: 1024px)').matches;
 
             if (!isMobile) {
+                console.log('Mode desktop - menu mobile désactivé');
                 return;
             }
+
+            console.log('Initialisation du menu mobile');
 
             // Ouvrir/fermer le menu
             burger.addEventListener('click', function (event) {
                 event.stopPropagation();
+                console.log('Bouton menu cliqué');
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
             });
 
             // Fermer le menu en cliquant sur l'overlay
             overlay.addEventListener('click', function () {
+                console.log('Overlay cliqué - fermeture du menu');
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
             });
@@ -1471,6 +1484,7 @@
                 const isClickOnMenuButton = burger.contains(event.target);
 
                 if (sidebar.classList.contains('active') && !isClickInsideSidebar && !isClickOnMenuButton) {
+                    console.log('Clic en dehors - fermeture du menu');
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                 }
@@ -1479,6 +1493,7 @@
             // Fermer avec la touche Échap
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                    console.log('Touche Échap - fermeture du menu');
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                 }
@@ -1489,6 +1504,8 @@
         function handleResize() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
+
+            if (!sidebar || !overlay) return;
 
             // Si on passe en mode desktop, fermer le menu
             if (window.matchMedia('(min-width: 1025px)').matches) {
