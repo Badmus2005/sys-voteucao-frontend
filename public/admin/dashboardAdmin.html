@@ -594,54 +594,174 @@
             font-size: 0.9rem;
         }
 
-        /* Génération de codes */
-        .generation-section {
-            margin-bottom: 2rem;
+        /* Styles pour l'importation d'étudiants */
+        .import-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
         }
 
-        .input-group {
+        .import-options {
             display: flex;
             gap: 10px;
-            max-width: 500px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-bg);
+            padding-bottom: 15px;
         }
 
-        #codeCountInput {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--light-bg);
-            border-radius: var(--border-radius);
-            font-family: 'Inter', sans-serif;
-            background: var(--card-bg);
-        }
-
-        .btn-primary {
-            background: var(--bordeaux);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
+        .import-option {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
             transition: var(--transition);
-            box-shadow: var(--shadow);
+            border: 2px solid transparent;
         }
 
-        .btn-primary:hover {
-            background: var(--bordeaux-light);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        .import-option:hover {
+            background: var(--light-bg);
         }
 
-        .generated-codes-section {
+        .import-option.active {
+            background: rgba(139, 0, 0, 0.1);
+            border-color: var(--bordeaux);
+            color: var(--bordeaux);
+        }
+
+        .manual-import-form,
+        .file-import-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--blue-night);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-bg);
+            border-radius: var(--border-radius);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .import-results-section {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 20px;
-            margin-top: 25px;
+            padding: 25px;
             box-shadow: var(--shadow);
-            border-top: 3px solid var(--bordeaux);
+            margin-bottom: 30px;
+        }
+
+        .import-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+
+        .summary-item.success {
+            color: var(--success);
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .summary-item.error {
+            color: var(--danger);
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .summary-item.total {
+            color: var(--blue-night);
+            background: rgba(10, 25, 49, 0.1);
+        }
+
+        .results-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--light-bg);
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active {
+            color: var(--bordeaux);
+            border-bottom-color: var(--bordeaux);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--blue-night);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .file-drop-area {
+            border: 2px dashed var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .file-drop-area:hover {
+            border-color: var(--bordeaux);
+        }
+
+        .file-drop-area.active {
+            border-color: var(--bordeaux);
+            background-color: rgba(139, 0, 0, 0.05);
+        }
+
+        .file-input {
+            display: none;
         }
 
         /* Styles pour les notifications */
@@ -762,29 +882,6 @@
             gap: 10px;
         }
 
-        /* Styles pour l'import de fichiers */
-        .file-drop-area {
-            border: 2px dashed var(--light-bg);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .file-drop-area:hover {
-            border-color: var(--bordeaux);
-        }
-
-        .file-drop-area.active {
-            border-color: var(--bordeaux);
-            background-color: rgba(139, 0, 0, 0.05);
-        }
-
-        .file-input {
-            display: none;
-        }
-
         /* Styles pour les graphiques */
         .chart-container {
             background: var(--card-bg);
@@ -794,111 +891,47 @@
             box-shadow: var(--shadow);
         }
 
-        /* Styles pour les codes générés */
-        .codes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .code-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: var(--light-bg);
+        /* Styles pour les boutons */
+        .btn-primary {
+            background: var(--bordeaux);
+            color: white;
+            border: none;
+            padding: 12px 20px;
             border-radius: var(--border-radius);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .code-item span {
-            font-family: monospace;
-            font-size: 0.9rem;
+            cursor: pointer;
             font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .copy-single-btn {
-            background: none;
-            border: none;
-            color: var(--bordeaux);
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: var(--transition);
-        }
-
-        .copy-single-btn:hover {
-            background-color: rgba(139, 0, 0, 0.1);
-        }
-
-        .codes-title {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            color: var(--blue-night);
-        }
-
-        .codes-count {
-            margin-left: 10px;
-            background-color: var(--bordeaux);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-        }
-
-        .codes-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .action-btn {
-            padding: 8px 15px;
-            background-color: var(--blue-night);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            gap: 8px;
             transition: var(--transition);
-        }
-
-        .action-btn:hover {
-            background-color: var(--blue-night-light);
-        }
-
-        /* Gestion des codes */
-        .codes-management {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 25px;
             box-shadow: var(--shadow);
-            margin-bottom: 30px;
         }
 
-        .codes-filters {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
+        .btn-primary:hover {
+            background: var(--bordeaux-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
         }
 
-        .filter-select {
-            padding: 10px 15px;
-            border: 1px solid var(--light-bg);
+        .btn-secondary {
+            background: var(--text-muted);
+            color: white;
+            border: none;
+            padding: 12px 20px;
             border-radius: var(--border-radius);
-            background: var(--card-bg);
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
         }
 
-        /* Styles pour le tableau de codes */
+        .btn-secondary:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Styles pour les tableaux */
         .table-container {
             overflow-x: auto;
             width: 100%;
@@ -1182,13 +1215,8 @@
                 padding: 20px;
             }
 
-            .input-group {
+            .import-options {
                 flex-direction: column;
-                max-width: 100%;
-            }
-
-            #codeCountInput {
-                width: 100%;
             }
 
             .notification-panel {
@@ -1198,11 +1226,6 @@
 
             .dropdown-menu {
                 width: 200px;
-            }
-
-            .codes-filters {
-                flex-direction: column;
-                align-items: stretch;
             }
 
             .search-input {
@@ -1236,10 +1259,6 @@
 
             .form-row {
                 flex-direction: column;
-            }
-
-            .codes-grid {
-                grid-template-columns: 1fr;
             }
 
             .notification-panel {
@@ -1377,10 +1396,9 @@
                     <i class="fas fa-cog nav-icon"></i>
                     <span class="nav-text">Acceuil</span>
                 </a>
-                <a href="#codes" class="nav-item">
-                    <i class="fas fa-key nav-icon"></i>
-                    <span class="nav-text">Codes d'accès</span>
-                    <span class="nav-badge" id="code-count">0</span>
+                <a href="#import" class="nav-item">
+                    <i class="fas fa-user-plus nav-icon"></i>
+                    <span class="nav-text">Import étudiants</span>
                 </a>
                 <a href="parametre.html" class="nav-item">
                     <i class="fas fa-cog nav-icon"></i>
@@ -1452,51 +1470,130 @@
                     <canvas id="votesChart"></canvas>
                 </div>
 
-                <!-- Gestion des codes -->
+                <!-- Importation d'étudiants -->
+                <div class="import-section" id="import-section">
+                    <h2 class="section-title"><i class="fas fa-file-import"></i> Importer des étudiants</h2>
 
-                <div class="codes-management">
-                    <div class="codes-header">
-                        <h2 class="section-title"><i class="fas fa-key"></i> Gestion des Codes</h2>
-                        <button class="refresh-btn" id="refreshCodesBtn">
-                            <i class="fas fa-sync-alt"></i> Actualiser
-                        </button>
-                    </div>
-
-                    <div class="codes-filters">
-                        <select class="filter-select" id="statusFilter">
-                            <option value="all">Tous les états</option>
-                            <option value="used">Utilisés</option>
-                            <option value="unused">Non utilisés</option>
-                        </select>
-
-                        <div class="search-box">
-                            <input type="text" class="search-input" id="codeSearch" placeholder="Rechercher un code...">
+                    <div class="import-options">
+                        <div class="import-option active" data-type="manual">
+                            <i class="fas fa-keyboard"></i>
+                            <span>Saisie manuelle</span>
+                        </div>
+                        <div class="import-option" data-type="file">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Import fichier</span>
                         </div>
                     </div>
 
-                    <div class="table-container">
-                        <table class="codes-table">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>État</th>
-                                    <th>Date de génération</th>
-                                    <th>Date d'utilisation</th>
-                                    <th>Généré par</th>
-                                    <th>Utilisé par</th>
-                                </tr>
-                            </thead>
-                            <tbody id="codesTableBody">
-                                <!-- Les codes seront chargés ici dynamiquement -->
-                            </tbody>
-                        </table>
+                    <!-- Formulaire de saisie manuelle -->
+                    <div class="manual-import-form" id="manualImportForm">
+                        <div class="form-group">
+                            <label for="studentData">Données des étudiants (format JSON):</label>
+                            <textarea id="studentData" rows="10" placeholder='[
+  {
+    "matricule": "MAT001",
+    "codeInscription": "CODE001",
+    "nom": "Doe",
+    "prenom": "John",
+    "ecole": "EGEI",
+    "filiere": "Informatique Industrielle et Maintenance",
+    "annee": 1,
+    "whatsapp": "+229 12345678",
+    "email": "john.doe@email.com"
+  }
+]'></textarea>
+                            <small class="form-help">
+                                Format JSON attendu. Au moins un identifiant (matricule ou code) requis par étudiant.
+                            </small>
+                        </div>
+                        <button class="btn-primary" id="importManualBtn">
+                            <i class="fas fa-upload"></i> Importer les étudiants
+                        </button>
                     </div>
 
-                    <div class="pagination" id="codesPagination">
-                        <!-- La pagination sera générée ici -->
+                    <!-- Import par fichier (caché par défaut) -->
+                    <div class="file-import-form" id="fileImportForm" style="display: none;">
+                        <div class="file-drop-area" id="fileDropArea">
+                            <i class="fas fa-cloud-upload-alt"
+                                style="font-size: 2rem; margin-bottom: 15px; color: var(--text-muted);"></i>
+                            <p>Glissez-déposez votre fichier CSV ou Excel ici</p>
+                            <label class="btn btn-primary" for="fileInput" style="margin-top: 15px;">
+                                <i class="fas fa-folder-open"></i> Parcourir
+                            </label>
+                            <input accept=".csv,.xlsx,.xls" class="file-input" id="fileInput" type="file" />
+                        </div>
+                        <div id="fileInfo" style="display: none; margin-top: 20px;">
+                            <p><strong>Fichier sélectionné:</strong> <span id="fileName"></span></p>
+                            <p><strong>Type:</strong> <span id="fileType"></span></p>
+                            <p><strong>Taille:</strong> <span id="fileSize"></span></p>
+                        </div>
+                        <button class="btn-primary" id="importFileBtn" disabled style="margin-top: 20px;">
+                            <i class="fas fa-upload"></i> Importer depuis le fichier
+                        </button>
                     </div>
                 </div>
 
+                <!-- Section des résultats d'importation -->
+                <div class="import-results-section" id="importResultsSection" style="display:none;">
+                    <h3 class="codes-title">Résultat de l'importation <span class="codes-count" id="importCount"></span>
+                    </h3>
+
+                    <div class="import-summary">
+                        <div class="summary-item success">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Importés: <strong id="importedCount">0</strong></span>
+                        </div>
+                        <div class="summary-item error">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Échecs: <strong id="failedCount">0</strong></span>
+                        </div>
+                        <div class="summary-item total">
+                            <i class="fas fa-list"></i>
+                            <span>Total: <strong id="totalCount">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="results-tabs">
+                        <button class="tab-btn active" data-tab="imported">Étudiants importés</button>
+                        <button class="tab-btn" data-tab="failed">Échecs</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="importedTab">
+                            <div class="table-container">
+                                <table class="codes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Identifiant temporaire</th>
+                                            <th>Nom</th>
+                                            <th>Prénom</th>
+                                            <th>Matricule</th>
+                                            <th>Code inscription</th>
+                                            <th>École</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="importedStudentsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="failedTab">
+                            <div class="table-container">
+                                <table class="codes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Étudiant</th>
+                                            <th>Erreur</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="failedStudentsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Recent Activity -->
                 <div class="activity-section">
@@ -1518,41 +1615,12 @@
                             <h3>Ajouter Candidat</h3>
                             <p>Ajouter un nouveau candidat</p>
                         </div>
-                        <div class="action-card" id="importMatricules">
-                            <i class="fas fa-file-import"></i>
-                            <h3>Importer Matricules</h3>
-                            <p>Importer des matricules depuis un fichier</p>
-                        </div>
                         <div class="action-card" id="viewReports">
                             <i class="fas fa-chart-bar"></i>
                             <h3>Voir Rapports</h3>
                             <p>Générer des rapports détaillés</p>
                         </div>
                     </div>
-                </div>
-
-                <!-- Code Generation -->
-                <div class="generation-section" id="generation-section">
-                    <h2 class="section-title"><i class="fas fa-key"></i> Générer des codes</h2>
-                    <div class="input-group">
-                        <input id="codeCountInput" max="100" min="1" placeholder="Nombre de codes (1-100)"
-                            type="number" />
-                        <button class="btn-primary pulse-on-hover" id="generateBtn">
-                            <i class="fas fa-bolt"></i> Générer
-                        </button>
-                    </div>
-                </div>
-                <div class="generated-codes-section" id="resultsSection" style="display:none;">
-                    <h3 class="codes-title">Codes générés <span class="codes-count" id="codesCount"></span></h3>
-                    <div class="codes-actions">
-                        <button class="action-btn copy-btn" id="copyAllBtn">
-                            <i class="fas fa-copy"></i> Copier tous
-                        </button>
-                        <button class="action-btn download-btn" id="downloadBtn">
-                            <i class="fas fa-download"></i> Télécharger
-                        </button>
-                    </div>
-                    <div class="codes-grid" id="codesContainer"></div>
                 </div>
             </div>
         </main>
@@ -1586,37 +1654,6 @@
         <div id="notificationList"></div>
     </div>
 
-    <!-- Import Modal -->
-    <div class="modal-overlay" id="importModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3><i class="fas fa-file-import"></i> Importer des matricules</h3>
-                <button class="close-btn" id="closeImportModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="file-drop-area" id="fileDropArea">
-                    <i class="fas fa-cloud-upload-alt"
-                        style="font-size: 2rem; margin-bottom: 15px; color: var(--text-muted);"></i>
-                    <p>Glissez-déposez votre fichier ici ou</p>
-                    <label class="btn btn-primary" for="fileInput" style="margin-top: 15px;">
-                        <i class="fas fa-folder-open"></i> Parcourir
-                    </label>
-                    <input accept=".csv,.xlsx,.xls" class="file-input" id="fileInput" type="file" />
-                </div>
-                <div id="fileInfo" style="display: none; margin-top: 20px;">
-                    <p><strong>Fichier sélectionné:</strong> <span id="fileName"></span></p>
-                    <p><strong>Type:</strong> <span id="fileType"></span></p>
-                    <p><strong>Taille:</strong> <span id="fileSize"></span></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelImport">Annuler</button>
-                <button class="btn btn-primary" disabled id="confirmImport">Importer</button>
-            </div>
-        </div>
-    </div>
     <script src="/assets/config.js"></script>
     <script>
         // Configuration des endpoints API
@@ -1626,11 +1663,10 @@
         const UPLOAD_IMAGE_ENDPOINT = '/api/upload/image';
         const STATS_ENDPOINT = '/api/stats/general';
         const ACTIVITY_ENDPOINT = '/api/activity';
-        const CODES_GENERATE_ENDPOINT = '/api/codes/generate';
-        const CODES_LIST_ENDPOINT = '/api/codes/list';
         const VOTE_STATS_ENDPOINT = '/api/stats/votes';
         const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
         const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/read';
+        const IMPORT_ETUDIANTS_ENDPOINT = '/api/import/etudiants';
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1697,6 +1733,7 @@
         function initializeDashboard() {
             // Initialiser les gestionnaires d'événements
             setupEventListeners();
+            setupImportListeners();
 
             // Charger les données du tableau de bord
             loadAdminInfo();
@@ -1704,7 +1741,6 @@
             loadActivity();
             loadVoteStats();
             loadNotifications();
-            loadAllCodes();
         }
 
         // ------------ UTILS ------------
@@ -1789,292 +1825,337 @@
             }
         }
 
-        // ------------ GESTION DES CODES ------------
-        let allCodes = [];
-        let currentPage = 1;
-        const itemsPerPage = 10;
-        document.getElementById('code-count').textContent = allCodes.length;
+        // ------------ IMPORTATION D'ÉTUDIANTS ------------
+        function setupImportListeners() {
+            // Gestion des onglets d'importation
+            document.querySelectorAll('.import-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    // Désactiver toutes les options
+                    document.querySelectorAll('.import-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
 
-        // Fonction pour charger tous les codes
-        async function loadAllCodes() {
-            try {
-                showLoading();
-                const statusFilter = document.getElementById('statusFilter').value;
-                const searchTerm = document.getElementById('codeSearch').value;
-                const token = getToken();
+                    // Activer l'option courante
+                    this.classList.add('active');
 
-                const params = new URLSearchParams({
-                    page: currentPage,
-                    limit: itemsPerPage,
-                    ...(searchTerm && { search: searchTerm }),
-                    ...(statusFilter !== 'all' && { status: statusFilter })
+                    // Afficher le formulaire correspondant
+                    const importType = this.getAttribute('data-type');
+                    document.getElementById('manualImportForm').style.display =
+                        importType === 'manual' ? 'block' : 'none';
+                    document.getElementById('fileImportForm').style.display =
+                        importType === 'file' ? 'block' : 'none';
                 });
+            });
 
-                const response = await fetch(`${API_BASE}${CODES_LIST_ENDPOINT}?${params}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+            // Importation manuelle
+            safeAddListener('importManualBtn', 'click', importStudentsManual);
+
+            // Importation par fichier
+            safeAddListener('importFileBtn', 'click', importStudentsFile);
+
+            // Gestion du drag & drop de fichiers
+            setupFileDrop();
+
+            // Gestion des onglets de résultats
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    const tabName = this.getAttribute('data-tab');
+
+                    // Mettre à jour les onglets
+                    document.querySelectorAll('.tab-btn').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    // Afficher le contenu correspondant
+                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    document.getElementById(tabName + 'Tab').classList.add('active');
                 });
-
-                if (!response.ok) {
-                    throw new Error('Erreur lors du chargement des codes');
-                }
-
-                const result = await response.json();
-
-                // Vérifier le format de la réponse
-                if (result.success && result.data) {
-                    allCodes = Array.isArray(result.data.codes) ? result.data.codes : [];
-                    document.getElementById('code-count').textContent = allCodes.length;
-                    renderCodesTable();
-                    setupPagination(result.data.pagination);
-                } else {
-                    console.warn('Format de réponse inattendu:', result);
-                    allCodes = [];
-                    renderCodesTable();
-                }
-            } catch (error) {
-                console.error('Erreur lors du chargement des codes:', error);
-                showToast('Erreur lors du chargement des codes', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Fonction pour afficher les codes dans le tableau
-        function renderCodesTable() {
-            const tableBody = document.getElementById('codesTableBody');
-            if (!tableBody) return;
-
-            // Vider le tableau
-            tableBody.innerHTML = '';
-
-            // Remplir le tableau avec les codes
-            if (allCodes.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 20px;">
-                            Aucun code trouvé
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            allCodes.forEach(code => {
-                const row = document.createElement('tr');
-
-                const statusClass = code.used ? 'status-used' : 'status-unused';
-                const statusText = code.used ? 'Utilisé' : 'Non utilisé';
-
-                // Correction ici : utilisation de code.created_at au lieu de code.createdAt
-                const createdAt = formatDate(code.created_at || code.createdAt);
-                // Correction ici : utilisation de code.used_at au lieu de code.usedAt
-                const usedAt = code.used_at || code.usedAt ? formatDate(code.used_at || code.usedAt) : '-';
-                const generatedBy = code.generatedBy || code.generated_by || 'Système';
-                const usedBy = code.usedBy || code.used_by || '-';
-
-                row.innerHTML = `
-                    <td><strong>${code.code}</strong></td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${createdAt}</td>
-                    <td>${usedAt}</td>
-                    <td>${generatedBy}</td>
-                    <td>${usedBy}</td>
-                `;
-
-                tableBody.appendChild(row);
             });
         }
 
-        // Fonction pour configurer la pagination
-        function setupPagination(paginationData) {
-            const paginationContainer = document.getElementById('codesPagination');
-            if (!paginationContainer) return;
+        function setupFileDrop() {
+            const dropArea = document.getElementById('fileDropArea');
+            const fileInput = document.getElementById('fileInput');
 
-            const totalPages = paginationData.totalPages || 1;
+            if (!dropArea || !fileInput) return;
 
-            paginationContainer.innerHTML = '';
+            // Événements pour le drag & drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
 
-            if (totalPages <= 1) return;
-
-            // Bouton précédent
-            if (currentPage > 1) {
-                const prevBtn = document.createElement('button');
-                prevBtn.className = 'pagination-btn';
-                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-                prevBtn.addEventListener('click', () => {
-                    currentPage--;
-                    loadAllCodes();
-                });
-                paginationContainer.appendChild(prevBtn);
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
 
-            // Pages
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, startPage + 4);
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
 
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
-                pageBtn.textContent = i;
-                pageBtn.addEventListener('click', () => {
-                    currentPage = i;
-                    loadAllCodes();
-                });
-                paginationContainer.appendChild(pageBtn);
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('active');
             }
 
-            // Bouton suivant
-            if (currentPage < totalPages) {
-                const nextBtn = document.createElement('button');
-                nextBtn.className = 'pagination-btn';
-                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                nextBtn.addEventListener('click', () => {
-                    currentPage++;
-                    loadAllCodes();
-                });
-                paginationContainer.appendChild(nextBtn);
+            function unhighlight() {
+                dropArea.classList.remove('active');
             }
 
-            // Informations sur la pagination
-            const infoText = document.createElement('div');
-            infoText.className = 'pagination-info';
-            infoText.textContent = `Page ${currentPage} sur ${totalPages} - ${paginationData.totalItems || allCodes.length} codes`;
-            paginationContainer.appendChild(infoText);
+            // Gérer le drop de fichier
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // Gérer la sélection via le bouton
+            fileInput.addEventListener('change', function () {
+                handleFiles(this.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    updateFileInfo(file);
+                    document.getElementById('importFileBtn').disabled = false;
+                }
+            }
         }
 
-        // ------------ GÉNÉRATION DE CODES ------------
-        async function generateCodes() {
-            const countInput = document.getElementById('codeCountInput');
-            const count = parseInt(countInput?.value);
-            const token = getToken();
+        function updateFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileType = document.getElementById('fileType');
+            const fileSize = document.getElementById('fileSize');
 
-            if (!count || count < 1 || count > 100) {
-                showToast('Veuillez entrer un nombre entre 1 et 100', 'error');
+            if (fileInfo && fileName && fileType && fileSize) {
+                fileName.textContent = file.name;
+                fileType.textContent = file.type || 'Inconnu';
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+            }
+        }
+
+        async function importStudentsManual() {
+            const studentDataTextarea = document.getElementById('studentData');
+            if (!studentDataTextarea) return;
+
+            const studentData = studentDataTextarea.value.trim();
+
+            if (!studentData) {
+                showToast('Veuillez saisir les données des étudiants', 'error');
                 return;
             }
 
-            const generateBtn = document.getElementById('generateBtn');
-            if (!generateBtn) return;
+            try {
+                // Parser le JSON
+                const etudiants = JSON.parse(studentData);
 
-            const originalBtnText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
-            generateBtn.disabled = true;
+                if (!Array.isArray(etudiants)) {
+                    throw new Error('Les données doivent être un tableau JSON');
+                }
+
+                // Importer les étudiants
+                await importStudents(etudiants);
+
+            } catch (error) {
+                console.error('Erreur de parsing JSON:', error);
+                showToast('Format JSON invalide. Vérifiez la syntaxe.', 'error');
+            }
+        }
+
+        async function importStudentsFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput || !fileInput.files[0]) {
+                showToast('Veuillez sélectionner un fichier', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            try {
+                // Lire le fichier
+                const text = await readFileAsText(file);
+                const etudiants = await parseFileData(text, file.type);
+
+                // Importer les étudiants
+                await importStudents(etudiants);
+
+            } catch (error) {
+                console.error('Erreur de traitement du fichier:', error);
+                showToast('Erreur lors du traitement du fichier: ' + error.message, 'error');
+            }
+        }
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function parseFileData(data, fileType) {
+            // Implémentation basique pour CSV - à adapter selon vos besoins
+            if (fileType.includes('csv') || fileType.includes('text')) {
+                return parseCSVData(data);
+            } else {
+                throw new Error('Format de fichier non supporté. Utilisez CSV ou JSON.');
+            }
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                throw new Error('Fichier CSV vide ou incomplet');
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const etudiants = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                const etudiant = {};
+
+                headers.forEach((header, index) => {
+                    if (values[index]) {
+                        etudiant[header] = values[index];
+                    }
+                });
+
+                // Normaliser les noms de champs
+                if (etudiant.matricule || etudiant.code) {
+                    etudiants.push({
+                        matricule: etudiant.matricule,
+                        codeInscription: etudiant.code || etudiant.code_inscription,
+                        nom: etudiant.nom,
+                        prenom: etudiant.prenom,
+                        ecole: etudiant.ecole,
+                        filiere: etudiant.filiere,
+                        annee: parseInt(etudiant.annee) || 1,
+                        whatsapp: etudiant.whatsapp,
+                        email: etudiant.email
+                    });
+                }
+            }
+
+            return etudiants;
+        }
+
+        async function importStudents(etudiants) {
+            if (!Array.isArray(etudiants) || etudiants.length === 0) {
+                showToast('Aucun étudiant à importer', 'error');
+                return;
+            }
+
+            const importBtn = document.querySelector('#importManualBtn, #importFileBtn');
+            const originalBtnText = importBtn?.innerHTML;
+
+            if (importBtn) {
+                importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importation...';
+                importBtn.disabled = true;
+            }
 
             try {
                 showLoading();
-                const response = await fetch(`${API_BASE}${CODES_GENERATE_ENDPOINT}`, {
+                const token = getToken();
+
+                const response = await fetch(`${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        quantity: count,
-                        expiresInHours: 72 // 3 jours par défaut
-                    })
+                    body: JSON.stringify({ etudiants })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Erreur lors de la génération');
+                    throw new Error(data.message || 'Erreur lors de l\'importation');
                 }
 
-                if (data.success && data.data && data.data.codes) {
-                    displayGeneratedCodes(data.data.codes);
-                    showToast(`${data.data.codes.length} codes générés avec succès`, 'success');
+                // Afficher les résultats
+                displayImportResults(data);
+                showToast(`Importation terminée: ${data.reussis || 0} réussis, ${data.echoues || 0} échecs`, 'success');
 
-                    // Recharger la liste des codes
-                    await loadAllCodes();
-                } else {
-                    throw new Error('Format de réponse inattendu');
-                }
+                // Recharger les statistiques
+                await loadStats();
+
             } catch (error) {
-                console.error('Erreur génération codes:', error);
-                showToast(error.message || 'Échec de la génération', 'error');
+                console.error('Erreur importation étudiants:', error);
+                showToast(error.message || 'Échec de l\'importation', 'error');
             } finally {
-                generateBtn.innerHTML = originalBtnText;
-                generateBtn.disabled = false;
+                if (importBtn) {
+                    importBtn.innerHTML = originalBtnText;
+                    importBtn.disabled = false;
+                }
                 hideLoading();
             }
         }
 
-        function displayGeneratedCodes(codes) {
-            const container = document.getElementById('codesContainer');
-            const resultsSection = document.getElementById('resultsSection');
-            if (!container || !resultsSection) return;
+        function displayImportResults(result) {
+            const resultsSection = document.getElementById('importResultsSection');
+            const importedCount = document.getElementById('importedCount');
+            const failedCount = document.getElementById('failedCount');
+            const totalCount = document.getElementById('totalCount');
+            const importCount = document.getElementById('importCount');
+            const importedBody = document.getElementById('importedStudentsBody');
+            const failedBody = document.getElementById('failedStudentsBody');
 
-            container.innerHTML = '';
-            codes.forEach(code => {
-                const codeElement = document.createElement('div');
-                codeElement.className = 'code-item';
-                codeElement.innerHTML = `
-                    <span>${code}</span>
-                    <button class="copy-single-btn" data-code="${code}">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                `;
-                container.appendChild(codeElement);
-            });
+            if (!resultsSection) return;
 
-            document.querySelectorAll('.copy-single-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const code = this.getAttribute('data-code');
-                    navigator.clipboard.writeText(code)
-                        .then(() => {
-                            this.innerHTML = '<i class="fas fa-check" style="color:green;"></i>';
-                            setTimeout(() => {
-                                this.innerHTML = '<i class="fas fa-copy"></i>';
-                            }, 2000);
-                        });
+            // Mettre à jour les compteurs
+            if (importedCount) importedCount.textContent = result.reussis || 0;
+            if (failedCount) failedCount.textContent = result.echoues || 0;
+            if (totalCount) totalCount.textContent = result.total || 0;
+            if (importCount) importCount.textContent = `(${result.total || 0} étudiants)`;
+
+            // Afficher les étudiants importés
+            if (importedBody && result.importes) {
+                importedBody.innerHTML = '';
+                result.importes.forEach(etudiant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${etudiant.identifiantTemporaire}</strong></td>
+                        <td>${etudiant.nom}</td>
+                        <td>${etudiant.prenom}</td>
+                        <td>${etudiant.matricule || '-'}</td>
+                        <td>${etudiant.codeInscription || '-'}</td>
+                        <td>${etudiant.ecole || '-'}</td>
+                    `;
+                    importedBody.appendChild(row);
                 });
-            });
+            }
 
+            // Afficher les échecs
+            if (failedBody && result.echecs) {
+                failedBody.innerHTML = '';
+                result.echecs.forEach(echec => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${echec.etudiant?.nom || 'N/A'} ${echec.etudiant?.prenom || ''}</td>
+                        <td style="color: var(--danger);">${echec.erreur}</td>
+                    `;
+                    failedBody.appendChild(row);
+                });
+            }
+
+            // Afficher la section des résultats
             resultsSection.style.display = 'block';
-            const codesCount = document.getElementById('codesCount');
-            if (codesCount) codesCount.textContent = `(${codes.length} codes)`;
-        }
 
-        function copyAllCodes() {
-            const codes = Array.from(document.querySelectorAll('.code-item span'))
-                .map(el => el.textContent)
-                .join('\n');
-
-            navigator.clipboard.writeText(codes)
-                .then(() => {
-                    const copyBtn = document.getElementById('copyAllBtn');
-                    if (!copyBtn) return;
-
-                    const originalHtml = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copié !';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalHtml;
-                    }, 2000);
-                })
-                .catch(err => {
-                    console.error('Erreur copie:', err);
-                    showToast('Erreur lors de la copie', 'error');
-                });
-        }
-
-        function downloadCodes() {
-            const codes = Array.from(document.querySelectorAll('.code-item span'))
-                .map(el => el.textContent)
-                .join('\n');
-
-            const blob = new Blob([codes], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `codes-ucao-${new Date().toISOString().slice(0, 10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Scroll vers les résultats
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ------------ DASHBOARD FUNCTIONS ------------
@@ -2478,18 +2559,9 @@
                 DASHBOARD_AUTH.logout();
             });
 
-            // Gestionnaire pour le bouton de génération de codes
-            safeAddListener('generateBtn', 'click', generateCodes);
-            safeAddListener('copyAllBtn', 'click', copyAllCodes);
-            safeAddListener('downloadBtn', 'click', downloadCodes);
-
             // Gestionnaire pour les actions rapides
             safeAddListener('addElection', 'click', () => showToast('Redirection vers la création d\'élection', 'info'));
             safeAddListener('addCandidate', 'click', () => showToast('Redirection vers l\'ajout de candidat', 'info'));
-            safeAddListener('importMatricules', 'click', () => {
-                const modal = document.getElementById('importModal');
-                if (modal) modal.classList.add('active');
-            });
             safeAddListener('viewReports', 'click', () => showToast('Redirection vers les rapports', 'info'));
 
             // Gestionnaire pour les notifications
@@ -2517,43 +2589,6 @@
                     !panel.contains(e.target) &&
                     !btn.contains(e.target)) {
                     panel.classList.remove('active');
-                }
-            });
-
-            // Gestion des filtres de codes
-            safeAddListener('statusFilter', 'change', () => {
-                currentPage = 1;
-                loadAllCodes();
-            });
-
-            safeAddListener('codeSearch', 'input', debounce(() => {
-                currentPage = 1;
-                loadAllCodes();
-            }, 300));
-
-            safeAddListener('refreshCodesBtn', 'click', () => {
-                currentPage = 1;
-                document.getElementById('codeSearch').value = '';
-                document.getElementById('statusFilter').value = 'all';
-                loadAllCodes();
-            });
-
-            // Gestion de la modal d'import
-            safeAddListener('closeImportModal', 'click', () => {
-                const modal = document.getElementById('importModal');
-                if (modal) modal.classList.remove('active');
-            });
-
-            safeAddListener('cancelImport', 'click', () => {
-                const modal = document.getElementById('importModal');
-                if (modal) modal.classList.remove('active');
-            });
-
-            // Fermer la modal en cliquant à l'extérieur
-            document.addEventListener('click', function (e) {
-                const modal = document.getElementById('importModal');
-                if (modal && e.target === modal) {
-                    modal.classList.remove('active');
                 }
             });
         }
