@@ -366,56 +366,6 @@ if (typeof window !== 'undefined') {
     window.CONFIG = CONFIG;
 }
 
-// Fonctions utilitaires
-/*const UTILS = {
-    
-    formatDate: (date, options = {}) => {
-        const defaultOptions = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-
-        return new Date(date).toLocaleDateString('fr-FR', {
-            ...defaultOptions,
-            ...options
-        });
-    },
-
-    
-    
-
-    
-    generateId: () => {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    },
-
-    isValidEmail: (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    },
-
-    
-    debounce: (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-};*/
-
-// Exporter la configuration
-
-//window.UTILS = UTILS;
-
-
 
 // Version du système
 CONFIG.VERSION = '2.0.0';

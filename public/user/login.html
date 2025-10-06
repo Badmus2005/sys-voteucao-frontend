@@ -706,23 +706,12 @@
             </div>
         </div>
     </div>
-
+    <script src="/assets/config.js"></script>
     <script>
-        // Configuration par défaut si config.js n'est pas disponible
-        const CONFIG = {
-            BASE_URL: window.location.origin,
-            API: {
-                ENDPOINTS: {
-                    AUTH: {
-                        FORGOT_PASSWORD: '/api/forgot-password'
-                    }
-                }
-            }
-        };
-
+        // Configuration de l'API
         const API_URL = CONFIG.BASE_URL;
         const LOGIN_ENDPOINT = '/api/userLogin';
-
+        const FORGOT_PASSWORD = '/api/userLogin/forgot-password';
         let elements = {};
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -986,7 +975,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
 
             try {
-                const res = await fetch(`${API_URL}${CONFIG.API.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+                const res = await fetch(`${API_URL}${FORGOT_PASSWORD}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email })
@@ -1010,7 +999,7 @@
             }
         }
 
-        // ----------------- Activités & Sous-activités (repris de register.html) -----------------
+        // ----------------- Activités & Sous-activités  -----------------
         let selectedActivities = [];
         let selectedSubactivities = {};
         let activitiesWithSubs = {};
