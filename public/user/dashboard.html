@@ -1439,14 +1439,22 @@
             }
         };
 
-        // Fonction pour fermer le menu au clic extérieur
+        // Fonction pour le menu mobile
         function initMobileMenu() {
             const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
+            // Vérifier si on est sur mobile (media query)
+            const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+
+            if (!isMobile) {
+                return;
+            }
+
             // Ouvrir/fermer le menu
-            burger.addEventListener('click', function () {
+            burger.addEventListener('click', function (event) {
+                event.stopPropagation();
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
             });
@@ -1475,6 +1483,18 @@
                     overlay.classList.remove('active');
                 }
             });
+        }
+
+        // Gérer le redimensionnement de la fenêtre
+        function handleResize() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            // Si on passe en mode desktop, fermer le menu
+            if (window.matchMedia('(min-width: 1025px)').matches) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
         }
 
         // Fonctions spécifiques à dashboard
@@ -1930,8 +1950,11 @@
             await Common.loadUserProfileInHeader();
             initializeNotifications();
 
-            // Initialiser le menu mobile avec fermeture au clic extérieur
+            // Initialiser le menu mobile (seulement si on est sur mobile)
             initMobileMenu();
+
+            // Écouter le redimensionnement de la fenêtre
+            window.addEventListener('resize', handleResize);
 
             // Charger les données spécifiques
             await loadPageData();
