@@ -2005,51 +2005,104 @@
             });
         }
 
-        function parseFileData(data, fileType) {
-            // Implémentation basique pour CSV - à adapter selon vos besoins
-            if (fileType.includes('csv') || fileType.includes('text')) {
+        // Fonction parseFileData 
+        function parseFileData(data, fileType, fileName) {
+            if (fileType.includes('csv') || fileType.includes('text') || fileName.endsWith('.csv')) {
                 return parseCSVData(data);
+            } else if (fileType.includes('spreadsheet') || fileType.includes('excel') ||
+                fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                // Pour les fichiers Excel, on ne peut pas les parser directement sans bibliothèque
+                // On retourne un message d'erreur explicite
+                throw new Error('Les fichiers Excel doivent être convertis en CSV. Utilisez "Enregistrer sous" > format CSV.');
             } else {
-                throw new Error('Format de fichier non supporté. Utilisez CSV ou JSON.');
+                throw new Error('Format de fichier non supporté. Utilisez CSV.');
             }
         }
 
+        // Amélioration de la fonction parseCSVData
         function parseCSVData(csvText) {
             const lines = csvText.split('\n').filter(line => line.trim());
             if (lines.length < 2) {
                 throw new Error('Fichier CSV vide ou incomplet');
             }
 
-            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            // Gérer différents séparateurs
+            const firstLine = lines[0];
+            let separator = ',';
+            if (firstLine.includes(';')) separator = ';';
+            if (firstLine.includes('\t')) separator = '\t';
+
+            const headers = lines[0].split(separator).map(h => h.trim().toLowerCase());
             const etudiants = [];
 
+            console.log('En-têtes détectés:', headers);
+            console.log('Séparateur utilisé:', separator);
+
             for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',').map(v => v.trim());
+                const line = lines[i].trim();
+                if (!line) continue; // Ignorer les lignes vides
+
+                // Gérer les champs contenant des virgules (entourés de guillemets)
+                const values = parseCSVLine(line, separator);
                 const etudiant = {};
 
                 headers.forEach((header, index) => {
-                    if (values[index]) {
-                        etudiant[header] = values[index];
+                    if (values[index] !== undefined && values[index] !== '') {
+                        etudiant[header] = values[index].trim();
                     }
                 });
 
-                // Normaliser les noms de champs
-                if (etudiant.matricule || etudiant.code) {
-                    etudiants.push({
-                        matricule: etudiant.matricule,
-                        codeInscription: etudiant.code || etudiant.code_inscription,
+                // Validation des données minimales
+                if (etudiant.nom && etudiant.prenom && etudiant.ecole && etudiant.filiere && etudiant.annee) {
+                    // Normaliser les noms de champs
+                    const etudiantNormalise = {
+                        matricule: etudiant.matricule || null,
+                        codeInscription: etudiant.codeinscription || etudiant.code_inscription || etudiant.code || null,
                         nom: etudiant.nom,
                         prenom: etudiant.prenom,
                         ecole: etudiant.ecole,
                         filiere: etudiant.filiere,
                         annee: parseInt(etudiant.annee) || 1,
-                        whatsapp: etudiant.whatsapp,
-                        email: etudiant.email
-                    });
+                        whatsapp: etudiant.whatsapp || null,
+                        email: etudiant.email || null
+                    };
+
+                    // Vérifier qu'au moins un identifiant est présent
+                    if (etudiantNormalise.matricule || etudiantNormalise.codeInscription) {
+                        etudiants.push(etudiantNormalise);
+                    } else {
+                        console.warn('Étudiant sans identifiant ignoré:', etudiant.nom, etudiant.prenom);
+                    }
+                } else {
+                    console.warn('Ligne ignorée - données manquantes:', etudiant);
                 }
             }
 
+            console.log(`${etudiants.length} étudiants valides trouvés`);
             return etudiants;
+        }
+
+        // Fonction utilitaire pour parser les lignes CSV avec guillemets
+        function parseCSVLine(line, separator) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === separator && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+
+            values.push(current);
+            return values;
         }
 
         async function importStudents(etudiants) {
