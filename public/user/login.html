@@ -932,14 +932,13 @@
             showMessage('', 'success');
 
             try {
-                let body = { password };
+                // CORRECTION : Toujours utiliser 'identifier' pour les matricules et emails
+                const body = {
+                    identifier: emailOrId,  // ← TOUJOURS 'identifier'
+                    password: password
+                };
 
-                // Déterminer si c'est un email ou un identifiant
-                if (emailOrId.includes('@')) {
-                    body.identifier = emailOrId;
-                } else {
-                    body.identifiantTemporaire = emailOrId;
-                }
+                console.log('📤 ENVOI VERS API:', body); // Ajouter ce log
 
                 const res = await fetch(`${API_URL}${LOGIN_ENDPOINT}`, {
                     method: 'POST',
@@ -947,7 +946,10 @@
                     body: JSON.stringify(body)
                 });
 
+                console.log('📥 RÉPONSE API:', res.status, res.statusText); // Ajouter ce log
+
                 const data = await res.json();
+                console.log('📊 DONNÉES RÉPONSE:', data); // Ajouter ce log
 
                 if (res.ok) {
                     const token = data.data.token;
