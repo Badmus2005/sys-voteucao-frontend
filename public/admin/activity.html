@@ -1179,8 +1179,6 @@
                                     <th>Filière</th>
                                     <th>Catégorie</th>
                                     <th>Sous-activité</th>
-                                    <th>Date d'inscription</th>
-                                    <th>Statut</th>
                                 </tr>
                             </thead>
                             <tbody id="studentActivitiesBody">
@@ -1396,8 +1394,19 @@
                 const endIndex = startIndex + this.itemsPerPage;
                 const studentsToShow = this.filteredStudents.slice(startIndex, endIndex);
 
-                tbody.innerHTML = '';
+                if (studentsToShow.length === 0) {
+                    this.renderNoData();
+                    return;
+                }
 
+                tbody.innerHTML = `
+    <tr>
+        <td colspan="5" class="no-data"> <!-- Changer de 7 à 5 colonnes -->
+            <i class="fas fa-inbox"></i>
+            <div>Aucune donnée disponible</div>
+        </td>
+    </tr>
+`;
                 studentsToShow.forEach(student => {
                     const row = document.createElement('tr');
                     const isActive = student.actif === true || student.actif === 1;
@@ -1427,12 +1436,7 @@
                                 <span>${student.subactivity_name}</span>
                             </div>
                         </td>
-                        <td>${this.formatDate(student.date_inscription)}</td>
-                        <td>
-                            <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
-                                ${isActive ? 'Actif' : 'Inactif'}
-                            </span>
-                        </td>
+                        
                     `;
                     tbody.appendChild(row);
                 });
