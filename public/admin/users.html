@@ -47,6 +47,7 @@
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f1f3f9" width="100" height="100"/><path d="M0,0 L100,100 M20,0 L100,80 M0,20 L80,100" stroke="%23e1e7f5" stroke-width="2"/></svg>');
         }
 
         /* Layout */
@@ -529,10 +530,12 @@
         }
 
         .search-section {
+            background: linear-gradient(to right, rgba(139, 0, 0, 0.05), rgba(10, 25, 49, 0.05));
             border-left: 4px solid var(--bordeaux);
         }
 
         .filter-section {
+            background: linear-gradient(to right, rgba(10, 25, 49, 0.05), rgba(139, 0, 0, 0.05));
             border-left: 4px solid var(--blue-night);
         }
 
@@ -598,7 +601,7 @@
         .students-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            min-width: 1200px;
         }
 
         .students-table th,
@@ -1031,10 +1034,6 @@
                 padding: 20px;
             }
 
-            .students-table {
-                min-width: 1200px;
-            }
-
             .action-buttons {
                 flex-direction: column;
                 gap: 5px;
@@ -1203,24 +1202,31 @@
                     </button>
                     <div class="filter-controls collapsible collapsed" id="filterControls">
                         <div class="form-group">
-                            <button class="btn btn-secondary btn-sm" onclick="loadEcoles()" style="width: 100%">
-                                <i class="fas fa-school"></i> Charger les écoles
-                            </button>
-                        </div>
-                        <div class="form-group" id="ecoleSelector" style="display: none;">
                             <label for="ecole">École :</label>
                             <select id="ecole" onchange="loadFilieresByEcole(this.value)" class="form-control">
-                                <option value="">-- Sélectionner une école --</option>
+                                <option value="">-- Toutes les écoles --</option>
                             </select>
                         </div>
-                        <div class="form-group" id="filiereSelector" style="display: none;">
+                        <div class="form-group" id="filiereSelector">
                             <label for="filiere">Filière :</label>
                             <select id="filiere" class="form-control">
-                                <option value="">-- Sélectionner une filière --</option>
+                                <option value="">-- Toutes les filières --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="annee">Année :</label>
+                            <select id="annee" class="form-control">
+                                <option value="">-- Toutes les années --</option>
+                                <option value="1">1ère année</option>
+                                <option value="2">2ème année</option>
+                                <option value="3">3ème année</option>
                             </select>
                         </div>
                         <button class="btn btn-primary btn-sm" onclick="filterEtudiants()">
                             <i class="fas fa-filter"></i> Appliquer les filtres
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearFilters()" style="margin-top: 10px;">
+                            <i class="fas fa-times"></i> Effacer les filtres
                         </button>
                     </div>
                 </div>
@@ -1356,6 +1362,8 @@
         // Variables globales
         let currentPage = 1;
         let currentStudentId = null;
+        let allEcoles = [];
+        let allFilieres = [];
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1375,6 +1383,7 @@
 
         function initializeStudentsPage() {
             setupEventListeners();
+            loadEcoles();
             fetchAllEtudiants();
             loadStats();
         }
@@ -1443,6 +1452,76 @@
                 console.error('Erreur lors de la copie:', err);
                 showToast('Erreur lors de la copie', 'error');
             });
+        }
+
+        // ------------ GESTION DES FILTRES ------------
+        async function loadEcoles() {
+            try {
+                const token = getToken();
+                const res = await fetch(`${API_BASE}${ECOLES_ENDPOINT}?actif=true`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) throw new Error('Erreur lors du chargement des écoles');
+
+                allEcoles = await res.json();
+                const ecoleSelect = document.getElementById('ecole');
+
+                allEcoles.forEach(ecole => {
+                    const opt = document.createElement('option');
+                    opt.value = ecole.id;
+                    opt.textContent = ecole.nom;
+                    ecoleSelect.appendChild(opt);
+                });
+
+            } catch (error) {
+                console.error('Erreur chargement écoles:', error);
+                showAlert('Impossible de charger les écoles', 'error');
+            }
+        }
+
+        async function loadFilieresByEcole(ecoleId) {
+            const filiereSelect = document.getElementById('filiere');
+            filiereSelect.innerHTML = '<option value="">-- Toutes les filières --</option>';
+
+            if (!ecoleId) return;
+
+            try {
+                const token = getToken();
+                const res = await fetch(`${API_BASE}${FILIERES_ENDPOINT}/${ecoleId}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (!res.ok) throw new Error('Erreur lors du chargement des filières');
+
+                const filieres = await res.json();
+
+                filieres.forEach(filiere => {
+                    const opt = document.createElement('option');
+                    opt.value = filiere.id;
+                    opt.textContent = filiere.nom;
+                    filiereSelect.appendChild(opt);
+                });
+
+            } catch (error) {
+                console.error('Erreur chargement filières:', error);
+                showAlert('Impossible de charger les filières', 'error');
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('ecole').value = '';
+            document.getElementById('filiere').value = '';
+            document.getElementById('annee').value = '';
+            document.getElementById('keyword').value = '';
+            fetchAllEtudiants();
+            showAlert('Filtres effacés', 'success');
         }
 
         // ------------ GESTION DES ÉTUDIANTS ------------
@@ -1516,11 +1595,12 @@
         }
 
         async function filterEtudiants() {
-            const filiere = document.getElementById('filiere').value;
             const ecole = document.getElementById('ecole').value;
+            const filiere = document.getElementById('filiere').value;
+            const annee = document.getElementById('annee').value;
 
-            if (!filiere && !ecole) {
-                showAlert('Veuillez sélectionner au moins un filtre', 'error');
+            // Si aucun filtre n'est sélectionné, afficher tous les étudiants
+            if (!ecole && !filiere && !annee) {
                 return fetchAllEtudiants();
             }
 
@@ -1529,8 +1609,11 @@
                 const token = getToken();
                 let url = `${API_BASE}${STUDENTS_FILTER_ENDPOINT}?`;
                 const params = new URLSearchParams();
-                if (filiere) params.append('filiere', filiere);
+
                 if (ecole) params.append('ecole', ecole);
+                if (filiere) params.append('filiere', filiere);
+                if (annee) params.append('annee', annee);
+
                 url += params.toString();
 
                 const res = await fetch(url, {
@@ -1544,81 +1627,10 @@
                 const data = await res.json();
 
                 renderStudentsTable(data.data || data.results || []);
-                showAlert('Filtrage appliqué', 'success');
+                showAlert('Filtrage appliqué avec succès', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
                 showAlert(error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadEcoles() {
-            try {
-                showLoading();
-                const token = getToken();
-                const res = await fetch(`${API_BASE}${ECOLES_ENDPOINT}?actif=true`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                if (!res.ok) throw new Error('Erreur lors du chargement des écoles');
-
-                const ecoles = await res.json();
-
-                const ecoleSelect = document.getElementById('ecole');
-                ecoleSelect.innerHTML = '<option value="">-- Sélectionner une école --</option>';
-
-                ecoles.forEach(ecole => {
-                    const opt = document.createElement('option');
-                    opt.value = ecole.id;
-                    opt.textContent = ecole.nom;
-                    ecoleSelect.appendChild(opt);
-                });
-
-                document.getElementById('ecoleSelector').style.display = 'block';
-                toggleFilters();
-            } catch (error) {
-                console.error('Erreur chargement écoles:', error);
-                showAlert('Impossible de charger les écoles', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        async function loadFilieresByEcole(ecoleId) {
-            if (!ecoleId) return;
-
-            try {
-                showLoading();
-                const token = getToken();
-                const res = await fetch(`${API_BASE}${FILIERES_ENDPOINT}/${ecoleId}`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                if (!res.ok) throw new Error('Erreur lors du chargement des filières');
-
-                const filieres = await res.json();
-
-                const filiereSelect = document.getElementById('filiere');
-                filiereSelect.innerHTML = '<option value="">-- Sélectionner une filière --</option>';
-
-                filieres.forEach(filiere => {
-                    const opt = document.createElement('option');
-                    opt.value = filiere.id;
-                    opt.textContent = filiere.nom;
-                    filiereSelect.appendChild(opt);
-                });
-
-                document.getElementById('filiereSelector').style.display = 'block';
-            } catch (error) {
-                console.error('Erreur chargement filières:', error);
-                showAlert('Impossible de charger les filières', 'error');
             } finally {
                 hideLoading();
             }
@@ -1743,14 +1755,14 @@
             if (!data || data.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 20px;">
+                        <td colspan="12" style="text-align: center; padding: 20px;">
                             Aucun étudiant trouvé
                         </td>
                     </tr>
                 `;
                 return;
             }
-            console.log("Donnée :", data);
+
             data.forEach(e => {
                 const isActive = e.actif ?? e.user?.actif;
                 const identifiantTemporaire = e.identifiantTemporaire || e.identifiant_temporaire || '-';
@@ -1762,8 +1774,8 @@
                     <td>${e.codeInscription || '-'}</td>
                     <td>${e.nom || '-'}</td>
                     <td>${e.prenom || '-'}</td>
-                    <td>${e.nomEcole || '-'}</td>
-                    <td>${e.nomFiliere || '-'}</td>
+                    <td>${e.nomEcole || e.ecole_nom || '-'}</td>
+                    <td>${e.nomFiliere || e.filiere_nom || '-'}</td>
                     <td>${e.annee || '-'}</td>
                     <td>${e.email || e.user?.email || '-'}</td>
                     <td>${identifiantTemporaire}</td>
