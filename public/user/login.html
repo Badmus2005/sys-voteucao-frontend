@@ -108,16 +108,12 @@
             z-index: 2;
         }
 
-        .logo-icon {
+        .logo-image {
             width: 50px;
             height: 50px;
-            background: var(--accent);
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary);
-            font-size: 1.5rem;
+            object-fit: cover;
+            border: 2px solid var(--accent);
         }
 
         .logo-text {
@@ -142,6 +138,26 @@
 
         .login-content {
             padding: 2.5rem;
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.05) 0%, rgba(2, 8, 175, 0.05) 100%);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .welcome-message h3 {
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+            font-size: 1.2rem;
+        }
+
+        .welcome-message p {
+            color: var(--gray);
+            font-size: 0.9rem;
         }
 
         .form-group {
@@ -458,7 +474,7 @@
         /* Styles pour les activités (repris de register.html) */
         .activities-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -472,6 +488,10 @@
             text-align: center;
             background: white;
             position: relative;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .activity-card:hover {
@@ -498,7 +518,7 @@
         }
 
         .activity-icon {
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
@@ -507,17 +527,18 @@
             font-weight: 600;
             color: var(--secondary);
             margin-bottom: 0.25rem;
+            font-size: 0.95rem;
         }
 
         .activity-description {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--gray);
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .subactivities-section {
-            margin-top: 2rem;
-            padding: 1.5rem;
+            margin-top: 1.5rem;
+            padding: 1.25rem;
             background: rgba(128, 0, 32, 0.02);
             border-radius: 10px;
             border: 1px solid var(--gray-light);
@@ -526,12 +547,12 @@
         .subactivities-section h4 {
             color: var(--secondary);
             margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .subactivities-section p {
             color: var(--gray);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 1rem;
         }
 
@@ -567,7 +588,12 @@
             }
 
             .activities-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .activity-card {
+                height: 130px;
+                padding: 0.75rem;
             }
         }
 
@@ -599,6 +625,10 @@
             .activities-grid {
                 grid-template-columns: 1fr;
             }
+
+            .activity-card {
+                height: 120px;
+            }
         }
     </style>
 </head>
@@ -609,7 +639,10 @@
     <div class="login-container">
         <div class="login-header">
             <div class="logo">
-                <div class="logo-icon">
+                <img src="/assets/images/ucao-logo.png" alt="Logo UCAO" class="logo-image"
+                    onerror="this.style.display='none'; document.querySelector('.logo-icon').style.display='flex';">
+                <div class="logo-icon"
+                    style="display:none; width:50px; height:50px; background:var(--accent); border-radius:12px; align-items:center; justify-content:center; color:var(--secondary); font-size:1.5rem;">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
                 <div class="logo-text">UCAO</div>
@@ -619,6 +652,11 @@
         </div>
 
         <div class="login-content">
+            <div class="welcome-message">
+                <h3>Bienvenue à l'UCAO !</h3>
+                <p>Connectez-vous pour accéder à votre espace étudiant</p>
+            </div>
+
             <div class="message error" id="errorMessage">
                 <i class="fas fa-exclamation-circle"></i>
                 <span id="errorText"></span>
@@ -672,7 +710,7 @@
 
     <!-- Modal: Choix des activités après connexion -->
     <div class="modal" id="activitiesModal">
-        <div class="modal-content" style="max-width:900px;">
+        <div class="modal-content" style="max-width:800px;">
             <div class="modal-header">
                 <h3><i class="fas fa-users"></i> Choisissez vos activités</h3>
                 <button class="modal-close" id="activitiesModalClose">&times;</button>
@@ -946,10 +984,7 @@
                     body: JSON.stringify(body)
                 });
 
-                console.log('📥 RÉPONSE API:', res.status, res.statusText); // Ajouter ce log
-
                 const data = await res.json();
-                console.log('📊 DONNÉES RÉPONSE:', data); // Ajouter ce log
 
                 if (res.ok) {
                     const token = data.data.token;
@@ -957,8 +992,6 @@
                     localStorage.setItem('studentName', `${data.data.user.prenom} ${data.data.user.nom}`);
 
                     showMessage('Connexion réussie ! Redirection...', 'success');
-                    console.log('Données reponses :', data.data);
-                    console.log('Données utilisateur:', data.data.requirePasswordChange);
 
                     // Si changement de mot de passe requis -> redirection
                     if (data.data.requirePasswordChange) {

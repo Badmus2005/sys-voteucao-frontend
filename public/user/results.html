@@ -1907,12 +1907,29 @@
             } catch (error) {
                 console.error('Erreur chargement résultats:', error);
 
-                if (error.message.includes('non disponibles') || error.message.includes('403')) {
-                    showToast(error.message, 'warning');
+                // Gérer spécifiquement l'erreur 403 (résultats non publiés)
+                if (error.message.includes('non disponibles') || error.message.includes('non encore disponibles')) {
+                    const message = document.getElementById('noResultsMessage');
+                    message.innerHTML = `
+                        <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
+                        <h3>Résultats en attente de publication</h3>
+                        <p>Les résultats de cette élection ne sont pas encore publiés. Ils seront disponibles après validation par l'administration.</p>
+                        <p style="font-size: 0.9rem; color: var(--gray); margin-top: 1rem;">
+                            <i class="fas fa-info-circle"></i> Veuillez revenir plus tard ou consultez vos notifications.
+                        </p>
+                    `;
+                    message.style.display = 'block';
+                    showToast('Les résultats seront publiés prochainement', 'warning');
                 } else {
                     showToast('Erreur de chargement des résultats', 'error');
+                    showNoResults();
                 }
-                showNoResults();
+
+                // Masquer les sections de résultats
+                document.getElementById('winnerBanner').style.display = 'none';
+                document.querySelector('.stats-grid').style.display = 'none';
+                document.querySelector('.charts-section').style.display = 'none';
+                document.querySelector('.ranking-section').style.display = 'none';
             } finally {
                 hideLoading();
             }
@@ -1926,6 +1943,11 @@
             }
 
             const { election, resultats, statistiques } = results;
+
+            // Réafficher les sections de résultats
+            document.querySelector('.stats-grid').style.display = 'grid';
+            document.querySelector('.charts-section').style.display = 'block';
+            document.querySelector('.ranking-section').style.display = 'block';
 
             // Mettre à jour les informations de l'élection
             document.getElementById('electionTitle').textContent = `Résultats: ${election.titre || 'Élection'}`;
