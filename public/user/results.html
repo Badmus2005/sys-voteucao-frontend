@@ -56,12 +56,12 @@
             background: white;
             padding: 0 1.5rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             z-index: 10;
             position: sticky;
             top: 0;
+            height: 80px;
         }
 
         .header-actions {
@@ -258,6 +258,8 @@
             padding: 2rem;
             overflow-y: auto;
             background-color: #f8fafc;
+            margin-left: 280px;
+            min-height: calc(100vh - 80px);
         }
 
         /* Breadcrumb */
@@ -634,14 +636,6 @@
             box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
             animation: fadeInUp 0.7s ease-out;
-        }
-
-        .section-title {
-            color: var(--secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
         }
 
         .charts-grid {
@@ -1078,6 +1072,8 @@
 
             .main-content {
                 padding: 1.5rem;
+                margin-left: 0;
+                width: 100%;
             }
 
             .notifications-panel {
@@ -1129,6 +1125,14 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 1rem;
             }
         }
 
@@ -1536,7 +1540,6 @@
     </div>
 
     <script src="/assets/config.js"></script>
-    <script src="/assets/js/common.js"></script>
     <script>
         // Variables globales pour cette page
         let allElections = [];
@@ -1628,7 +1631,7 @@
 
                     // Gestion spécifique des erreurs HTTP
                     if (response.status === 403) {
-                        throw new Error('Les résultats ne sont pas encore disponibles. Veuillez patienter jusqu’à leur publication officielle.');
+                        throw new Error('Les résultats ne sont pas encore disponibles. Veuillez patienter jusqu\'à leur publication officielle.');
                     }
 
                     if (!response.ok) {
@@ -1689,13 +1692,15 @@
 
         // Initialisation de la page
         document.addEventListener('DOMContentLoaded', async function () {
-            if (!Common.checkAuth()) return;
+            // Vérifier l'authentification
+            const token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
 
             // Initialiser les éléments communs
-            Common.initCommonElements();
-            await Common.loadUserProfileInHeader();
-
-            // Initialiser les gestionnaires d'événements
+            await loadUserProfileInHeader();
             initEventHandlers();
 
             // Charger les données des filtres
@@ -1704,6 +1709,32 @@
             // Charger les données
             await loadPageData();
         });
+
+        // Charger le profil utilisateur dans l'en-tête
+        async function loadUserProfileInHeader() {
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}/api/user/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        const user = data.data;
+                        document.getElementById('userName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Étudiant';
+                        if (user.photoUrl) {
+                            document.getElementById('userAvatar').src = user.photoUrl;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+            }
+        }
 
         // Charger les données des filtres
         async function loadFilterData() {
@@ -1766,7 +1797,9 @@
 
             // Déconnexion
             document.getElementById('logoutBtn').addEventListener('click', function () {
-                Common.logout();
+                localStorage.removeItem('token');
+                localStorage.removeItem('studentName');
+                window.location.href = 'login.html';
             });
 
             // Notifications
