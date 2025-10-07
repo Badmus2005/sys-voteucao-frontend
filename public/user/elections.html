@@ -2019,11 +2019,11 @@
             const delegateType = getDelegateType(election);
             const schoolDelegateType = await StatusService.getSchoolDelegateType(studentData.id);
 
-            if (delegateType === 'premier' && schoolDelegateType !== 'premier') {
+            if (delegateType === 'PREMIER' && schoolDelegateType !== 'premier') {
                 return { canCandidate: false, reason: 'not_premier_school_delegate' };
             }
 
-            if (delegateType === 'deuxieme' && schoolDelegateType !== 'deuxieme') {
+            if (delegateType === 'DEUXIEME' && schoolDelegateType !== 'deuxieme') {
                 return { canCandidate: false, reason: 'not_deuxieme_school_delegate' };
             }
 
@@ -2087,14 +2087,14 @@
                 //  Vérifications complètes des conditions
                 const isEligible = isStudentEligibleForElection(election);
                 const candidateEligibility = await canCandidate(election, studentInfo);
-                const canCandidate = candidateEligibility.canCandidate;
+                const isEligibleToCandidate = candidateEligibility.canCandidate;
                 const canVote = isEligible && canStudentVote(election);
                 const canViewResults = areResultsAvailable(election);
 
                 // Générer les boutons d'action en fonction des conditions
                 let actionButtons = '';
 
-                if (canCandidate) {
+                if (isEligibleToCandidate) {
                     actionButtons += `
                         <button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
                             <i class="fas fa-file-signature"></i>
