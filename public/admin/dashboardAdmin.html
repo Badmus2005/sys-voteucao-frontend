@@ -1298,6 +1298,68 @@
                 opacity: 1;
             }
         }
+
+        /* Styles pour la checkbox updateExisting */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ddd;
+            border-radius: 3px;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked+.checkmark {
+            background-color: #800020;
+            border-color: #800020;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked+.checkmark::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Badges pour les statuts */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        .badge-danger {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
     </style>
 </head>
 
@@ -1506,6 +1568,20 @@
                                 Format JSON attendu. Au moins un identifiant (matricule ou code) requis par étudiant.
                             </small>
                         </div>
+
+                        <!-- Checkbox pour la mise à jour des étudiants existants -->
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="updateExisting" name="updateExisting">
+                                <span class="checkmark"></span>
+                                Mettre à jour les étudiants existants
+                            </label>
+                            <small class="form-text text-muted">
+                                Si cochée, les étudiants existants seront mis à jour. Sinon, l'importation échouera en
+                                cas de doublons.
+                            </small>
+                        </div>
+
                         <button class="btn-primary" id="importManualBtn">
                             <i class="fas fa-upload"></i> Importer les étudiants
                         </button>
@@ -1527,6 +1603,20 @@
                             <p><strong>Type:</strong> <span id="fileType"></span></p>
                             <p><strong>Taille:</strong> <span id="fileSize"></span></p>
                         </div>
+
+                        <!-- Checkbox pour la mise à jour des étudiants existants -->
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="updateExistingFile" name="updateExistingFile">
+                                <span class="checkmark"></span>
+                                Mettre à jour les étudiants existants
+                            </label>
+                            <small class="form-text text-muted">
+                                Si cochée, les étudiants existants seront mis à jour. Sinon, l'importation échouera en
+                                cas de doublons.
+                            </small>
+                        </div>
+
                         <button class="btn-primary" id="importFileBtn" disabled style="margin-top: 20px;">
                             <i class="fas fa-upload"></i> Importer depuis le fichier
                         </button>
@@ -1543,6 +1633,10 @@
                             <i class="fas fa-check-circle"></i>
                             <span>Importés: <strong id="importedCount">0</strong></span>
                         </div>
+                        <div class="summary-item success">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Mis à jour: <strong id="updatedCount">0</strong></span>
+                        </div>
                         <div class="summary-item error">
                             <i class="fas fa-times-circle"></i>
                             <span>Échecs: <strong id="failedCount">0</strong></span>
@@ -1555,6 +1649,7 @@
 
                     <div class="results-tabs">
                         <button class="tab-btn active" data-tab="imported">Étudiants importés</button>
+                        <button class="tab-btn" data-tab="updated">Étudiants mis à jour</button>
                         <button class="tab-btn" data-tab="failed">Échecs</button>
                     </div>
 
@@ -1570,9 +1665,30 @@
                                             <th>Matricule</th>
                                             <th>Code inscription</th>
                                             <th>École</th>
+                                            <th>Statut</th>
                                         </tr>
                                     </thead>
                                     <tbody id="importedStudentsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="updatedTab">
+                            <div class="table-container">
+                                <table class="codes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Identifiant temporaire</th>
+                                            <th>Nom</th>
+                                            <th>Prénom</th>
+                                            <th>Matricule</th>
+                                            <th>Code inscription</th>
+                                            <th>École</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="updatedStudentsBody">
                                     </tbody>
                                 </table>
                             </div>
@@ -1584,6 +1700,7 @@
                                     <thead>
                                         <tr>
                                             <th>Étudiant</th>
+                                            <th>Identifiant</th>
                                             <th>Erreur</th>
                                         </tr>
                                     </thead>
@@ -1874,6 +1991,265 @@
                     document.getElementById(tabName + 'Tab').classList.add('active');
                 });
             });
+
+            // Gestion de la checkbox updateExisting pour l'import manuel
+            const updateCheckbox = document.getElementById('updateExisting');
+            if (updateCheckbox) {
+                updateCheckbox.addEventListener('change', function () {
+                    const importBtn = document.getElementById('importManualBtn');
+                    if (importBtn) {
+                        if (this.checked) {
+                            importBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Importer/Mettre à jour';
+                        } else {
+                            importBtn.innerHTML = '<i class="fas fa-upload"></i> Importer';
+                        }
+                    }
+                });
+            }
+
+            // Gestion de la checkbox updateExisting pour l'import fichier
+            const updateCheckboxFile = document.getElementById('updateExistingFile');
+            if (updateCheckboxFile) {
+                updateCheckboxFile.addEventListener('change', function () {
+                    const importBtn = document.getElementById('importFileBtn');
+                    if (importBtn) {
+                        if (this.checked) {
+                            importBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Importer/Mettre à jour';
+                        } else {
+                            importBtn.innerHTML = '<i class="fas fa-upload"></i> Importer depuis le fichier';
+                        }
+                    }
+                });
+            }
+        }
+
+        async function importStudentsManual() {
+            const studentDataTextarea = document.getElementById('studentData');
+            if (!studentDataTextarea) return;
+
+            const studentData = studentDataTextarea.value.trim();
+
+            if (!studentData) {
+                showToast('Veuillez saisir les données des étudiants', 'error');
+                return;
+            }
+
+            try {
+                // Parser le JSON
+                const etudiants = JSON.parse(studentData);
+
+                if (!Array.isArray(etudiants)) {
+                    throw new Error('Les données doivent être un tableau JSON');
+                }
+
+                // Récupérer l'état de la checkbox
+                const updateExisting = document.getElementById('updateExisting')?.checked || false;
+
+                // Importer les étudiants
+                await importStudents(etudiants, updateExisting);
+
+            } catch (error) {
+                console.error('Erreur de parsing JSON:', error);
+                showToast('Format JSON invalide. Vérifiez la syntaxe.', 'error');
+            }
+        }
+
+        async function importStudentsFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput || !fileInput.files[0]) {
+                showToast('Veuillez sélectionner un fichier', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            try {
+                // Lire le fichier
+                const text = await readFileAsText(file);
+                // Passer le nom du fichier en paramètre
+                const etudiants = await parseFileData(text, file.type, file.name);
+
+                // Récupérer l'état de la checkbox
+                const updateExisting = document.getElementById('updateExistingFile')?.checked || false;
+
+                // Importer les étudiants
+                await importStudents(etudiants, updateExisting);
+
+            } catch (error) {
+                console.error('Erreur de traitement du fichier:', error);
+                showToast('Erreur lors du traitement du fichier: ' + error.message, 'error');
+            }
+        }
+
+        // Fonction principale d'importation
+        async function importStudents(etudiants, updateExisting = false) {
+            if (!Array.isArray(etudiants) || etudiants.length === 0) {
+                showToast('Aucun étudiant à importer', 'error');
+                return;
+            }
+
+            const importBtn = document.querySelector('#importManualBtn, #importFileBtn');
+            const originalBtnText = importBtn?.innerHTML;
+
+            if (importBtn) {
+                importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importation...';
+                importBtn.disabled = true;
+            }
+
+            try {
+                showLoading();
+                const token = getToken();
+
+                console.log('Importation avec updateExisting:', updateExisting);
+
+                const response = await fetch(`${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        etudiants,
+                        updateExisting
+                    })
+                });
+
+                if (!response.ok) {
+                    let errorMessage = `Erreur ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        console.error('Réponse d\'erreur:', errorData);
+
+                        // Gestion spéciale des doublons
+                        if (errorData.doublons && errorData.doublons.length > 0) {
+                            errorMessage = `${errorData.doublons.length} doublon(s) détecté(s). `;
+                            errorMessage += 'Cochez "Mettre à jour les étudiants existants" pour les mettre à jour.';
+                        } else {
+                            errorMessage = errorData.message || `Erreur ${response.status}: ${response.statusText}`;
+                        }
+                    } catch (e) {
+                        errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                console.log('Réponse réussie:', data);
+
+                // Afficher les résultats
+                displayImportResults(data);
+
+                // Message de succès adapté
+                const successMessage = updateExisting ?
+                    `Importation/Mise à jour terminée: ${data.reussis || 0} traités avec succès` :
+                    `Importation terminée: ${data.reussis || 0} étudiants importés`;
+
+                showToast(successMessage, 'success');
+
+                // Recharger les statistiques
+                await loadStats();
+
+            } catch (error) {
+                console.error('Erreur importation étudiants:', error);
+
+                // Message d'erreur plus explicite
+                let userMessage = error.message;
+                if (error.message.includes('doublon')) {
+                    userMessage = error.message; // Garder le message spécifique aux doublons
+                } else if (error.message.includes('404')) {
+                    userMessage = 'Endpoint d\'importation non trouvé. Vérifiez la configuration du serveur.';
+                } else if (error.message.includes('401')) {
+                    userMessage = 'Non autorisé. Vérifiez votre connexion.';
+                } else if (error.message.includes('500')) {
+                    userMessage = 'Erreur serveur. Contactez l\'administrateur.';
+                }
+
+                showToast(userMessage, 'error');
+            } finally {
+                if (importBtn) {
+                    importBtn.innerHTML = originalBtnText;
+                    importBtn.disabled = false;
+                }
+                hideLoading();
+            }
+        }
+
+        // Mettre à jour displayImportResults
+        function displayImportResults(result) {
+            const resultsSection = document.getElementById('importResultsSection');
+            const importedCount = document.getElementById('importedCount');
+            const updatedCount = document.getElementById('updatedCount');
+            const failedCount = document.getElementById('failedCount');
+            const totalCount = document.getElementById('totalCount');
+            const importCount = document.getElementById('importCount');
+            const importedBody = document.getElementById('importedStudentsBody');
+            const updatedBody = document.getElementById('updatedStudentsBody');
+            const failedBody = document.getElementById('failedStudentsBody');
+
+            if (!resultsSection) return;
+
+            // Mettre à jour les compteurs
+            if (importedCount) importedCount.textContent = result.importes?.length || 0;
+            if (updatedCount) updatedCount.textContent = result.misAJour?.length || 0;
+            if (failedCount) failedCount.textContent = result.echecs?.length || 0;
+            if (totalCount) totalCount.textContent = result.total || 0;
+            if (importCount) importCount.textContent = `(${result.total || 0} étudiants)`;
+
+            // Afficher les étudiants importés (NOUVEAUX)
+            if (importedBody && result.importes) {
+                importedBody.innerHTML = '';
+                result.importes.forEach(etudiant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${etudiant.identifiantTemporaire}</strong></td>
+                        <td>${etudiant.nom}</td>
+                        <td>${etudiant.prenom}</td>
+                        <td>${etudiant.matricule || '-'}</td>
+                        <td>${etudiant.codeInscription || '-'}</td>
+                        <td>${etudiant.ecole || '-'}</td>
+                        <td><span class="badge badge-success">Nouveau</span></td>
+                    `;
+                    importedBody.appendChild(row);
+                });
+            }
+
+            // Afficher les étudiants mis à jour
+            if (updatedBody && result.misAJour) {
+                updatedBody.innerHTML = '';
+                result.misAJour.forEach(etudiant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${etudiant.identifiantTemporaire}</strong></td>
+                        <td>${etudiant.nom}</td>
+                        <td>${etudiant.prenom}</td>
+                        <td>${etudiant.matricule || '-'}</td>
+                        <td>${etudiant.codeInscription || '-'}</td>
+                        <td>${etudiant.ecole || '-'}</td>
+                        <td><span class="badge badge-warning">Mis à jour</span></td>
+                    `;
+                    updatedBody.appendChild(row);
+                });
+            }
+
+            // Afficher les échecs
+            if (failedBody && result.echecs) {
+                failedBody.innerHTML = '';
+                result.echecs.forEach(echec => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${echec.etudiant?.nom || 'N/A'} ${echec.etudiant?.prenom || ''}</td>
+                        <td>${echec.etudiant?.matricule || echec.etudiant?.codeInscription || 'Aucun identifiant'}</td>
+                        <td style="color: var(--danger);">${echec.erreur}</td>
+                    `;
+                    failedBody.appendChild(row);
+                });
+            }
+
+            // Afficher la section des résultats
+            resultsSection.style.display = 'block';
+
+            // Scroll vers les résultats
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         function setupFileDrop() {
@@ -1945,35 +2321,6 @@
             }
         }
 
-        async function importStudentsManual() {
-            const studentDataTextarea = document.getElementById('studentData');
-            if (!studentDataTextarea) return;
-
-            const studentData = studentDataTextarea.value.trim();
-
-            if (!studentData) {
-                showToast('Veuillez saisir les données des étudiants', 'error');
-                return;
-            }
-
-            try {
-                // Parser le JSON
-                const etudiants = JSON.parse(studentData);
-
-                if (!Array.isArray(etudiants)) {
-                    throw new Error('Les données doivent être un tableau JSON');
-                }
-
-                // Importer les étudiants
-                await importStudents(etudiants);
-
-            } catch (error) {
-                console.error('Erreur de parsing JSON:', error);
-                showToast('Format JSON invalide. Vérifiez la syntaxe.', 'error');
-            }
-        }
-
-
         function readFileAsText(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1995,31 +2342,6 @@
                 throw new Error('Les fichiers Excel doivent être convertis en CSV. Utilisez "Enregistrer sous" > format CSV.');
             } else {
                 throw new Error('Format de fichier non supporté. Utilisez CSV.');
-            }
-        }
-
-        // Modifier l'appel dans importStudentsFile
-        async function importStudentsFile() {
-            const fileInput = document.getElementById('fileInput');
-            if (!fileInput || !fileInput.files[0]) {
-                showToast('Veuillez sélectionner un fichier', 'error');
-                return;
-            }
-
-            const file = fileInput.files[0];
-
-            try {
-                // Lire le fichier
-                const text = await readFileAsText(file);
-                // Passer le nom du fichier en paramètre
-                const etudiants = await parseFileData(text, file.type, file.name);
-
-                // Importer les étudiants
-                await importStudents(etudiants);
-
-            } catch (error) {
-                console.error('Erreur de traitement du fichier:', error);
-                showToast('Erreur lors du traitement du fichier: ' + error.message, 'error');
             }
         }
 
@@ -2107,140 +2429,6 @@
 
             values.push(current);
             return values;
-        }
-
-
-        // Ajouter un log pour debugger
-        async function importStudents(etudiants) {
-            if (!Array.isArray(etudiants) || etudiants.length === 0) {
-                showToast('Aucun étudiant à importer', 'error');
-                return;
-            }
-
-            const importBtn = document.querySelector('#importManualBtn, #importFileBtn');
-            const originalBtnText = importBtn?.innerHTML;
-
-            if (importBtn) {
-                importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importation...';
-                importBtn.disabled = true;
-            }
-
-            try {
-                showLoading();
-                const token = getToken();
-
-                console.log('URL appelée:', `${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`);
-                console.log('Données envoyées:', { etudiants: etudiants.slice(0, 2) }); // Log seulement les 2 premiers pour debug
-
-                const response = await fetch(`${API_BASE}${IMPORT_ETUDIANTS_ENDPOINT}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ etudiants })
-                });
-
-                console.log('Statut de la réponse:', response.status);
-                console.log('Headers de la réponse:', response.headers);
-
-                if (!response.ok) {
-                    let errorMessage = `Erreur ${response.status}`;
-                    try {
-                        const errorData = await response.text();
-                        console.error('Réponse d\'erreur:', errorData);
-                        errorMessage = errorData || `Erreur ${response.status}: ${response.statusText}`;
-                    } catch (e) {
-                        errorMessage = `Erreur ${response.status}: ${response.statusText}`;
-                    }
-                    throw new Error(errorMessage);
-                }
-
-                const data = await response.json();
-                console.log('Réponse réussie:', data);
-
-                // Afficher les résultats
-                displayImportResults(data);
-                showToast(`Importation terminée: ${data.reussis || 0} réussis, ${data.echoues || 0} échecs`, 'success');
-
-                // Recharger les statistiques
-                await loadStats();
-
-            } catch (error) {
-                console.error('Erreur importation étudiants:', error);
-
-                // Message d'erreur plus explicite
-                let userMessage = error.message;
-                if (error.message.includes('404')) {
-                    userMessage = 'Endpoint d\'importation non trouvé. Vérifiez la configuration du serveur.';
-                } else if (error.message.includes('401')) {
-                    userMessage = 'Non autorisé. Vérifiez votre connexion.';
-                } else if (error.message.includes('500')) {
-                    userMessage = 'Erreur serveur. Contactez l\'administrateur.';
-                }
-
-                showToast(userMessage, 'error');
-            } finally {
-                if (importBtn) {
-                    importBtn.innerHTML = originalBtnText;
-                    importBtn.disabled = false;
-                }
-                hideLoading();
-            }
-        }
-
-        function displayImportResults(result) {
-            const resultsSection = document.getElementById('importResultsSection');
-            const importedCount = document.getElementById('importedCount');
-            const failedCount = document.getElementById('failedCount');
-            const totalCount = document.getElementById('totalCount');
-            const importCount = document.getElementById('importCount');
-            const importedBody = document.getElementById('importedStudentsBody');
-            const failedBody = document.getElementById('failedStudentsBody');
-
-            if (!resultsSection) return;
-
-            // Mettre à jour les compteurs
-            if (importedCount) importedCount.textContent = result.reussis || 0;
-            if (failedCount) failedCount.textContent = result.echoues || 0;
-            if (totalCount) totalCount.textContent = result.total || 0;
-            if (importCount) importCount.textContent = `(${result.total || 0} étudiants)`;
-
-            // Afficher les étudiants importés
-            if (importedBody && result.importes) {
-                importedBody.innerHTML = '';
-                result.importes.forEach(etudiant => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${etudiant.identifiantTemporaire}</strong></td>
-                        <td>${etudiant.nom}</td>
-                        <td>${etudiant.prenom}</td>
-                        <td>${etudiant.matricule || '-'}</td>
-                        <td>${etudiant.codeInscription || '-'}</td>
-                        <td>${etudiant.ecole || '-'}</td>
-                    `;
-                    importedBody.appendChild(row);
-                });
-            }
-
-            // Afficher les échecs
-            if (failedBody && result.echecs) {
-                failedBody.innerHTML = '';
-                result.echecs.forEach(echec => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${echec.etudiant?.nom || 'N/A'} ${echec.etudiant?.prenom || ''}</td>
-                        <td style="color: var(--danger);">${echec.erreur}</td>
-                    `;
-                    failedBody.appendChild(row);
-                });
-            }
-
-            // Afficher la section des résultats
-            resultsSection.style.display = 'block';
-
-            // Scroll vers les résultats
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         // ------------ DASHBOARD FUNCTIONS ------------
@@ -2350,7 +2538,6 @@
             }
         }
 
-
         function formatRelativeTime(dateStr) {
             const diff = Date.now() - new Date(dateStr).getTime();
             const min = Math.floor(diff / 60000);
@@ -2370,7 +2557,6 @@
                 default: return 'check';
             }
         }
-
 
         async function loadVoteStats() {
             try {
