@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Activités Para-Universitaires - Admin UCAO</title>
+    <title>Gestion des Activités - Admin UCAO</title>
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
@@ -12,9 +12,75 @@
         rel="stylesheet" />
     <style>
         /* Reprendre tous les styles CSS de parametre.html */
-        /* Ajouter ici tous les styles CSS de la page paramètre */
+        :root {
+            --bordeaux: #8B0000;
+            --bordeaux-light: #a83232;
+            --blue-night: #0A1931;
+            --blue-night-light: #1a2f57;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+            --info: #3182ce;
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --sidebar-width: 280px;
+            --header-height: 80px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-        /* Styles spécifiques aux activités */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout et styles identiques à parametre.html */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-rows: var(--header-height) 1fr auto;
+            grid-template-areas:
+                "header header"
+                "main main"
+                "footer footer";
+            min-height: 100vh;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .main-header {
+            grid-area: header;
+            background: var(--card-bg);
+            color: var(--blue-night);
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            height: var(--header-height);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        /* ... Tous les autres styles identiques à parametre.html ... */
+
+        /* Styles spécifiques pour la page activités */
         .activity-stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -108,25 +174,41 @@
             font-size: 1.4rem;
         }
 
-        .activity-card-body {
-            padding: 0;
-            max-width: 100%;
+        .export-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
         }
 
-        .activity-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        .export-buttons {
+            display: flex;
             gap: 15px;
-            margin-bottom: 20px;
-            max-width: 100%;
+            flex-wrap: wrap;
+            margin-top: 15px;
         }
 
-        .activity-form-group {
+        .filters-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-bottom: 15px;
-            max-width: 100%;
         }
 
-        .activity-form-group label {
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
@@ -134,11 +216,9 @@
             font-size: 0.95rem;
         }
 
-        .activity-form-group input,
-        .activity-form-group select,
-        .activity-form-group textarea {
+        .filter-group select,
+        .filter-group input {
             width: 100%;
-            max-width: 100%;
             padding: 10px 12px;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
@@ -146,35 +226,14 @@
             font-size: 0.9rem;
             transition: var(--transition);
             background: var(--light-bg);
-            box-sizing: border-box;
         }
 
-        .activity-form-group input:focus,
-        .activity-form-group select:focus,
-        .activity-form-group textarea:focus {
+        .filter-group select:focus,
+        .filter-group input:focus {
             border-color: var(--bordeaux);
             outline: none;
             box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
             background: white;
-        }
-
-        .activity-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            padding: 10px 0;
-        }
-
-        .activity-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--bordeaux);
-        }
-
-        .activity-checkbox span {
-            color: var(--text-primary);
-            font-weight: 500;
         }
 
         .activity-table-container {
@@ -190,7 +249,7 @@
         .activity-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 800px;
         }
 
         .activity-table th {
@@ -214,114 +273,47 @@
             background-color: rgba(139, 0, 0, 0.02);
         }
 
-        .activity-status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .activity-status-active {
-            background: rgba(40, 167, 69, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-
-        .activity-status-inactive {
-            background: rgba(220, 53, 69, 0.15);
-            color: var(--danger);
-            border: 1px solid rgba(220, 53, 69, 0.3);
-        }
-
-        .activity-table-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .activity-btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-        }
-
-        .activity-btn-primary {
-            background: var(--blue-night);
-            color: white;
-        }
-
-        .activity-btn-primary:hover {
-            background: #15232e;
-            transform: translateY(-1px);
-        }
-
-        .activity-btn-secondary {
-            background: var(--bordeaux);
-            color: white;
-        }
-
-        .activity-btn-secondary:hover {
-            background: #5a2230;
-            transform: translateY(-1px);
-        }
-
         .activity-icon-preview {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: var(--bordeaux);
-            margin-right: 10px;
+            margin-right: 8px;
         }
 
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        .student-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--bordeaux);
         }
 
-        @keyframes activitySlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
         }
 
-        .activity-card {
-            animation: activitySlideIn 0.4s ease-out;
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--text-muted);
         }
 
-        /* Responsive Design pour la page activités */
         @media (max-width: 768px) {
-            .activity-stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .activity-card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
             .export-buttons {
                 flex-direction: column;
             }
 
-            .activity-table-actions {
-                flex-direction: column;
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-stat-card {
+                padding: 15px;
+            }
+
+            .activity-stat-number {
+                font-size: 2rem;
             }
         }
     </style>
@@ -384,7 +376,7 @@
             </div>
         </header>
 
-        <!-- Sidebar (identique mais avec item activités actif) -->
+        <!-- Sidebar -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <aside class="sidebar" id="sidebar">
@@ -422,7 +414,6 @@
                 <a href="codes.html" class="nav-item">
                     <i class="fas fa-key nav-icon"></i>
                     <span class="nav-text">Codes d'accès</span>
-                    <span class="nav-badge">12</span>
                 </a>
                 <a href="parametre.html" class="nav-item">
                     <i class="fas fa-cog nav-icon"></i>
@@ -444,10 +435,10 @@
             </div>
         </aside>
 
-        <!-- Main Content Spécifique aux Activités -->
+        <!-- Main Content -->
         <main class="main-content">
             <div class="page-header">
-                <h1><i class="fas fa-running"></i> Activités Para-Universitaires</h1>
+                <h1><i class="fas fa-running"></i> Gestion des Activités Para-Universitaires</h1>
                 <div class="breadcrumb">
                     <span>Admin</span> / <span>Activités Para-Universitaires</span>
                 </div>
@@ -456,27 +447,21 @@
             <!-- Alert pour les messages -->
             <div id="activityAlert" class="alert" style="display: none;"></div>
 
-            <!-- Boutons d'exportation -->
-            <div class="export-buttons">
-                <button class="btn btn-primary" onclick="ACTIVITIES.exportData('categories')">
-                    <i class="fas fa-file-export"></i> Exporter les Catégories
-                </button>
-                <button class="btn btn-primary" onclick="ACTIVITIES.exportData('subactivities')">
-                    <i class="fas fa-file-export"></i> Exporter les Sous-Activités
-                </button>
-                <button class="btn btn-primary" onclick="ACTIVITIES.exportData('participations')">
-                    <i class="fas fa-file-export"></i> Exporter les Participations
-                </button>
-            </div>
-
             <!-- Statistiques -->
             <div class="activity-stats-grid">
+                <div class="activity-stat-card">
+                    <div class="activity-stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="activity-stat-number" id="totalStudents">0</div>
+                    <div class="activity-stat-label">Étudiants Inscrits</div>
+                </div>
                 <div class="activity-stat-card">
                     <div class="activity-stat-icon">
                         <i class="fas fa-layer-group"></i>
                     </div>
                     <div class="activity-stat-number" id="totalCategories">0</div>
-                    <div class="activity-stat-label">Catégories Principales</div>
+                    <div class="activity-stat-label">Catégories</div>
                 </div>
                 <div class="activity-stat-card">
                     <div class="activity-stat-icon">
@@ -487,13 +472,6 @@
                 </div>
                 <div class="activity-stat-card">
                     <div class="activity-stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="activity-stat-number" id="totalStudents">0</div>
-                    <div class="activity-stat-label">Étudiants Inscrits</div>
-                </div>
-                <div class="activity-stat-card">
-                    <div class="activity-stat-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="activity-stat-number" id="participationRate">0%</div>
@@ -501,161 +479,110 @@
                 </div>
             </div>
 
-            <!-- Gestion des Catégories Principales -->
-            <div class="activity-card">
-                <div class="activity-card-header">
-                    <h3 class="activity-card-title">
-                        <i class="fas fa-layer-group"></i> Catégories Principales
-                    </h3>
-                    <button class="btn btn-secondary" onclick="ACTIVITIES.toggleCategoryForm()">
-                        <i class="fas fa-plus"></i> Nouvelle Catégorie
+            <!-- Section Exportation -->
+            <div class="export-section">
+                <h3 class="activity-card-title">
+                    <i class="fas fa-file-export"></i> Exportation des Données
+                </h3>
+                <p>Exportez la liste complète des étudiants avec leurs activités para-universitaires.</p>
+
+                <div class="export-buttons">
+                    <button class="btn btn-primary" onclick="ACTIVITY_MANAGER.exportStudentActivities('csv')">
+                        <i class="fas fa-file-csv"></i> Exporter en CSV
+                    </button>
+                    <button class="btn btn-primary" onclick="ACTIVITY_MANAGER.exportStudentActivities('excel')">
+                        <i class="fas fa-file-excel"></i> Exporter en Excel
+                    </button>
+                    <button class="btn btn-primary" onclick="ACTIVITY_MANAGER.exportStudentActivities('pdf')">
+                        <i class="fas fa-file-pdf"></i> Exporter en PDF
                     </button>
                 </div>
-                <div class="activity-card-body">
-                    <form id="formAddCategory" class="activity-form" style="display: none;">
-                        <div class="activity-form-grid">
-                            <div class="activity-form-group">
-                                <label for="categoryName">Nom de la catégorie</label>
-                                <input type="text" id="categoryName" name="categoryName" required
-                                    placeholder="Ex: Sport, Culture, Technologie">
-                            </div>
-                            <div class="activity-form-group">
-                                <label for="categoryIcon">Icône FontAwesome</label>
-                                <input type="text" id="categoryIcon" name="categoryIcon" required
-                                    placeholder="Ex: running, palette, laptop-code">
-                            </div>
-                        </div>
-                        <div class="activity-form-group">
-                            <label for="categoryDescription">Description</label>
-                            <textarea id="categoryDescription" name="categoryDescription"
-                                placeholder="Description de la catégorie..."></textarea>
-                        </div>
-                        <div class="activity-form-group">
-                            <label class="activity-checkbox">
-                                <input type="checkbox" id="hasSubactivities" name="hasSubactivities" checked>
-                                <span>Cette catégorie a des sous-activités</span>
-                            </label>
-                        </div>
-                        <div class="activity-form-group">
-                            <button type="submit" class="btn btn-primary" id="btnAddCategory">
-                                <i class="fas fa-plus"></i> Ajouter la catégorie
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="ACTIVITIES.toggleCategoryForm()">
-                                <i class="fas fa-times"></i> Annuler
-                            </button>
-                        </div>
-                    </form>
+            </div>
 
-                    <div class="activity-table-container">
-                        <table class="activity-table" id="tableCategories">
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Description</th>
-                                    <th>Icône</th>
-                                    <th>Sous-activités</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+            <!-- Filtres -->
+            <div class="filters-section">
+                <h3 class="activity-card-title">
+                    <i class="fas fa-filter"></i> Filtres de Recherche
+                </h3>
+
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="filterCategory">Catégorie</label>
+                        <select id="filterCategory" onchange="ACTIVITY_MANAGER.applyFilters()">
+                            <option value="">Toutes les catégories</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSubactivity">Sous-activité</label>
+                        <select id="filterSubactivity" onchange="ACTIVITY_MANAGER.applyFilters()">
+                            <option value="">Toutes les sous-activités</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSchool">École</label>
+                        <select id="filterSchool" onchange="ACTIVITY_MANAGER.applyFilters()">
+                            <option value="">Toutes les écoles</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="filterSearch">Recherche</label>
+                        <input type="text" id="filterSearch" placeholder="Nom, prénom ou email..."
+                            onkeyup="ACTIVITY_MANAGER.applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterStatus">Statut</label>
+                        <select id="filterStatus" onchange="ACTIVITY_MANAGER.applyFilters()">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actif</option>
+                            <option value="inactive">Inactif</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Gestion des Sous-Activités -->
+            <!-- Liste des étudiants avec leurs activités -->
             <div class="activity-card">
                 <div class="activity-card-header">
                     <h3 class="activity-card-title">
-                        <i class="fas fa-list-alt"></i> Sous-Activités
+                        <i class="fas fa-list"></i> Liste des Étudiants et leurs Activités
                     </h3>
-                    <button class="btn btn-secondary" onclick="ACTIVITIES.toggleSubactivityForm()">
-                        <i class="fas fa-plus"></i> Nouvelle Sous-Activité
-                    </button>
+                    <div>
+                        <span id="studentCount" class="activity-stat-label">0 étudiants</span>
+                    </div>
                 </div>
                 <div class="activity-card-body">
-                    <form id="formAddSubactivity" class="activity-form" style="display: none;">
-                        <div class="activity-form-grid">
-                            <div class="activity-form-group">
-                                <label for="categorySelect">Catégorie</label>
-                                <select id="categorySelect" required>
-                                    <option value="">-- Sélectionner une catégorie --</option>
-                                </select>
-                            </div>
-                            <div class="activity-form-group">
-                                <label for="subactivityName">Nom de la sous-activité</label>
-                                <input type="text" id="subactivityName" name="subactivityName" required
-                                    placeholder="Ex: Football, Musique, Programmation">
-                            </div>
-                        </div>
-                        <div class="activity-form-grid">
-                            <div class="activity-form-group">
-                                <label for="subactivityIcon">Icône FontAwesome</label>
-                                <input type="text" id="subactivityIcon" name="subactivityIcon" required
-                                    placeholder="Ex: futbol, music, code">
-                            </div>
-                            <div class="activity-form-group">
-                                <label for="subactivityDescription">Description</label>
-                                <input type="text" id="subactivityDescription" name="subactivityDescription"
-                                    placeholder="Description courte...">
-                            </div>
-                        </div>
-                        <div class="activity-form-group">
-                            <button type="submit" class="btn btn-primary" id="btnAddSubactivity">
-                                <i class="fas fa-plus"></i> Ajouter la sous-activité
-                            </button>
-                            <button type="button" class="btn btn-secondary"
-                                onclick="ACTIVITIES.toggleSubactivityForm()">
-                                <i class="fas fa-times"></i> Annuler
-                            </button>
-                        </div>
-                    </form>
-
                     <div class="activity-table-container">
-                        <table class="activity-table" id="tableSubactivities">
+                        <table class="activity-table" id="tableStudentActivities">
                             <thead>
                                 <tr>
-                                    <th>Nom</th>
-                                    <th>Description</th>
+                                    <th>Étudiant</th>
+                                    <th>École</th>
+                                    <th>Filière</th>
                                     <th>Catégorie</th>
-                                    <th>Icône</th>
+                                    <th>Sous-activité</th>
+                                    <th>Date d'inscription</th>
                                     <th>Statut</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody id="studentActivitiesBody">
+                                <!-- Les données seront chargées ici -->
+                            </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
 
-            <!-- Statistiques des Participations -->
-            <div class="activity-card">
-                <div class="activity-card-header">
-                    <h3 class="activity-card-title">
-                        <i class="fas fa-chart-bar"></i> Statistiques des Participations
-                    </h3>
-                </div>
-                <div class="activity-card-body">
-                    <div class="activity-table-container">
-                        <table class="activity-table" id="tableActivityStats">
-                            <thead>
-                                <tr>
-                                    <th>Activité</th>
-                                    <th>Étudiants inscrits</th>
-                                    <th>Écoles représentées</th>
-                                    <th>Taux de participation</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <!-- Pagination -->
+                    <div id="pagination" class="pagination"
+                        style="display: none; margin-top: 20px; text-align: center;">
+                        <!-- La pagination sera générée ici -->
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Footer (identique) -->
+        <!-- Footer -->
         <footer class="footer">
             <div>© 2025 UCAO - Tous droits réservés</div>
             <div class="footer-links">
@@ -678,487 +605,350 @@
     <script src="/assets/config.js"></script>
     <script>
         // =============================================
-        // CONFIGURATION ET CONSTANTES
+        // GESTIONNAIRE DES ACTIVITÉS - LISTE ET EXPORTATION
         // =============================================
-        const API_BASE = CONFIG.BASE_URL;
+        const ACTIVITY_MANAGER = {
+            currentPage: 1,
+            itemsPerPage: 10,
+            allStudents: [],
+            filteredStudents: [],
 
-        // =============================================
-        // GESTION DES ACTIVITÉS PARA-UNIVERSITAIRES 
-        // =============================================
-        const ACTIVITIES = {
-            // Fonction utilitaire pour déterminer correctement le statut
-            isActive: (item) => {
-                if (item.actif === true || item.actif === 1 || item.actif === 'true' || item.actif === '1') {
-                    return true;
-                }
-                if (item.actif === false || item.actif === 0 || item.actif === 'false' || item.actif === '0') {
-                    return false;
-                }
-                return item.actif !== undefined;
+            // Initialisation
+            init: async function () {
+                await this.loadStatistics();
+                await this.loadFilters();
+                await this.loadStudentActivities();
+                this.setupEventListeners();
             },
 
-            // Fonctions pour afficher/masquer les formulaires
-            toggleCategoryForm: () => {
-                const form = document.getElementById('formAddCategory');
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            },
-
-            toggleSubactivityForm: () => {
-                const form = document.getElementById('formAddSubactivity');
-                form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            },
-
-            // Chargement des données
-            loadActivitySettings: async () => {
-                await ACTIVITIES.loadCategories();
-                await ACTIVITIES.loadSubactivities();
-                await ACTIVITIES.loadActivityStats();
-            },
-
-            loadCategories: async () => {
+            // Chargement des statistiques
+            loadStatistics: async function () {
                 try {
                     const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities`, {
+                    const res = await fetch(`${CONFIG.BASE_URL}/api/activities/stats`, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
 
-                    if (!res.ok) throw new Error("Erreur lors du chargement des catégories");
+                    if (res.ok) {
+                        const data = await res.json();
+                        const stats = data.data;
 
-                    const data = await res.json();
-                    let categories = [];
+                        document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+                        document.getElementById('totalCategories').textContent = stats.totalCategories || 0;
+                        document.getElementById('totalSubactivities').textContent = stats.totalSubactivities || 0;
 
-                    if (data.data && Array.isArray(data.data)) {
-                        categories = data.data;
-                    } else if (Array.isArray(data)) {
-                        categories = data;
-                    } else {
-                        throw new Error('Structure de données invalide');
+                        const participationRate = stats.participationRate || 0;
+                        document.getElementById('participationRate').textContent = participationRate + '%';
                     }
+                } catch (error) {
+                    console.error('Erreur chargement statistiques:', error);
+                }
+            },
 
-                    const tableBody = document.querySelector('#tableCategories tbody');
-                    const categorySelect = document.getElementById('categorySelect');
+            // Chargement des filtres
+            loadFilters: async function () {
+                try {
+                    const token = localStorage.getItem('token');
 
-                    if (tableBody) tableBody.innerHTML = '';
-                    if (categorySelect) categorySelect.innerHTML = '<option value="">-- Sélectionner une catégorie --</option>';
+                    // Charger les catégories
+                    const categoriesRes = await fetch(`${CONFIG.BASE_URL}/api/activities`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
 
-                    categories.forEach(category => {
-                        const isActive = ACTIVITIES.isActive(category);
+                    if (categoriesRes.ok) {
+                        const categoriesData = await categoriesRes.json();
+                        const categories = categoriesData.data || categoriesData;
+                        const categorySelect = document.getElementById('filterCategory');
 
-                        if (tableBody) {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <i class="fas fa-${category.icone} activity-icon-preview"></i>
-                                        <span>${category.nom}</span>
-                                    </div>
-                                </td>
-                                <td>${category.description || '-'}</td>
-                                <td><code>${category.icone}</code></td>
-                                <td>
-                                    <span class="activity-status-badge ${category.has_subactivities ? 'activity-status-active' : 'activity-status-inactive'}">
-                                        ${category.has_subactivities ? 'Oui' : 'Non'}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
-                                        ${isActive ? 'Actif' : 'Inactif'}
-                                    </span>
-                                </td>
-                                <td class="table-actions">
-                                    <button class="activity-btn activity-btn-primary" onclick="ACTIVITIES.editCategory(${category.id})">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </button>
-                                    <button class="activity-btn ${isActive ? 'activity-btn-secondary' : 'activity-btn-primary'}" 
-                                            onclick="ACTIVITIES.toggleCategoryActif(${category.id}, ${!isActive})">
-                                        <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
-                                        ${isActive ? 'Désactiver' : 'Activer'}
-                                    </button>
-                                </td>
-                            `;
-                            tableBody.appendChild(row);
-                        }
-
-                        if (categorySelect) {
+                        categories.forEach(category => {
                             const option = document.createElement('option');
                             option.value = category.id;
                             option.textContent = category.nom;
                             categorySelect.appendChild(option);
-                        }
-                    });
-
-                    const totalCategoriesEl = document.getElementById('totalCategories');
-                    if (totalCategoriesEl) totalCategoriesEl.textContent = categories.length;
-                } catch (err) {
-                    console.error('Erreur chargement catégories:', err);
-                    ACTIVITIES.showAlert('Erreur lors du chargement des catégories: ' + err.message, 'error');
-                }
-            },
-
-            loadSubactivities: async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities/all/with-subactivities`, {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    });
-
-                    if (!res.ok) throw new Error("Erreur lors du chargement des sous-activités");
-
-                    const data = await res.json();
-                    let categories = [];
-
-                    if (data.data && Array.isArray(data.data)) {
-                        categories = data.data;
-                    } else if (Array.isArray(data)) {
-                        categories = data;
-                    } else {
-                        throw new Error('Structure de données invalide');
-                    }
-
-                    const tableBody = document.querySelector('#tableSubactivities tbody');
-                    if (!tableBody) return;
-
-                    tableBody.innerHTML = '';
-                    let totalSubactivities = 0;
-
-                    categories.forEach(category => {
-                        if (category.subactivities && category.subactivities.length > 0) {
-                            totalSubactivities += category.subactivities.length;
-
-                            category.subactivities.forEach(subactivity => {
-                                const isActive = ACTIVITIES.isActive(subactivity);
-
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                    <td>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <i class="fas fa-${subactivity.icone} activity-icon-preview"></i>
-                                            <span>${subactivity.nom}</span>
-                                        </div>
-                                    </td>
-                                    <td>${subactivity.description || '-'}</td>
-                                    <td>${category.nom}</td>
-                                    <td><code>${subactivity.icone}</code></td>
-                                    <td>
-                                        <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
-                                            ${isActive ? 'Actif' : 'Inactif'}
-                                        </span>
-                                    </td>
-                                    <td class="table-actions">
-                                        <button class="activity-btn activity-btn-primary" onclick="ACTIVITIES.editSubactivity(${subactivity.id})">
-                                            <i class="fas fa-edit"></i> Modifier
-                                        </button>
-                                        <button class="activity-btn ${isActive ? 'activity-btn-secondary' : 'activity-btn-primary'}" 
-                                                onclick="ACTIVITIES.toggleSubactivityActif(${subactivity.id}, ${!isActive})">
-                                            <i class="fas ${isActive ? 'fa-times' : 'fa-check'}"></i> 
-                                            ${isActive ? 'Désactiver' : 'Activer'}
-                                        </button>
-                                    </td>
-                                `;
-                                tableBody.appendChild(row);
-                            });
-                        }
-                    });
-
-                    const totalSubactivitiesEl = document.getElementById('totalSubactivities');
-                    if (totalSubactivitiesEl) totalSubactivitiesEl.textContent = totalSubactivities;
-                } catch (err) {
-                    console.error('Erreur chargement sous-activités:', err);
-                    ACTIVITIES.showAlert('Erreur lors du chargement des sous-activités: ' + err.message, 'error');
-                }
-            },
-
-            loadActivityStats: async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities/stats`, {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    });
-
-                    if (!res.ok) throw new Error("Erreur lors du chargement des statistiques");
-
-                    const data = await res.json();
-                    const stats = data.data;
-
-                    const tableBody = document.querySelector('#tableActivityStats tbody');
-                    if (!tableBody) return;
-
-                    tableBody.innerHTML = '';
-
-                    if (stats && stats.activities) {
-                        let totalParticipation = 0;
-                        let activityCount = 0;
-
-                        stats.activities.forEach(activity => {
-                            const participationRate = stats.totalStudents > 0
-                                ? Math.round((activity.student_count / stats.totalStudents) * 100)
-                                : 0;
-
-                            totalParticipation += participationRate;
-                            activityCount++;
-
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <i class="fas fa-${activity.icone} activity-icon-preview"></i>
-                                        <span>${activity.nom}</span>
-                                    </div>
-                                </td>
-                                <td>${activity.student_count}</td>
-                                <td>${activity.school_count}</td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="flex: 1; background: var(--light-bg); height: 8px; border-radius: 4px;">
-                                            <div style="width: ${participationRate}%; background: var(--bordeaux); height: 100%; border-radius: 4px;"></div>
-                                        </div>
-                                        <span>${participationRate}%</span>
-                                    </div>
-                                </td>
-                            `;
-                            tableBody.appendChild(row);
                         });
+                    }
 
-                        const totalStudentsEl = document.getElementById('totalStudents');
-                        const participationRateEl = document.getElementById('participationRate');
+                    // Charger les écoles
+                    const schoolsRes = await fetch(`${CONFIG.BASE_URL}/api/ecoles?actif=true`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
 
-                        if (totalStudentsEl) totalStudentsEl.textContent = stats.totalStudents || 0;
-                        if (participationRateEl) {
-                            const avgParticipation = activityCount > 0 ? Math.round(totalParticipation / activityCount) : 0;
-                            participationRateEl.textContent = avgParticipation + '%';
+                    if (schoolsRes.ok) {
+                        const schools = await schoolsRes.json();
+                        const schoolSelect = document.getElementById('filterSchool');
+
+                        schools.forEach(school => {
+                            const option = document.createElement('option');
+                            option.value = school.id;
+                            option.textContent = school.nom;
+                            schoolSelect.appendChild(option);
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('Erreur chargement filtres:', error);
+                }
+            },
+
+            // Chargement des étudiants avec leurs activités
+            loadStudentActivities: async function () {
+                try {
+                    this.showLoading();
+                    const token = localStorage.getItem('token');
+
+                    const res = await fetch(`${CONFIG.BASE_URL}/api/activities/students`, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.allStudents = data.data || data || [];
+                        this.filteredStudents = [...this.allStudents];
+                        this.renderStudentActivities();
+                        this.updateStudentCount();
+                    } else {
+                        throw new Error('Erreur lors du chargement des données');
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement étudiants:', error);
+                    this.showAlert('Erreur lors du chargement des données: ' + error.message, 'error');
+                    this.renderNoData();
+                } finally {
+                    this.hideLoading();
+                }
+            },
+
+            // Application des filtres
+            applyFilters: function () {
+                const categoryFilter = document.getElementById('filterCategory').value;
+                const subactivityFilter = document.getElementById('filterSubactivity').value.toLowerCase();
+                const schoolFilter = document.getElementById('filterSchool').value;
+                const searchFilter = document.getElementById('filterSearch').value.toLowerCase();
+                const statusFilter = document.getElementById('filterStatus').value;
+
+                this.filteredStudents = this.allStudents.filter(student => {
+                    // Filtre par catégorie
+                    if (categoryFilter && student.category_id != categoryFilter) {
+                        return false;
+                    }
+
+                    // Filtre par sous-activité
+                    if (subactivityFilter && !student.subactivity_name.toLowerCase().includes(subactivityFilter)) {
+                        return false;
+                    }
+
+                    // Filtre par école
+                    if (schoolFilter && student.ecole_id != schoolFilter) {
+                        return false;
+                    }
+
+                    // Filtre par recherche
+                    if (searchFilter) {
+                        const searchText = `${student.prenom} ${student.nom} ${student.email}`.toLowerCase();
+                        if (!searchText.includes(searchFilter)) {
+                            return false;
                         }
                     }
-                } catch (err) {
-                    console.error('Erreur chargement statistiques:', err);
-                }
+
+                    // Filtre par statut
+                    if (statusFilter) {
+                        const isActive = student.actif === true || student.actif === 1;
+                        if (statusFilter === 'active' && !isActive) return false;
+                        if (statusFilter === 'inactive' && isActive) return false;
+                    }
+
+                    return true;
+                });
+
+                this.currentPage = 1;
+                this.renderStudentActivities();
+                this.updateStudentCount();
             },
 
-            // Gestion des formulaires
-            handleAddCategory: async (e) => {
-                e.preventDefault();
+            // Rendu de la liste des étudiants
+            renderStudentActivities: function () {
+                const tbody = document.getElementById('studentActivitiesBody');
+                if (!tbody) return;
 
-                const formData = {
-                    nom: document.getElementById('categoryName').value.trim(),
-                    description: document.getElementById('categoryDescription').value.trim(),
-                    icone: document.getElementById('categoryIcon').value.trim(),
-                    has_subactivities: document.getElementById('hasSubactivities').checked
-                };
-
-                if (!formData.nom || !formData.icone) {
-                    ACTIVITIES.showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+                if (this.filteredStudents.length === 0) {
+                    this.renderNoData();
                     return;
                 }
 
-                const btn = document.getElementById('btnAddCategory');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
-                btn.disabled = true;
+                // Pagination
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                const studentsToShow = this.filteredStudents.slice(startIndex, endIndex);
 
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(formData)
-                    });
+                tbody.innerHTML = '';
 
-                    const data = await res.json();
+                studentsToShow.forEach(student => {
+                    const row = document.createElement('tr');
+                    const isActive = student.actif === true || student.actif === 1;
 
-                    if (!res.ok) {
-                        throw new Error(data.message || "Erreur lors de la création de la catégorie");
-                    }
+                    row.innerHTML = `
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${student.photo || 'https://via.placeholder.com/35'}" 
+                                     alt="${student.prenom}" class="student-avatar">
+                                <div>
+                                    <div style="font-weight: 500;">${student.prenom} ${student.nom}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${student.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${student.ecole_nom || '-'}</td>
+                        <td>${student.filiere_nom || '-'}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-${student.category_icon} activity-icon-preview"></i>
+                                <span>${student.category_name}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-${student.subactivity_icon} activity-icon-preview"></i>
+                                <span>${student.subactivity_name}</span>
+                            </div>
+                        </td>
+                        <td>${this.formatDate(student.date_inscription)}</td>
+                        <td>
+                            <span class="activity-status-badge ${isActive ? 'activity-status-active' : 'activity-status-inactive'}">
+                                ${isActive ? 'Actif' : 'Inactif'}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
 
-                    ACTIVITIES.showAlert('Catégorie ajoutée avec succès', 'success');
-                    document.getElementById('formAddCategory').reset();
-                    ACTIVITIES.toggleCategoryForm();
-                    await ACTIVITIES.loadCategories();
-                } catch (err) {
-                    console.error('Erreur ajout catégorie:', err);
-                    ACTIVITIES.showAlert('Erreur lors de l\'ajout de la catégorie: ' + err.message, 'error');
-                } finally {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
+                this.renderPagination();
             },
 
-            handleAddSubactivity: async (e) => {
-                e.preventDefault();
+            // Rendu quand pas de données
+            renderNoData: function () {
+                const tbody = document.getElementById('studentActivitiesBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <div>Aucune donnée disponible</div>
+                            </td>
+                        </tr>
+                    `;
+                }
+                document.getElementById('pagination').style.display = 'none';
+            },
 
-                const formData = {
-                    nom: document.getElementById('subactivityName').value.trim(),
-                    description: document.getElementById('subactivityDescription').value.trim(),
-                    icone: document.getElementById('subactivityIcon').value.trim(),
-                    activity_id: document.getElementById('categorySelect').value
-                };
+            // Pagination
+            renderPagination: function () {
+                const pagination = document.getElementById('pagination');
+                if (!pagination) return;
 
-                if (!formData.nom || !formData.icone || !formData.activity_id) {
-                    ACTIVITIES.showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+                const totalPages = Math.ceil(this.filteredStudents.length / this.itemsPerPage);
+
+                if (totalPages <= 1) {
+                    pagination.style.display = 'none';
                     return;
                 }
 
-                const btn = document.getElementById('btnAddSubactivity');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout en cours...';
-                btn.disabled = true;
+                pagination.style.display = 'block';
 
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities/${formData.activity_id}/subactivities`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(formData)
-                    });
+                let paginationHTML = '';
 
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        throw new Error(data.message || "Erreur lors de l'ajout de la sous-activité");
-                    }
-
-                    ACTIVITIES.showAlert('Sous-activité ajoutée avec succès', 'success');
-                    document.getElementById('formAddSubactivity').reset();
-                    ACTIVITIES.toggleSubactivityForm();
-                    await ACTIVITIES.loadSubactivities();
-                } catch (err) {
-                    console.error('Erreur ajout sous-activité:', err);
-                    ACTIVITIES.showAlert('Erreur lors de l\'ajout de la sous-activité: ' + err.message, 'error');
-                } finally {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
+                // Bouton précédent
+                if (this.currentPage > 1) {
+                    paginationHTML += `<button class="btn btn-sm" onclick="ACTIVITY_MANAGER.changePage(${this.currentPage - 1})">
+                        <i class="fas fa-chevron-left"></i> Précédent
+                    </button>`;
                 }
+
+                // Pages
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === this.currentPage) {
+                        paginationHTML += `<button class="btn btn-sm btn-primary">${i}</button>`;
+                    } else {
+                        paginationHTML += `<button class="btn btn-sm" onclick="ACTIVITY_MANAGER.changePage(${i})">${i}</button>`;
+                    }
+                }
+
+                // Bouton suivant
+                if (this.currentPage < totalPages) {
+                    paginationHTML += `<button class="btn btn-sm" onclick="ACTIVITY_MANAGER.changePage(${this.currentPage + 1})">
+                        Suivant <i class="fas fa-chevron-right"></i>
+                    </button>`;
+                }
+
+                pagination.innerHTML = paginationHTML;
             },
 
-            // Gestion de l'activation/désactivation
-            toggleCategoryActif: async (id, actif) => {
-                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette catégorie ?`)) return;
-
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities/${id}/actif`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ actif })
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        throw new Error(data.message || "Erreur lors de la mise à jour");
-                    }
-
-                    ACTIVITIES.showAlert(`Catégorie ${actif ? 'activée' : 'désactivée'} avec succès`, 'success');
-                    await ACTIVITIES.loadCategories();
-                } catch (err) {
-                    console.error('Erreur toggle catégorie:', err);
-                    ACTIVITIES.showAlert('Erreur lors de la mise à jour: ' + err.message, 'error');
-                }
+            // Changement de page
+            changePage: function (page) {
+                this.currentPage = page;
+                this.renderStudentActivities();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             },
 
-            toggleSubactivityActif: async (id, actif) => {
-                if (!confirm(`Êtes-vous sûr de vouloir ${actif ? 'activer' : 'désactiver'} cette sous-activité ?`)) return;
-
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`${API_BASE}/api/activities/subactivities/${id}/actif`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ actif })
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        throw new Error(data.message || "Erreur lors de la mise à jour");
-                    }
-
-                    ACTIVITIES.showAlert(`Sous-activité ${actif ? 'activée' : 'désactivée'} avec succès`, 'success');
-                    await ACTIVITIES.loadSubactivities();
-                } catch (err) {
-                    console.error('Erreur toggle sous-activité:', err);
-                    ACTIVITIES.showAlert('Erreur lors de la mise à jour: ' + err.message, 'error');
+            // Mise à jour du compteur
+            updateStudentCount: function () {
+                const countElement = document.getElementById('studentCount');
+                if (countElement) {
+                    countElement.textContent = `${this.filteredStudents.length} étudiant(s)`;
                 }
             },
 
             // Exportation des données
-            exportData: async (type) => {
+            exportStudentActivities: async function (format) {
                 try {
+                    this.showLoading();
                     const token = localStorage.getItem('token');
-                    let endpoint = '';
-                    let filename = '';
 
-                    switch (type) {
-                        case 'categories':
-                            endpoint = '/api/activities/export/categories';
-                            filename = 'categories_activites.csv';
-                            break;
-                        case 'subactivities':
-                            endpoint = '/api/activities/export/subactivities';
-                            filename = 'sous_activites.csv';
-                            break;
-                        case 'participations':
-                            endpoint = '/api/activities/export/participations';
-                            filename = 'participations_activites.csv';
-                            break;
-                        default:
-                            throw new Error('Type d\'export non supporté');
-                    }
-
-                    const res = await fetch(`${API_BASE}${endpoint}`, {
+                    const res = await fetch(`${CONFIG.BASE_URL}/api/activities/export/students?format=${format}`, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
 
-                    if (!res.ok) {
-                        throw new Error("Erreur lors de l'exportation");
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+
+                        let filename = `etudiants_activites.${format}`;
+                        if (format === 'excel') filename = 'etudiants_activites.xlsx';
+                        if (format === 'pdf') filename = 'etudiants_activites.pdf';
+
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+
+                        this.showAlert('Exportation réussie', 'success');
+                    } else {
+                        throw new Error('Erreur lors de l\'exportation');
                     }
-
-                    const blob = await res.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-
-                    ACTIVITIES.showAlert('Exportation réussie', 'success');
-                } catch (err) {
-                    console.error('Erreur exportation:', err);
-                    ACTIVITIES.showAlert('Erreur lors de l\'exportation: ' + err.message, 'error');
+                } catch (error) {
+                    console.error('Erreur exportation:', error);
+                    this.showAlert('Erreur lors de l\'exportation: ' + error.message, 'error');
+                } finally {
+                    this.hideLoading();
                 }
             },
 
-            // Fonctions d'édition (à implémenter)
-            editCategory: (id) => {
-                ACTIVITIES.showAlert('Fonctionnalité de modification à implémenter', 'info');
-            },
-
-            editSubactivity: (id) => {
-                ACTIVITIES.showAlert('Fonctionnalité de modification à implémenter', 'info');
-            },
-
             // Utilitaires
-            showAlert: (message, type = 'success') => {
+            formatDate: function (dateString) {
+                if (!dateString) return '-';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR');
+            },
+
+            showAlert: function (message, type = 'success') {
                 const alertBox = document.getElementById('activityAlert');
                 if (!alertBox) return;
 
@@ -1171,14 +961,21 @@
                 }, 4000);
             },
 
-            showLoading: () => {
+            showLoading: function () {
                 const loader = document.getElementById('loadingOverlay');
                 if (loader) loader.classList.add('active');
             },
 
-            hideLoading: () => {
+            hideLoading: function () {
                 const loader = document.getElementById('loadingOverlay');
                 if (loader) loader.classList.remove('active');
+            },
+
+            setupEventListeners: function () {
+                // Mise à jour des sous-activités quand la catégorie change
+                document.getElementById('filterCategory').addEventListener('change', function () {
+                    // Implémenter le chargement des sous-activités selon la catégorie sélectionnée
+                });
             }
         };
 
@@ -1193,14 +990,10 @@
                 return;
             }
 
-            // Configuration des événements
-            document.getElementById('formAddCategory')?.addEventListener('submit', ACTIVITIES.handleAddCategory);
-            document.getElementById('formAddSubactivity')?.addEventListener('submit', ACTIVITIES.handleAddSubactivity);
+            // Initialisation de la gestion des activités
+            ACTIVITY_MANAGER.init();
 
-            // Chargement des données
-            ACTIVITIES.loadActivitySettings();
-
-            // Configuration de la navigation (identique à parametre.html)
+            // Configuration de la navigation
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebarOverlay');
