@@ -1240,7 +1240,7 @@
             loadStatistics: async function () {
                 try {
                     const token = localStorage.getItem('token');
-                    const res = await fetch(`${CONFIG.BASE_URL}/api/activities/stats`, {
+                    const res = await fetch(`${CONFIG.BASE_URL}/api/activities/dashboard/stats`, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
@@ -1253,15 +1253,12 @@
                         document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
                         document.getElementById('totalCategories').textContent = stats.totalCategories || 0;
                         document.getElementById('totalSubactivities').textContent = stats.totalSubactivities || 0;
-
-                        const participationRate = stats.participationRate || 0;
-                        document.getElementById('participationRate').textContent = participationRate + '%';
+                        document.getElementById('participationRate').textContent = (stats.participationRate || 0) + '%';
                     }
                 } catch (error) {
                     console.error('Erreur chargement statistiques:', error);
                 }
             },
-
             // Chargement des filtres
             loadFilters: async function () {
                 try {
@@ -1321,7 +1318,7 @@
 
                     if (res.ok) {
                         const data = await res.json();
-                        this.allStudents = data.data || data || [];
+                        this.allStudents = data.data || [];
                         this.filteredStudents = [...this.allStudents];
                         this.renderStudentActivities();
                         this.updateStudentCount();
