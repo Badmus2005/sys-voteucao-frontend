@@ -1844,9 +1844,239 @@
             }
         };
 
-        // Composant ElectionCard avec images
+        // NOUVEAU : Service de vérification des statuts
+        const StatusService = {
+            async checkIfResponsableSalle(studentId, ecoleId) {
+                try {
+                    const response = await apiCall(`/students/${studentId}/status/responsable-salle?ecoleId=${ecoleId}`);
+                    return response?.isResponsableSalle || false;
+                } catch (error) {
+                    console.error('Erreur vérification responsable salle:', error);
+                    return false;
+                }
+            },
+
+            async checkIfSchoolDelegate(studentId) {
+                try {
+                    const response = await apiCall(`/students/${studentId}/status/school-delegate`);
+                    return response?.isSchoolDelegate || false;
+                } catch (error) {
+                    console.error('Erreur vérification délégué école:', error);
+                    return false;
+                }
+            },
+
+            async getSchoolDelegateType(studentId) {
+                try {
+                    const response = await apiCall(`/students/${studentId}/status/school-delegate-type`);
+                    return response?.delegateType; // 'premier' ou 'deuxieme'
+                } catch (error) {
+                    console.error('Erreur récupération type délégué:', error);
+                    return null;
+                }
+            },
+
+            async checkIfAlreadyCandidated(studentId, electionId) {
+                try {
+                    const response = await apiCall(`/candidatures/student/${studentId}/election/${electionId}`);
+                    return response?.hasCandidated || false;
+                } catch (error) {
+                    console.error('Erreur vérification candidature:', error);
+                    return false;
+                }
+            },
+
+            async getExistingUniversityDelegates() {
+                try {
+                    const response = await apiCall('/university-delegates/current');
+                    return response?.data || [];
+                } catch (error) {
+                    console.error('Erreur récupération délégués universitaires:', error);
+                    return [];
+                }
+            }
+        };
+
+        // NOUVELLE : Fonction pour déterminer le type d'école
+        function getSchoolType(ecoleId) {
+            const ecoleFaculties = ['FSAE', 'FDE'];
+            const ecoleSchools = ['EGEI', 'ESMEA'];
+
+            if (ecoleFaculties.includes(ecoleId)) return 'faculty';
+            if (ecoleSchools.includes(ecoleId)) return 'school';
+            return 'unknown';
+        }
+
+        // NOUVELLE : Fonction pour déterminer le type de délégué
+        function getDelegateType(election) {
+            // Basé sur le titre ou les métadonnées de l'élection
+            if (election.titre?.includes('1er') || election.titre?.includes('premier')) {
+                return 'premier';
+            } else if (election.titre?.includes('2ème') || election.titre?.includes('deuxieme')) {
+                return 'deuxieme';
+            }
+            return 'unknown';
+        }
+
+        // NOUVELLES FONCTIONS D'ÉLIGIBILITÉ AMÉLIORÉES
+        async function canCandidate(election, studentInfo) {
+            // 1. Vérifications de base
+            if (!isStudentEligibleForElection(election)) {
+                return { canCandidate: false, reason: 'non_eligible' };
+            }
+
+            if (!isCandidaturePeriodOpen(election)) {
+                return { canCandidate: false, reason: 'period_closed' };
+            }
+
+            const studentData = studentInfo.data;
+
+            // 2. Vérifier si déjà candidaté
+            const hasAlreadyCandidated = await StatusService.checkIfAlreadyCandidated(studentData.id, election.id);
+            if (hasAlreadyCandidated) {
+                return { canCandidate: false, reason: 'already_candidated' };
+            }
+
+            // 3. Vérifications spécifiques selon le type d'élection
+            switch (election.type) {
+                case 'SALLE':
+                    return await canCandidateForSalle(election, studentInfo);
+
+                case 'ECOLE':
+                    return await canCandidateForEcole(election, studentInfo);
+
+                case 'UNIVERSITE':
+                    return await canCandidateForUniversite(election, studentInfo);
+
+                default:
+                    return { canCandidate: false, reason: 'unknown_election_type' };
+            }
+        }
+
+        async function canCandidateForSalle(election, studentInfo) {
+            const studentData = studentInfo.data;
+
+            // Vérifier que l'étudiant appartient à la bonne filière et année
+            const isInRightFiliere = studentData.filiereId && studentData.filiereId.toString() === election.filiereId.toString();
+            const isInRightAnnee = studentData.annee && studentData.annee.toString() === election.annee.toString();
+
+            if (!isInRightFiliere || !isInRightAnnee) {
+                return { canCandidate: false, reason: 'wrong_filiere_or_annee' };
+            }
+
+            // Vérifier qu'il n'est pas déjà responsable de salle
+            const isAlreadyResponsable = await StatusService.checkIfResponsableSalle(studentData.id, election.ecoleId);
+            if (isAlreadyResponsable) {
+                return { canCandidate: false, reason: 'already_responsable' };
+            }
+
+            return { canCandidate: true };
+        }
+
+        async function canCandidateForEcole(election, studentInfo) {
+            const studentData = studentInfo.data;
+
+            // Vérifier que l'étudiant est responsable de salle
+            const isResponsableSalle = await StatusService.checkIfResponsableSalle(studentData.id, election.ecoleId);
+            if (!isResponsableSalle) {
+                return { canCandidate: false, reason: 'not_responsable_salle' };
+            }
+
+            // Vérifier l'année selon le type de délégué
+            const delegateType = getDelegateType(election);
+
+            if (delegateType === 'premier') {
+                // 1er délégué : doit être en Licence 3
+                if (studentData.annee !== 3) {
+                    return { canCandidate: false, reason: 'wrong_annee_for_premier_delegate' };
+                }
+            } else if (delegateType === 'deuxieme') {
+                // 2ème délégué : doit être en Licence 2
+                if (studentData.annee !== 2) {
+                    return { canCandidate: false, reason: 'wrong_annee_for_deuxieme_delegate' };
+                }
+            }
+
+            // Vérifier qu'il n'est pas déjà délégué d'école
+            const isAlreadyDelegate = await StatusService.checkIfSchoolDelegate(studentData.id);
+            if (isAlreadyDelegate) {
+                return { canCandidate: false, reason: 'already_school_delegate' };
+            }
+
+            return { canCandidate: true };
+        }
+
+        async function canCandidateForUniversite(election, studentInfo) {
+            const studentData = studentInfo.data;
+
+            // Vérifier que l'étudiant est délégué d'école
+            const isSchoolDelegate = await StatusService.checkIfSchoolDelegate(studentData.id);
+            if (!isSchoolDelegate) {
+                return { canCandidate: false, reason: 'not_school_delegate' };
+            }
+
+            // Vérifier le type de délégué universitaire
+            const delegateType = getDelegateType(election);
+            const schoolDelegateType = await StatusService.getSchoolDelegateType(studentData.id);
+
+            if (delegateType === 'premier' && schoolDelegateType !== 'premier') {
+                return { canCandidate: false, reason: 'not_premier_school_delegate' };
+            }
+
+            if (delegateType === 'deuxieme' && schoolDelegateType !== 'deuxieme') {
+                return { canCandidate: false, reason: 'not_deuxieme_school_delegate' };
+            }
+
+            // Vérifier la règle de répartition École/Faculté
+            const studentSchoolType = getSchoolType(studentData.ecoleId);
+            const existingDelegates = await StatusService.getExistingUniversityDelegates();
+
+            if (shouldApplyDistributionRule(existingDelegates, studentSchoolType)) {
+                return { canCandidate: false, reason: 'distribution_rule_not_satisfied' };
+            }
+
+            return { canCandidate: true };
+        }
+
+        function shouldApplyDistributionRule(existingDelegates, candidateSchoolType) {
+            if (existingDelegates.length === 0) return false;
+
+            const premierDelegate = existingDelegates.find(d => d.type === 'premier');
+            const deuxiemeDelegate = existingDelegates.find(d => d.type === 'deuxieme');
+
+            // Si le 1er délégué existe et vient d'une école, le 2ème doit venir d'une faculté, et vice versa
+            if (premierDelegate && !deuxiemeDelegate) {
+                const premierSchoolType = getSchoolType(premierDelegate.ecoleId);
+                return premierSchoolType === candidateSchoolType;
+            }
+
+            return false;
+        }
+
+        function getCandidatureErrorMessage(reason) {
+            const messages = {
+                'non_eligible': 'Vous n\'êtes pas éligible pour cette élection',
+                'period_closed': 'La période de candidature est fermée',
+                'already_candidated': 'Vous avez déjà candidaté pour cette élection',
+                'not_responsable_salle': 'Réservé aux responsables de salle',
+                'wrong_annee_for_premier_delegate': 'Réservé aux responsables de salle en Licence 3',
+                'wrong_annee_for_deuxieme_delegate': 'Réservé aux responsables de salle en Licence 2',
+                'not_school_delegate': 'Réservé aux délégués d\'école',
+                'not_premier_school_delegate': 'Réservé aux 1ers délégués d\'école',
+                'not_deuxieme_school_delegate': 'Réservé aux 2èmes délégués d\'école',
+                'distribution_rule_not_satisfied': 'Règle de répartition École/Faculté non satisfaite',
+                'already_responsable': 'Vous êtes déjà responsable de salle',
+                'already_school_delegate': 'Vous êtes déjà délégué d\'école',
+                'wrong_filiere_or_annee': 'Vous n\'appartenez pas à la filière/année concernée',
+                'unknown_election_type': 'Type d\'élection non reconnu'
+            };
+
+            return messages[reason] || 'Candidature non autorisée';
+        }
+
+        // Composant ElectionCard avec la nouvelle logique d'éligibilité
         const ElectionCard = {
-            create(election, options = {}) {
+            async create(election, options = {}) {
                 const status = ElectionService.getElectionStatus(election);
                 const statusText = ElectionService.getStatusText(status);
                 const statusClass = `status-${status}`;
@@ -1854,9 +2084,10 @@
                 const startDate = new Date(election.dateDebut).toLocaleDateString();
                 const endDate = new Date(election.dateFin).toLocaleDateString();
 
-                // Vérifier les conditions pour chaque type de bouton
+                // NOUVELLE LOGIQUE : Vérifications complètes des conditions
                 const isEligible = isStudentEligibleForElection(election);
-                const canCandidate = isEligible && isCandidaturePeriodOpen(election);
+                const candidateEligibility = await canCandidate(election, studentInfo);
+                const canCandidate = candidateEligibility.canCandidate;
                 const canVote = isEligible && canStudentVote(election);
                 const canViewResults = areResultsAvailable(election);
 
@@ -1865,72 +2096,81 @@
 
                 if (canCandidate) {
                     actionButtons += `
-                <button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
-                    <i class="fas fa-file-signature"></i>
-                    Candidater
-                </button>
-            `;
+                        <button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
+                            <i class="fas fa-file-signature"></i>
+                            Candidater
+                        </button>
+                    `;
+                } else if (status === 'candidature') {
+                    // Afficher un bouton désactivé avec info-bulle si période ouverte mais conditions non remplies
+                    const errorMessage = getCandidatureErrorMessage(candidateEligibility.reason);
+                    actionButtons += `
+                        <button class="election-action action-candidature" disabled title="${errorMessage}" style="opacity:0.6;cursor:not-allowed">
+                            <i class="fas fa-file-signature"></i>
+                            Candidater
+                        </button>
+                    `;
                 }
 
                 if (canVote) {
                     actionButtons += `
-                <button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
-                    <i class="fas fa-vote-yea"></i>
-                    Voter
-                </button>
-            `;
+                        <button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
+                            <i class="fas fa-vote-yea"></i>
+                            Voter
+                        </button>
+                    `;
                 }
 
                 if (canViewResults) {
                     actionButtons += `
-                <button class="election-action action-results" onclick="event.stopPropagation(); redirectToResults('${election.id}')">
-                    <i class="fas fa-chart-bar"></i>
-                    Résultats
-                </button>
-            `;
+                        <button class="election-action action-results" onclick="event.stopPropagation(); redirectToResults('${election.id}')">
+                            <i class="fas fa-chart-bar"></i>
+                            Résultats
+                        </button>
+                    `;
                 }
 
                 // Toujours afficher le bouton détails
                 actionButtons += `
-            <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
-                <i class="fas fa-eye"></i>
-                Détails
-            </button>
-        `;
+                    <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
+                        <i class="fas fa-eye"></i>
+                        Détails
+                    </button>
+                `;
 
                 // Image par défaut selon l'école
                 const ecoleImage = ECOLE_IMAGES[election.ecole] || ECOLE_IMAGES.EGEI;
 
                 return `
-            <div class="election-card" data-election-id="${election.id}">
-                <div class="election-image" style="background-image: url('${ecoleImage}')">
-                    <span class="election-badge ${statusClass}">${statusText}</span>
-                </div>
-                <div class="election-content">
-                    <div>
-                        <h3 class="election-title">${election.titre}</h3>
-                        <div class="election-date">
-                            <i class="far fa-calendar"></i>
-                            ${startDate} - ${endDate}
+                    <div class="election-card" data-election-id="${election.id}">
+                        <div class="election-image" style="background-image: url('${ecoleImage}')">
+                            <span class="election-badge ${statusClass}">${statusText}</span>
                         </div>
-                        ${election.description ? `
-                            <div class="election-description" title="${election.description}">
-                                ${election.description.substring(0, 60)}${election.description.length > 60 ? '...' : ''}
+                        <div class="election-content">
+                            <div>
+                                <h3 class="election-title">${election.titre}</h3>
+                                <div class="election-date">
+                                    <i class="far fa-calendar"></i>
+                                    ${startDate} - ${endDate}
+                                </div>
+                                ${election.description ? `
+                                    <div class="election-description" title="${election.description}">
+                                        ${election.description.substring(0, 60)}${election.description.length > 60 ? '...' : ''}
+                                    </div>
+                                ` : ''}
                             </div>
-                        ` : ''}
-                    </div>
-                    <div class="election-footer">
-                        <div class="election-info">
-                            <i class="fas fa-users"></i>
-                            ${election.nb_candidats || 0} candidat(s)
+                            <div class="election-footer">
+                                <div class="election-info">
+                                    <i class="fas fa-users"></i>
+                                    ${election.nb_candidats || 0} candidat(s)
+                                </div>
+                                <div class="election-actions">
+                                    ${actionButtons}
+                                </div>
+                            </div>
                         </div>
-                        <div class="election-actions">
-                            ${actionButtons}
-                        </div>
                     </div>
-                </div>
-            </div>
-        `;
+                `;
             }
         };
 
@@ -1952,53 +2192,53 @@
                 ];
 
                 return `
-            <div class="candidate-card" data-candidate-id="${candidate.candidateId || candidate.id}">
-                <div class="candidate-header">
-                    <div class="candidate-photo-container">
-                        <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
-                             class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
-                    </div>
-                    <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                    <div class="candidate-role">Candidat</div>
-                </div>
-                
-                <div class="candidate-body">
-                    <div class="candidate-info-grid">
-                        ${infos.map(info => `
-                            <div class="info-item">
-                                <div class="info-label">${info.label}</div>
-                                <div class="info-value">${info.value}</div>
+                    <div class="candidate-card" data-candidate-id="${candidate.candidateId || candidate.id}">
+                        <div class="candidate-header">
+                            <div class="candidate-photo-container">
+                                <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
+                                     class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
                             </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="candidate-program">
-                        <div class="candidate-program-title">
-                            <i class="fas fa-bullhorn"></i>Informations
+                            <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
+                            <div class="candidate-role">Candidat</div>
                         </div>
-                        <div class="candidate-program-text">
-                            ${candidate.email ? `Email: ${candidate.email}<br>` : ''}
-                            ${candidate.statut ? `Statut: ${candidate.statut}` : 'Candidature approuvée'}
+                        
+                        <div class="candidate-body">
+                            <div class="candidate-info-grid">
+                                ${infos.map(info => `
+                                    <div class="info-item">
+                                        <div class="info-label">${info.label}</div>
+                                        <div class="info-value">${info.value}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="candidate-program">
+                                <div class="candidate-program-title">
+                                    <i class="fas fa-bullhorn"></i>Informations
+                                </div>
+                                <div class="candidate-program-text">
+                                    ${candidate.email ? `Email: ${candidate.email}<br>` : ''}
+                                    ${candidate.statut ? `Statut: ${candidate.statut}` : 'Candidature approuvée'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="candidate-footer">
+                            <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.candidateId || candidate.id}')">
+                                <i class="fas fa-eye"></i>Voir profil
+                            </button>
+                            ${showVote && electionId ? `
+                                <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.candidateId || candidate.id}')">
+                                    <i class="fas fa-vote-yea"></i>Voter
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
-                </div>
-                
-                <div class="candidate-footer">
-                    <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.candidateId || candidate.id}')">
-                        <i class="fas fa-eye"></i>Voir profil
-                    </button>
-                    ${showVote && electionId ? `
-                        <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.candidateId || candidate.id}')">
-                            <i class="fas fa-vote-yea"></i>Voter
-                        </button>
-                    ` : ''}
-                </div>
-            </div>
-        `;
+                `;
             }
         };
 
-        // Fonctions d'affichage
+        // FONCTIONS EXISTANTES (conservées mais améliorées)
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
@@ -2049,17 +2289,52 @@
 
             // Si l'élection est de type ECOLE, vérifier l'école
             if (election.type === 'ECOLE') {
-                return studentData.ecoleId && studentData.ecoleId === election.ecoleId;
+                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString();
             }
 
             // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
             if (election.type === 'SALLE') {
-                return studentData.ecoleId && studentData.ecoleId === election.ecoleId &&
-                    studentData.filiereId && studentData.filiereId === election.filiereId &&
-                    studentData.annee && studentData.annee === election.annee;
+                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString() &&
+                    studentData.filiereId && studentData.filiereId.toString() === election.filiereId.toString() &&
+                    studentData.annee && studentData.annee.toString() === election.annee.toString();
             }
 
             return false;
+        }
+
+        // Vérifier si la période de candidature est ouverte
+        function isCandidaturePeriodOpen(election) {
+            if (!election.dateDebutCandidature || !election.dateFinCandidature) {
+                return false;
+            }
+
+            const now = new Date();
+            const startCandidature = new Date(election.dateDebutCandidature);
+            const endCandidature = new Date(election.dateFinCandidature);
+
+            return now >= startCandidature && now <= endCandidature;
+        }
+
+        // Vérifier si l'étudiant peut voter
+        function canStudentVote(election) {
+            if (!isStudentEligibleForElection(election)) {
+                return false;
+            }
+
+            const now = new Date();
+            const startDate = new Date(election.dateDebut);
+            const endDate = new Date(election.dateFin);
+
+            return now >= startDate && now <= endDate;
+        }
+
+        // Vérifier si les résultats sont disponibles
+        function areResultsAvailable(election) {
+            const now = new Date();
+            const endDate = new Date(election.dateFin);
+
+            // Les résultats sont disponibles après la fin de l'élection
+            return now > endDate;
         }
 
         // Gestion des carousels
@@ -2177,41 +2452,6 @@
                 }
             }
         });
-
-        // Vérifier si la période de candidature est ouverte
-        function isCandidaturePeriodOpen(election) {
-            if (!election.dateDebutCandidature || !election.dateFinCandidature) {
-                return false;
-            }
-
-            const now = new Date();
-            const startCandidature = new Date(election.dateDebutCandidature);
-            const endCandidature = new Date(election.dateFinCandidature);
-
-            return now >= startCandidature && now <= endCandidature;
-        }
-
-        // Vérifier si l'étudiant peut voter
-        function canStudentVote(election) {
-            if (!isStudentEligibleForElection(election)) {
-                return false;
-            }
-
-            const now = new Date();
-            const startDate = new Date(election.dateDebut);
-            const endDate = new Date(election.dateFin);
-
-            return now >= startDate && now <= endDate;
-        }
-
-        // Vérifier si les résultats sont disponibles
-        function areResultsAvailable(election) {
-            const now = new Date();
-            const endDate = new Date(election.dateFin);
-
-            // Les résultats sont disponibles après la fin de l'élection
-            return now > endDate;
-        }
 
         // Initialiser le système de notifications
         function initializeNotifications() {
@@ -2353,7 +2593,6 @@
             showLoading();
 
             try {
-
                 await loadUserProfilePhoto();
                 // Charger les informations de l'étudiant
                 await loadStudentInfo();
@@ -2409,7 +2648,6 @@
                     document.getElementById('userName').textContent =
                         response.data.prenom + ' ' + (response.data.nom || '');
 
-
                     // Charger la photo de profil
                     await loadUserProfilePhoto();
                 }
@@ -2435,7 +2673,7 @@
 
                 if (elections && Array.isArray(elections)) {
                     allElections = elections;
-                    displayElectionsByEcole(elections);
+                    await displayElectionsByEcole(elections);
                 } else {
                     showAllElectionsError('Aucune élection disponible');
                 }
@@ -2446,7 +2684,7 @@
         }
 
         // Afficher les élections groupées par école avec carousels
-        function displayElectionsByEcole(elections) {
+        async function displayElectionsByEcole(elections) {
             const container = document.getElementById('electionsSections');
             if (!container) return;
 
@@ -2474,11 +2712,21 @@
             // Générer les sections pour chaque école
             let sectionsHTML = '';
 
-            Object.keys(ECOLE_CONFIG).forEach(ecole => {
+            for (const ecole of Object.keys(ECOLE_CONFIG)) {
                 const ecoleElections = electionsByEcole[ecole];
-                if (!ecoleElections || ecoleElections.length === 0) return;
+                if (!ecoleElections || ecoleElections.length === 0) continue;
 
                 const config = ECOLE_CONFIG[ecole];
+
+                // Générer les cartes d'élection pour cette école
+                let electionCardsHTML = '';
+                for (const election of ecoleElections) {
+                    electionCardsHTML += `
+                        <div class="carousel-item">
+                            ${await ElectionCard.create(election, { isEligible: isStudentEligibleForElection(election) })}
+                        </div>
+                    `;
+                }
 
                 sectionsHTML += `
                     <div class="ecole-section" data-ecole="${ecole}">
@@ -2500,16 +2748,12 @@
                         </div>
                         <div class="carousel-container">
                             <div class="carousel-track" id="carousel-track-${ecole}">
-                                ${ecoleElections.map(election => `
-                                    <div class="carousel-item">
-                                        ${ElectionCard.create(election, { isEligible: isStudentEligibleForElection(election) })}
-                                    </div>
-                                `).join('')}
+                                ${electionCardsHTML}
                             </div>
                         </div>
                     </div>
                 `;
-            });
+            }
 
             container.innerHTML = sectionsHTML;
 
@@ -2587,11 +2831,11 @@
 
             section.style.display = 'block';
             container.innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <p>Chargement des candidats...</p>
-        </div>
-    `;
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des candidats...</p>
+                </div>
+            `;
 
             try {
                 let electionCandidates = [];
@@ -2625,12 +2869,12 @@
 
                 if (electionCandidates.length === 0) {
                     container.innerHTML = `
-                <div class="no-data-message">
-                    <i class="fas fa-user-slash"></i>
-                    <h3>Aucun candidat pour cette élection</h3>
-                    <p>Soyez le premier à vous porter candidat !</p>
-                </div>
-            `;
+                        <div class="no-data-message">
+                            <i class="fas fa-user-slash"></i>
+                            <h3>Aucun candidat pour cette élection</h3>
+                            <p>Soyez le premier à vous porter candidat !</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -2648,12 +2892,12 @@
             } catch (error) {
                 console.error('Erreur affichage candidats:', error);
                 container.innerHTML = `
-            <div class="no-data-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erreur de chargement</h3>
-                <p>Impossible de charger les candidats: ${error.message}</p>
-            </div>
-        `;
+                    <div class="no-data-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Erreur de chargement</h3>
+                        <p>Impossible de charger les candidats: ${error.message}</p>
+                    </div>
+                `;
             }
         }
 
@@ -2684,7 +2928,7 @@
 
                 if (elections && Array.isArray(elections)) {
                     allElections = elections;
-                    displayElectionsByEcole(elections);
+                    await displayElectionsByEcole(elections);
                     showToast('Filtres appliqués avec succès', 'success');
                 } else {
                     showAllElectionsError('Aucune élection correspondante');
@@ -2798,11 +3042,11 @@
             ];
 
             infoGrid.innerHTML = infos.map(info => `
-        <div class="modal-info-item">
-            <div class="modal-info-label">${info.label}</div>
-            <div class="modal-info-value">${info.value}</div>
-        </div>
-    `).join('');
+                <div class="modal-info-item">
+                    <div class="modal-info-label">${info.label}</div>
+                    <div class="modal-info-value">${info.value}</div>
+                </div>
+            `).join('');
 
             // Programme électoral - adapter selon les données disponibles
             const programElement = document.getElementById('modalProgram');
@@ -2871,6 +3115,7 @@
         window.applyFilters = applyFilters;
         window.resetFilters = resetFilters;
     </script>
+
 </body>
 
 </html>
