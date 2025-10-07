@@ -1470,13 +1470,26 @@
 
         const UserService = {
             async getProfile() {
-                return { data: { id: 1, name: 'Étudiant' } }; // Simulation
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/users/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement du profil');
+                return await response.json();
             }
         };
 
         const Common = {
             checkAuth() {
-                return true; // Simulation
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
             },
 
             showLoading() {
@@ -1557,27 +1570,15 @@
         // Services spécifiques à dashboard
         const ElectionService = {
             async getElections() {
-                // Simulation de données
-                return {
-                    data: [
-                        {
-                            id: 1,
-                            titre: "Élection BDE",
-                            description: "Élection du Bureau des Étudiants",
-                            dateDebut: "2023-10-15",
-                            dateFin: "2023-10-20",
-                            candidatesCount: 5
-                        },
-                        {
-                            id: 2,
-                            titre: "Élection Représentants",
-                            description: "Élection des représentants étudiants",
-                            dateDebut: "2023-10-25",
-                            dateFin: "2023-10-30",
-                            candidatesCount: 3
-                        }
-                    ]
-                };
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/elections`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement des élections');
+                return await response.json();
             },
 
             async getElectionById(id) {
@@ -1597,21 +1598,53 @@
 
         const CandidateService = {
             async getCandidates(electionId) {
-                return await BaseService.apiCall(`/candidates/election/${electionId}`);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/candidats/election/${electionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement des candidats');
+                return await response.json();
             },
 
             async getMyCandidatures() {
-                return { data: [] }; // Simulation
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/candidats/my-candidatures`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement des candidatures');
+                return await response.json();
             }
         };
 
         const VoteService = {
             async getMyVotes() {
-                return { data: [] }; // Simulation
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/votes/my-votes`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement des votes');
+                return await response.json();
             },
 
             async getMyResult() {
-                return { data: [] }; // Simulation
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${CONFIG.BASE_URL}/api/votes/my-results`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) throw new Error('Erreur lors du chargement des résultats');
+                return await response.json();
             }
         };
 
