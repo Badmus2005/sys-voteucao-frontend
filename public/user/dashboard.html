@@ -1461,6 +1461,15 @@
         let currentPage = 1;
         let totalPages = 1;
 
+        const etudiant = await UserService.getProfile();
+        if (!etudiant || etudiant.status !== 200) {
+            showToast('Erreur récupération profil utilisateur', 'error');
+            throw new Error('Erreur récupération profil utilisateur');
+        }
+        const studentId = etudiant?.data?.id;
+        const userName = etudiant?.data?.nom || 'Étudiant';
+        document.getElementById('userName').textContent = userName;
+
         // Services spécifiques à dashboard utilisateur
         const ElectionService = {
             async getElections() {
@@ -1551,20 +1560,21 @@
         };
 
         const ActivityService = {
-            async getActivity(page = 1, limit = 5) {
+            async getActivity(userId, page = 1, limit = 5) {
                 try {
                     const endpoints = ['/activity/recent'];
 
                     for (let endpoint of endpoints) {
                         try {
-                            const response = await BaseService.apiCall(`${endpoint}?page=${page}&limit=${limit}`);
+                            const response = await BaseService.apiCall(
+                                `${endpoint}?userId=${encodeURIComponent(userId)}&page=${page}&limit=${limit}`
+                            );
                             if (response) return response;
                         } catch (error) {
                             console.log(`Endpoint ${endpoint} non disponible, essai suivant...`);
                         }
                     }
 
-                    // Aucun endpoint n'a répondu
                     return {
                         logs: [],
                         pagination: {
@@ -1583,7 +1593,6 @@
                     };
                 }
             }
-
         };
 
         // Composant ElectionCard
@@ -1750,7 +1759,7 @@
             if (activityPagination) activityPagination.style.display = 'none';
 
             try {
-                const response = await ActivityService.getActivity(page, 5);
+                const response = await ActivityService.getActivity(studentId, page, 5);
                 console.log('Réponse activité:', response);
 
                 // Gérer différentes structures de réponse
