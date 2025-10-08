@@ -1257,41 +1257,6 @@
             </div>
         </header>
 
-        <script>
-            // Fonction pour charger la photo de profil et le nom
-            async function loadUserProfilePhoto() {
-                try {
-                    // Utiliser UserService.getProfile() si disponible, sinon StudentService.getStudentInfo()
-                    let userData = null;
-                    if (window.UserService && UserService.getProfile) {
-                        const response = await UserService.getProfile();
-                        userData = response.data || response;
-                    } else if (window.StudentService && StudentService.getStudentInfo) {
-                        const response = await StudentService.getStudentInfo();
-                        userData = response.data || response;
-                    }
-                    // Mettre à jour l'avatar
-                    const avatarElement = document.getElementById('userAvatar');
-                    if (userData && userData.photoUrl && avatarElement) {
-                        const photoUrl = userData.photoUrl.startsWith('http') ? userData.photoUrl : (window.API_URL ? window.API_URL + userData.photoUrl : userData.photoUrl);
-                        avatarElement.src = photoUrl;
-                        avatarElement.onerror = function () {
-                            this.src = 'https://tse1.explicit.bing.net/th/id/OIP.vTMq0lI0UHaCHxcvykT-EQHaHa?cb=12&w=1000&h=1000&rs=1&pid=ImgDetMain&o=7&rm=3';
-                        };
-                    }
-                    // Mettre à jour le nom
-                    if (userData && userData.prenom) {
-                        const userName = document.getElementById('userName');
-                        if (userName) userName.textContent = userData.prenom + ' ' + (userData.nom || '');
-                    }
-                } catch (error) {
-                    console.error('Erreur chargement profil:', error);
-                }
-            }
-            // Appel à l'initialisation
-            document.addEventListener('DOMContentLoaded', loadUserProfilePhoto);
-        </script>
-
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -1559,6 +1524,40 @@
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
     <script>
+        // Fonction pour charger la photo de profil et le nom
+        async function loadUserProfilePhoto() {
+            try {
+                // Utiliser UserService.getProfile() si disponible, sinon StudentService.getStudentInfo()
+                let userData = null;
+                if (window.UserService && UserService.getProfile) {
+                    const response = await UserService.getProfile();
+                    userData = response.data || response;
+                } else if (window.StudentService && StudentService.getStudentInfo) {
+                    const response = await StudentService.getStudentInfo();
+                    userData = response.data || response;
+                }
+                // Mettre à jour l'avatar
+                const avatarElement = document.getElementById('userAvatar');
+                if (userData && userData.photoUrl && avatarElement) {
+                    const photoUrl = userData.photoUrl.startsWith('http') ? userData.photoUrl : (window.API_URL ? window.API_URL + userData.photoUrl : userData.photoUrl);
+                    avatarElement.src = photoUrl;
+                    avatarElement.onerror = function () {
+                        this.src = 'https://tse1.explicit.bing.net/th/id/OIP.vTMq0lI0UHaCHxcvykT-EQHaHa?cb=12&w=1000&h=1000&rs=1&pid=ImgDetMain&o=7&rm=3';
+                    };
+                }
+                // Mettre à jour le nom
+                if (userData && userData.prenom) {
+                    const userName = document.getElementById('userName');
+                    if (userName) userName.textContent = userData.prenom + ' ' + (userData.nom || '');
+                }
+            } catch (error) {
+                console.error('Erreur chargement profil:', error);
+            }
+        }
+        // Appel à l'initialisation
+        document.addEventListener('DOMContentLoaded', loadUserProfilePhoto);
+    </script>
+    <script>
         // Variables globales pour cette page
         let allCandidatures = [];
         let filteredCandidatures = [];
@@ -1815,7 +1814,6 @@
             for (let i = 0; i < allCandidatures.length; i++) {
                 const candidature = allCandidatures[i];
 
-                // CORRECTION : Utiliser candidature.candidatureId au lieu de candidature.id
                 const candidatureId = candidature.candidatureId || candidature.id;
 
                 if (candidature.electionId && candidatureId) {
@@ -1949,34 +1947,6 @@
                 "${candidature.slogan}"
             </div>
             ` : ''}
-    
-            <div class="candidature-card-actions">
-                ${candidatureId && candidatureId !== 'id-indefini' ? `
-                <button class="btn btn-secondary view-details-btn" data-candidature-id="${candidatureId}">
-                    <i class="fas fa-eye"></i>
-                    Voir détails
-                </button>
-                ` : `
-                <button class="btn btn-secondary" disabled>
-                    <i class="fas fa-eye"></i>
-                    Détails indisponibles
-                </button>
-                `}
-    
-                ${(candidatureId && candidatureId !== 'id-indefini' && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
-                <button class="btn btn-warning edit-btn" data-candidature-id="${candidatureId}">
-                    <i class="fas fa-pen-to-square"></i>
-                    Modifier
-                </button>
-                ` : ''}
-    
-                ${(candidatureId && candidatureId !== 'id-indefini' && (statut === 'EN_ATTENTE' || statut === 'en_attente')) ? `
-                <button class="btn btn-danger cancel-btn" data-candidature-id="${candidatureId}">
-                    <i class="fas fa-trash"></i>
-                    Annuler
-                </button>
-                ` : ''}
-            </div>
         </div>
     </div>
     `;
