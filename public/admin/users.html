@@ -1445,18 +1445,6 @@
             }
         }
 
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-
-            const text = element.textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Copié dans le presse-papier', 'success');
-            }).catch(err => {
-                console.error('Erreur lors de la copie:', err);
-                showToast('Erreur lors de la copie', 'error');
-            });
-        }
 
         // ------------ GESTION DES FILTRES ------------
         async function loadEcoles() {
@@ -1753,6 +1741,7 @@
             }
         }
 
+        // CORRECTION de la fonction confirmReset
         async function confirmReset() {
             console.log('Réinitialisation pour studentId:', currentStudentId);
             if (!currentStudentId) return;
@@ -1776,10 +1765,38 @@
                 }
 
                 const result = await res.json();
-                console.log('Réponse réinitialisation:', result);
+                console.log('Réponse réinitialisation COMPLÈTE:', result);
 
-                if (!result.data.temporaryIdentifiant || !result.data.temporaryPassword) {
-                    throw new Error('Données de réinitialisation incomplètes');
+                // DÉBOGAGE : Vérifier la structure exacte
+                console.log('Structure de result:', result);
+                console.log('Structure de result.data:', result.data);
+
+                // CORRECTION : Rechercher les identifiants dans différentes structures possibles
+                let tempIdentifiant, tempPassword;
+
+                // Essayer différentes structures
+                if (result.temporaryIdentifiant && result.temporaryPassword) {
+                    // Structure 1: directement dans result
+                    tempIdentifiant = result.temporaryIdentifiant;
+                    tempPassword = result.temporaryPassword;
+                } else if (result.data) {
+                    // Structure 2: dans result.data
+                    if (result.data.temporaryIdentifiant && result.data.temporaryPassword) {
+                        tempIdentifiant = result.data.temporaryIdentifiant;
+                        tempPassword = result.data.temporaryPassword;
+                    } else if (result.data.credentials) {
+                        // Structure 3: dans result.data.credentials
+                        tempIdentifiant = result.data.credentials.identifiant;
+                        tempPassword = result.data.credentials.motDePasse;
+                    }
+                }
+
+                console.log('Identifiant trouvé:', tempIdentifiant);
+                console.log('Mot de passe trouvé:', tempPassword);
+
+                if (!tempIdentifiant || !tempPassword) {
+                    console.error('Structure non reconnue:', result);
+                    throw new Error('Données de réinitialisation incomplètes. Structure: ' + JSON.stringify(result));
                 }
 
                 // Afficher les identifiants temporaires
@@ -1788,8 +1805,14 @@
                 const resetModalContent = document.getElementById('resetModalContent');
                 const resetResult = document.getElementById('resetResult');
 
-                if (tempIdDisplay) tempIdDisplay.textContent = result.temporaryIdentifiant;
-                if (tempPasswordDisplay) tempPasswordDisplay.textContent = result.temporaryPassword;
+                if (tempIdDisplay) {
+                    tempIdDisplay.textContent = tempIdentifiant;
+                    tempIdDisplay.setAttribute('data-value', tempIdentifiant); // Pour la copie
+                }
+                if (tempPasswordDisplay) {
+                    tempPasswordDisplay.textContent = tempPassword;
+                    tempPasswordDisplay.setAttribute('data-value', tempPassword); // Pour la copie
+                }
 
                 // Masquer le contenu initial et afficher les résultats
                 if (resetModalContent) resetModalContent.style.display = 'none';
@@ -1815,6 +1838,45 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        // CORRECTION de la fonction copyToClipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.error('Élément non trouvé:', elementId);
+                return;
+            }
+
+            // Essayer d'abord l'attribut data-value, puis le textContent
+            const text = element.getAttribute('data-value') || element.textContent;
+
+            if (!text) {
+                console.error('Aucun texte à copier pour:', elementId);
+                showToast('Aucun texte à copier', 'error');
+                return;
+            }
+
+            console.log('Texte à copier:', text);
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copié dans le presse-papier', 'success');
+            }).catch(err => {
+                console.error('Erreur lors de la copie:', err);
+                // Fallback pour les navigateurs qui ne supportent pas clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Copié dans le presse-papier', 'success');
+                } catch (fallbackErr) {
+                    console.error('Erreur fallback:', fallbackErr);
+                    showToast('Erreur lors de la copie', 'error');
+                }
+                document.body.removeChild(textArea);
+            });
         }
 
         function renderStudentsTable(data) {
