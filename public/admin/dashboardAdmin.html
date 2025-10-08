@@ -1360,6 +1360,110 @@
             background: rgba(220, 53, 69, 0.15);
             color: #dc3545;
         }
+
+        /* Styles pour les inputs du formulaire simplifié */
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-bg);
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background: var(--card-bg);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--bordeaux);
+            box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+        }
+
+        .form-input:invalid {
+            border-color: var(--danger);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Styles pour le select avec recherche */
+        .select-search-container {
+            position: relative;
+        }
+
+        .select-search-input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 1px solid var(--light-bg);
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            background: var(--card-bg);
+        }
+
+        .select-search-clear {
+            position: absolute;
+            right: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .select-search-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--light-bg);
+            border-radius: var(--border-radius);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .select-options.active {
+            display: block;
+        }
+
+        .select-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .select-option:hover {
+            background: var(--light-bg);
+        }
+
+        .select-option.selected {
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--bordeaux);
+        }
     </style>
 </head>
 
@@ -1552,29 +1656,68 @@
                         </div>
                     </div>
 
-                    <!-- Formulaire de saisie manuelle -->
+                    <!-- Formulaire de saisie manuelle SIMPLIFIÉ -->
                     <div class="manual-import-form" id="manualImportForm">
-                        <div class="form-group">
-                            <label for="studentData">Données des étudiants (format JSON):</label>
-                            <textarea id="studentData" rows="10" placeholder='[
-  {
-    "matricule": "MAT001",
-    "codeInscription": "CODE001",
-    "nom": "Doe",
-    "prenom": "John",
-    "ecole": "EGEI",
-    "filiere": "Informatique Industrielle et Maintenance",
-    "annee": 1,
-    "whatsapp": "+229 12345678",
-    "email": "john.doe@email.com"
-  }
-]'></textarea>
-                            <small class="form-help">
-                                Format JSON attendu. Au moins un identifiant (matricule ou code) requis par étudiant.
-                            </small>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nom">Nom *</label>
+                                <input type="text" id="nom" class="form-input" placeholder="Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom">Prénom *</label>
+                                <input type="text" id="prenom" class="form-input" placeholder="John" required>
+                            </div>
                         </div>
 
-                        <!-- Checkbox pour la mise à jour des étudiants existants -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="matricule">Matricule</label>
+                                <input type="text" id="matricule" class="form-input" placeholder="MAT001">
+                            </div>
+                            <div class="form-group">
+                                <label for="codeInscription">Code Inscription</label>
+                                <input type="text" id="codeInscription" class="form-input" placeholder="CODE001">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ecole">École *</label>
+                                <select id="ecole" class="form-input" required>
+                                    <option value="">Chargement des écoles...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filiere">Filière *</label>
+                                <select id="filiere" class="form-input" required disabled>
+                                    <option value="">Sélectionnez d'abord une école</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="annee">Année *</label>
+                                <select id="annee" class="form-input" required>
+                                    <option value="1">1ère année</option>
+                                    <option value="2">2ème année</option>
+                                    <option value="3">3ème année</option>
+                                    <option value="4">4ème année</option>
+                                    <option value="5">5ème année</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" class="form-input" placeholder="john.doe@email.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp</label>
+                            <input type="text" id="whatsapp" class="form-input" placeholder="+229 12345678">
+                        </div>
+
+                        <!-- Checkbox pour la mise à jour -->
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="updateExisting" name="updateExisting">
@@ -1587,12 +1730,17 @@
                             </small>
                         </div>
 
-                        <button class="btn-primary" id="importManualBtn">
-                            <i class="fas fa-upload"></i> Importer les étudiants
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-primary" id="importSingleBtn">
+                                <i class="fas fa-user-plus"></i> Ajouter cet étudiant
+                            </button>
+                            <button class="btn-secondary" id="addAnotherBtn" style="display: none;">
+                                <i class="fas fa-plus"></i> Ajouter un autre
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Import par fichier (caché par défaut) -->
+                    <!-- Import par fichier -->
                     <div class="file-import-form" id="fileImportForm" style="display: none;">
                         <div class="file-drop-area" id="fileDropArea">
                             <i class="fas fa-cloud-upload-alt"
@@ -1789,6 +1937,12 @@
         const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
         const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/read';
         const IMPORT_ETUDIANTS_ENDPOINT = '/api/import/etudiants';
+        const ECOLES_ENDPOINT = '/api/ecoles';
+        const FILIERES_ENDPOINT = '/api/filieres';
+
+        // Variables globales pour stocker les données
+        let ecolesData = [];
+        let filieresData = [];
 
         // Fonction pour récupérer le token
         function getToken() {
@@ -1852,10 +2006,13 @@
             initializeDashboard();
         });
 
-        function initializeDashboard() {
+        async function initializeDashboard() {
             // Initialiser les gestionnaires d'événements
             setupEventListeners();
             setupImportListeners();
+
+            // Charger les données des écoles et filières
+            await loadEcoles();
 
             // Charger les données du tableau de bord
             loadAdminInfo();
@@ -1916,19 +2073,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Fonction debounce pour la recherche
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
         // Formatage de date
         function formatDate(dateString) {
             if (!dateString) return '-';
@@ -1945,6 +2089,135 @@
                 console.error('Erreur de formatage de date:', error);
                 return dateString;
             }
+        }
+
+        // ------------ GESTION DES ÉCOLES ET FILIÈRES ------------
+        async function loadEcoles() {
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${ECOLES_ENDPOINT}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des écoles');
+                }
+
+                const result = await response.json();
+
+                // Adapter selon la structure de votre API
+                ecolesData = Array.isArray(result) ? result :
+                    result.data ? result.data :
+                        result.ecoles ? result.ecoles : [];
+
+                populateEcolesSelect();
+
+            } catch (error) {
+                console.error('Erreur chargement écoles:', error);
+                showToast('Erreur lors du chargement des écoles', 'error');
+
+                // Données de fallback
+                ecolesData = [
+                    { id: 1, nom: 'EGEI' },
+                    { id: 2, nom: 'ESG' },
+                    { id: 3, nom: 'ESM' },
+                    { id: 4, nom: 'FLL' },
+                    { id: 5, nom: 'FSS' }
+                ];
+                populateEcolesSelect();
+            }
+        }
+
+        function populateEcolesSelect() {
+            const ecoleSelect = document.getElementById('ecole');
+            if (!ecoleSelect) return;
+
+            ecoleSelect.innerHTML = '<option value="">Sélectionnez une école</option>';
+
+            ecolesData.forEach(ecole => {
+                const option = document.createElement('option');
+                option.value = ecole.nom || ecole.id;
+                option.textContent = ecole.nom;
+                ecoleSelect.appendChild(option);
+            });
+        }
+
+        async function loadFilieres(ecoleId) {
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${FILIERES_ENDPOINT}?ecole=${ecoleId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des filières');
+                }
+
+                const result = await response.json();
+
+                // Adapter selon la structure de votre API
+                filieresData = Array.isArray(result) ? result :
+                    result.data ? result.data :
+                        result.filieres ? result.filieres : [];
+
+                populateFilieresSelect();
+
+            } catch (error) {
+                console.error('Erreur chargement filières:', error);
+                showToast('Erreur lors du chargement des filières', 'error');
+
+                // Données de fallback basées sur l'école
+                const fallbackFilieres = getFallbackFilieres(ecoleId);
+                filieresData = fallbackFilieres;
+                populateFilieresSelect();
+            }
+        }
+
+        function getFallbackFilieres(ecoleNom) {
+            const filieresParEcole = {
+                'EGEI': [
+                    'Informatique Industrielle et Maintenance',
+                    'Génie Électrique et Informatique Industrielle',
+                    'Réseaux et Télécommunications'
+                ],
+                'ESG': [
+                    'Gestion des Ressources Humaines',
+                    'Marketing et Communication',
+                    'Finance et Comptabilité'
+                ],
+                'ESM': [
+                    'Management des Projets',
+                    'Entrepreneuriat',
+                    'Stratégie et Développement'
+                ],
+                'FLL': [
+                    'Lettres Modernes',
+                    'Linguistique',
+                    'Traduction et Interprétation'
+                ],
+                'FSS': [
+                    'Sociologie',
+                    'Psychologie',
+                    'Anthropologie'
+                ]
+            };
+
+            return filieresParEcole[ecoleNom] || ['Filière Générale'].map((nom, index) => ({ id: index + 1, nom }));
+        }
+
+        function populateFilieresSelect() {
+            const filiereSelect = document.getElementById('filiere');
+            if (!filiereSelect) return;
+
+            filiereSelect.innerHTML = '<option value="">Sélectionnez une filière</option>';
+            filiereSelect.disabled = false;
+
+            filieresData.forEach(filiere => {
+                const option = document.createElement('option');
+                option.value = filiere.nom || filiere.id;
+                option.textContent = filiere.nom;
+                filiereSelect.appendChild(option);
+            });
         }
 
         // ------------ IMPORTATION D'ÉTUDIANTS ------------
@@ -1969,8 +2242,26 @@
                 });
             });
 
-            // Importation manuelle
-            safeAddListener('importManualBtn', 'click', importStudentsManual);
+            // Gestion du changement d'école
+            safeAddListener('ecole', 'change', function () {
+                const ecoleNom = this.value;
+                if (ecoleNom) {
+                    loadFilieres(ecoleNom);
+                } else {
+                    const filiereSelect = document.getElementById('filiere');
+                    filiereSelect.innerHTML = '<option value="">Sélectionnez d\'abord une école</option>';
+                    filiereSelect.disabled = true;
+                }
+            });
+
+            // Importation manuelle simplifiée
+            safeAddListener('importSingleBtn', 'click', importStudentsManual);
+
+            // Bouton "Ajouter un autre"
+            safeAddListener('addAnotherBtn', 'click', function () {
+                resetManualForm();
+                this.style.display = 'none';
+            });
 
             // Importation par fichier
             safeAddListener('importFileBtn', 'click', importStudentsFile);
@@ -2001,12 +2292,12 @@
             const updateCheckbox = document.getElementById('updateExisting');
             if (updateCheckbox) {
                 updateCheckbox.addEventListener('change', function () {
-                    const importBtn = document.getElementById('importManualBtn');
+                    const importBtn = document.getElementById('importSingleBtn');
                     if (importBtn) {
                         if (this.checked) {
                             importBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Importer/Mettre à jour';
                         } else {
-                            importBtn.innerHTML = '<i class="fas fa-upload"></i> Importer';
+                            importBtn.innerHTML = '<i class="fas fa-user-plus"></i> Ajouter cet étudiant';
                         }
                     }
                 });
@@ -2028,35 +2319,56 @@
             }
         }
 
+        // Nouvelle fonction pour l'importation manuelle simplifiée
         async function importStudentsManual() {
-            const studentDataTextarea = document.getElementById('studentData');
-            if (!studentDataTextarea) return;
+            // Récupérer les valeurs du formulaire
+            const etudiant = {
+                nom: document.getElementById('nom').value.trim(),
+                prenom: document.getElementById('prenom').value.trim(),
+                matricule: document.getElementById('matricule').value.trim() || null,
+                codeInscription: document.getElementById('codeInscription').value.trim() || null,
+                ecole: document.getElementById('ecole').value,
+                filiere: document.getElementById('filiere').value,
+                annee: parseInt(document.getElementById('annee').value) || 1,
+                whatsapp: document.getElementById('whatsapp').value.trim() || null,
+                email: document.getElementById('email').value.trim() || null
+            };
 
-            const studentData = studentDataTextarea.value.trim();
+            // Validation
+            if (!etudiant.nom || !etudiant.prenom || !etudiant.ecole || !etudiant.filiere) {
+                showToast('Veuillez remplir tous les champs obligatoires (*)', 'error');
+                return;
+            }
 
-            if (!studentData) {
-                showToast('Veuillez saisir les données des étudiants', 'error');
+            if (!etudiant.matricule && !etudiant.codeInscription) {
+                showToast('Veuillez saisir au moins un identifiant (matricule ou code d\'inscription)', 'error');
                 return;
             }
 
             try {
-                // Parser le JSON
-                const etudiants = JSON.parse(studentData);
-
-                if (!Array.isArray(etudiants)) {
-                    throw new Error('Les données doivent être un tableau JSON');
-                }
-
-                // Récupérer l'état de la checkbox
                 const updateExisting = document.getElementById('updateExisting')?.checked || false;
-
-                // Importer les étudiants
-                await importStudents(etudiants, updateExisting);
+                await importStudents([etudiant], updateExisting);
 
             } catch (error) {
-                console.error('Erreur de parsing JSON:', error);
-                showToast('Format JSON invalide. Vérifiez la syntaxe.', 'error');
+                console.error('Erreur importation manuelle:', error);
             }
+        }
+
+        // Fonction pour réinitialiser le formulaire
+        function resetManualForm() {
+            document.getElementById('nom').value = '';
+            document.getElementById('prenom').value = '';
+            document.getElementById('matricule').value = '';
+            document.getElementById('codeInscription').value = '';
+            document.getElementById('ecole').value = '';
+            document.getElementById('filiere').innerHTML = '<option value="">Sélectionnez d\'abord une école</option>';
+            document.getElementById('filiere').disabled = true;
+            document.getElementById('annee').value = '1';
+            document.getElementById('email').value = '';
+            document.getElementById('whatsapp').value = '';
+
+            // Remettre le focus sur le premier champ
+            document.getElementById('nom').focus();
         }
 
         async function importStudentsFile() {
@@ -2093,7 +2405,7 @@
                 return;
             }
 
-            const importBtn = document.querySelector('#importManualBtn, #importFileBtn');
+            const importBtn = document.querySelector('#importSingleBtn, #importFileBtn');
             const originalBtnText = importBtn?.innerHTML;
 
             if (importBtn) {
@@ -2150,6 +2462,11 @@
                     `Importation terminée: ${data.reussis || 0} étudiants importés`;
 
                 showToast(successMessage, 'success');
+
+                // Afficher le bouton "Ajouter un autre" pour l'import manuel
+                if (etudiants.length === 1) {
+                    document.getElementById('addAnotherBtn').style.display = 'inline-block';
+                }
 
                 // Recharger les statistiques
                 await loadStats();
@@ -2699,19 +3016,35 @@
 
                 if (!response.ok) throw new Error('Erreur de chargement des notifications');
 
-                const notifications = await response.json();
-                console.log('Notifications reçues:', notifications);
+                const result = await response.json();
+
+                // Adapter selon la structure de votre API
+                let notifications = [];
+                if (Array.isArray(result)) {
+                    notifications = result;
+                } else if (result.data && Array.isArray(result.data)) {
+                    notifications = result.data;
+                } else if (result.notifications && Array.isArray(result.notifications)) {
+                    notifications = result.notifications;
+                } else {
+                    console.warn('Structure de notifications non reconnue:', result);
+                }
+
+                console.log('Notifications traitées:', notifications);
                 displayNotifications(notifications);
 
                 // Mettre à jour le badge
-                const unreadCount = notifications.filter(n => !n.is_read).length;
+                const unreadCount = notifications.filter(n =>
+                    !(n.is_read || n.read)
+                ).length;
+
                 const badge = document.getElementById('notificationCount');
                 if (badge) {
                     badge.textContent = unreadCount;
                     badge.style.display = unreadCount > 0 ? 'block' : 'none';
                 }
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur chargement notifications:', error);
                 showToast('Erreur de chargement des notifications', 'error');
             }
         }
@@ -2724,7 +3057,7 @@
 
             // Vérification du type
             if (!Array.isArray(notifications)) {
-                console.warn('notifications n/est pas un tableau', notifications);
+                console.warn('notifications n\'est pas un tableau', notifications);
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--danger);">Erreur de chargement des notifications</p>';
                 return;
             }
@@ -2736,17 +3069,27 @@
 
             notifications.forEach(notification => {
                 const div = document.createElement('div');
-                div.className = `notification-item ${notification.read ? '' : 'unread'}`;
+
+                // Adapter selon la structure de vos données
+                const isRead = notification.is_read !== undefined ? notification.is_read :
+                    notification.read !== undefined ? notification.read : true;
+
+                div.className = `notification-item ${isRead ? '' : 'unread'}`;
+
+                // Utiliser les propriétés de votre réponse API
+                const message = notification.message || notification.action || 'Notification sans contenu';
+                const time = notification.createdAt || notification.timestamp;
+
                 div.innerHTML = `
-                    <div class="notification-content">${notification.message || 'Notification sans contenu'}</div>
-                    <div class="notification-time">${formatDate(notification.createdAt || notification.timestamp)}</div>
+                    <div class="notification-content">${message}</div>
+                    <div class="notification-time">${formatDate(time)}</div>
                 `;
 
                 div.addEventListener('click', async () => {
-                    if (!notification.read && notification.id) {
+                    if (!isRead && notification.id) {
                         await markAsRead(notification.id);
                         div.classList.remove('unread');
-                        loadNotifications();
+                        loadNotifications(); // Recharger pour mettre à jour le badge
                     }
                 });
 
