@@ -1445,7 +1445,6 @@
     <script src="/assets/config.js"></script>
     <script src="/assets/js/common.js"></script>
     <script src="/assets/js/notificationService.js"></script>
-    <script src="/assets/initNotifications.js"></script>
     <script>
         // Variables globales pour cette page
         let currentElections = [];
@@ -1461,14 +1460,14 @@
         let currentPage = 1;
         let totalPages = 1;
 
-        // Services spécifiques à dashboard
+        // Services spécifiques à dashboard - CORRIGÉS selon votre common.js
         const ElectionService = {
             async getElections() {
-                return await BaseService.apiCall('/api/elections/actives');
+                return await BaseService.apiCall('/elections/actives');
             },
 
             async getElectionById(id) {
-                return await BaseService.apiCall(`/api/elections/${id}`);
+                return await BaseService.apiCall(`/elections/${id}`);
             },
 
             getElectionStatus(election) {
@@ -1484,7 +1483,7 @@
 
         const CandidateService = {
             async getMyCandidatures() {
-                return await BaseService.apiCall('/api/candidats/mes-candidatures');
+                return await BaseService.apiCall('/candidats/mes-candidatures');
             },
 
             async getCandidaturesCount() {
@@ -1500,7 +1499,7 @@
 
         const VoteService = {
             async getMyVotes() {
-                return await BaseService.apiCall('/api/votes/mes-votes');
+                return await BaseService.apiCall('/votes/mes-votes');
             },
 
             async getVotesCount() {
@@ -1514,7 +1513,7 @@
             },
 
             async getMyResults() {
-                return await BaseService.apiCall('/api/candidats/mes-resultats');
+                return await BaseService.apiCall('/candidats/mes-resultats');
             },
 
             async getElectionsWonCount() {
@@ -1531,7 +1530,7 @@
 
         const ActivityService = {
             async getActivity(page = 1, limit = 5) {
-                return await BaseService.apiCall(`/api/activite?page=${page}&limit=${limit}`);
+                return await BaseService.apiCall(`/activite?page=${page}&limit=${limit}`);
             }
         };
 
@@ -1588,28 +1587,19 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
 
-            // Vérifier si les éléments existent
-            if (!burger || !sidebar || !overlay) {
-                console.log('Éléments du menu non trouvés');
-                return;
-            }
+            if (!burger || !sidebar) return;
 
-            console.log('Initialisation du menu mobile');
-
-            // Ouvrir/fermer le menu
-            burger.addEventListener('click', function (event) {
-                event.stopPropagation();
-                console.log('Bouton menu cliqué');
+            burger.addEventListener('click', function () {
                 sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
+                if (overlay) overlay.classList.toggle('active');
             });
 
-            // Fermer le menu en cliquant sur l'overlay
-            overlay.addEventListener('click', function () {
-                console.log('Overlay cliqué - fermeture du menu');
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            });
+            if (overlay) {
+                overlay.addEventListener('click', function () {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
 
             // Fermer le menu en cliquant n'importe où en dehors
             document.addEventListener('click', function (event) {
@@ -1617,18 +1607,16 @@
                 const isClickOnMenuButton = burger.contains(event.target);
 
                 if (sidebar.classList.contains('active') && !isClickInsideSidebar && !isClickOnMenuButton) {
-                    console.log('Clic en dehors - fermeture du menu');
                     sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
                 }
             });
 
             // Fermer avec la touche Échap
             document.addEventListener('keydown', function (event) {
                 if (event.key === 'Escape' && sidebar.classList.contains('active')) {
-                    console.log('Touche Échap - fermeture du menu');
                     sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
                 }
             });
         }
@@ -1640,7 +1628,6 @@
 
             if (!sidebar || !overlay) return;
 
-            // Si on passe en mode desktop, fermer le menu
             if (window.matchMedia('(min-width: 1025px)').matches) {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
@@ -1652,15 +1639,12 @@
             Common.showLoading();
 
             try {
-                // Charger les élections en cours
                 await loadCurrentElections();
-                // Charger l'activité récente
                 await loadRecentActivity();
-                // Charger les statistiques utilisateur
                 await loadUserStatistics();
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                Common.showToast('Erreur de chargement des données', 'error');
+                Common.handleApiError(error, 'chargement dashboard');
             } finally {
                 Common.hideLoading();
             }
@@ -1681,7 +1665,7 @@
                     });
 
                     userStats.elections = currentElections.length;
-                    document.getElementById('statElections').textContent = userStats.elections;
+                    updateStatisticsDisplay();
 
                     electionDates = data.map(e => new Date(e.dateDebut));
                     displayCurrentElections(currentElections);
@@ -1691,7 +1675,6 @@
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
                 showElectionsError('Erreur de chargement');
-                Common.showToast('Erreur de chargement des élections', 'error');
             }
         }
 
@@ -1711,13 +1694,9 @@
             }
 
             container.innerHTML = elections.map(election =>
-                ElectionCard.create(election, {
-                    showActions: true,
-                    showDetails: true
-                })
+                ElectionCard.create(election, { showActions: true })
             ).join('');
 
-            // Ajouter les événements de clic
             attachElectionCardEvents();
         }
 
@@ -1737,7 +1716,6 @@
                 const logs = response.data?.logs || response.logs || [];
                 const pagination = response.data?.pagination || response.pagination || { currentPage: 1, totalPages: 1 };
 
-                // Affichage des logs
                 const list = document.getElementById('activityList');
                 if (logs.length > 0 && list) {
                     logs.forEach(log => {
@@ -1768,7 +1746,6 @@
                     }
                 }
 
-                // Mise à jour pagination
                 currentPage = pagination.currentPage;
                 totalPages = pagination.totalPages;
 
@@ -1808,31 +1785,19 @@
 
         async function loadUserStatistics() {
             try {
-                // Charger les élections actives
                 const electionsResponse = await ElectionService.getElections();
                 const activeElections = electionsResponse.data || electionsResponse;
                 userStats.elections = Array.isArray(activeElections) ? activeElections.length : 0;
 
-                // Charger le nombre de candidatures
                 userStats.candidatures = await CandidateService.getCandidaturesCount();
-
-                // Charger le nombre de votes
                 userStats.votes = await VoteService.getVotesCount();
-
-                // Charger le nombre d'élections gagnées
                 userStats.electionsWin = await VoteService.getElectionsWonCount();
 
                 updateStatisticsDisplay();
             } catch (error) {
                 console.error('Erreur chargement statistiques:', error);
-                userStats = {
-                    candidatures: 0,
-                    votes: 0,
-                    elections: 0,
-                    electionsWin: 0
-                };
+                userStats = { candidatures: 0, votes: 0, elections: 0, electionsWin: 0 };
                 updateStatisticsDisplay();
-                Common.showToast('Erreur de chargement des statistiques', 'error');
             }
         }
 
@@ -1992,7 +1957,6 @@
                 });
             }
 
-            // Pagination de l'activité
             if (prevPageBtn) {
                 prevPageBtn.addEventListener('click', () => {
                     if (currentPage > 1) loadRecentActivity(currentPage - 1);
@@ -2010,24 +1974,19 @@
         document.addEventListener('DOMContentLoaded', async function () {
             if (!Common.checkAuth()) return;
 
-            // Initialiser les éléments communs (déjà fait dans common.js importé)
+            // Initialiser les éléments communs
+            Common.initCommonElements();
 
-            // Charger le profil utilisateur AVANT tout
-            const userProfile = await Common.loadUserProfileInHeader();
-            if (!userProfile) {
-                Common.showToast('Erreur de chargement du profil', 'error');
-                return;
-            }
+            // Charger le profil utilisateur
+            await Common.loadUserProfileInHeader();
 
-            // Les notifications sont déjà initialisées par initNotifications.js
-
-            // Initialiser le menu mobile (seulement si on est sur mobile)
+            // Initialiser le menu mobile
             initMobileMenu();
 
-            // Écouter le redimensionnement de la fenêtre
+            // Écouter le redimensionnement
             window.addEventListener('resize', handleResize);
 
-            // Charger les données spécifiques
+            // Charger les données
             await loadPageData();
             initEventHandlers();
             renderCalendar();
