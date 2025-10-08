@@ -1454,37 +1454,21 @@
         let userStats = {
             candidatures: 0,
             votes: 0,
-            elections: 0
+            elections: 0,
+            electionsWin: 0
         };
 
-        // Services spécifiques à dashboard
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Services spécifiques à dashboard - MIS À JOUR
         const ElectionService = {
             async getElections() {
-                // Simulation de données
-                return {
-                    data: [
-                        {
-                            id: 1,
-                            titre: "Élection BDE",
-                            description: "Élection du Bureau des Étudiants",
-                            dateDebut: "2023-10-15",
-                            dateFin: "2023-10-20",
-                            candidatesCount: 5
-                        },
-                        {
-                            id: 2,
-                            titre: "Élection Représentants",
-                            description: "Élection des représentants étudiants",
-                            dateDebut: "2023-10-25",
-                            dateFin: "2023-10-30",
-                            candidatesCount: 3
-                        }
-                    ]
-                };
+                return await BaseService.apiCall('/api/elections/actives');
             },
 
             async getElectionById(id) {
-                return await BaseService.apiCall(`/elections/${id}`);
+                return await BaseService.apiCall(`/api/elections/${id}`);
             },
 
             getElectionStatus(election) {
@@ -1499,44 +1483,55 @@
         };
 
         const CandidateService = {
-            async getCandidates(electionId) {
-                return await BaseService.apiCall(`/candidates/election/${electionId}`);
+            async getMyCandidatures() {
+                return await BaseService.apiCall('/api/candidats/mes-candidatures');
             },
 
-            async getMyCandidatures() {
-                return { data: [] }; // Simulation
+            async getCandidaturesCount() {
+                try {
+                    const response = await this.getMyCandidatures();
+                    return response.data?.length || response.length || 0;
+                } catch (error) {
+                    console.error('Erreur récupération candidatures:', error);
+                    return 0;
+                }
             }
         };
 
         const VoteService = {
             async getMyVotes() {
-                return { data: [] }; // Simulation
+                return await BaseService.apiCall('/api/votes/mes-votes');
             },
 
-            async getMyResult() {
-                return { data: [] }; // Simulation
+            async getVotesCount() {
+                try {
+                    const response = await this.getMyVotes();
+                    return response.data?.length || response.length || 0;
+                } catch (error) {
+                    console.error('Erreur récupération votes:', error);
+                    return 0;
+                }
+            },
+
+            async getMyResults() {
+                return await BaseService.apiCall('/api/candidats/mes-resultats');
+            },
+
+            async getElectionsWonCount() {
+                try {
+                    const response = await this.getMyResults();
+                    const results = response.data || response;
+                    return results.filter(result => result.estElu).length || 0;
+                } catch (error) {
+                    console.error('Erreur récupération résultats:', error);
+                    return 0;
+                }
             }
         };
 
         const ActivityService = {
-            async getActivity(studentId, page = 1, limit = 5) {
-                // Simulation de données
-                return {
-                    logs: [
-                        {
-                            action: "Connexion réussie",
-                            createdAt: new Date().toISOString()
-                        },
-                        {
-                            action: "Vote soumis - Élection BDE",
-                            createdAt: new Date(Date.now() - 3600000).toISOString()
-                        }
-                    ],
-                    pagination: {
-                        currentPage: 1,
-                        totalPages: 1
-                    }
-                };
+            async getActivity(page = 1, limit = 5) {
+                return await BaseService.apiCall(`/api/activite?page=${page}&limit=${limit}`);
             }
         };
 
@@ -1569,21 +1564,21 @@
                 }
 
                 return `
-                        <div class="election-card" data-election-id="${election.id}">
-                            <div class="election-header">
-                                <h3 class="election-title">${election.titre}</h3>
-                                <div class="election-date">${startDate} - ${endDate}</div>
-                            </div>
-                            <div class="election-body">
-                                <p class="election-description">${election.description || 'Aucune description disponible'}</p>
-                                <span class="election-status ${statusClass}">${statusText}</span>
-                            </div>
-                            <div class="election-footer">
-                                <div class="election-info">${election.candidatesCount || 0} candidats</div>
-                                ${actionButton}
-                            </div>
+                    <div class="election-card" data-election-id="${election.id}">
+                        <div class="election-header">
+                            <h3 class="election-title">${election.titre}</h3>
+                            <div class="election-date">${startDate} - ${endDate}</div>
                         </div>
-                    `;
+                        <div class="election-body">
+                            <p class="election-description">${election.description || 'Aucune description disponible'}</p>
+                            <span class="election-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="election-footer">
+                            <div class="election-info">${election.candidatesCount || 0} candidats</div>
+                            ${actionButton}
+                        </div>
+                    </div>
+                `;
             }
         };
 
@@ -1720,13 +1715,14 @@
         async function loadCurrentElections() {
             try {
                 const response = await ElectionService.getElections();
-                const data = response.data;
+                const data = response.data || response;
+
                 if (data && Array.isArray(data)) {
-                    const now = new Date();
                     currentElections = data.filter(election => {
                         if (!election.dateDebut || !election.dateFin) return false;
                         const startDate = new Date(election.dateDebut);
                         const endDate = new Date(election.dateFin);
+                        const now = new Date();
                         return now >= startDate && now <= endDate;
                     });
 
@@ -1741,6 +1737,7 @@
             } catch (error) {
                 console.error('Erreur chargement élections:', error);
                 showElectionsError('Erreur de chargement');
+                Common.showToast('Erreur de chargement des élections', 'error');
             }
         }
 
@@ -1750,12 +1747,12 @@
 
             if (!elections || elections.length === 0) {
                 container.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fa-solid fa-calendar-check"></i>
-                            <h3>Aucune élection en cours</h3>
-                            <p>Il n'y a aucune élection en cours pour le moment.</p>
-                        </div>
-                    `;
+                    <div class="no-data-message">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <h3>Aucune élection en cours</h3>
+                        <p>Il n'y a aucune élection en cours pour le moment.</p>
+                    </div>
+                `;
                 return;
             }
 
@@ -1770,69 +1767,75 @@
             attachElectionCardEvents();
         }
 
-        let currentPage = 1;
-        let totalPages = 1;
-
         async function loadRecentActivity(page = 1) {
-            document.getElementById('activityLoading').style.display = 'block';
-            document.getElementById('activityList').innerHTML = '';
-            document.getElementById('activityPagination').style.display = 'none';
+            const activityLoading = document.getElementById('activityLoading');
+            const activityList = document.getElementById('activityList');
+            const activityPagination = document.getElementById('activityPagination');
+
+            if (activityLoading) activityLoading.style.display = 'block';
+            if (activityList) activityList.innerHTML = '';
+            if (activityPagination) activityPagination.style.display = 'none';
 
             try {
-                const etudiant = await UserService.getProfile();
-                const studentId = etudiant?.data?.id;
-                if (!studentId) throw new Error("Identifiant étudiant introuvable");
-
-                const response = await ActivityService.getActivity(studentId, page, 5);
+                const response = await ActivityService.getActivity(page, 5);
                 console.log('Logs activité:', response);
-                const logs = response.logs || [];
+
+                const logs = response.data?.logs || response.logs || [];
+                const pagination = response.data?.pagination || response.pagination || { currentPage: 1, totalPages: 1 };
 
                 // Affichage des logs
                 const list = document.getElementById('activityList');
-                logs.forEach(log => {
-                    const item = document.createElement('li');
-                    item.textContent = `${log.action} - ${new Date(log.createdAt).toLocaleString()}`;
-                    list.appendChild(item);
-                });
+                if (logs.length > 0 && list) {
+                    logs.forEach(log => {
+                        const item = document.createElement('div');
+                        item.className = 'timeline-item';
+                        item.innerHTML = `
+                            <div class="timeline-icon">
+                                <i class="fas ${getIconForAction(log.actionType)}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h3 class="timeline-title">${log.action}</h3>
+                                <p class="timeline-desc">${log.details || 'Action effectuée'}</p>
+                                <span class="timeline-time">${new Date(log.createdAt).toLocaleString()}</span>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                } else {
+                    const activityContent = document.getElementById('activityContent');
+                    if (activityContent) {
+                        activityContent.innerHTML = `
+                            <div class="no-data-message">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <h3>Aucune activité récente</h3>
+                                <p>Vos activités récentes apparaîtront ici.</p>
+                            </div>
+                        `;
+                    }
+                }
 
                 // Mise à jour pagination
-                currentPage = response.pagination.currentPage;
-                totalPages = response.pagination.totalPages;
+                currentPage = pagination.currentPage;
+                totalPages = pagination.totalPages;
 
-                document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages}`;
-                document.getElementById('prevPageBtn').disabled = currentPage <= 1;
-                document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
-                document.getElementById('activityPagination').style.display = 'block';
+                const pageInfo = document.getElementById('pageInfo');
+                const prevPageBtn = document.getElementById('prevPageBtn');
+                const nextPageBtn = document.getElementById('nextPageBtn');
+
+                if (pageInfo) pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+                if (prevPageBtn) prevPageBtn.disabled = currentPage <= 1;
+                if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
+
+                if (logs.length > 0 && activityPagination) {
+                    activityPagination.style.display = 'block';
+                }
 
             } catch (error) {
                 console.error('Erreur activité :', error);
                 showActivityError('Impossible de charger les activités');
             } finally {
-                document.getElementById('activityLoading').style.display = 'none';
+                if (activityLoading) activityLoading.style.display = 'none';
             }
-        }
-
-        // Boutons de navigation
-        document.getElementById('prevPageBtn').addEventListener('click', () => {
-            if (currentPage > 1) loadRecentActivity(currentPage - 1);
-        });
-        document.getElementById('nextPageBtn').addEventListener('click', () => {
-            if (currentPage < totalPages) loadRecentActivity(currentPage + 1);
-        });
-
-        function mapActivityLogToDisplay(log) {
-            const actionType = log.actionType || log.type || 'INFO';
-            const action = log.action || log.description || 'Action inconnue';
-            const details = log.details || log.message || `Action effectuée`;
-            const email = log.email || log.userEmail || 'Utilisateur inconnu';
-            const createdAt = log.createdAt || log.timestamp || new Date().toISOString();
-
-            return {
-                icon: getIconForAction(actionType),
-                title: action,
-                description: details,
-                time: new Date(createdAt).toLocaleString()
-            };
         }
 
         function getIconForAction(type) {
@@ -1849,65 +1852,46 @@
             }
         }
 
-        function displayRecentActivity(activities) {
-            const container = document.getElementById('activityContent');
-            if (!container) return;
-
-            if (!activities || activities.length === 0) {
-                container.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            <h3>Aucune activité récente</h3>
-                            <p>Vos activités récentes apparaîtront ici.</p>
-                        </div>
-                    `;
-                return;
-            }
-
-            const mapped = activities.slice(0, 5).map(mapActivityLogToDisplay);
-
-            container.innerHTML = mapped.map(activity => `
-                    <div class="timeline-item">
-                        <div class="timeline-icon">
-                            <i class="fa-solid ${activity.icon}"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">${activity.title}</h3>
-                            <p class="timeline-desc">${activity.description}</p>
-                            <span class="timeline-time">${activity.time}</span>
-                        </div>
-                    </div>
-                `).join('');
-        }
-
         async function loadUserStatistics() {
             try {
-                const votesResponse = await VoteService.getMyVotes();
-                userStats.votes = votesResponse.data?.length || 0;
+                // Charger les élections actives
+                const electionsResponse = await ElectionService.getElections();
+                const activeElections = electionsResponse.data || electionsResponse;
+                userStats.elections = Array.isArray(activeElections) ? activeElections.length : 0;
 
-                const candidaturesResponse = await CandidateService.getMyCandidatures();
-                userStats.candidatures = candidaturesResponse.data?.length || 0;
+                // Charger le nombre de candidatures
+                userStats.candidatures = await CandidateService.getCandidaturesCount();
 
-                const ElectionsWinResponse = await VoteService.getMyResult();
-                userStats.election_results = ElectionsWinResponse.data?.length || 0;
+                // Charger le nombre de votes
+                userStats.votes = await VoteService.getVotesCount();
+
+                // Charger le nombre d'élections gagnées
+                userStats.electionsWin = await VoteService.getElectionsWonCount();
 
                 updateStatisticsDisplay();
             } catch (error) {
                 console.error('Erreur chargement statistiques:', error);
                 userStats = {
-                    candidatures: 3,
-                    votes: 5,
-                    elections: currentElections.length
+                    candidatures: 0,
+                    votes: 0,
+                    elections: 0,
+                    electionsWin: 0
                 };
                 updateStatisticsDisplay();
+                Common.showToast('Erreur de chargement des statistiques', 'error');
             }
         }
 
         function updateStatisticsDisplay() {
-            document.getElementById('statCandidatures').textContent = userStats.candidatures;
-            document.getElementById('statVotes').textContent = userStats.votes;
-            document.getElementById('statElections').textContent = userStats.elections;
-            document.getElementById('statElectionsWin').textContent = userStats.election_results;
+            const statCandidatures = document.getElementById('statCandidatures');
+            const statVotes = document.getElementById('statVotes');
+            const statElections = document.getElementById('statElections');
+            const statElectionsWin = document.getElementById('statElectionsWin');
+
+            if (statCandidatures) statCandidatures.textContent = userStats.candidatures;
+            if (statVotes) statVotes.textContent = userStats.votes;
+            if (statElections) statElections.textContent = userStats.elections;
+            if (statElectionsWin) statElectionsWin.textContent = userStats.electionsWin;
         }
 
         function renderCalendar() {
@@ -1991,11 +1975,11 @@
             if (!container) return;
 
             container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>${message}</h3>
-                    </div>
-                `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                </div>
+            `;
         }
 
         function showActivityError(message) {
@@ -2003,11 +1987,11 @@
             if (!container) return;
 
             container.innerHTML = `
-                    <div class="no-data-message">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                        <h3>${message}</h3>
-                    </div>
-                `;
+                <div class="no-data-message">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                </div>
+            `;
         }
 
         function initializeNotifications() {
@@ -2015,6 +1999,8 @@
             const notificationBtn = document.getElementById('notificationBtn');
             const notificationsPanel = document.getElementById('notificationsPanel');
             const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            if (!notificationBtn || !notificationsPanel || !markAllReadBtn) return;
 
             notificationBtn.addEventListener('click', () => {
                 notificationsPanel.classList.toggle('show');
@@ -2037,13 +2023,17 @@
             function updateNotificationBadge() {
                 const unreadCount = notificationService.getUnreadCount();
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = unreadCount;
-                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                }
             }
 
             function renderNotifications() {
                 const notifications = notificationService.getNotifications();
                 const container = document.getElementById('notificationsList');
+
+                if (!container) return;
 
                 if (notifications.length === 0) {
                     container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
@@ -2053,16 +2043,16 @@
                 container.innerHTML = notifications
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .map(notif => `
-                            <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                                <div class="notification-icon">
-                                    <i class="fas ${getNotificationIcon(notif.type)}"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-text">${notif.message}</div>
-                                    <div class="notification-time">${formatNotificationDate(notif.date)}</div>
-                                </div>
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
                             </div>
-                        `).join('');
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
 
                 container.querySelectorAll('.notification-item').forEach(item => {
                     item.addEventListener('click', () => {
@@ -2118,28 +2108,61 @@
         }
 
         function initEventHandlers() {
-            document.getElementById('refreshElections').addEventListener('click', async function () {
-                await loadCurrentElections();
-                Common.showToast('Liste actualisée avec succès', 'success');
-            });
+            const refreshElections = document.getElementById('refreshElections');
+            const prevMonth = document.getElementById('prevMonth');
+            const nextMonth = document.getElementById('nextMonth');
+            const btnVote = document.getElementById('btnVote');
+            const btnResult = document.getElementById('btnResult');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
 
-            document.getElementById('prevMonth').addEventListener('click', function () {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar();
-            });
+            if (refreshElections) {
+                refreshElections.addEventListener('click', async function () {
+                    Common.showLoading();
+                    await loadCurrentElections();
+                    Common.hideLoading();
+                    Common.showToast('Liste actualisée avec succès', 'success');
+                });
+            }
 
-            document.getElementById('nextMonth').addEventListener('click', function () {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar();
-            });
+            if (prevMonth) {
+                prevMonth.addEventListener('click', function () {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    renderCalendar();
+                });
+            }
 
-            document.getElementById('btnVote').addEventListener('click', function () {
-                window.location.href = 'vote.html';
-            });
+            if (nextMonth) {
+                nextMonth.addEventListener('click', function () {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    renderCalendar();
+                });
+            }
 
-            document.getElementById('btnResult').addEventListener('click', function () {
-                window.location.href = 'results.html';
-            });
+            if (btnVote) {
+                btnVote.addEventListener('click', function () {
+                    window.location.href = 'vote.html';
+                });
+            }
+
+            if (btnResult) {
+                btnResult.addEventListener('click', function () {
+                    window.location.href = 'results.html';
+                });
+            }
+
+            // Pagination de l'activité
+            if (prevPageBtn) {
+                prevPageBtn.addEventListener('click', () => {
+                    if (currentPage > 1) loadRecentActivity(currentPage - 1);
+                });
+            }
+
+            if (nextPageBtn) {
+                nextPageBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) loadRecentActivity(currentPage + 1);
+                });
+            }
         }
 
         // Initialisation de la page
@@ -2148,7 +2171,14 @@
 
             // Initialiser les éléments communs
             Common.initCommonElements();
-            await Common.loadUserProfileInHeader();
+
+            // Charger le profil utilisateur AVANT tout
+            const userProfile = await Common.loadUserProfileInHeader();
+            if (!userProfile) {
+                Common.showToast('Erreur de chargement du profil', 'error');
+                return;
+            }
+
             initializeNotifications();
 
             // Initialiser le menu mobile (seulement si on est sur mobile)
