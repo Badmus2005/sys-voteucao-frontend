@@ -1,17 +1,11 @@
 class NotificationService {
     constructor() {
-        // Attendre que CONFIG soit défini
-        if (typeof CONFIG === 'undefined') {
-            throw new Error('CONFIG n\'est pas défini. Assurez-vous que config.js est chargé avant NotificationService');
-        }
-
         this.API_URL = CONFIG.BASE_URL;
         this.TOKEN = localStorage.getItem('token');
         this.notifications = [];
         this.subscribers = [];
         this.initialized = false;
 
-        // Initialiser le service
         this.initialize();
     }
 
@@ -19,15 +13,12 @@ class NotificationService {
         if (this.initialized) return;
 
         try {
-            await this.fetchNotifications();
+            await this.fetchNotifications(); // 🔁 toutes les notifications
             this.initialized = true;
-            // Notifier les abonnés
             this.notifySubscribers();
-
-            // Mettre en place le polling pour les mises à jour
-            this.startPolling();
+            this.startPolling(); // 🔁 mise à jour régulière
         } catch (error) {
-            console.error('Erreur d\'initialisation du service de notifications:', error);
+            console.error("Erreur d'initialisation du service de notifications:", error);
         }
     }
 
@@ -40,19 +31,68 @@ class NotificationService {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur de récupération des notifications');
+                throw new Error("Erreur de récupération des notifications");
             }
 
             const data = await response.json();
-            this.notifications = data.notifications || [];
+            this.notifications = Array.isArray(data?.notifications) ? data.notifications : [];
 
-            // Trier les notifications par date (plus récentes en premier)
-            this.notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            // ✅ Tri par date descendante
+            this.notifications.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             return this.notifications;
         } catch (error) {
-            console.error('Erreur lors de la récupération des notifications:', error);
+            console.error("Erreur lors de la récupération des notifications:", error);
             return [];
+        }
+    }
+
+    async fetchNewNotifications() {
+        try {
+            const response = await fetch(`${this.API_URL}/api/notifications?unreadOnly=true`, {
+                headers: {
+                    'Authorization': `Bearer ${this.TOKEN}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Erreur de récupération des nouvelles notifications");
+            }
+
+            const data = await response.json();
+            const newNotifications = Array.isArray(data?.notifications) ? data.notifications : [];
+
+            for (const notification of newNotifications) {
+                if (!this.notifications.find(n => n.id === notification.id)) {
+                    this.notifications.unshift(notification);
+                }
+            }
+
+            this.notifySubscribers();
+            return newNotifications;
+        } catch (error) {
+            console.error("Erreur lors de la récupération des nouvelles notifications:", error);
+            return [];
+        }
+    }
+
+    async getUnreadCount() {
+        try {
+            const response = await fetch(`${this.API_URL}/api/notifications/unread/count`, {
+                headers: {
+                    'Authorization': `Bearer ${this.TOKEN}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Erreur de récupération du nombre de notifications non lues");
+            }
+
+            const data = await response.json();
+            return data?.count || 0;
+        } catch (error) {
+            console.error("Erreur lors du comptage des notifications non lues:", error);
+            return 0;
         }
     }
 
@@ -60,7 +100,7 @@ class NotificationService {
         return [...this.notifications];
     }
 
-    getUnreadCount() {
+    getUnreadLocalCount() {
         return this.notifications.filter(n => !n.read).length;
     }
 
@@ -74,17 +114,16 @@ class NotificationService {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur de marquage de la notification');
+                throw new Error("Erreur de marquage de la notification");
             }
 
-            // Mettre à jour localement
             const notification = this.notifications.find(n => n.id === notificationId);
             if (notification) {
                 notification.read = true;
                 this.notifySubscribers();
             }
         } catch (error) {
-            console.error('Erreur marquage notification:', error);
+            console.error("Erreur marquage notification:", error);
         }
     }
 
@@ -98,14 +137,13 @@ class NotificationService {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur de marquage des notifications');
+                throw new Error("Erreur de marquage des notifications");
             }
 
-            // Mettre à jour localement
             this.notifications.forEach(n => n.read = true);
             this.notifySubscribers();
         } catch (error) {
-            console.error('Erreur marquage notifications:', error);
+            console.error("Erreur marquage notifications:", error);
         }
     }
 
@@ -119,14 +157,13 @@ class NotificationService {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur lors de la suppression des notifications');
+                throw new Error("Erreur lors de la suppression des notifications");
             }
 
-            // Vider localement
             this.notifications = [];
             this.notifySubscribers();
         } catch (error) {
-            console.error('Erreur suppression notifications:', error);
+            console.error("Erreur suppression notifications:", error);
         }
     }
 
@@ -145,53 +182,18 @@ class NotificationService {
             try {
                 callback();
             } catch (error) {
-                console.error('Erreur lors de la notification d\'un abonné:', error);
+                console.error("Erreur lors de la notification d'un abonné:", error);
             }
         });
     }
 
-    async fetchNewNotifications() {
-        try {
-            const response = await fetch(`${this.API_URL}/api/notifications?unreadOnly=true`, {
-                headers: {
-                    'Authorization': `Bearer ${this.TOKEN}`
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur de récupération des nouvelles notifications');
-            }
-
-            const data = await response.json();
-            const newNotifications = data.notifications || [];
-
-            // Ajouter seulement les notifications qui n'existent pas déjà
-            for (const notification of newNotifications) {
-                if (!this.notifications.find(n => n.id === notification.id)) {
-                    this.notifications.unshift(notification);
-                }
-            }
-
-            this.notifySubscribers();
-            return newNotifications;
-        } catch (error) {
-            console.error('Erreur lors de la récupération des nouvelles notifications:', error);
-            return [];
-        }
-    }
-
     startPolling() {
-        // Vérifier les nouvelles notifications toutes les 30 secondes
         setInterval(async () => {
             try {
                 await this.fetchNewNotifications();
             } catch (error) {
-                console.error('Erreur polling notifications:', error);
+                console.error("Erreur polling notifications:", error);
             }
         }, 30000);
     }
-
 }
-
-
-const notificationService = new NotificationService();
