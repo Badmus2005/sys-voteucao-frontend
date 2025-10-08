@@ -1462,13 +1462,16 @@
         let totalPages = 1;
 
         const etudiant = await UserService.getProfile();
-        if (!etudiant || etudiant.status !== 200) {
+
+        if (!etudiant || !etudiant.data || !etudiant.data.id) {
             showToast('Erreur récupération profil utilisateur', 'error');
             throw new Error('Erreur récupération profil utilisateur');
         }
-        const studentId = etudiant?.data?.id;
-        const userName = etudiant?.data?.nom || 'Étudiant';
+
+        const studentId = etudiant.data.id;
+        const userName = etudiant.data.nom || 'Étudiant';
         document.getElementById('userName').textContent = userName;
+        document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userName} !`;
 
         // Services spécifiques à dashboard utilisateur
         const ElectionService = {
