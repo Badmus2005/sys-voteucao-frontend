@@ -1466,6 +1466,75 @@
         let studentId = null;
         let userName = 'Étudiant';
 
+        // Fonction pour initialiser les informations étudiant
+        async function initStudentInfo() {
+            try {
+                // Utiliser directement UserService.getProfile() comme dans common.js
+                etudiant = await UserService.getProfile();
+
+                console.log('Réponse complète du profil:', etudiant);
+
+                // Vérifier la structure de la réponse
+                if (!etudiant) {
+                    throw new Error('Aucune réponse du serveur');
+                }
+
+                // Vérifier si la réponse a une structure différente
+                let userData = etudiant;
+
+                // Si la réponse a une propriété data (comme dans common.js)
+                if (etudiant.data) {
+                    userData = etudiant.data;
+                }
+
+                // Si la réponse est directement les données utilisateur
+                if (etudiant.prenom || etudiant.nom || etudiant.email) {
+                    userData = etudiant;
+                }
+
+                console.log('Données utilisateur extraites:', userData);
+
+                // Trouver l'ID selon différentes propriétés possibles
+                studentId = userData.id || userData.userId || userData._id || userData.id_utilisateur;
+
+                if (!studentId) {
+                    console.warn('ID utilisateur non trouvé, propriétés disponibles:', Object.keys(userData));
+                    // Utiliser un ID temporaire pour permettre le fonctionnement
+                    studentId = 'temp-' + Date.now();
+                }
+
+                // Trouver le nom selon différentes propriétés possibles
+                userName = userData.prenom || userData.nom || userData.name || userData.username || 'Étudiant';
+
+                console.log('Profil chargé:', { studentId, userName });
+
+                // Mettre à jour l'interface utilisateur
+                const userNameElement = document.getElementById('userName');
+                const welcomeTitleElement = document.getElementById('welcomeTitle');
+
+                if (userNameElement) userNameElement.textContent = userName;
+                if (welcomeTitleElement) welcomeTitleElement.textContent = `Bienvenue, ${userName} !`;
+
+                return true;
+            } catch (error) {
+                console.error('Erreur initialisation info étudiant:', error);
+
+                // Mode dégradé - utiliser des valeurs par défaut
+                studentId = 'unknown-' + Date.now();
+                userName = 'Étudiant';
+
+                // Mettre à jour l'interface même en mode dégradé
+                const userNameElement = document.getElementById('userName');
+                const welcomeTitleElement = document.getElementById('welcomeTitle');
+
+                if (userNameElement) userNameElement.textContent = userName;
+                if (welcomeTitleElement) welcomeTitleElement.textContent = `Bienvenue, ${userName} !`;
+
+                Common.showToast('Chargement en mode limité - profil indisponible', 'warning');
+                return false;
+            }
+        }
+
         // Services spécifiques à dashboard utilisateur
         const ElectionService = {
             async getElections() {
@@ -1558,6 +1627,18 @@
         const ActivityService = {
             async getActivity(userId, page = 1, limit = 5) {
                 try {
+                    // Si l'ID est temporaire, ne pas appeler l'API
+                    if (userId && (userId.startsWith('temp-') || userId.startsWith('unknown-'))) {
+                        console.log('ID temporaire - skip appel activité');
+                        return {
+                            logs: [],
+                            pagination: {
+                                currentPage: 1,
+                                totalPages: 1
+                            }
+                        };
+                    }
+
                     const endpoints = ['/activity/recent'];
 
                     for (let endpoint of endpoints) {
@@ -1691,46 +1772,23 @@
             }
         }
 
-        // Fonction pour initialiser les informations étudiant
-        async function initStudentInfo() {
-            try {
-                etudiant = UserService.getProfile();
-
-                if (!etudiant || !etudiant.data || !etudiant.data.id) {
-                    Common.showToast('Erreur récupération profil utilisateur', 'error');
-                    throw new Error('Erreur récupération profil utilisateur');
-                }
-
-                studentId = etudiant.data.id;
-                userName = etudiant.data.nom || etudiant.data.prenom || 'Étudiant';
-
-                // Mettre à jour l'interface utilisateur
-                document.getElementById('userName').textContent = userName;
-                document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userName} !`;
-
-                return true;
-            } catch (error) {
-                console.error('Erreur initialisation info étudiant:', error);
-                return false;
-            }
-        }
-
         // Fonctions spécifiques à dashboard
         async function loadPageData() {
             Common.showLoading();
 
             try {
                 // Initialiser d'abord les infos étudiant
-                const studentInfoLoaded = await initStudentInfo();
-                if (!studentInfoLoaded) {
-                    throw new Error('Impossible de charger les informations étudiant');
-                }
+                await initStudentInfo();
 
+                // Charger les autres données même si le profil a échoué
                 await loadCurrentElections();
                 await loadRecentActivity();
                 await loadUserStatistics();
+
+                Common.showToast('Tableau de bord chargé', 'success');
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
+                Common.showToast('Certaines données n\'ont pas pu être chargées', 'warning');
             } finally {
                 Common.hideLoading();
             }
@@ -1785,13 +1843,7 @@
             if (activityPagination) activityPagination.style.display = 'none';
 
             try {
-                // Vérifier que studentId est disponible
-                if (!studentId) {
-                    throw new Error('ID étudiant non disponible');
-                }
-
                 const response = await ActivityService.getActivity(studentId, page, 5);
-                console.log('Réponse activité:', response);
 
                 // Gérer différentes structures de réponse
                 let logs = [];
@@ -1883,11 +1935,6 @@
 
         async function loadUserStatistics() {
             try {
-                // Vérifier que studentId est disponible
-                if (!studentId) {
-                    throw new Error('ID étudiant non disponible pour les statistiques');
-                }
-
                 // Élections actives
                 const activeElections = await ElectionService.getActiveElections();
                 userStats.elections = activeElections.length;
@@ -2082,22 +2129,27 @@
         document.addEventListener('DOMContentLoaded', async function () {
             if (!Common.checkAuth()) return;
 
-            // Initialiser les éléments communs
-            Common.initCommonElements();
+            try {
+                // Initialiser les éléments communs
+                Common.initCommonElements();
 
-            // Charger le profil utilisateur
-            await Common.loadUserProfileInHeader();
+                // Charger le profil utilisateur dans le header (laissé à common.js)
+                await Common.loadUserProfileInHeader();
 
-            // Initialiser le menu mobile
-            initMobileMenu();
+                // Initialiser le menu mobile
+                initMobileMenu();
 
-            // Écouter le redimensionnement
-            window.addEventListener('resize', handleResize);
+                // Écouter le redimensionnement
+                window.addEventListener('resize', handleResize);
 
-            // Charger les données
-            await loadPageData();
-            initEventHandlers();
-            renderCalendar();
+                // Charger les données
+                await loadPageData();
+                initEventHandlers();
+                renderCalendar();
+            } catch (error) {
+                console.error('Erreur initialisation dashboard:', error);
+                Common.showToast('Erreur lors du chargement du tableau de bord', 'error');
+            }
         });
     </script>
 </body>
