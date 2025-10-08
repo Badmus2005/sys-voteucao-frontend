@@ -1422,22 +1422,26 @@
                 ? document.getElementById('alertSuccess')
                 : document.getElementById('alertError');
 
-            alertElement.textContent = message;
-            alertElement.style.display = 'block';
+            if (alertElement) {
+                alertElement.textContent = message;
+                alertElement.style.display = 'block';
 
-            setTimeout(() => {
-                alertElement.style.display = 'none';
-            }, 5000);
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 5000);
+            }
         }
 
         function toggleFilters() {
             const filterControls = document.getElementById('filterControls');
-            if (filterControls.classList.contains('collapsed')) {
-                filterControls.classList.remove('collapsed');
-                filterControls.classList.add('expanded');
-            } else {
-                filterControls.classList.remove('expanded');
-                filterControls.classList.add('collapsed');
+            if (filterControls) {
+                if (filterControls.classList.contains('collapsed')) {
+                    filterControls.classList.remove('collapsed');
+                    filterControls.classList.add('expanded');
+                } else {
+                    filterControls.classList.remove('expanded');
+                    filterControls.classList.add('collapsed');
+                }
             }
         }
 
@@ -1470,12 +1474,15 @@
                 allEcoles = await res.json();
                 const ecoleSelect = document.getElementById('ecole');
 
-                allEcoles.forEach(ecole => {
-                    const opt = document.createElement('option');
-                    opt.value = ecole.id;
-                    opt.textContent = ecole.nom;
-                    ecoleSelect.appendChild(opt);
-                });
+                if (ecoleSelect) {
+                    ecoleSelect.innerHTML = '<option value="">-- Toutes les écoles --</option>';
+                    allEcoles.forEach(ecole => {
+                        const opt = document.createElement('option');
+                        opt.value = ecole.id;
+                        opt.textContent = ecole.nom;
+                        ecoleSelect.appendChild(opt);
+                    });
+                }
 
             } catch (error) {
                 console.error('Erreur chargement écoles:', error);
@@ -1485,6 +1492,8 @@
 
         async function loadFilieresByEcole(ecoleId) {
             const filiereSelect = document.getElementById('filiere');
+            if (!filiereSelect) return;
+
             filiereSelect.innerHTML = '<option value="">-- Toutes les filières --</option>';
 
             if (!ecoleId) return;
@@ -1516,10 +1525,16 @@
         }
 
         function clearFilters() {
-            document.getElementById('ecole').value = '';
-            document.getElementById('filiere').value = '';
-            document.getElementById('annee').value = '';
-            document.getElementById('keyword').value = '';
+            const ecoleSelect = document.getElementById('ecole');
+            const filiereSelect = document.getElementById('filiere');
+            const anneeSelect = document.getElementById('annee');
+            const keywordInput = document.getElementById('keyword');
+
+            if (ecoleSelect) ecoleSelect.value = '';
+            if (filiereSelect) filiereSelect.value = '';
+            if (anneeSelect) anneeSelect.value = '';
+            if (keywordInput) keywordInput.value = '';
+
             fetchAllEtudiants();
             showAlert('Filtres effacés', 'success');
         }
@@ -1573,7 +1588,9 @@
         }
 
         async function searchEtudiants() {
-            const q = document.getElementById('keyword').value.trim();
+            const keywordInput = document.getElementById('keyword');
+            const q = keywordInput ? keywordInput.value.trim() : '';
+
             if (!q) return fetchAllEtudiants();
 
             try {
@@ -1605,9 +1622,13 @@
         }
 
         async function filterEtudiants() {
-            const ecole = document.getElementById('ecole').value;
-            const filiere = document.getElementById('filiere').value;
-            const annee = document.getElementById('annee').value;
+            const ecoleSelect = document.getElementById('ecole');
+            const filiereSelect = document.getElementById('filiere');
+            const anneeSelect = document.getElementById('annee');
+
+            const ecole = ecoleSelect ? ecoleSelect.value : '';
+            const filiere = filiereSelect ? filiereSelect.value : '';
+            const annee = anneeSelect ? anneeSelect.value : '';
 
             if (!ecole && !filiere && !annee) {
                 return fetchAllEtudiants();
@@ -1707,25 +1728,29 @@
             const content = document.getElementById('resetModalContent');
             const result = document.getElementById('resetResult');
 
+            if (!modal || !content) return;
+
             content.innerHTML = `
                 <p>Êtes-vous sûr de vouloir réinitialiser les accès de <strong>${studentName}</strong> ?</p>
                 <p>Un identifiant et mot de passe temporaires seront générés.</p>
             `;
 
-            result.style.display = 'none';
+            if (result) result.style.display = 'none';
             content.style.display = 'block';
             modal.classList.add('active');
         }
 
         function closeResetModal() {
             const modal = document.getElementById('resetModalOverlay');
-            modal.classList.remove('active');
+            if (modal) modal.classList.remove('active');
             currentStudentId = null;
 
             // Réinitialiser le bouton
             const confirmBtn = document.getElementById('confirmResetBtn');
-            confirmBtn.textContent = 'Confirmer';
-            confirmBtn.onclick = confirmReset;
+            if (confirmBtn) {
+                confirmBtn.textContent = 'Confirmer';
+                confirmBtn.onclick = confirmReset;
+            }
         }
 
         async function confirmReset() {
@@ -1758,17 +1783,24 @@
                 }
 
                 // Afficher les identifiants temporaires
-                document.getElementById('tempIdDisplay').textContent = result.temporaryIdentifiant;
-                document.getElementById('tempPasswordDisplay').textContent = result.temporaryPassword;
+                const tempIdDisplay = document.getElementById('tempIdDisplay');
+                const tempPasswordDisplay = document.getElementById('tempPasswordDisplay');
+                const resetModalContent = document.getElementById('resetModalContent');
+                const resetResult = document.getElementById('resetResult');
+
+                if (tempIdDisplay) tempIdDisplay.textContent = result.temporaryIdentifiant;
+                if (tempPasswordDisplay) tempPasswordDisplay.textContent = result.temporaryPassword;
 
                 // Masquer le contenu initial et afficher les résultats
-                document.getElementById('resetModalContent').style.display = 'none';
-                document.getElementById('resetResult').style.display = 'block';
+                if (resetModalContent) resetModalContent.style.display = 'none';
+                if (resetResult) resetResult.style.display = 'block';
 
                 // Changer le bouton Confirmer en Fermer
                 const confirmBtn = document.getElementById('confirmResetBtn');
-                confirmBtn.textContent = 'Fermer';
-                confirmBtn.onclick = closeResetModal;
+                if (confirmBtn) {
+                    confirmBtn.textContent = 'Fermer';
+                    confirmBtn.onclick = closeResetModal;
+                }
 
                 showAlert('Accès réinitialisés avec succès', 'success');
 
@@ -1807,13 +1839,18 @@
                 const identifiantTemporaire = e.identifiantTemporaire || e.identifiant_temporaire || '-';
 
                 // CORRECTION : Récupérer le statut du mot de passe temporaire depuis l'utilisateur
-                const hasTempPassword = e.user?.tempPassword || e.tempPassword;
+                const hasTempPassword = e.user?.tempPassword || e.tempPassword ? 'Oui' : 'Non';
 
                 const row = document.createElement('tr');
 
+                // Échapper les caractères spéciaux pour éviter les problèmes d'affichage
+                const nom = e.nom ? e.nom.replace(/'/g, "\\'") : '-';
+                const prenom = e.prenom ? e.prenom.replace(/'/g, "\\'") : '-';
+                const studentName = `${prenom} ${nom}`;
+
                 row.innerHTML = `
                     <td>${e.matricule || '-'}</td>
-                    <td>${e.codeInscription || '-'}</td>
+                    <td>${e.codeInscription || e.code_inscription || '-'}</td>
                     <td>${e.nom || '-'}</td>
                     <td>${e.prenom || '-'}</td>
                     <td>${e.nomEcole || e.ecole_nom || '-'}</td>
@@ -1828,7 +1865,7 @@
                             <button class="btn btn-sm toggle-btn" onclick="toggleStatus(${e.id}, ${isActive})" title="${isActive ? 'Désactiver' : 'Activer'}">
                                 <i class="fas fa-toggle-${isActive ? 'on' : 'off'}"></i>
                             </button>
-                            <button class="btn btn-sm reset-btn" onclick="openResetModal(${e.id}, '${e.prenom} ${e.nom}')" title="Réinitialiser accès">
+                            <button class="btn btn-sm reset-btn" onclick="openResetModal(${e.id}, '${studentName}')" title="Réinitialiser accès">
                                 <i class="fas fa-key"></i>
                             </button>
                             <button class="btn btn-sm delete-btn" onclick="deleteEtudiant(${e.id})" title="Supprimer">
@@ -1869,7 +1906,8 @@
                     backgroundColor: generateColor(index)
                 }));
 
-                const ctx = document.getElementById('statsChart').getContext('2d');
+                const ctx = document.getElementById('statsChart');
+                if (!ctx) return;
 
                 if (window.statsChartInstance) {
                     window.statsChartInstance.destroy();
@@ -1947,9 +1985,11 @@
             const sidebarOverlay = document.getElementById('sidebarOverlay');
 
             function toggleSidebar() {
-                sidebar.classList.toggle('active');
-                sidebarOverlay.classList.toggle('active');
-                menuToggle.classList.toggle('active');
+                if (sidebar && sidebarOverlay) {
+                    sidebar.classList.toggle('active');
+                    sidebarOverlay.classList.toggle('active');
+                    if (menuToggle) menuToggle.classList.toggle('active');
+                }
             }
 
             if (menuToggle && sidebar) {
@@ -1958,9 +1998,11 @@
                     toggleSidebar();
                 });
 
-                sidebarOverlay.addEventListener('click', function () {
-                    toggleSidebar();
-                });
+                if (sidebarOverlay) {
+                    sidebarOverlay.addEventListener('click', function () {
+                        toggleSidebar();
+                    });
+                }
 
                 sidebar.addEventListener('click', function (e) {
                     e.stopPropagation();
@@ -1985,11 +2027,14 @@
             }
 
             // Déconnexion
-            document.getElementById('logoutBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                localStorage.removeItem('token');
-                window.location.href = '/admin';
-            });
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    localStorage.removeItem('token');
+                    window.location.href = '/admin';
+                });
+            }
 
             // Recherche avec Entrée
             const keywordInput = document.getElementById('keyword');
@@ -2000,17 +2045,24 @@
             }
 
             // Pagination
-            document.getElementById('btn-prev').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    fetchAllEtudiants(currentPage);
-                }
-            });
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
 
-            document.getElementById('btn-next').addEventListener('click', () => {
-                currentPage++;
-                fetchAllEtudiants(currentPage);
-            });
+            if (btnPrev) {
+                btnPrev.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        fetchAllEtudiants(currentPage);
+                    }
+                });
+            }
+
+            if (btnNext) {
+                btnNext.addEventListener('click', () => {
+                    currentPage++;
+                    fetchAllEtudiants(currentPage);
+                });
+            }
 
             // Modal
             const resetModal = document.getElementById('resetModalOverlay');
@@ -2019,6 +2071,14 @@
                     if (e.target === resetModal) {
                         closeResetModal();
                     }
+                });
+            }
+
+            // Écouteur pour le changement d'école
+            const ecoleSelect = document.getElementById('ecole');
+            if (ecoleSelect) {
+                ecoleSelect.addEventListener('change', function () {
+                    loadFilieresByEcole(this.value);
                 });
             }
         }
