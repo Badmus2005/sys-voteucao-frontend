@@ -1461,17 +1461,10 @@
         let currentPage = 1;
         let totalPages = 1;
 
-        const etudiant = UserService.getProfile();
-
-        if (!etudiant || !etudiant.data || !etudiant.data.id) {
-            Common.showToast('Erreur récupération profil utilisateur', 'error');
-            throw new Error('Erreur récupération profil utilisateur');
-        }
-
-        const studentId = etudiant.data.id;
-        const userName = etudiant.data.nom || 'Étudiant';
-        document.getElementById('userName').textContent = userName;
-        document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userName} !`;
+        // Récupération cohérente du profil étudiant
+        let etudiant = null;
+        let studentId = null;
+        let userName = 'Étudiant';
 
         // Services spécifiques à dashboard utilisateur
         const ElectionService = {
@@ -1698,11 +1691,41 @@
             }
         }
 
+        // Fonction pour initialiser les informations étudiant
+        async function initStudentInfo() {
+            try {
+                etudiant = UserService.getProfile();
+
+                if (!etudiant || !etudiant.data || !etudiant.data.id) {
+                    Common.showToast('Erreur récupération profil utilisateur', 'error');
+                    throw new Error('Erreur récupération profil utilisateur');
+                }
+
+                studentId = etudiant.data.id;
+                userName = etudiant.data.nom || etudiant.data.prenom || 'Étudiant';
+
+                // Mettre à jour l'interface utilisateur
+                document.getElementById('userName').textContent = userName;
+                document.getElementById('welcomeTitle').textContent = `Bienvenue, ${userName} !`;
+
+                return true;
+            } catch (error) {
+                console.error('Erreur initialisation info étudiant:', error);
+                return false;
+            }
+        }
+
         // Fonctions spécifiques à dashboard
         async function loadPageData() {
             Common.showLoading();
 
             try {
+                // Initialiser d'abord les infos étudiant
+                const studentInfoLoaded = await initStudentInfo();
+                if (!studentInfoLoaded) {
+                    throw new Error('Impossible de charger les informations étudiant');
+                }
+
                 await loadCurrentElections();
                 await loadRecentActivity();
                 await loadUserStatistics();
@@ -1762,6 +1785,11 @@
             if (activityPagination) activityPagination.style.display = 'none';
 
             try {
+                // Vérifier que studentId est disponible
+                if (!studentId) {
+                    throw new Error('ID étudiant non disponible');
+                }
+
                 const response = await ActivityService.getActivity(studentId, page, 5);
                 console.log('Réponse activité:', response);
 
@@ -1855,6 +1883,11 @@
 
         async function loadUserStatistics() {
             try {
+                // Vérifier que studentId est disponible
+                if (!studentId) {
+                    throw new Error('ID étudiant non disponible pour les statistiques');
+                }
+
                 // Élections actives
                 const activeElections = await ElectionService.getActiveElections();
                 userStats.elections = activeElections.length;
