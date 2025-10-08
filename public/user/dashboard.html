@@ -1461,7 +1461,7 @@
         let currentPage = 1;
         let totalPages = 1;
 
-        // Services spécifiques à dashboard - ENDPOINTS CORRIGÉS
+        // Services spécifiques à dashboard utilisateur
         const ElectionService = {
             async getElections() {
                 return await BaseService.apiCall('/elections');
@@ -1469,18 +1469,19 @@
 
             async getActiveElections() {
                 try {
-                    const response = await BaseService.apiCall('/elections');
-                    const elections = response.data || response;
-                    if (Array.isArray(elections)) {
-                        return elections.filter(election => {
-                            if (!election.dateDebut || !election.dateFin) return false;
-                            const startDate = new Date(election.dateDebut);
-                            const endDate = new Date(election.dateFin);
-                            const now = new Date();
-                            return now >= startDate && now <= endDate;
-                        });
-                    }
-                    return [];
+                    const response = await BaseService.apiCall('/elections/active');
+
+                    const elections = Array.isArray(response?.data) ? response.data : [];
+
+                    const now = new Date();
+                    const activeElections = elections.filter(election => {
+                        if (!election.dateDebut || !election.dateFin) return false;
+                        const startDate = new Date(election.dateDebut);
+                        const endDate = new Date(election.dateFin);
+                        return now >= startDate && now <= endDate;
+                    });
+
+                    return activeElections;
                 } catch (error) {
                     console.error('Erreur récupération élections actives:', error);
                     return [];
@@ -1504,7 +1505,7 @@
 
         const CandidateService = {
             async getMyCandidatures() {
-                return await BaseService.apiCall('/candidats/mes-candidatures');
+                return await BaseService.apiCall('/candidats/my-candidature');
             },
 
             async getCandidaturesCount() {
@@ -1520,7 +1521,7 @@
 
         const VoteService = {
             async getMyVotes() {
-                return await BaseService.apiCall('/votes/mes-votes');
+                return await BaseService.apiCall('/votes/my-votes');
             },
 
             async getVotesCount() {
