@@ -1552,8 +1552,7 @@
         const ActivityService = {
             async getActivity(page = 1, limit = 5) {
                 try {
-
-                    const endpoints = '/activity/recent';
+                    const endpoints = ['/activity/recent'];
 
                     for (let endpoint of endpoints) {
                         try {
@@ -1564,13 +1563,26 @@
                         }
                     }
 
-                    // Si aucun endpoint ne fonctionne, retourner des données vides
-                    return { logs: [], pagination: { currentPage: 1, totalPages: 1 } };
+                    // Aucun endpoint n'a répondu
+                    return {
+                        logs: [],
+                        pagination: {
+                            currentPage: 1,
+                            totalPages: 1
+                        }
+                    };
                 } catch (error) {
                     console.error('Erreur récupération activité:', error);
-                    return { logs: [], pagination: { currentPage: 1, totalPages: 1 } };
+                    return {
+                        logs: [],
+                        pagination: {
+                            currentPage: 1,
+                            totalPages: 1
+                        }
+                    };
                 }
             }
+
         };
 
         // Composant ElectionCard
