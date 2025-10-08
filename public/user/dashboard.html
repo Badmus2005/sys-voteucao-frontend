@@ -1534,7 +1534,7 @@
             },
 
             async getMyResults() {
-                return await BaseService.apiCall('/candidats/mes-resultats');
+                return await BaseService.apiCall('/votes/elections/wins');
             },
 
             async getElectionsWonCount() {
@@ -1552,8 +1552,8 @@
         const ActivityService = {
             async getActivity(page = 1, limit = 5) {
                 try {
-                    // Essayer différents endpoints possibles pour l'activité
-                    const endpoints = ['/activite', '/activities', '/user/activity'];
+
+                    const endpoints = '/activity/recent';
 
                     for (let endpoint of endpoints) {
                         try {
@@ -1683,7 +1683,6 @@
                 await loadUserStatistics();
             } catch (error) {
                 console.error('Erreur lors du chargement des données:', error);
-                // Ne pas afficher d'erreur toast pour éviter de spammer l'utilisateur
             } finally {
                 Common.hideLoading();
             }
