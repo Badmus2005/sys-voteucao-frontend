@@ -1348,6 +1348,7 @@
     </div>
 
     <script src="/assets/config.js"></script>
+    <script src="/assets/config.js"></script>
     <script>
         // Configuration des endpoints API
         const API_BASE = CONFIG.BASE_URL;
@@ -1529,21 +1530,26 @@
             try {
                 showLoading();
                 const token = getToken();
-                const res = await fetch(`${API_BASE}${STUDENTS_ENDPOINT}?page=${page}`, {
+                const res = await fetch(`${API_BASE}${STUDENTS_ENDPOINT}?page=${page}&includeUser=true`, {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     }
                 });
 
-                if (!res.ok) throw new Error('Erreur lors de la récupération des étudiants');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`Erreur ${res.status}: ${errorText}`);
+                }
+
                 const data = await res.json();
+                console.log('Données étudiants reçues:', data);
 
                 renderStudentsTable(data.results || data.data || []);
                 updatePaginationControls(data);
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert(error.message, 'error');
+                console.error('Erreur détaillée:', error);
+                showAlert(`Erreur lors du chargement: ${error.message}`, 'error');
             } finally {
                 hideLoading();
             }
@@ -1574,21 +1580,26 @@
             try {
                 showLoading();
                 const token = getToken();
-                const res = await fetch(`${API_BASE}${STUDENTS_SEARCH_ENDPOINT}?q=${encodeURIComponent(q)}`, {
+                const res = await fetch(`${API_BASE}${STUDENTS_SEARCH_ENDPOINT}?q=${encodeURIComponent(q)}&includeUser=true`, {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     }
                 });
 
-                if (!res.ok) throw new Error('Erreur lors de la recherche');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`Erreur ${res.status}: ${errorText}`);
+                }
+
                 const data = await res.json();
+                console.log('Résultats recherche:', data);
 
                 renderStudentsTable(data.results || data.data || []);
-                showAlert(`Résultats de recherche pour "${q}"`, 'success');
+                showAlert(`${data.results?.length || data.data?.length || 0} résultat(s) trouvé(s) pour "${q}"`, 'success');
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert(error.message, 'error');
+                console.error('Erreur recherche:', error);
+                showAlert(`Erreur lors de la recherche: ${error.message}`, 'error');
             } finally {
                 hideLoading();
             }
@@ -1599,7 +1610,6 @@
             const filiere = document.getElementById('filiere').value;
             const annee = document.getElementById('annee').value;
 
-            // Si aucun filtre n'est sélectionné, afficher tous les étudiants
             if (!ecole && !filiere && !annee) {
                 return fetchAllEtudiants();
             }
@@ -1607,7 +1617,7 @@
             try {
                 showLoading();
                 const token = getToken();
-                let url = `${API_BASE}${STUDENTS_FILTER_ENDPOINT}?`;
+                let url = `${API_BASE}${STUDENTS_FILTER_ENDPOINT}?includeUser=true&`;
                 const params = new URLSearchParams();
 
                 if (ecole) params.append('ecole', ecole);
@@ -1623,14 +1633,19 @@
                     }
                 });
 
-                if (!res.ok) throw new Error('Erreur lors du filtrage');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    throw new Error(`Erreur ${res.status}: ${errorText}`);
+                }
+
                 const data = await res.json();
+                console.log('Résultats filtrage:', data);
 
                 renderStudentsTable(data.data || data.results || []);
-                showAlert('Filtrage appliqué avec succès', 'success');
+                showAlert(`${data.data?.length || data.results?.length || 0} étudiant(s) trouvé(s)`, 'success');
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert(error.message, 'error');
+                console.error('Erreur filtrage:', error);
+                showAlert(`Erreur lors du filtrage: ${error.message}`, 'error');
             } finally {
                 hideLoading();
             }
@@ -1699,6 +1714,7 @@
             `;
 
             result.style.display = 'none';
+            content.style.display = 'block';
             modal.classList.add('active');
         }
 
@@ -1706,15 +1722,21 @@
             const modal = document.getElementById('resetModalOverlay');
             modal.classList.remove('active');
             currentStudentId = null;
+
+            // Réinitialiser le bouton
+            const confirmBtn = document.getElementById('confirmResetBtn');
+            confirmBtn.textContent = 'Confirmer';
+            confirmBtn.onclick = confirmReset;
         }
 
         async function confirmReset() {
-            console.log(currentStudentId);
+            console.log('Réinitialisation pour studentId:', currentStudentId);
             if (!currentStudentId) return;
 
             try {
                 showLoading();
                 const token = getToken();
+
                 const res = await fetch(`${API_BASE}/api/admin/students/${currentStudentId}/reset-access`, {
                     method: 'POST',
                     headers: {
@@ -1723,25 +1745,42 @@
                     }
                 });
 
-                if (!res.ok) throw new Error('Erreur lors de la réinitialisation');
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Erreur API:', errorText);
+                    throw new Error(`Erreur ${res.status}: ${errorText}`);
+                }
 
                 const result = await res.json();
+                console.log('Réponse réinitialisation:', result);
 
+                if (!result.temporaryIdentifiant || !result.temporaryPassword) {
+                    throw new Error('Données de réinitialisation incomplètes');
+                }
+
+                // Afficher les identifiants temporaires
                 document.getElementById('tempIdDisplay').textContent = result.temporaryIdentifiant;
                 document.getElementById('tempPasswordDisplay').textContent = result.temporaryPassword;
 
+                // Masquer le contenu initial et afficher les résultats
                 document.getElementById('resetModalContent').style.display = 'none';
                 document.getElementById('resetResult').style.display = 'block';
 
+                // Changer le bouton Confirmer en Fermer
                 const confirmBtn = document.getElementById('confirmResetBtn');
                 confirmBtn.textContent = 'Fermer';
                 confirmBtn.onclick = closeResetModal;
 
                 showAlert('Accès réinitialisés avec succès', 'success');
-                fetchAllEtudiants();
+
+                // Recharger la liste pour afficher les nouvelles informations
+                setTimeout(() => {
+                    fetchAllEtudiants();
+                }, 1000);
+
             } catch (error) {
-                console.error('Erreur:', error);
-                showAlert(error.message, 'error');
+                console.error('Erreur détaillée:', error);
+                showAlert(`Erreur lors de la réinitialisation: ${error.message}`, 'error');
             } finally {
                 hideLoading();
             }
@@ -1767,7 +1806,10 @@
             data.forEach(e => {
                 const isActive = e.actif ?? e.user?.actif;
                 const identifiantTemporaire = e.identifiantTemporaire || e.identifiant_temporaire || '-';
-                const tempPassword = e.tempPassword ? 'Défini' : 'Aucun';
+
+                // CORRECTION : Récupérer le statut du mot de passe temporaire depuis l'utilisateur
+                const hasTempPassword = e.user?.tempPassword || e.tempPassword;
+
                 const row = document.createElement('tr');
 
                 row.innerHTML = `
@@ -1780,7 +1822,7 @@
                     <td>${e.annee || '-'}</td>
                     <td>${e.email || e.user?.email || '-'}</td>
                     <td>${identifiantTemporaire}</td>
-                    <td>${tempPassword}</td>
+                    <td>${hasTempPassword}</td>
                     <td><span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'Actif' : 'Inactif'}</span></td>
                     <td>
                         <div class="action-buttons">
