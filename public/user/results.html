@@ -163,17 +163,6 @@
         .sidebar-header {
             padding: 0 1.5rem 2rem;
             border-bottom: 1px solid var(--gray-light);
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
         }
 
         .logo {
@@ -268,7 +257,6 @@
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
             color: var(--gray);
-            animation: fadeIn 0.5s ease-out;
         }
 
         .breadcrumb a {
@@ -290,7 +278,6 @@
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
-            animation: fadeIn 0.5s ease-out;
         }
 
         .section-title {
@@ -327,19 +314,6 @@
             box-shadow: var(--card-shadow);
             padding: 1.5rem;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                transform: translateY(10px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .filters-header {
@@ -430,7 +404,6 @@
             box-shadow: var(--card-shadow);
             padding: 2rem;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.5s ease-out;
         }
 
         .results-title {
@@ -462,7 +435,7 @@
             color: var(--gray);
         }
 
-        /* Winner Banner avec Animation */
+        /* Winner Banner */
         .winner-banner {
             background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
             color: white;
@@ -473,45 +446,12 @@
             position: relative;
             overflow: hidden;
             display: none;
-            animation: slideInUp 0.8s ease-out;
-        }
-
-        @keyframes slideInUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .winner-crown {
             font-size: 3rem;
             color: var(--accent);
             margin-bottom: 1rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-10px);
-            }
-
-            60% {
-                transform: translateY(-5px);
-            }
         }
 
         .winner-title {
@@ -572,7 +512,6 @@
             display: flex;
             align-items: center;
             transition: var(--transition);
-            animation: fadeInUp 0.6s ease-out;
         }
 
         .stat-card:hover {
@@ -633,7 +572,6 @@
             border-radius: 12px;
             box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
-            animation: fadeInUp 0.7s ease-out;
         }
 
         .charts-grid {
@@ -672,7 +610,6 @@
             border-radius: 12px;
             box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
-            animation: fadeInUp 0.8s ease-out;
         }
 
         .ranking-header {
@@ -899,19 +836,6 @@
             color: var(--gray);
         }
 
-        /* Loading Animation */
-        .loading-gif {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem;
-        }
-
-        .loading-gif img {
-            width: 80px;
-            height: 80px;
-        }
-
         /* Toast Notification */
         .toast {
             position: fixed;
@@ -1007,7 +931,6 @@
             text-align: center;
             padding: 3rem;
             color: var(--gray);
-            animation: fadeIn 0.5s ease-out;
         }
 
         .no-data-message i {
@@ -1481,10 +1404,6 @@
             <div class="ranking-section">
                 <div class="ranking-header">
                     <h2 class="section-title"><i class="fas fa-trophy"></i> Classement des candidats</h2>
-                    <button class="btn btn-secondary" id="exportResultsBtn">
-                        <i class="fas fa-download"></i>
-                        Exporter
-                    </button>
                 </div>
                 <table class="ranking-table">
                     <thead>
@@ -1544,7 +1463,6 @@
         let currentResults = null;
         let votesChart = null;
         let comparisonChart = null;
-        let filterTimeout = null;
 
         // Configuration API
         const API_BASE = CONFIG.BASE_URL;
@@ -1771,16 +1689,12 @@
 
             // Gestionnaire de filtres
             document.getElementById('applyFilters').addEventListener('click', function () {
-                clearTimeout(filterTimeout);
-                filterTimeout = setTimeout(() => applyFilters(), 300);
+                applyFilters();
             });
 
             document.getElementById('resetFilters').addEventListener('click', async function () {
                 resetFilters();
             });
-
-            // Gestionnaire d'export
-            document.getElementById('exportResultsBtn').addEventListener('click', exportResults);
 
             // Menu mobile
             document.getElementById('mobileMenuBtn').addEventListener('click', function () {
@@ -2223,6 +2137,9 @@
 
             // Masquer les autres sections
             document.getElementById('winnerBanner').style.display = 'none';
+            document.querySelector('.stats-grid').style.display = 'none';
+            document.querySelector('.charts-section').style.display = 'none';
+            document.querySelector('.ranking-section').style.display = 'none';
         }
 
         // Appliquer les filtres
@@ -2245,45 +2162,6 @@
 
             await loadPageData();
             showToast('Filtres réinitialisés', 'success');
-        }
-
-        // Exporter les résultats
-        function exportResults() {
-            if (!currentResults) {
-                showToast('Aucun résultat à exporter', 'warning');
-                return;
-            }
-
-            const { election, resultats, statistiques } = currentResults;
-
-            // Créer le contenu CSV
-            let csvContent = "Résultats de l'élection: " + (election.titre || 'Élection') + "\n\n";
-            csvContent += "Classement,Nom,Prénom,Votes,Pourcentage\n";
-
-            resultats.forEach((candidate, index) => {
-                csvContent += `${index + 1},${candidate.nom || ''},${candidate.prenom || ''},${candidate.details?.totalVotes || 0},${candidate.scoreFinal || 0}%\n`;
-            });
-
-            csvContent += "\nStatistiques:\n";
-            csvContent += `Total des votes,${statistiques.totalVotes || 0}\n`;
-            csvContent += `Électeurs inscrits,${statistiques.totalInscrits || 0}\n`;
-            csvContent += `Taux de participation,${statistiques.tauxParticipation || 0}%\n`;
-            csvContent += `Nombre de candidats,${resultats.length}\n`;
-
-            // Créer et télécharger le fichier
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-
-            link.setAttribute('href', url);
-            link.setAttribute('download', `resultats-${(election.titre || 'election').replace(/\s+/g, '-').toLowerCase()}.csv`);
-            link.style.visibility = 'hidden';
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showToast('Résultats exportés avec succès', 'success');
         }
 
         // Exposer les fonctions globales pour cette page
