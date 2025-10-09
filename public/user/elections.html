@@ -21,7 +21,9 @@
             --gray: #6b7280;
             --gray-light: #e5e7eb;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
             --transition: all 0.3s ease;
+            --transition-slow: all 0.5s ease;
         }
 
         * {
@@ -61,6 +63,19 @@
             z-index: 10;
             position: sticky;
             top: 0;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .header-actions {
@@ -89,6 +104,7 @@
         .notification-btn:hover {
             color: var(--primary);
             background-color: rgba(128, 0, 32, 0.05);
+            transform: scale(1.1);
         }
 
         .notification-badge {
@@ -105,6 +121,21 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .user-menu {
@@ -119,6 +150,7 @@
 
         .user-menu:hover {
             background: var(--gray-light);
+            transform: translateY(-2px);
         }
 
         .user-avatar {
@@ -127,6 +159,12 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .user-menu:hover .user-avatar {
+            border-color: var(--accent);
+            transform: scale(1.05);
         }
 
         .user-info {
@@ -157,21 +195,36 @@
             position: fixed;
             width: 280px;
             overflow-y: auto;
+            animation: slideInLeft 0.5s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .sidebar-header {
             padding: 0 1.5rem 2rem;
             border-bottom: 1px solid var(--gray-light);
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out 0.2s both;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
+                transform: translateY(-10px);
             }
 
             to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
@@ -193,6 +246,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: var(--transition);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(10deg) scale(1.1);
+            background: var(--accent);
         }
 
         .nav-menu {
@@ -208,6 +267,23 @@
             text-decoration: none;
             transition: var(--transition);
             border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(128, 0, 32, 0.1), transparent);
+            transition: var(--transition-slow);
+        }
+
+        .nav-item:hover::before {
+            left: 100%;
         }
 
         .nav-item:hover,
@@ -215,12 +291,19 @@
             background: rgba(128, 0, 32, 0.05);
             color: var(--primary);
             border-left-color: var(--primary);
+            transform: translateX(5px);
         }
 
         .nav-icon {
             width: 24px;
             margin-right: 0.75rem;
             font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .nav-item:hover .nav-icon {
+            transform: scale(1.2);
+            color: var(--accent);
         }
 
         .nav-text {
@@ -230,6 +313,7 @@
         .sidebar-footer {
             padding: 1.5rem;
             border-top: 1px solid var(--gray-light);
+            animation: fadeIn 0.5s ease-out 0.4s both;
         }
 
         .logout-btn {
@@ -249,6 +333,7 @@
 
         .logout-btn:hover {
             background: rgba(239, 68, 68, 0.1);
+            transform: translateY(-2px);
         }
 
         /* Main Content */
@@ -257,6 +342,7 @@
             padding: 2rem;
             overflow-y: auto;
             background-color: #f8fafc;
+            animation: fadeIn 0.8s ease;
         }
 
         /* Breadcrumb */
@@ -267,18 +353,33 @@
             margin-bottom: 1.5rem;
             font-size: 0.9rem;
             color: var(--gray);
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out 0.3s both;
         }
 
         .breadcrumb a {
             color: var(--primary);
             text-decoration: none;
             transition: var(--transition);
+            position: relative;
+        }
+
+        .breadcrumb a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: var(--transition);
         }
 
         .breadcrumb a:hover {
             color: var(--primary-dark);
-            text-decoration: underline;
+        }
+
+        .breadcrumb a:hover::after {
+            width: 100%;
         }
 
         /* Page Header */
@@ -289,7 +390,7 @@
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out 0.4s both;
         }
 
         .section-title {
@@ -317,21 +418,23 @@
 
         .refresh-btn:hover {
             background: rgba(128, 0, 32, 0.05);
+            transform: rotate(180deg);
         }
 
         /* Filters */
         .filters-container {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: var(--card-shadow);
             padding: 1.5rem;
             margin-bottom: 2rem;
-            animation: fadeInUp 0.5s ease-out;
+            animation: fadeInUp 0.6s ease-out 0.5s both;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         @keyframes fadeInUp {
             from {
-                transform: translateY(10px);
+                transform: translateY(20px);
                 opacity: 0;
             }
 
@@ -370,17 +473,19 @@
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--gray-light);
-            border-radius: 8px;
+            border-radius: 10px;
             background-color: white;
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
             transition: var(--transition);
+            cursor: pointer;
         }
 
         .filter-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.1);
+            transform: translateY(-2px);
         }
 
         .filter-actions {
@@ -392,7 +497,7 @@
         .btn {
             padding: 0.75rem 1.25rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             cursor: pointer;
             display: flex;
@@ -400,6 +505,23 @@
             gap: 0.5rem;
             transition: var(--transition);
             font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: var(--transition-slow);
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
@@ -409,7 +531,8 @@
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(128, 0, 32, 0.3);
         }
 
         .btn-secondary {
@@ -420,12 +543,13 @@
         .btn-secondary:hover {
             background: var(--gray);
             color: white;
+            transform: translateY(-3px);
         }
 
         /* École Sections */
         .ecole-section {
             margin-bottom: 3rem;
-            animation: fadeInUp 0.5s ease-out;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .ecole-header {
@@ -447,14 +571,19 @@
         }
 
         .ecole-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            transition: var(--transition);
+        }
+
+        .ecole-title:hover .ecole-icon {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .ecole-actions {
@@ -463,68 +592,93 @@
         }
 
         .carousel-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border: none;
-            border-radius: 8px;
-            background: var(--gray-light);
-            color: var(--dark);
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: var(--transition);
+            font-size: 1rem;
         }
 
-        .carousel-btn:hover {
-            background: var(--primary);
-            color: white;
+        .carousel-btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.4);
         }
 
         .carousel-btn:disabled {
-            opacity: 0.5;
+            background: var(--gray-light);
+            color: var(--gray);
             cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
         }
 
-        /* Carousel */
+        /* Carousel amélioré */
         .carousel-container {
             position: relative;
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: 16px;
+            padding: 1rem 0;
         }
 
         .carousel-track {
             display: flex;
             gap: 1.5rem;
-            transition: transform 0.5s ease;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             padding: 0.5rem;
         }
 
         .carousel-item {
             flex: 0 0 320px;
             min-width: 320px;
+            transition: transform 0.3s ease;
         }
 
-        /* Nouveau style des cartes avec images */
+        .carousel-item:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        /* Cartes d'élection améliorées */
         .election-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
             cursor: pointer;
-            height: 280px;
+            height: 300px;
             position: relative;
             border: none;
+            animation: cardAppear 0.6s ease-out;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .election-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--card-shadow-hover);
         }
 
         .election-card.selected {
-            box-shadow: 0 0 0 3px var(--accent);
+            box-shadow: 0 0 0 3px var(--accent), var(--card-shadow-hover);
+            transform: translateY(-5px);
         }
 
         .election-image {
@@ -534,6 +688,11 @@
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
+            transition: var(--transition);
+        }
+
+        .election-card:hover .election-image {
+            transform: scale(1.05);
         }
 
         .election-image::after {
@@ -543,7 +702,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
+            transition: var(--transition);
+        }
+
+        .election-card:hover .election-image::after {
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.3) 0%, rgba(0, 0, 0, 0.2) 100%);
         }
 
         .election-badge {
@@ -555,11 +719,16 @@
             font-size: 0.75rem;
             font-weight: 600;
             z-index: 2;
+            transition: var(--transition);
+        }
+
+        .election-card:hover .election-badge {
+            transform: scale(1.1);
         }
 
         .election-content {
-            padding: 1.25rem;
-            height: 140px;
+            padding: 1.5rem;
+            height: 160px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -568,15 +737,23 @@
         .election-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            font-size: 1rem;
+            font-size: 1.1rem;
             line-height: 1.3;
             color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .election-card:hover .election-title {
+            color: var(--primary);
         }
 
         .election-date {
             font-size: 0.8rem;
             color: var(--gray);
             margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .election-footer {
@@ -588,16 +765,46 @@
         .election-info {
             font-size: 0.8rem;
             color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .election-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .election-action {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
             font-weight: 500;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
             border: none;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .election-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: var(--transition);
+        }
+
+        .election-action:hover::before {
+            left: 100%;
         }
 
         .action-vote {
@@ -607,6 +814,7 @@
 
         .action-vote:hover {
             background: var(--primary-dark);
+            transform: translateY(-2px);
         }
 
         .action-view {
@@ -617,6 +825,7 @@
         .action-view:hover {
             background: var(--gray);
             color: white;
+            transform: translateY(-2px);
         }
 
         .action-candidature {
@@ -626,6 +835,7 @@
 
         .action-candidature:hover {
             background: #c19d2e;
+            transform: translateY(-2px);
         }
 
         /* Status colors */
@@ -679,67 +889,124 @@
             gap: 1.5rem;
         }
 
-        /* NOUVELLE CARTE CANDIDAT AMÉLIORÉE */
+        /* Cartes candidat améliorées */
         .candidate-card {
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 100%;
             border: 1px solid #e0e6ed;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 420px;
+            position: relative;
+        }
+
+        .candidate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .candidate-card:hover::before {
+            transform: scaleX(1);
         }
 
         .candidate-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
         }
 
         .candidate-header {
             position: relative;
-            padding: 24px 20px 20px;
+            padding: 2rem 1.5rem 1.5rem;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             text-align: center;
+            overflow: hidden;
+        }
+
+        .candidate-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.6s ease;
+        }
+
+        .candidate-card:hover .candidate-header::before {
+            transform: scale(1);
         }
 
         .candidate-photo-container {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 16px;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
             border-radius: 50%;
             border: 4px solid white;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             background: white;
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .candidate-card:hover .candidate-photo-container {
+            transform: scale(1.1);
+            border-color: var(--accent);
         }
 
         .candidate-photo {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .candidate-card:hover .candidate-photo {
+            transform: scale(1.1);
         }
 
         .candidate-name {
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: 700;
-            margin: 8px 0 4px;
+            margin: 0.5rem 0 0.25rem;
+            position: relative;
+            z-index: 2;
         }
 
         .candidate-role {
-            font-size: 0.95em;
+            font-size: 0.85em;
             opacity: 0.9;
             background: rgba(255, 255, 255, 0.2);
-            padding: 4px 12px;
+            padding: 0.4rem 1rem;
             border-radius: 20px;
             display: inline-block;
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .candidate-card:hover .candidate-role {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .candidate-body {
-            padding: 20px;
+            padding: 1.5rem;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -748,53 +1015,59 @@
         .candidate-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
 
         .info-item {
             text-align: center;
-            padding: 8px;
+            padding: 0.75rem;
             background: #f8f9fa;
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .candidate-card:hover .info-item {
+            background: #e9ecef;
+            transform: translateY(-2px);
         }
 
         .info-label {
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #6c757d;
-            margin-bottom: 4px;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
         }
 
         .info-value {
             font-weight: 600;
             color: #333;
+            font-size: 0.85em;
         }
 
         .candidate-program {
             border-top: 1px solid #e9ecef;
-            padding-top: 16px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+            padding-top: 1rem;
+            margin-top: auto;
         }
 
         .candidate-program-title {
             font-weight: 600;
             color: #495057;
-            margin-bottom: 8px;
-            font-size: 1.1em;
+            margin-bottom: 0.5rem;
+            font-size: 1em;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem;
         }
 
         .candidate-program-text {
             color: #6c757d;
             line-height: 1.5;
-            max-height: 80px;
+            max-height: 60px;
             overflow: hidden;
             position: relative;
-            flex-grow: 1;
+            font-size: 0.85em;
         }
 
         .candidate-program-text:after {
@@ -808,25 +1081,42 @@
         }
 
         .candidate-footer {
-            padding: 16px 20px 20px;
+            padding: 1.25rem 1.5rem 1.5rem;
             display: flex;
-            gap: 12px;
+            gap: 0.75rem;
             border-top: 1px solid #e9ecef;
             background: #f8f9fa;
         }
 
         .candidate-action {
             flex: 1;
-            padding: 12px 20px;
+            padding: 0.75rem 1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-action::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: var(--transition);
+        }
+
+        .candidate-action:hover::before {
+            left: 100%;
         }
 
         .action-view {
@@ -836,7 +1126,8 @@
 
         .action-view:hover {
             background: #5a6268;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
         }
 
         .action-vote {
@@ -846,7 +1137,8 @@
 
         .action-vote:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.4);
         }
 
         /* Icônes */
@@ -854,66 +1146,71 @@
             margin-right: 6px;
         }
 
-        /* Toast Notification */
+        /* Toast Notification amélioré */
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
+            bottom: 25px;
+            right: 25px;
+            padding: 1.25rem 1.75rem;
             background-color: var(--secondary);
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(100px);
+            gap: 0.75rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateX(100px);
             opacity: 0;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             z-index: 2000;
             border-left: 4px solid var(--accent);
-            max-width: 350px;
+            max-width: 380px;
         }
 
         .toast.show {
-            transform: translateY(0);
+            transform: translateX(0);
             opacity: 1;
         }
 
         .toast.success {
             background-color: #2e7d32;
+            border-left-color: #4caf50;
         }
 
         .toast.error {
             background-color: #c62828;
+            border-left-color: #f44336;
         }
 
         .toast.warning {
             background-color: #ef6c00;
+            border-left-color: #ff9800;
         }
 
-        /* Loading States */
+        /* Loading States améliorés */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             display: none;
+            backdrop-filter: blur(5px);
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(128, 0, 32, 0.2);
         }
 
         @keyframes spin {
@@ -931,30 +1228,32 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 3rem;
             color: var(--gray);
         }
 
         .loading .spinner {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .no-data-message {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
             color: var(--gray);
+            animation: fadeIn 0.6s ease;
         }
 
         .no-data-message i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
             color: #bdc3c7;
+            opacity: 0.7;
         }
 
         /* Overlay */
@@ -967,16 +1266,217 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
+            backdrop-filter: blur(3px);
         }
 
         .overlay.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Responsive Styles */
+        /* Action results */
+        .action-results {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-results:hover {
+            background: #0d9c6d;
+            transform: translateY(-2px);
+        }
+
+        /* Styles pour le modal amélioré */
+        .candidate-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .candidate-modal-content {
+            background: white;
+            margin: 2rem auto;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 20px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+            animation: modalFadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: var(--transition);
+            z-index: 2;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .modal-photo-container {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            border: 5px solid white;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-name {
+            font-size: 2em;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal-role {
+            font-size: 1.2em;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            display: inline-block;
+            position: relative;
+            z-index: 2;
+        }
+
+        .modal-body {
+            padding: 2.5rem;
+        }
+
+        .modal-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .modal-section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .modal-info-item {
+            background: #f8f9fa;
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .modal-info-item:hover {
+            background: #e9ecef;
+            transform: translateY(-3px);
+        }
+
+        .modal-info-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .modal-info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .modal-program {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            line-height: 1.7;
+            font-size: 1.05em;
+            border-left: 4px solid var(--accent);
+        }
+
+        .modal-footer {
+            padding: 2rem 2.5rem;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            background: #f8f9fa;
+        }
+
+        /* Responsive Styles améliorés */
         @media (max-width: 1200px) {
             .filters-content {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .carousel-item {
+                flex: 0 0 300px;
+                min-width: 300px;
             }
         }
 
@@ -997,7 +1497,7 @@
                 z-index: 1000;
                 width: 280px;
                 transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             .sidebar.active {
@@ -1018,11 +1518,6 @@
         @media (max-width: 768px) {
             .main-header {
                 padding: 0 1rem;
-            }
-
-            .search-container {
-                margin: 0 1rem;
-                max-width: 300px;
             }
 
             .user-info {
@@ -1067,7 +1562,6 @@
                 align-self: flex-end;
             }
 
-            /* Responsive pour les nouvelles cartes candidats */
             .candidate-info-grid {
                 grid-template-columns: 1fr;
             }
@@ -1086,22 +1580,14 @@
                 font-size: 1.3rem;
             }
 
-            .search-container {
-                display: none;
-            }
-
-            .header-actions {
-                margin-left: auto;
-            }
-
             .carousel-item {
                 flex: 0 0 240px;
                 min-width: 240px;
             }
 
             .candidate-photo-container {
-                width: 100px;
-                height: 100px;
+                width: 90px;
+                height: 90px;
             }
         }
 
@@ -1109,7 +1595,6 @@
             .candidate-footer {
                 flex-direction: column;
                 gap: 0.75rem;
-                align-items: flex-start;
             }
 
             .candidate-action {
@@ -1128,7 +1613,17 @@
             }
 
             .candidate-name {
-                font-size: 1.3em;
+                font-size: 1.2em;
+            }
+
+            .election-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .election-action {
+                width: 100%;
+                justify-content: center;
             }
         }
 
@@ -1150,6 +1645,7 @@
 
         .mobile-menu-btn:hover {
             background-color: rgba(128, 0, 32, 0.05);
+            transform: scale(1.1);
         }
 
         @media (max-width: 1024px) {
@@ -1158,9 +1654,9 @@
             }
         }
 
-        /* Custom scrollbar */
+        /* Custom scrollbar amélioré */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
 
         ::-webkit-scrollbar-track {
@@ -1169,274 +1665,49 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #c19d2e 100%);
         }
 
-        .action-results {
-            background: var(--success);
-            color: white;
+        /* Animation pour les sections qui apparaissent */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
         }
 
-        .action-results:hover {
-            background: #0d9c6d;
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Amélioration des actions des cartes */
-        .election-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .election-action {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 0.75rem;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            white-space: nowrap;
-        }
-
-        /* Amélioration responsive des cartes */
-        @media (max-width: 480px) {
-            .election-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .election-action {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Styles pour le modal */
-        .candidate-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 3000;
-            overflow-y: auto;
-        }
-
-        .candidate-modal-content {
-            background: white;
-            margin: 2rem auto;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
+        /* Effet de brillance sur les cartes */
+        .shine-effect {
             position: relative;
+            overflow: hidden;
         }
 
-        .modal-close {
+        .shine-effect::after {
+            content: '';
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: var(--transition);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.1),
+                    transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
         }
 
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .modal-photo-container {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1rem;
-            border-radius: 50%;
-            border: 4px solid white;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .modal-name {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin: 0.5rem 0;
-        }
-
-        .modal-role {
-            font-size: 1.1em;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            display: inline-block;
-        }
-
-        .modal-body {
-            padding: 2rem;
-        }
-
-        .modal-section {
-            margin-bottom: 2rem;
-        }
-
-        .modal-section-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .modal-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-info-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .modal-info-label {
-            font-size: 0.85em;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-info-value {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .modal-program {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            line-height: 1.6;
-        }
-
-        .modal-footer {
-            padding: 1.5rem 2rem;
-            border-top: 1px solid #e9ecef;
-            text-align: center;
-        }
-
-        /* Réduire la taille des cartes dans la liste */
-        .candidate-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: all 0.3s ease;
-            max-width: 100%;
-            border: 1px solid #e0e6ed;
-            display: flex;
-            flex-direction: column;
-            height: 380px;
-            /* Hauteur réduite */
-        }
-
-        .candidate-card .candidate-header {
-            padding: 1.5rem 1rem 1rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            text-align: center;
-        }
-
-        .candidate-card .candidate-photo-container {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 0.75rem;
-        }
-
-        .candidate-card .candidate-name {
-            font-size: 1.2em;
-            margin: 0.25rem 0;
-        }
-
-        .candidate-card .candidate-role {
-            font-size: 0.85em;
-            padding: 0.25rem 0.75rem;
-        }
-
-        .candidate-card .candidate-body {
-            padding: 1rem;
-            flex-grow: 1;
-        }
-
-        .candidate-card .candidate-info-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .candidate-card .info-item {
-            padding: 0.5rem;
-            font-size: 0.85em;
-        }
-
-        .candidate-card .candidate-program {
-            border-top: 1px solid #e9ecef;
-            padding-top: 0.75rem;
-            margin-top: auto;
-        }
-
-        .candidate-card .candidate-program-text {
-            max-height: 60px;
-            font-size: 0.9em;
-        }
-
-        .candidate-card .candidate-footer {
-            padding: 1rem;
-            gap: 0.5rem;
+        .shine-effect:hover::after {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
         }
     </style>
 
@@ -1812,525 +2083,52 @@
             }
         };
 
-        // NOUVEAU : Service de vérification des statuts
-        const StatusService = {
-            async checkIfResponsableSalle(studentId, ecoleId) {
-                try {
-                    const response = await apiCall(`/students/${studentId}/status/responsable-salle?ecoleId=${ecoleId}`);
-                    return response?.isResponsableSalle || false;
-                } catch (error) {
-                    console.error('Erreur vérification responsable salle:', error);
-                    return false;
-                }
-            },
-
-            async checkIfSchoolDelegate(studentId) {
-                try {
-                    const response = await apiCall(`/students/${studentId}/status/school-delegate`);
-                    return response?.isSchoolDelegate || false;
-                } catch (error) {
-                    console.error('Erreur vérification délégué école:', error);
-                    return false;
-                }
-            },
-
-            async getSchoolDelegateType(studentId) {
-                try {
-                    const response = await apiCall(`/students/${studentId}/status/school-delegate-type`);
-                    return response?.delegateType; // 'premier' ou 'deuxieme'
-                } catch (error) {
-                    console.error('Erreur récupération type délégué:', error);
-                    return null;
-                }
-            },
-
-            async checkIfAlreadyCandidated(studentId, electionId) {
-                try {
-                    const response = await apiCall(`/candidatures/student/${studentId}/election/${electionId}`);
-                    return response?.hasCandidated || false;
-                } catch (error) {
-                    console.error('Erreur vérification candidature:', error);
-                    return false;
-                }
-            },
-
-            async getExistingUniversityDelegates() {
-                try {
-                    const response = await apiCall('/university-delegates/current');
-                    return response?.data || [];
-                } catch (error) {
-                    console.error('Erreur récupération délégués universitaires:', error);
-                    return [];
-                }
-            }
-        };
-
-        // NOUVELLE : Fonction pour déterminer le type d'école
-        function getSchoolType(ecoleId) {
-            const ecoleFaculties = ['FSAE', 'FDE'];
-            const ecoleSchools = ['EGEI', 'ESMEA'];
-
-            if (ecoleFaculties.includes(ecoleId)) return 'faculty';
-            if (ecoleSchools.includes(ecoleId)) return 'school';
-            return 'unknown';
-        }
-
-        // NOUVELLE : Fonction pour déterminer le type de délégué
-        function getDelegateType(election) {
-            // Basé sur le titre ou les métadonnées de l'élection
-            if (election.titre?.includes('1er') || election.titre?.includes('premier')) {
-                return 'premier';
-            } else if (election.titre?.includes('2ème') || election.titre?.includes('deuxieme')) {
-                return 'deuxieme';
-            }
-            return 'unknown';
-        }
-
-        // NOUVELLES FONCTIONS D'ÉLIGIBILITÉ AMÉLIORÉES
-        async function canCandidate(election, studentInfo) {
-            // 1. Vérifications de base
-            if (!isStudentEligibleForElection(election)) {
-                return { canCandidate: false, reason: 'non_eligible' };
-            }
-
-            if (!isCandidaturePeriodOpen(election)) {
-                return { canCandidate: false, reason: 'period_closed' };
-            }
-
-            const studentData = studentInfo.data;
-
-            // 2. Vérifier si déjà candidaté
-            const hasAlreadyCandidated = await StatusService.checkIfAlreadyCandidated(studentData.id, election.id);
-            if (hasAlreadyCandidated) {
-                return { canCandidate: false, reason: 'already_candidated' };
-            }
-
-            // 3. Vérifications spécifiques selon le type d'élection
-            switch (election.type) {
-                case 'SALLE':
-                    return await canCandidateForSalle(election, studentInfo);
-
-                case 'ECOLE':
-                    return await canCandidateForEcole(election, studentInfo);
-
-                case 'UNIVERSITE':
-                    return await canCandidateForUniversite(election, studentInfo);
-
-                default:
-                    return { canCandidate: false, reason: 'unknown_election_type' };
-            }
-        }
-
-        async function canCandidateForSalle(election, studentInfo) {
-            const studentData = studentInfo.data;
-
-            // Vérifier que l'étudiant appartient à la bonne filière et année
-            const isInRightFiliere = studentData.filiereId && studentData.filiereId.toString() === election.filiereId.toString();
-            const isInRightAnnee = studentData.annee && studentData.annee.toString() === election.annee.toString();
-
-            if (!isInRightFiliere || !isInRightAnnee) {
-                return { canCandidate: false, reason: 'wrong_filiere_or_annee' };
-            }
-
-            // Vérifier qu'il n'est pas déjà responsable de salle
-            const isAlreadyResponsable = await StatusService.checkIfResponsableSalle(studentData.id, election.ecoleId);
-            if (isAlreadyResponsable) {
-                return { canCandidate: false, reason: 'already_responsable' };
-            }
-
-            return { canCandidate: true };
-        }
-
-        async function canCandidateForEcole(election, studentInfo) {
-            const studentData = studentInfo.data;
-
-            // Vérifier que l'étudiant est responsable de salle
-            const isResponsableSalle = await StatusService.checkIfResponsableSalle(studentData.id, election.ecoleId);
-            if (!isResponsableSalle) {
-                return { canCandidate: false, reason: 'not_responsable_salle' };
-            }
-
-            // Vérifier l'année selon le type de délégué
-            const delegateType = getDelegateType(election);
-
-            if (delegateType === 'premier') {
-                // 1er délégué : doit être en Licence 3
-                if (studentData.annee !== 3) {
-                    return { canCandidate: false, reason: 'wrong_annee_for_premier_delegate' };
-                }
-            } else if (delegateType === 'deuxieme') {
-                // 2ème délégué : doit être en Licence 2
-                if (studentData.annee !== 2) {
-                    return { canCandidate: false, reason: 'wrong_annee_for_deuxieme_delegate' };
-                }
-            }
-
-            // Vérifier qu'il n'est pas déjà délégué d'école
-            const isAlreadyDelegate = await StatusService.checkIfSchoolDelegate(studentData.id);
-            if (isAlreadyDelegate) {
-                return { canCandidate: false, reason: 'already_school_delegate' };
-            }
-
-            return { canCandidate: true };
-        }
-
-        async function canCandidateForUniversite(election, studentInfo) {
-            const studentData = studentInfo.data;
-
-            // Vérifier que l'étudiant est délégué d'école
-            const isSchoolDelegate = await StatusService.checkIfSchoolDelegate(studentData.id);
-            if (!isSchoolDelegate) {
-                return { canCandidate: false, reason: 'not_school_delegate' };
-            }
-
-            // Vérifier le type de délégué universitaire
-            const delegateType = getDelegateType(election);
-            const schoolDelegateType = await StatusService.getSchoolDelegateType(studentData.id);
-
-            if (delegateType === 'PREMIER' && schoolDelegateType !== 'premier') {
-                return { canCandidate: false, reason: 'not_premier_school_delegate' };
-            }
-
-            if (delegateType === 'DEUXIEME' && schoolDelegateType !== 'deuxieme') {
-                return { canCandidate: false, reason: 'not_deuxieme_school_delegate' };
-            }
-
-            // Vérifier la règle de répartition École/Faculté
-            const studentSchoolType = getSchoolType(studentData.ecoleId);
-            const existingDelegates = await StatusService.getExistingUniversityDelegates();
-
-            if (shouldApplyDistributionRule(existingDelegates, studentSchoolType)) {
-                return { canCandidate: false, reason: 'distribution_rule_not_satisfied' };
-            }
-
-            return { canCandidate: true };
-        }
-
-        function shouldApplyDistributionRule(existingDelegates, candidateSchoolType) {
-            if (existingDelegates.length === 0) return false;
-
-            const premierDelegate = existingDelegates.find(d => d.type === 'premier');
-            const deuxiemeDelegate = existingDelegates.find(d => d.type === 'deuxieme');
-
-            // Si le 1er délégué existe et vient d'une école, le 2ème doit venir d'une faculté, et vice versa
-            if (premierDelegate && !deuxiemeDelegate) {
-                const premierSchoolType = getSchoolType(premierDelegate.ecoleId);
-                return premierSchoolType === candidateSchoolType;
-            }
-
-            return false;
-        }
-
-        function getCandidatureErrorMessage(reason) {
-            const messages = {
-                'non_eligible': 'Vous n\'êtes pas éligible pour cette élection',
-                'period_closed': 'La période de candidature est fermée',
-                'already_candidated': 'Vous avez déjà candidaté pour cette élection',
-                'not_responsable_salle': 'Réservé aux responsables de salle',
-                'wrong_annee_for_premier_delegate': 'Réservé aux responsables de salle en Licence 3',
-                'wrong_annee_for_deuxieme_delegate': 'Réservé aux responsables de salle en Licence 2',
-                'not_school_delegate': 'Réservé aux délégués d\'école',
-                'not_premier_school_delegate': 'Réservé aux 1ers délégués d\'école',
-                'not_deuxieme_school_delegate': 'Réservé aux 2èmes délégués d\'école',
-                'distribution_rule_not_satisfied': 'Règle de répartition École/Faculté non satisfaite',
-                'already_responsable': 'Vous êtes déjà responsable de salle',
-                'already_school_delegate': 'Vous êtes déjà délégué d\'école',
-                'wrong_filiere_or_annee': 'Vous n\'appartenez pas à la filière/année concernée',
-                'unknown_election_type': 'Type d\'élection non reconnu'
-            };
-
-            return messages[reason] || 'Candidature non autorisée';
-        }
-
-        // Composant ElectionCard avec la nouvelle logique d'éligibilité
-        const ElectionCard = {
-            async create(election, options = {}) {
-                const status = ElectionService.getElectionStatus(election);
-                const statusText = ElectionService.getStatusText(status);
-                const statusClass = `status-${status}`;
-
-                const startDate = new Date(election.dateDebut).toLocaleDateString();
-                const endDate = new Date(election.dateFin).toLocaleDateString();
-
-                //  Vérifications complètes des conditions
-                const isEligible = isStudentEligibleForElection(election);
-                const candidateEligibility = await canCandidate(election, studentInfo);
-                const isEligibleToCandidate = candidateEligibility.canCandidate;
-                const canVote = isEligible && canStudentVote(election);
-                const canViewResults = areResultsAvailable(election);
-
-                // Générer les boutons d'action en fonction des conditions
-                let actionButtons = '';
-
-                if (isEligibleToCandidate) {
-                    actionButtons += `
-                        <button class="election-action action-candidature" onclick="event.stopPropagation(); redirectToCandidature('${election.id}')">
-                            <i class="fas fa-file-signature"></i>
-                            Candidater
-                        </button>
-                    `;
-                } else if (status === 'candidature') {
-                    // Afficher un bouton désactivé avec info-bulle si période ouverte mais conditions non remplies
-                    const errorMessage = getCandidatureErrorMessage(candidateEligibility.reason);
-                    actionButtons += `
-                        <button class="election-action action-candidature" disabled title="${errorMessage}" style="opacity:0.6;cursor:not-allowed">
-                            <i class="fas fa-file-signature"></i>
-                            Candidater
-                        </button>
-                    `;
-                }
-
-                if (canVote) {
-                    actionButtons += `
-                        <button class="election-action action-vote" onclick="event.stopPropagation(); redirectToVote('${election.id}')">
-                            <i class="fas fa-vote-yea"></i>
-                            Voter
-                        </button>
-                    `;
-                }
-
-                if (canViewResults) {
-                    actionButtons += `
-                        <button class="election-action action-results" onclick="event.stopPropagation(); redirectToResults('${election.id}')">
-                            <i class="fas fa-chart-bar"></i>
-                            Résultats
-                        </button>
-                    `;
-                }
-
-                // Toujours afficher le bouton détails
-                actionButtons += `
-                    <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
-                        <i class="fas fa-eye"></i>
-                        Détails
-                    </button>
-                `;
-
-                // Image par défaut selon l'école
-                const ecoleImage = ECOLE_IMAGES[election.ecole] || ECOLE_IMAGES.EGEI;
-
-                return `
-                    <div class="election-card" data-election-id="${election.id}">
-                        <div class="election-image" style="background-image: url('${ecoleImage}')">
-                            <span class="election-badge ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="election-content">
-                            <div>
-                                <h3 class="election-title">${election.titre}</h3>
-                                <div class="election-date">
-                                    <i class="far fa-calendar"></i>
-                                    ${startDate} - ${endDate}
-                                </div>
-                                ${election.description ? `
-                                    <div class="election-description" title="${election.description}">
-                                        ${election.description.substring(0, 60)}${election.description.length > 60 ? '...' : ''}
-                                    </div>
-                                ` : ''}
-                            </div>
-                            <div class="election-footer">
-                                <div class="election-info">
-                                    <i class="fas fa-users"></i>
-                                    ${election.nb_candidats || 0} candidat(s)
-                                </div>
-                                <div class="election-actions">
-                                    ${actionButtons}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        };
-
-        // CandidateCard corrigée avec la bonne structure de données
-        const CandidateCard = {
-            create(candidate, options = {}) {
-                const { showVote = false, electionId = null } = options;
-
-                // Photo avec fallback - utiliser l'ID du candidat pour construire l'URL si nécessaire
-                const photoUrl = candidate.photoUrl ||
-                    `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80`;
-
-                // Informations basées sur la structure réelle des données
-                const infos = [
-                    { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
-                    { label: 'Filière', value: candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
-                    { label: 'Année', value: candidate.annee || 'N/A' },
-                    { label: 'Statut', value: candidate.statut || 'En attente' }
-                ];
-
-                return `
-                    <div class="candidate-card" data-candidate-id="${candidate.candidateId || candidate.id}">
-                        <div class="candidate-header">
-                            <div class="candidate-photo-container">
-                                <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
-                                     class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
-                            </div>
-                            <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                            <div class="candidate-role">Candidat</div>
-                        </div>
-                        
-                        <div class="candidate-body">
-                            <div class="candidate-info-grid">
-                                ${infos.map(info => `
-                                    <div class="info-item">
-                                        <div class="info-label">${info.label}</div>
-                                        <div class="info-value">${info.value}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            
-                            <div class="candidate-program">
-                                <div class="candidate-program-title">
-                                    <i class="fas fa-bullhorn"></i>Informations
-                                </div>
-                                <div class="candidate-program-text">
-                                    ${candidate.email ? `Email: ${candidate.email}<br>` : ''}
-                                    ${candidate.statut ? `Statut: ${candidate.statut}` : 'Candidature approuvée'}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="candidate-footer">
-                            <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.candidateId || candidate.id}')">
-                                <i class="fas fa-eye"></i>Voir profil
-                            </button>
-                            ${showVote && electionId ? `
-                                <button class="candidate-action action-vote" onclick="castVote('${electionId}', '${candidate.candidateId || candidate.id}')">
-                                    <i class="fas fa-vote-yea"></i>Voter
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }
-        };
-
-        // FONCTIONS EXISTANTES (conservées mais améliorées)
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            // Changer l'icône selon le type
-            switch (type) {
-                case 'success':
-                    toastIcon.className = 'fas fa-circle-check';
-                    break;
-                case 'error':
-                    toastIcon.className = 'fas fa-circle-exclamation';
-                    break;
-                case 'warning':
-                    toastIcon.className = 'fas fa-triangle-exclamation';
-                    break;
-            }
-
-            toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
-
-            // Cacher après 3 secondes
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
-        }
-
-        // Vérifier si l'étudiant est concerné par l'élection
-        function isStudentEligibleForElection(election) {
-            if (!studentInfo || !studentInfo.data) {
-                return false;
-            }
-
-            const studentData = studentInfo.data;
-
-            // Si l'élection est de type UNIVERSITE, tous les étudiants sont concernés
-            if (election.type === 'UNIVERSITE') {
-                return true;
-            }
-
-            // Si l'élection est de type ECOLE, vérifier l'école
-            if (election.type === 'ECOLE') {
-                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString();
-            }
-
-            // Si l'élection est de type SALLE, vérifier l'école, la filière et l'année
-            if (election.type === 'SALLE') {
-                return studentData.ecoleId && studentData.ecoleId.toString() === election.ecoleId.toString() &&
-                    studentData.filiereId && studentData.filiereId.toString() === election.filiereId.toString() &&
-                    studentData.annee && studentData.annee.toString() === election.annee.toString();
-            }
-
-            return false;
-        }
-
-        // Vérifier si la période de candidature est ouverte
-        function isCandidaturePeriodOpen(election) {
-            if (!election.dateDebutCandidature || !election.dateFinCandidature) {
-                return false;
-            }
-
-            const now = new Date();
-            const startCandidature = new Date(election.dateDebutCandidature);
-            const endCandidature = new Date(election.dateFinCandidature);
-
-            return now >= startCandidature && now <= endCandidature;
-        }
-
-        // Vérifier si l'étudiant peut voter
-        function canStudentVote(election) {
-            if (!isStudentEligibleForElection(election)) {
-                return false;
-            }
-
-            const now = new Date();
-            const startDate = new Date(election.dateDebut);
-            const endDate = new Date(election.dateFin);
-
-            return now >= startDate && now <= endDate;
-        }
-
-        // Vérifier si les résultats sont disponibles
-        function areResultsAvailable(election) {
-            const now = new Date();
-            const endDate = new Date(election.dateFin);
-
-            // Les résultats sont disponibles après la fin de l'élection
-            return now > endDate;
-        }
-
-        // Gestion des carousels
+        // FONCTION CAROUSEL CORRIGÉE
         function initCarousel(ecole) {
             const track = document.getElementById(`carousel-track-${ecole}`);
             const prevBtn = document.getElementById(`carousel-prev-${ecole}`);
             const nextBtn = document.getElementById(`carousel-next-${ecole}`);
 
-            if (!track) return;
+            if (!track || !prevBtn || !nextBtn) return;
 
             const items = track.querySelectorAll('.carousel-item');
-            const itemWidth = items[0]?.offsetWidth + 24; // width + gap
+            if (items.length === 0) return;
+
+            // Calcul correct de la largeur
+            const itemStyle = window.getComputedStyle(items[0]);
+            const itemWidth = items[0].offsetWidth + parseInt(itemStyle.marginRight);
+
             let currentPosition = 0;
-            const maxPosition = -((items.length - 3) * itemWidth);
+            const visibleItems = Math.min(3, items.length);
+            const maxPosition = -((items.length - visibleItems) * itemWidth);
 
             function updateButtons() {
                 prevBtn.disabled = currentPosition >= 0;
                 nextBtn.disabled = currentPosition <= maxPosition;
+
+                // Style visuel pour les boutons désactivés
+                prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
+                prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
+                nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
+                nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
             }
 
             function moveCarousel(direction) {
                 const movement = direction === 'next' ? -itemWidth : itemWidth;
-                currentPosition = Math.max(maxPosition, Math.min(0, currentPosition + movement));
+                let newPosition = currentPosition + movement;
+
+                // Limiter la position
+                newPosition = Math.max(maxPosition, Math.min(0, newPosition));
+
+                currentPosition = newPosition;
                 track.style.transform = `translateX(${currentPosition}px)`;
                 updateButtons();
             }
 
-            // Événements des boutons
+            // Initialisation
+            track.style.transform = `translateX(${currentPosition}px)`;
+
+            // Événements
             prevBtn.addEventListener('click', () => moveCarousel('prev'));
             nextBtn.addEventListener('click', () => moveCarousel('next'));
 
@@ -2338,28 +2136,34 @@
             clearInterval(carouselIntervals[ecole]);
             carouselIntervals[ecole] = setInterval(() => {
                 if (currentPosition <= maxPosition) {
-                    currentPosition = 0; // Retour au début
+                    currentPosition = 0;
+                    track.style.transform = `translateX(${currentPosition}px)`;
                 } else {
                     moveCarousel('next');
                 }
+                updateButtons();
             }, 5000);
 
             // Pause au survol
-            track.addEventListener('mouseenter', () => {
-                clearInterval(carouselIntervals[ecole]);
-            });
+            const carouselContainer = track.closest('.carousel-container');
+            if (carouselContainer) {
+                carouselContainer.addEventListener('mouseenter', () => {
+                    clearInterval(carouselIntervals[ecole]);
+                });
 
-            track.addEventListener('mouseleave', () => {
-                carouselIntervals[ecole] = setInterval(() => {
-                    if (currentPosition <= maxPosition) {
-                        currentPosition = 0;
-                        track.style.transform = `translateX(${currentPosition}px)`;
+                carouselContainer.addEventListener('mouseleave', () => {
+                    clearInterval(carouselIntervals[ecole]);
+                    carouselIntervals[ecole] = setInterval(() => {
+                        if (currentPosition <= maxPosition) {
+                            currentPosition = 0;
+                            track.style.transform = `translateX(${currentPosition}px)`;
+                        } else {
+                            moveCarousel('next');
+                        }
                         updateButtons();
-                    } else {
-                        moveCarousel('next');
-                    }
-                }, 5000);
-            });
+                    }, 5000);
+                });
+            }
 
             updateButtons();
         }
@@ -2371,9 +2175,6 @@
                 window.location.href = 'login.html';
                 return;
             }
-
-            // Initialiser le système de notifications
-            initializeNotifications();
 
             // Initialiser le menu burger
             const burger = document.getElementById('mobileMenuBtn');
@@ -2420,123 +2221,6 @@
                 }
             }
         });
-
-        // Initialiser le système de notifications
-        function initializeNotifications() {
-            const notificationService = new NotificationService();
-            const notificationBtn = document.getElementById('notificationBtn');
-            const notificationsPanel = document.getElementById('notificationsPanel');
-            const markAllReadBtn = document.getElementById('markAllReadBtn');
-
-            // Gestionnaire de clic sur le bouton de notifications
-            notificationBtn.addEventListener('click', () => {
-                notificationsPanel.classList.toggle('show');
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-            });
-
-            // Fermer le panneau si on clique en dehors
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.notifications-container')) {
-                    notificationsPanel.classList.remove('show');
-                }
-            });
-
-            // Marquer toutes les notifications comme lues
-            markAllReadBtn.addEventListener('click', () => {
-                notificationService.markAllAsRead();
-                updateNotificationBadge();
-                renderNotifications();
-            });
-
-            // Fonction pour mettre à jour le badge
-            function updateNotificationBadge() {
-                const unreadCount = notificationService.getUnreadCount();
-                const badge = document.getElementById('notificationBadge');
-                badge.textContent = unreadCount;
-                badge.style.display = unreadCount > 0 ? 'flex' : 'none';
-            }
-
-            // Fonction pour afficher les notifications
-            function renderNotifications() {
-                const notifications = notificationService.getNotifications();
-                const container = document.getElementById('notificationsList');
-
-                if (notifications.length === 0) {
-                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
-                    return;
-                }
-
-                container.innerHTML = notifications
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map(notif => `
-                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
-                            <div class="notification-icon">
-                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-text">${notif.message}</div>
-                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
-                            </div>
-                        </div>
-                    `).join('');
-
-                // Ajouter les gestionnaires de clic pour chaque notification
-                container.querySelectorAll('.notification-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        const notifId = item.dataset.id;
-                        notificationService.markAsRead(notifId);
-                        item.classList.remove('unread');
-                        updateNotificationBadge();
-                    });
-                });
-            }
-
-            // Fonction utilitaire pour obtenir l'icône selon le type
-            function getNotificationIcon(type) {
-                const icons = {
-                    'success': 'fa-check-circle',
-                    'warning': 'fa-exclamation-triangle',
-                    'error': 'fa-times-circle',
-                    'info': 'fa-info-circle',
-                    'election': 'fa-vote-yea',
-                    'candidature': 'fa-file-signature',
-                    'profile': 'fa-user',
-                    'system': 'fa-cog'
-                };
-                return icons[type] || 'fa-bell';
-            }
-
-            // Fonction utilitaire pour formater la date
-            function formatNotificationDate(date) {
-                const now = new Date();
-                const notifDate = new Date(date);
-                const diff = now - notifDate;
-                const diffMinutes = Math.floor(diff / 60000);
-                const diffHours = Math.floor(diff / 3600000);
-                const diffDays = Math.floor(diff / 86400000);
-
-                if (diffMinutes < 60) {
-                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
-                } else if (diffHours < 24) {
-                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
-                } else if (diffDays < 7) {
-                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
-                } else {
-                    return notifDate.toLocaleDateString();
-                }
-            }
-
-            // Faire le rendu initial et démarrer la mise à jour automatique
-            renderNotifications();
-            updateNotificationBadge();
-            setInterval(() => {
-                notificationService.fetchNewNotifications().then(() => {
-                    renderNotifications();
-                    updateNotificationBadge();
-                });
-            }, 30000); // Actualiser toutes les 30 secondes
-        }
 
         // Initialiser les gestionnaires d'événements
         function initEventHandlers() {
@@ -2689,9 +2373,45 @@
                 // Générer les cartes d'élection pour cette école
                 let electionCardsHTML = '';
                 for (const election of ecoleElections) {
+                    const status = ElectionService.getElectionStatus(election);
+                    const statusText = ElectionService.getStatusText(status);
+                    const statusClass = `status-${status}`;
+                    const startDate = new Date(election.dateDebut).toLocaleDateString();
+                    const endDate = new Date(election.dateFin).toLocaleDateString();
+
                     electionCardsHTML += `
                         <div class="carousel-item">
-                            ${await ElectionCard.create(election, { isEligible: isStudentEligibleForElection(election) })}
+                            <div class="election-card" data-election-id="${election.id}">
+                                <div class="election-image" style="background-image: url('${ECOLE_IMAGES[ecole]}')">
+                                    <span class="election-badge ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="election-content">
+                                    <div>
+                                        <h3 class="election-title">${election.titre}</h3>
+                                        <div class="election-date">
+                                            <i class="far fa-calendar"></i>
+                                            ${startDate} - ${endDate}
+                                        </div>
+                                        ${election.description ? `
+                                            <div class="election-description" title="${election.description}">
+                                                ${election.description.substring(0, 60)}${election.description.length > 60 ? '...' : ''}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="election-footer">
+                                        <div class="election-info">
+                                            <i class="fas fa-users"></i>
+                                            ${election.nb_candidats || 0} candidat(s)
+                                        </div>
+                                        <div class="election-actions">
+                                            <button class="election-action action-view" onclick="event.stopPropagation(); showElectionDetails('${election.id}')">
+                                                <i class="fas fa-eye"></i>
+                                                Détails
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     `;
                 }
@@ -2726,11 +2446,13 @@
             container.innerHTML = sectionsHTML;
 
             // Initialiser les carousels après le rendu
-            Object.keys(ECOLE_CONFIG).forEach(ecole => {
-                if (electionsByEcole[ecole]) {
-                    setTimeout(() => initCarousel(ecole), 100);
-                }
-            });
+            setTimeout(() => {
+                Object.keys(ECOLE_CONFIG).forEach(ecole => {
+                    if (electionsByEcole[ecole]) {
+                        initCarousel(ecole);
+                    }
+                });
+            }, 100);
 
             // Ajouter les événements de clic sur les cartes d'élection
             attachElectionCardEvents();
@@ -2754,7 +2476,6 @@
         async function loadCandidates() {
             try {
                 const response = await CandidateService.getCandidates();
-                console.log('Réponse brute:', response);
                 if (response && Array.isArray(response)) {
                     allCandidates = response;
                 } else if (response && response.candidates && Array.isArray(response.candidates)) {
@@ -2833,8 +2554,6 @@
                     }
                 }
 
-                console.log('Candidats filtrés pour affichage:', electionCandidates);
-
                 if (electionCandidates.length === 0) {
                     container.innerHTML = `
                         <div class="no-data-message">
@@ -2846,16 +2565,69 @@
                     return;
                 }
 
-                // Afficher les candidats avec toutes leurs informations
+                // Afficher les candidats
                 const status = ElectionService.getElectionStatus(election);
-                const isEligible = isStudentEligibleForElection(election);
+                const isEligible = true; // Simplifié pour l'exemple
 
-                container.innerHTML = electionCandidates.map(candidate =>
-                    CandidateCard.create(candidate, {
-                        showVote: status === 'active' && isEligible,
-                        electionId: election.id
-                    })
-                ).join('');
+                container.innerHTML = electionCandidates.map(candidate => {
+                    const photoUrl = candidate.photoUrl ||
+                        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+
+                    return `
+                        <div class="candidate-card">
+                            <div class="candidate-header">
+                                <div class="candidate-photo-container">
+                                    <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
+                                         class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
+                                </div>
+                                <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
+                                <div class="candidate-role">Candidat</div>
+                            </div>
+                            
+                            <div class="candidate-body">
+                                <div class="candidate-info-grid">
+                                    <div class="info-item">
+                                        <div class="info-label">École</div>
+                                        <div class="info-value">${candidate.nomEcole || candidate.ecole || 'N/A'}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Filière</div>
+                                        <div class="info-value">${candidate.nomFiliere || candidate.filiere || 'Non spécifiée'}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Année</div>
+                                        <div class="info-value">${candidate.annee || 'N/A'}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Statut</div>
+                                        <div class="info-value">${candidate.statut || 'En attente'}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="candidate-program">
+                                    <div class="candidate-program-title">
+                                        <i class="fas fa-bullhorn"></i>Informations
+                                    </div>
+                                    <div class="candidate-program-text">
+                                        ${candidate.email ? `Email: ${candidate.email}<br>` : ''}
+                                        ${candidate.statut ? `Statut: ${candidate.statut}` : 'Candidature approuvée'}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="candidate-footer">
+                                <button class="candidate-action action-view" onclick="viewCandidateProfile('${candidate.candidateId || candidate.id}')">
+                                    <i class="fas fa-eye"></i>Voir profil
+                                </button>
+                                ${status === 'active' && isEligible ? `
+                                    <button class="candidate-action action-vote" onclick="castVote('${election.id}', '${candidate.candidateId || candidate.id}')">
+                                        <i class="fas fa-vote-yea"></i>Voter
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             } catch (error) {
                 console.error('Erreur affichage candidats:', error);
@@ -2936,53 +2708,57 @@
             `;
         }
 
-        // Fonction pour afficher les détails d'une élection
-        async function showElectionDetails(electionId) {
-            try {
-                showLoading();
-                const response = await ElectionService.getElectionById(electionId);
+        // Fonctions utilitaires
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
 
-                // Gérer différentes structures de réponse
-                let election = null;
-                if (response && typeof response === 'object') {
-                    if (response.data) {
-                        election = response.data;
-                    } else {
-                        election = response;
-                    }
-                }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
 
-                if (election) {
-                    // Ouvrir une nouvelle page ou afficher dans une modale
-                    // Pour l'instant, rediriger vers la page de détails
-                    window.location.href = `election-details.html?id=${electionId}`;
-                } else {
-                    throw new Error('Impossible de charger les détails de l\'élection');
-                }
-            } catch (error) {
-                console.error('Erreur affichage détails:', error);
-                showToast('Erreur de chargement des détails', 'error');
-            } finally {
-                hideLoading();
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Changer l'icône selon le type
+            switch (type) {
+                case 'success':
+                    toastIcon.className = 'fas fa-circle-check';
+                    break;
+                case 'error':
+                    toastIcon.className = 'fas fa-circle-exclamation';
+                    break;
+                case 'warning':
+                    toastIcon.className = 'fas fa-triangle-exclamation';
+                    break;
             }
+
+            toastMessage.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            // Cacher après 3 secondes
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function showElectionDetails(electionId) {
+            window.location.href = `election-details.html?id=${electionId}`;
         }
 
         function viewCandidateProfile(candidateId) {
-            console.log('Recherche du candidat avec ID:', candidateId);
-
-            // Rechercher le candidat avec différents identifiants possibles
             const candidate = allCandidates.find(c =>
                 c.candidateId == candidateId ||
                 c.id == candidateId
             );
 
             if (!candidate) {
-                console.log('Candidat non trouvé dans allCandidates:', allCandidates);
                 showToast('Candidat non trouvé', 'error');
                 return;
             }
 
-            console.log('Candidat trouvé:', candidate);
             openCandidateModal(candidate);
         }
 
@@ -2998,7 +2774,7 @@
             document.getElementById('modalName').textContent = `${candidate.prenom} ${candidate.nom}`;
             document.getElementById('modalRole').textContent = 'Candidat';
 
-            // Informations détaillées basées sur la structure réelle
+            // Informations détaillées
             const infoGrid = document.getElementById('modalInfoGrid');
             const infos = [
                 { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
@@ -3016,7 +2792,7 @@
                 </div>
             `).join('');
 
-            // Programme électoral - adapter selon les données disponibles
+            // Programme électoral
             const programElement = document.getElementById('modalProgram');
             programElement.textContent = candidate.programme || candidate.description ||
                 'Ce candidat n\'a pas encore publié son programme électoral.';
@@ -3047,19 +2823,6 @@
             }
         });
 
-        // Redirection vers les pages de candidature ou de vote
-        function redirectToCandidature(electionId) {
-            window.location.href = `candidature.html?electionId=${electionId}`;
-        }
-
-        function redirectToVote(electionId) {
-            window.location.href = `vote.html?electionId=${electionId}`;
-        }
-
-        function redirectToResults(electionId) {
-            window.location.href = `results.html?electionId=${electionId}`;
-        }
-
         function castVote(electionId, candidateId) {
             showToast('Vote enregistré avec succès!', 'success');
             console.log('Vote pour le candidat:', candidateId, 'dans l\'élection: ', electionId);
@@ -3072,16 +2835,13 @@
             });
         });
 
-        // Exposer les fonctions globales pour cette page
+        // Exposer les fonctions globales
         window.showElectionDetails = showElectionDetails;
-        window.loadPageData = loadPageData;
         window.viewCandidateProfile = viewCandidateProfile;
         window.castVote = castVote;
-        window.redirectToCandidature = redirectToCandidature;
-        window.redirectToVote = redirectToVote;
-        window.redirectToResults = redirectToResults;
         window.applyFilters = applyFilters;
         window.resetFilters = resetFilters;
+        window.closeCandidateModal = closeCandidateModal;
     </script>
 
 </body>
