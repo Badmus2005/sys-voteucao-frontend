@@ -1423,10 +1423,13 @@
 
             <!-- No Results Message -->
             <div class="no-data-message" id="noResultsMessage" style="display: none">
-                <i class="fas fa-inbox"></i>
-                <h3>Aucun résultat disponible</h3>
-                <p>Aucun résultat n'est disponible pour le moment. Les résultats seront affichés ici une fois les
-                    élections terminées.</p>
+                <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
+                <h3>Résultats en attente de publication</h3>
+                <p>Les résultats de cette élection ne sont pas encore publiés. Ils seront disponibles après validation
+                    par l'administration.</p>
+                <p style="font-size: 0.9rem; color: var(--gray); margin-top: 1rem;">
+                    <i class="fas fa-info-circle"></i> Veuillez revenir plus tard ou consultez vos notifications.
+                </p>
             </div>
         </main>
     </div>
@@ -1854,27 +1857,11 @@
 
                 // Gérer spécifiquement l'erreur 403 (résultats non publiés)
                 if (error.message.includes('non disponibles') || error.message.includes('non encore disponibles')) {
-                    const message = document.getElementById('noResultsMessage');
-                    message.innerHTML = `
-                        <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
-                        <h3>Résultats en attente de publication</h3>
-                        <p>Les résultats de cette élection ne sont pas encore publiés. Ils seront disponibles après validation par l'administration.</p>
-                        <p style="font-size: 0.9rem; color: var(--gray); margin-top: 1rem;">
-                            <i class="fas fa-info-circle"></i> Veuillez revenir plus tard ou consultez vos notifications.
-                        </p>
-                    `;
-                    message.style.display = 'block';
-                    showToast('Les résultats seront publiés prochainement', 'warning');
+                    showResultsPending();
                 } else {
                     showToast('Erreur de chargement des résultats', 'error');
                     showNoResults();
                 }
-
-                // Masquer les sections de résultats
-                document.getElementById('winnerBanner').style.display = 'none';
-                document.querySelector('.stats-grid').style.display = 'none';
-                document.querySelector('.charts-section').style.display = 'none';
-                document.querySelector('.ranking-section').style.display = 'none';
             } finally {
                 hideLoading();
             }
@@ -1893,6 +1880,7 @@
             document.querySelector('.stats-grid').style.display = 'grid';
             document.querySelector('.charts-section').style.display = 'block';
             document.querySelector('.ranking-section').style.display = 'block';
+            document.getElementById('noResultsMessage').style.display = 'none';
 
             // Mettre à jour les informations de l'élection
             document.getElementById('electionTitle').textContent = `Résultats: ${election.titre || 'Élection'}`;
@@ -2132,6 +2120,26 @@
                     'Aucun résultat n\'est disponible pour le moment. Les résultats seront affichés ici une fois les élections terminées et publiées.'}
                 </p>
                 ${filtersApplied ? '<button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 1rem;">Réinitialiser les filtres</button>' : ''}
+            `;
+            message.style.display = 'block';
+
+            // Masquer les autres sections
+            document.getElementById('winnerBanner').style.display = 'none';
+            document.querySelector('.stats-grid').style.display = 'none';
+            document.querySelector('.charts-section').style.display = 'none';
+            document.querySelector('.ranking-section').style.display = 'none';
+        }
+
+        // Afficher le message de résultats en attente
+        function showResultsPending() {
+            const message = document.getElementById('noResultsMessage');
+            message.innerHTML = `
+                <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
+                <h3>Résultats en attente de publication</h3>
+                <p>Les résultats de cette élection ne sont pas encore publiés. Ils seront disponibles après validation par l'administration.</p>
+                <p style="font-size: 0.9rem; color: var(--gray); margin-top: 1rem;">
+                    <i class="fas fa-info-circle"></i> Veuillez revenir plus tard ou consultez vos notifications.
+                </p>
             `;
             message.style.display = 'block';
 
