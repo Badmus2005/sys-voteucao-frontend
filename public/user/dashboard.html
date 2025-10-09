@@ -1766,6 +1766,11 @@
                 return;
             }
 
+            // Fonction pour vérifier si le menu est ouvert
+            function isMenuOpen() {
+                return sidebar.classList.contains('active') || sidebar.style.display === 'flex';
+            }
+
             // Fonction pour ouvrir le menu
             function openMenu() {
                 console.log('Ouverture du menu');
@@ -1775,7 +1780,7 @@
                     overlay.style.display = 'block';
                     overlay.classList.add('active');
                 }
-                document.body.style.overflow = 'hidden'; // Bloquer le scroll
+                document.body.style.overflow = 'hidden';
             }
 
             // Fonction pour fermer le menu
@@ -1787,19 +1792,21 @@
                     overlay.style.display = 'none';
                     overlay.classList.remove('active');
                 }
-                document.body.style.overflow = ''; // Rétablir le scroll
+                document.body.style.overflow = '';
             }
 
             // Événement click sur le bouton burger
             burger.addEventListener('click', function (e) {
                 e.stopPropagation();
-                console.log('Bouton menu cliqué');
+                console.log('Bouton menu cliqué - Menu actuellement:', isMenuOpen() ? 'OUVERT' : 'FERMÉ');
 
-                if (sidebar.classList.contains('active')) {
+                if (isMenuOpen()) {
                     closeMenu();
                 } else {
                     openMenu();
                 }
+
+                console.log('Menu après click:', isMenuOpen() ? 'OUVERT' : 'FERMÉ');
             });
 
             // Fermer le menu en cliquant sur l'overlay
@@ -1820,7 +1827,7 @@
 
             // Fermer le menu avec la touche Échap
             document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                if (event.key === 'Escape' && isMenuOpen()) {
                     console.log('Touche Échap - fermeture menu');
                     closeMenu();
                 }
@@ -1828,8 +1835,10 @@
 
             // Ajuster l'affichage au redimensionnement
             function handleResize() {
+                console.log('Redimensionnement - Largeur:', window.innerWidth);
                 if (window.innerWidth > 1024) {
                     // Sur desktop - toujours afficher la sidebar
+                    console.log('Mode desktop - affichage sidebar');
                     sidebar.style.display = 'flex';
                     sidebar.classList.remove('active');
                     if (overlay) {
@@ -1839,6 +1848,7 @@
                     document.body.style.overflow = '';
                 } else {
                     // Sur mobile - cacher la sidebar si inactive
+                    console.log('Mode mobile - sidebar display:', sidebar.style.display);
                     if (!sidebar.classList.contains('active')) {
                         sidebar.style.display = 'none';
                     }
@@ -1849,6 +1859,7 @@
             window.addEventListener('resize', handleResize);
 
             // Initialiser l'état au chargement
+            console.log('Initialisation état initial');
             handleResize();
         }
 
