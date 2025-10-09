@@ -2228,14 +2228,16 @@
             if (!Common.checkAuth()) return;
 
             try {
+                console.log('=== INITIALISATION DASHBOARD ===');
+
                 // Initialiser les éléments communs
                 Common.initCommonElements();
-
-                // Charger le profil utilisateur dans le header (laissé à common.js)
                 await Common.loadUserProfileInHeader();
 
-                // Initialiser le menu mobile
+                // INITIALISATION DU MENU MOBILE - EN PREMIER
+                console.log('Initialisation menu mobile...');
                 initMobileMenu();
+                console.log('Menu mobile initialisé');
 
                 // Écouter le redimensionnement
                 window.addEventListener('resize', handleResize);
@@ -2244,11 +2246,14 @@
                 await loadPageData();
                 initEventHandlers();
                 renderCalendar();
+
+                console.log('Dashboard initialisé avec succès');
             } catch (error) {
                 console.error('Erreur initialisation dashboard:', error);
                 Common.showToast('Erreur lors du chargement du tableau de bord', 'error');
             }
         });
+
     </script>
 </body>
 
