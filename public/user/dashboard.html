@@ -10,12 +10,9 @@
     <style>
         :root {
             --primary: #800020;
-            /* Bordeaux */
             --primary-dark: #5a0017;
             --secondary: #090f58;
-            /* Bleu nuit */
             --accent: #d4af37;
-            /* Or */
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -161,6 +158,7 @@
             align-items: center;
             justify-content: center;
             transition: var(--transition);
+            z-index: 1001;
         }
 
         .mobile-menu-btn:hover {
@@ -985,58 +983,54 @@
                     "main";
             }
 
-            @media (max-width: 1024px) {
-                .dashboard-container {
-                    grid-template-columns: 1fr;
-                    grid-template-areas:
-                        "header"
-                        "main";
-                }
+            .sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 1000;
+                width: 280px;
+            }
 
-                .sidebar {
-                    display: none;
-                    /* Cachée par défaut sur mobile */
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100vh;
-                    z-index: 1000;
-                    width: 280px;
-                    transform: translateX(0);
-                    /* Retirer l'animation translate */
-                    transition: none;
-                    /* Retirer la transition */
-                }
+            .sidebar.active {
+                display: flex;
+            }
 
-                .sidebar.active {
-                    display: flex;
-                    /* Affichée quand active */
-                }
+            .mobile-menu-btn {
+                display: flex;
+            }
 
-                .mobile-menu-btn {
-                    display: flex;
-                }
+            .main-content {
+                padding: 1.5rem;
+                margin-left: 0;
+            }
 
-                .main-content {
-                    padding: 1.5rem;
-                    margin-left: 0;
-                }
+            /* Overlay pour mobile */
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
 
-                /* Overlay pour mobile */
-                .overlay {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    z-index: 999;
-                }
+            .overlay.active {
+                display: block;
+            }
 
-                .overlay.active {
-                    display: block;
-                }
+            /* Notifications mobile */
+            .notifications-panel {
+                position: fixed;
+                top: 80px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                max-width: 400px;
+                margin: 0 auto;
             }
         }
 
@@ -1086,8 +1080,9 @@
             }
 
             .notifications-panel {
-                width: 300px;
-                right: -50px;
+                right: 10px;
+                left: 10px;
+                width: auto;
             }
         }
 
@@ -1111,8 +1106,8 @@
             }
 
             .notifications-panel {
-                width: 280px;
-                right: -80px;
+                right: 5px;
+                left: 5px;
             }
         }
 
@@ -1159,8 +1154,8 @@
             }
 
             .notifications-panel {
-                width: 260px;
-                right: -100px;
+                right: 5px;
+                left: 5px;
             }
         }
 
@@ -1175,8 +1170,8 @@
             }
 
             .notifications-panel {
-                width: 240px;
-                right: -120px;
+                right: 5px;
+                left: 5px;
             }
         }
 
@@ -1473,6 +1468,7 @@
         <i class="fa-solid fa-circle-check" id="toastIcon"></i>
         <span id="toastMessage"></span>
     </div>
+
     <!-- Scripts -->
     <script src="/assets/config.js"></script>
     <script src="/assets/js/common.js"></script>
@@ -1750,6 +1746,7 @@
             }
         };
 
+        // CORRECTION: Fonction unique pour le menu mobile
         function initMobileMenu() {
             const burger = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
@@ -1766,10 +1763,7 @@
                 return;
             }
 
-            // Fonction pour vérifier si le menu est ouvert
-            function isMenuOpen() {
-                return sidebar.classList.contains('active') || sidebar.style.display === 'flex';
-            }
+            let isMenuOpen = false;
 
             // Fonction pour ouvrir le menu
             function openMenu() {
@@ -1781,6 +1775,7 @@
                     overlay.classList.add('active');
                 }
                 document.body.style.overflow = 'hidden';
+                isMenuOpen = true;
             }
 
             // Fonction pour fermer le menu
@@ -1793,20 +1788,19 @@
                     overlay.classList.remove('active');
                 }
                 document.body.style.overflow = '';
+                isMenuOpen = false;
             }
 
             // Événement click sur le bouton burger
             burger.addEventListener('click', function (e) {
                 e.stopPropagation();
-                console.log('Bouton menu cliqué - Menu actuellement:', isMenuOpen() ? 'OUVERT' : 'FERMÉ');
+                console.log('Bouton menu cliqué - Menu actuellement:', isMenuOpen ? 'OUVERT' : 'FERMÉ');
 
-                if (isMenuOpen()) {
+                if (isMenuOpen) {
                     closeMenu();
                 } else {
                     openMenu();
                 }
-
-                console.log('Menu après click:', isMenuOpen() ? 'OUVERT' : 'FERMÉ');
             });
 
             // Fermer le menu en cliquant sur l'overlay
@@ -1827,14 +1821,14 @@
 
             // Fermer le menu avec la touche Échap
             document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && isMenuOpen()) {
+                if (event.key === 'Escape' && isMenuOpen) {
                     console.log('Touche Échap - fermeture menu');
                     closeMenu();
                 }
             });
 
-            // Ajuster l'affichage au redimensionnement
-            function handleResize() {
+            // CORRECTION: Fonction unique pour le redimensionnement
+            function handleWindowResize() {
                 console.log('Redimensionnement - Largeur:', window.innerWidth);
                 if (window.innerWidth > 1024) {
                     // Sur desktop - toujours afficher la sidebar
@@ -1846,39 +1840,49 @@
                         overlay.classList.remove('active');
                     }
                     document.body.style.overflow = '';
+                    isMenuOpen = false;
                 } else {
                     // Sur mobile - cacher la sidebar si inactive
-                    console.log('Mode mobile - sidebar display:', sidebar.style.display);
-                    if (!sidebar.classList.contains('active')) {
+                    console.log('Mode mobile');
+                    if (!isMenuOpen) {
                         sidebar.style.display = 'none';
                     }
                 }
             }
 
             // Écouter le redimensionnement
-            window.addEventListener('resize', handleResize);
+            window.addEventListener('resize', handleWindowResize);
 
             // Initialiser l'état au chargement
             console.log('Initialisation état initial');
-            handleResize();
+            handleWindowResize();
         }
 
-        // Gérer le redimensionnement de la fenêtre
-        function handleResize() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+        // CORRECTION: Initialisation des notifications
+        function initNotifications() {
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
 
-            if (!sidebar || !overlay) return;
+            if (!notificationBtn || !notificationsPanel) return;
 
-            if (window.matchMedia('(min-width: 1025px)').matches) {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active');
-            } else {
-                // Sur mobile, la sidebar est cachée par défaut
-                if (!sidebar.classList.contains('active')) {
-                    sidebar.style.display = 'none';
+            notificationBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                notificationsPanel.classList.toggle('show');
+            });
+
+            // Fermer les notifications en cliquant ailleurs
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.notifications-container')) {
+                    notificationsPanel.classList.remove('show');
                 }
-            }
+            });
+
+            // Fermer avec Échap
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
         }
 
         // Fonctions spécifiques à dashboard
@@ -2245,13 +2249,15 @@
                 Common.initCommonElements();
                 await Common.loadUserProfileInHeader();
 
-                // INITIALISATION DU MENU MOBILE - EN PREMIER
+                // INITIALISATION DU MENU MOBILE
                 console.log('Initialisation menu mobile...');
                 initMobileMenu();
                 console.log('Menu mobile initialisé');
 
-                // Écouter le redimensionnement
-                window.addEventListener('resize', handleResize);
+                // INITIALISATION DES NOTIFICATIONS
+                console.log('Initialisation notifications...');
+                initNotifications();
+                console.log('Notifications initialisées');
 
                 // Charger les données
                 await loadPageData();
@@ -2264,7 +2270,6 @@
                 Common.showToast('Erreur lors du chargement du tableau de bord', 'error');
             }
         });
-
     </script>
 </body>
 
