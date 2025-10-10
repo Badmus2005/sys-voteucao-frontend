@@ -589,29 +589,61 @@
         }
 
         .election-status {
-            display: inline-block;
-            padding: 6px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .election-status i {
+            font-size: 0.75rem;
         }
 
         .status-active {
-            background: rgba(40, 167, 69, .15);
-            color: var(--success);
-            border: 1px solid rgba(40, 167, 69, 0.3);
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-active i {
+            color: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
 
         .status-upcoming {
-            background: rgba(23, 162, 184, .15);
-            color: var(--info);
-            border: 1px solid rgba(23, 162, 184, 0.3);
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
+        .status-upcoming i {
+            color: #007bff;
         }
 
         .status-completed {
-            background: rgba(108, 117, 125, .15);
-            color: var(--text-muted);
-            border: 1px solid rgba(108, 117, 125, 0.3);
+            background: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+
+        .status-completed i {
+            color: #6c757d;
         }
 
         /* Elections Grid Cards */
@@ -640,9 +672,10 @@
 
         .election-card-header {
             padding: 20px;
-            background: linear-gradient(135deg, var(--blue-night), var(--blue-night-light));
+            background: linear-gradient(135deg, #0f2441, #1a3a5f);
             color: white;
             position: relative;
+            border-bottom: 3px solid var(--bordeaux);
         }
 
         .election-card-title {
@@ -657,6 +690,12 @@
             opacity: 0.9;
             margin-bottom: 12px;
             line-height: 1.5;
+            max-height: 3em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .election-card-badges {
@@ -810,11 +849,11 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
-            background: white;
+            white-space: nowrap;
         }
 
         .election-phase-badge i {
@@ -822,34 +861,52 @@
         }
 
         .phase-phase1 {
-            color: var(--phase1-color);
-            background: rgba(26, 43, 60, 0.1);
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .phase-phase1 i {
+            color: #17a2b8;
         }
 
         .phase-phase2 {
-            color: var(--phase2-color);
-            background: rgba(123, 45, 58, 0.1);
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .phase-phase2 i {
+            color: #dc3545;
         }
 
         .phase-phase3 {
-            color: var(--phase3-color);
-            background: rgba(212, 175, 55, 0.2);
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .phase-phase3 i {
+            color: #ffc107;
         }
 
         .election-type-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
-            background: rgba(49, 130, 206, 0.1);
-            color: var(--info);
+            background: #e7f3ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+            white-space: nowrap;
         }
 
         .election-type-badge i {
             font-size: 0.9rem;
+            color: #007bff;
         }
 
         /* Filters */
@@ -1730,25 +1787,35 @@
 
         // Fonctions utilitaires pour la gestion des dates
         function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                return date.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return null;
+            }
         }
 
         function formatDateTime(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                return date.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return null;
+            }
         }
 
         function setupEventListeners() {
@@ -2001,6 +2068,7 @@
                     
                     <div class="election-card-body">
                         <div class="election-info-grid">
+                            ${election.dateDebut && formatDate(election.dateDebut) ? `
                             <div class="election-info-item">
                                 <div class="election-info-label">Début votes</div>
                                 <div class="election-info-value">
@@ -2008,6 +2076,8 @@
                                     ${formatDate(election.dateDebut)}
                                 </div>
                             </div>
+                            ` : ''}
+                            ${election.dateFin && formatDate(election.dateFin) ? `
                             <div class="election-info-item">
                                 <div class="election-info-label">Fin votes</div>
                                 <div class="election-info-value">
@@ -2015,6 +2085,7 @@
                                     ${formatDate(election.dateFin)}
                                 </div>
                             </div>
+                            ` : ''}
                             ${election.filiere ? `
                             <div class="election-info-item">
                                 <div class="election-info-label">Filière</div>
@@ -2247,35 +2318,47 @@
                     </div>
 
                     <div class="election-details-grid">
+                        ${election.dateDebutCandidature || election.dateFinCandidature ? `
                         <div class="detail-section">
                             <div class="detail-section-title">
                                 <i class="fas fa-calendar-alt"></i>
                                 Période de Candidatures
                             </div>
+                            ${election.dateDebutCandidature && formatDateTime(election.dateDebutCandidature) ? `
                             <div class="detail-row">
                                 <span class="detail-label">Début</span>
                                 <span class="detail-value">${formatDateTime(election.dateDebutCandidature)}</span>
                             </div>
+                            ` : ''}
+                            ${election.dateFinCandidature && formatDateTime(election.dateFinCandidature) ? `
                             <div class="detail-row">
                                 <span class="detail-label">Fin</span>
                                 <span class="detail-value">${formatDateTime(election.dateFinCandidature)}</span>
                             </div>
+                            ` : ''}
                         </div>
+                        ` : ''}
 
+                        ${election.dateDebut || election.dateFin ? `
                         <div class="detail-section">
                             <div class="detail-section-title">
                                 <i class="fas fa-vote-yea"></i>
                                 Période de Votes
                             </div>
+                            ${election.dateDebut && formatDateTime(election.dateDebut) ? `
                             <div class="detail-row">
                                 <span class="detail-label">Début</span>
                                 <span class="detail-value">${formatDateTime(election.dateDebut)}</span>
                             </div>
+                            ` : ''}
+                            ${election.dateFin && formatDateTime(election.dateFin) ? `
                             <div class="detail-row">
                                 <span class="detail-label">Fin</span>
                                 <span class="detail-value">${formatDateTime(election.dateFin)}</span>
                             </div>
+                            ` : ''}
                         </div>
+                        ` : ''}
 
                         <div class="detail-section">
                             <div class="detail-section-title">
