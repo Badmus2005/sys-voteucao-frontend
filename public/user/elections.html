@@ -1600,6 +1600,94 @@
             padding: 1rem;
             gap: 0.5rem;
         }
+
+        /* Styles spécifiques pour le modal des élections */
+        .modal-header {
+            text-align: center;
+        }
+
+        .modal-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .modal-role {
+            font-size: 1.1em;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .modal-section {
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .modal-section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .modal-info-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .modal-info-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .modal-info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .modal-program {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            background: #f8f9fa;
+        }
     </style>
 
     <link rel="stylesheet" href="/assets/notifications.css">
@@ -3151,7 +3239,7 @@
             `;
         }
 
-        // Fonction pour afficher les détails d'une élection
+        // Fonction pour afficher les détails d'une élection dans un modal
         async function showElectionDetails(electionId) {
             try {
                 showLoading();
@@ -3168,9 +3256,8 @@
                 }
 
                 if (election) {
-                    // Ouvrir une nouvelle page ou afficher dans une modale
-                    // Pour l'instant, rediriger vers la page de détails
-                    window.location.href = `election-details.html?id=${electionId}`;
+                    // Afficher les détails dans un modal
+                    openElectionModal(election);
                 } else {
                     throw new Error('Impossible de charger les détails de l\'élection');
                 }
@@ -3182,9 +3269,173 @@
             }
         }
 
-        function viewCandidateProfile(candidateId) {
-            console.log('Recherche du candidat avec ID:', candidateId);
+        // Fonction pour ouvrir le modal des détails de l'élection
+        function openElectionModal(election) {
+            // Créer le modal s'il n'existe pas
+            let modal = document.getElementById('electionModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'electionModal';
+                modal.className = 'candidate-modal';
+                modal.innerHTML = `
+            <div class="candidate-modal-content" style="max-width: 700px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
+                    <button class="modal-close" onclick="closeElectionModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <h2 id="modalElectionTitle" class="modal-name" style="margin-bottom: 0.5rem;"></h2>
+                    <div id="modalElectionType" class="modal-role"></div>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">
+                            <i class="fas fa-info-circle"></i>Informations générales
+                        </h3>
+                        <div id="modalElectionInfo" class="modal-info-grid">
+                            <!-- Les informations seront insérées ici -->
+                        </div>
+                    </div>
 
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">
+                            <i class="fas fa-calendar-alt"></i>Dates importantes
+                        </h3>
+                        <div id="modalElectionDates" class="modal-info-grid">
+                            <!-- Les dates seront insérées ici -->
+                        </div>
+                    </div>
+
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">
+                            <i class="fas fa-file-alt"></i>Description
+                        </h3>
+                        <div id="modalElectionDescription" class="modal-program">
+                            <!-- La description sera insérée ici -->
+                        </div>
+                    </div>
+
+                    <div class="modal-section" id="modalElectionStats">
+                        <h3 class="modal-section-title">
+                            <i class="fas fa-chart-bar"></i>Statistiques
+                        </h3>
+                        <div id="modalElectionStatsContent" class="modal-info-grid">
+                            <!-- Les statistiques seront insérées ici -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeElectionModal()">
+                        <i class="fas fa-times"></i> Fermer
+                    </button>
+                </div>
+            </div>
+        `;
+                document.body.appendChild(modal);
+            }
+
+            // Remplir le modal avec les données de l'élection
+            document.getElementById('modalElectionTitle').textContent = election.titre;
+            document.getElementById('modalElectionType').textContent = ElectionService.getElectionTypeLabel(election.type);
+
+            // Informations générales
+            const infoGrid = document.getElementById('modalElectionInfo');
+            const generalInfos = [
+                { label: 'École/Faculté', value: ECOLE_CONFIG[election.ecole]?.name || election.ecole || 'N/A' },
+                { label: 'Type', value: ElectionService.getElectionTypeLabel(election.type) },
+                { label: 'Statut', value: ElectionService.getStatusText(ElectionService.getElectionStatus(election)) },
+                { label: 'Nombre de candidats', value: election.nb_candidats || 0 }
+            ];
+
+            infoGrid.innerHTML = generalInfos.map(info => `
+        <div class="modal-info-item">
+            <div class="modal-info-label">${info.label}</div>
+            <div class="modal-info-value">${info.value}</div>
+        </div>
+    `).join('');
+
+            // Dates importantes
+            const datesGrid = document.getElementById('modalElectionDates');
+            const electionDates = [
+                {
+                    label: 'Période de candidature',
+                    value: election.dateDebutCandidature && election.dateFinCandidature
+                        ? `${new Date(election.dateDebutCandidature).toLocaleDateString()} - ${new Date(election.dateFinCandidature).toLocaleDateString()}`
+                        : 'Non définie'
+                },
+                {
+                    label: 'Période de vote',
+                    value: election.dateDebut && election.dateFin
+                        ? `${new Date(election.dateDebut).toLocaleDateString()} - ${new Date(election.dateFin).toLocaleDateString()}`
+                        : 'Non définie'
+                }
+            ];
+
+            datesGrid.innerHTML = electionDates.map(date => `
+        <div class="modal-info-item">
+            <div class="modal-info-label">${date.label}</div>
+            <div class="modal-info-value">${date.value}</div>
+        </div>
+    `).join('');
+
+            // Description
+            const descriptionElement = document.getElementById('modalElectionDescription');
+            descriptionElement.textContent = election.description || 'Aucune description disponible pour cette élection.';
+
+            // Statistiques (si disponibles)
+            const statsElement = document.getElementById('modalElectionStatsContent');
+            const statsSection = document.getElementById('modalElectionStats');
+
+            const stats = [
+                { label: 'Candidats inscrits', value: election.nb_candidats || 0 },
+                { label: 'Votes attendus', value: election.nb_votants_attendus || 'Non disponible' },
+                { label: 'Taux de participation', value: election.taux_participation ? `${election.taux_participation}%` : 'Non disponible' }
+            ];
+
+            statsElement.innerHTML = stats.map(stat => `
+        <div class="modal-info-item">
+            <div class="modal-info-label">${stat.label}</div>
+            <div class="modal-info-value">${stat.value}</div>
+        </div>
+    `).join('');
+
+            // Afficher ou masquer la section statistiques selon les données disponibles
+            const hasStats = election.nb_candidats || election.nb_votants_attendus || election.taux_participation;
+            statsSection.style.display = hasStats ? 'block' : 'none';
+
+            // Afficher le modal
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fonction pour fermer le modal des élections
+        function closeElectionModal() {
+            const modal = document.getElementById('electionModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Gestion des événements pour fermer le modal
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('electionModal');
+            if (event.target === modal) {
+                closeElectionModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeElectionModal();
+            }
+        });
+
+
+
+        // Afficher le profil détaillé d'un candidat dans un modal
+        function viewCandidateProfile(candidateId) {
             // Rechercher le candidat avec différents identifiants possibles
             const candidate = allCandidates.find(c =>
                 c.candidateId == candidateId ||
@@ -3192,21 +3443,15 @@
             );
 
             if (!candidate) {
-                console.log('Candidat non trouvé dans allCandidates:', allCandidates);
                 showToast('Candidat non trouvé', 'error');
                 return;
             }
 
-            console.log('Candidat trouvé:', candidate);
             openCandidateModal(candidate);
         }
 
         function openCandidateModal(candidate) {
             const modal = document.getElementById('candidateModal');
-
-            // Console.log pour déboguer
-            console.log('📸 openCandidateModal - Structure du candidat:', candidate);
-            console.log('📸 photoUrl dans modal:', candidate.photoUrl);
 
             // Photo avec fallback - utiliser UNIQUEMENT photoUrl de la table candidates
             let photoUrl = candidate.photoUrl;
@@ -3214,12 +3459,10 @@
             // Si l'URL ne commence pas par http, ajouter le base URL
             if (photoUrl && !photoUrl.startsWith('http')) {
                 photoUrl = `${CONFIG.BASE_URL}${photoUrl}`;
-                console.log('📸 URL complétée dans modal:', photoUrl);
             }
 
             // Image par défaut si aucune photo
             if (!photoUrl) {
-                console.log('⚠️ Aucune photoUrl dans modal, utilisation de l\'image par défaut');
                 photoUrl = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
             }
 
@@ -3310,6 +3553,7 @@
         });
 
         // Exposer les fonctions globales pour cette page
+        window.closeElectionModal = closeElectionModal;
         window.showElectionDetails = showElectionDetails;
         window.loadPageData = loadPageData;
         window.viewCandidateProfile = viewCandidateProfile;
