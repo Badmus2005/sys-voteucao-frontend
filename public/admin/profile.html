@@ -173,6 +173,66 @@
             justify-content: center;
         }
 
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 350px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        .notification-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--blue-night);
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--light-bg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background-color: var(--light-bg);
+        }
+
+        .notification-item.unread {
+            background-color: rgba(139, 0, 0, 0.05);
+        }
+
+        .notification-content {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
         /* Menu utilisateur */
         .user-menu {
             position: relative;
@@ -1643,6 +1703,27 @@
             safeAddListener('saveProfileBtn', 'click', saveProfile);
         }
     </script>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="markAllReadBtn"
+                style="background: none; border: none; color: var(--bordeaux); cursor: pointer; font-size: 0.85rem; font-weight: 600;">Tout
+                marquer comme lu</button>
+        </div>
+        <div id="notificationList"></div>
+        <div id="notificationPagination"
+            style="padding: 10px 15px; border-top: 1px solid var(--light-bg); display: none;">
+            <button id="loadMoreNotifications"
+                style="width: 100%; padding: 8px; background: var(--bordeaux); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                <i class="fas fa-angle-down"></i> Charger plus
+            </button>
+        </div>
+    </div>
+
+    <!-- Script de gestion des notifications -->
+    <script src="/assets/js/admin-notifications.js"></script>
 </body>
 
 </html>
