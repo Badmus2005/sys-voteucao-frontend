@@ -786,6 +786,106 @@
             flex-wrap: wrap;
         }
 
+        /* Buttons Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            font-size: 0.85rem;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #138496, #117a8b);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800, #d39e00);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268, #545b62);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--bordeaux), #6b0000);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #6b0000, #550000);
+            box-shadow: 0 4px 12px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         /* Election Details Modal */
         #electionDetailsModal .modal {
             max-width: 900px;
@@ -2087,12 +2187,28 @@
                                 </div>
                             </div>
                             ` : ''}
-                            ${election.filiere ? `
+                            ${election.annee && election.filiere ? `
+                            <div class="election-info-item">
+                                <div class="election-info-label">Filière & Année</div>
+                                <div class="election-info-value">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    ${election.filiere} - L${election.annee}
+                                </div>
+                            </div>
+                            ` : election.filiere ? `
                             <div class="election-info-item">
                                 <div class="election-info-label">Filière</div>
                                 <div class="election-info-value">
                                     <i class="fas fa-book"></i>
                                     ${election.filiere}
+                                </div>
+                            </div>
+                            ` : election.annee ? `
+                            <div class="election-info-item">
+                                <div class="election-info-label">Année</div>
+                                <div class="election-info-value">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Licence ${election.annee}
                                 </div>
                             </div>
                             ` : ''}
@@ -2102,15 +2218,6 @@
                                 <div class="election-info-value">
                                     <i class="fas fa-building"></i>
                                     ${election.ecole}
-                                </div>
-                            </div>
-                            ` : ''}
-                            ${election.annee ? `
-                            <div class="election-info-item">
-                                <div class="election-info-label">Année</div>
-                                <div class="election-info-value">
-                                    <i class="fas fa-graduation-cap"></i>
-                                    Licence ${election.annee}
                                 </div>
                             </div>
                             ` : ''}
@@ -2237,24 +2344,9 @@
             }
         }
 
-        async function proclaimResults(id) {
-            try {
-                const token = getToken();
-                const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}/proclaim`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || "Erreur lors de la proclamation");
-                }
-
-                showToast('Résultats proclamés avec succès !', 'success');
-                loadElections();
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
+        function proclaimResults(id) {
+            // Redirection vers la page des résultats
+            window.location.href = `results.html?id=${id}`;
         }
 
         function viewElection(id) {
@@ -2300,21 +2392,29 @@
                 if (election.type === 'ECOLE') typeIcon = 'building';
                 else if (election.type === 'UNIVERSITE') typeIcon = 'graduation-cap';
 
+                // Log pour déboguer
+                console.log('Données élection reçues:', election);
+
                 const modalContent = document.getElementById('electionDetailsContent');
                 modalContent.innerHTML = `
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: var(--blue-night); margin-bottom: 10px;">${election.titre}</h3>
+                        <h3 style="color: var(--blue-night); margin-bottom: 10px;">${election.titre || 'Sans titre'}</h3>
                         <p style="color: var(--text-secondary); margin-bottom: 15px;">${election.description || 'Aucune description'}</p>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <span class="election-phase-badge phase-${election.niveau?.toLowerCase() || 'phase1'}">
-                                <i class="fas fa-${phaseIcon}"></i> ${getPhaseLabel(election.niveau)}
+                                <i class="fas fa-${phaseIcon}"></i> ${getPhaseLabel(election.niveau) || 'Phase non définie'}
                             </span>
                             <span class="election-type-badge">
-                                <i class="fas fa-${typeIcon}"></i> ${getElectionTypeLabel(election.type)}
+                                <i class="fas fa-${typeIcon}"></i> ${getElectionTypeLabel(election.type) || 'Type non défini'}
                             </span>
                             <span class="election-status status-${status}">
                                 <i class="fas fa-${statusIcon}"></i> ${statusText}
                             </span>
+                            ${election.isActive !== undefined ? `
+                            <span class="election-phase-badge" style="background: ${election.isActive ? '#d4edda' : '#f8d7da'}; color: ${election.isActive ? '#155724' : '#721c24'};">
+                                <i class="fas fa-${election.isActive ? 'toggle-on' : 'toggle-off'}"></i> ${election.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                            ` : ''}
                         </div>
                     </div>
 
@@ -2380,12 +2480,24 @@
                             </div>
                         </div>
 
-                        ${election.filiere || election.ecole || election.annee || election.delegueType ? `
+                        ${election.filiere || election.ecole || election.annee || election.delegueType || election.niveau || election.type ? `
                         <div class="detail-section">
                             <div class="detail-section-title">
                                 <i class="fas fa-info-circle"></i>
                                 Détails Spécifiques
                             </div>
+                            ${election.niveau ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Phase</span>
+                                <span class="detail-value">${getPhaseLabel(election.niveau)}</span>
+                            </div>
+                            ` : ''}
+                            ${election.type ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Type d'élection</span>
+                                <span class="detail-value">${getElectionTypeLabel(election.type)}</span>
+                            </div>
+                            ` : ''}
                             ${election.filiere ? `
                             <div class="detail-row">
                                 <span class="detail-label">Filière</span>
@@ -2408,6 +2520,24 @@
                             <div class="detail-row">
                                 <span class="detail-label">Type délégué</span>
                                 <span class="detail-value">${election.delegueType === 'PREMIER' ? 'Premier' : 'Deuxième'} délégué</span>
+                            </div>
+                            ` : ''}
+                            ${election.maxCandidats ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Max. candidats</span>
+                                <span class="detail-value">${election.maxCandidats}</span>
+                            </div>
+                            ` : ''}
+                            ${election.minCandidats ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Min. candidats</span>
+                                <span class="detail-value">${election.minCandidats}</span>
+                            </div>
+                            ` : ''}
+                            ${election.id ? `
+                            <div class="detail-row">
+                                <span class="detail-label">ID</span>
+                                <span class="detail-value">${election.id}</span>
                             </div>
                             ` : ''}
                         </div>
