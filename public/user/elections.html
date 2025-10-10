@@ -2176,14 +2176,29 @@
             create(candidate, options = {}) {
                 const { showVote = false, electionId = null } = options;
 
-                // Photo avec fallback - utiliser l'ID du candidat pour construire l'URL si nécessaire
-                const photoUrl = candidate.photoUrl ||
-                    `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80`;
+                // Console.log pour déboguer la structure des données
+                console.log('📸 CandidateCard.create - Structure du candidat:', candidate);
+                console.log('📸 photoUrl reçu:', candidate.photoUrl);
+
+                // Photo avec fallback - utiliser UNIQUEMENT photoUrl de la table candidates
+                let photoUrl = candidate.photoUrl;
+                
+                // Si l'URL ne commence pas par http, ajouter le base URL
+                if (photoUrl && !photoUrl.startsWith('http')) {
+                    photoUrl = `${CONFIG.BASE_URL}${photoUrl}`;
+                    console.log('📸 URL complétée:', photoUrl);
+                }
+                
+                // Image par défaut si aucune photo
+                if (!photoUrl) {
+                    console.log('⚠️ Aucune photoUrl trouvée, utilisation de l\'image par défaut');
+                    photoUrl = `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80`;
+                }
 
                 // Informations basées sur la structure réelle des données
                 const infos = [
-                    { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
-                    { label: 'Filière', value: candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
+                    { label: 'École', value: candidate.ecole_nom || candidate.nomEcole || candidate.ecole || 'N/A' },
+                    { label: 'Filière', value: candidate.filiere_nom || candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
                     { label: 'Année', value: candidate.annee || 'N/A' },
                     { label: 'Statut', value: candidate.statut || 'En attente' }
                 ];
@@ -3082,9 +3097,24 @@
         function openCandidateModal(candidate) {
             const modal = document.getElementById('candidateModal');
 
-            // Photo avec fallback
-            const photoUrl = candidate.photoUrl ||
-                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+            // Console.log pour déboguer
+            console.log('📸 openCandidateModal - Structure du candidat:', candidate);
+            console.log('📸 photoUrl dans modal:', candidate.photoUrl);
+
+            // Photo avec fallback - utiliser UNIQUEMENT photoUrl de la table candidates
+            let photoUrl = candidate.photoUrl;
+            
+            // Si l'URL ne commence pas par http, ajouter le base URL
+            if (photoUrl && !photoUrl.startsWith('http')) {
+                photoUrl = `${CONFIG.BASE_URL}${photoUrl}`;
+                console.log('📸 URL complétée dans modal:', photoUrl);
+            }
+            
+            // Image par défaut si aucune photo
+            if (!photoUrl) {
+                console.log('⚠️ Aucune photoUrl dans modal, utilisation de l\'image par défaut');
+                photoUrl = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80';
+            }
 
             // Mettre à jour les informations du modal
             document.getElementById('modalPhoto').src = photoUrl;
@@ -3094,8 +3124,8 @@
             // Informations détaillées basées sur la structure réelle
             const infoGrid = document.getElementById('modalInfoGrid');
             const infos = [
-                { label: 'École', value: candidate.nomEcole || candidate.ecole || 'N/A' },
-                { label: 'Filière', value: candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
+                { label: 'École', value: candidate.ecole_nom || candidate.nomEcole || candidate.ecole || 'N/A' },
+                { label: 'Filière', value: candidate.filiere_nom || candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
                 { label: 'Année', value: candidate.annee || 'N/A' },
                 { label: 'Email', value: candidate.email || 'Non disponible' },
                 { label: 'Statut', value: candidate.statut || 'En attente' },
