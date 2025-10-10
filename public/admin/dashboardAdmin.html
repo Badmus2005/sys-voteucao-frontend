@@ -1952,7 +1952,7 @@
         const ACTIVITY_ENDPOINT = '/api/activity';
         const VOTE_STATS_ENDPOINT = '/api/stats/votes';
         const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
-        const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/read';
+        const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/:id/read';
         const IMPORT_ETUDIANTS_ENDPOINT = '/api/import/etudiants';
         const ECOLES_ENDPOINT = '/api/ecoles';
         const FILIERES_ENDPOINT = '/api/filieres';
@@ -3151,6 +3151,33 @@
         const notificationItemsPerPage = 15;
         let allNotifications = [];
 
+        // Clé pour stocker les notifications lues dans localStorage
+        const READ_NOTIFICATIONS_KEY = 'admin_read_notifications';
+
+        // Fonctions pour gérer les notifications lues en localStorage
+        function getReadNotifications() {
+            const stored = localStorage.getItem(READ_NOTIFICATIONS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function markNotificationAsReadLocally(notificationKey) {
+            const readNotifications = getReadNotifications();
+            if (!readNotifications.includes(notificationKey)) {
+                readNotifications.push(notificationKey);
+                localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(readNotifications));
+            }
+        }
+
+        function markAllNotificationsAsReadLocally() {
+            const allKeys = allNotifications.map(n => createNotificationKey(n));
+            localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(allKeys));
+        }
+
+        function createNotificationKey(notification) {
+            // Créer une clé unique basée sur les propriétés de la notification
+            return `${notification.action || ''}_${notification.createdAt || ''}`;
+        }
+
         async function loadNotifications(reset = false) {
             try {
                 const token = getToken();
@@ -3169,7 +3196,7 @@
 
                 const result = await response.json();
 
-                // Adapter selon la structure de votre API
+                // Adapter selon la structure de votre API (pour les activity_logs admin)
                 let notifications = [];
                 let total = 0;
 
@@ -3187,6 +3214,19 @@
                 }
 
                 console.log('Notifications traitées:', notifications);
+
+                // Récupérer les notifications lues du localStorage
+                const readNotifications = getReadNotifications();
+
+                // Marquer les notifications comme lues si elles sont dans localStorage
+                notifications = notifications.map(n => {
+                    const key = createNotificationKey(n);
+                    return {
+                        ...n,
+                        is_read: readNotifications.includes(key),
+                        notificationKey: key
+                    };
+                });
 
                 // Ajouter les nouvelles notifications
                 if (reset) {
@@ -3211,9 +3251,7 @@
                 console.error('Erreur chargement notifications:', error);
                 showToast('Erreur de chargement des notifications', 'error');
             }
-        }
-
-        async function loadMoreNotifications() {
+        } async function loadMoreNotifications() {
             notificationCurrentPage++;
             await loadNotifications(false);
         }
@@ -3235,7 +3273,8 @@
         async function loadNotificationBadge() {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}?limit=1&page=1&unreadOnly=true`, {
+                // Charger un nombre limité de notifications récentes pour compter les non lues
+                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}?limit=50`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -3243,17 +3282,24 @@
 
                 const result = await response.json();
 
-                // Récupérer le nombre de notifications non lues
-                let unreadCount = 0;
-                if (result.unreadCount !== undefined) {
-                    unreadCount = result.unreadCount;
-                } else if (result.total !== undefined) {
-                    unreadCount = result.total;
-                } else if (Array.isArray(result)) {
-                    unreadCount = result.length;
+                // Récupérer les notifications
+                let notifications = [];
+                if (Array.isArray(result)) {
+                    notifications = result;
                 } else if (result.data && Array.isArray(result.data)) {
-                    unreadCount = result.data.length;
+                    notifications = result.data;
+                } else if (result.notifications && Array.isArray(result.notifications)) {
+                    notifications = result.notifications;
                 }
+
+                // Récupérer les notifications lues du localStorage
+                const readNotifications = getReadNotifications();
+
+                // Compter les notifications non lues
+                const unreadCount = notifications.filter(n => {
+                    const key = createNotificationKey(n);
+                    return !readNotifications.includes(key);
+                }).length;
 
                 const badge = document.getElementById('notificationCount');
                 if (badge) {
@@ -3309,16 +3355,23 @@
                     <div class="notification-time">${formatDate(time)}</div>
                 `;
 
-                div.addEventListener('click', async () => {
-                    if (!isRead && notification.id) {
-                        await markAsRead(notification.id);
+                div.addEventListener('click', () => {
+                    if (!isRead) {
+                        // Marquer comme lu localement
+                        const key = notification.notificationKey || createNotificationKey(notification);
+                        markNotificationAsReadLocally(key);
+
+                        // Mettre à jour l'affichage
                         div.classList.remove('unread');
+
                         // Mettre à jour l'objet notification dans le tableau
-                        const notifIndex = allNotifications.findIndex(n => n.id === notification.id);
+                        const notifIndex = allNotifications.findIndex(n =>
+                            createNotificationKey(n) === key
+                        );
                         if (notifIndex !== -1) {
                             allNotifications[notifIndex].is_read = true;
-                            allNotifications[notifIndex].read = true;
                         }
+
                         // Mettre à jour le badge sans recharger
                         updateNotificationBadge();
                     }
@@ -3328,30 +3381,14 @@
             });
         }
 
-        async function markAsRead(notificationId) {
+        function markAllAsRead() {
             try {
-                const token = getToken();
-                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', notificationId)}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (error) {
-                console.error('Erreur:', error);
-            }
-        }
+                // Marquer toutes les notifications comme lues dans localStorage
+                markAllNotificationsAsReadLocally();
 
-        async function markAllAsRead() {
-            try {
-                const token = getToken();
-                await fetch(`${API_BASE}${NOTIFICATIONS_READ_ENDPOINT.replace(':id', 'all')}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                // Marquer toutes les notifications comme lues localement
+                // Marquer toutes les notifications comme lues dans le tableau
                 allNotifications.forEach(n => {
                     n.is_read = true;
-                    n.read = true;
                 });
 
                 // Mettre à jour l'affichage
@@ -3363,12 +3400,10 @@
 
                 showToast('Toutes les notifications marquées comme lues', 'success');
             } catch (error) {
-                console.error('Erreur:', error);
+                console.error('Erreur markAllAsRead:', error);
                 showToast('Erreur lors du marquage des notifications', 'error');
             }
-        }
-
-        // ------------ GESTIONNAIRES D'ÉVÉNEMENTS ------------
+        }        // ------------ GESTIONNAIRES D'ÉVÉNEMENTS ------------
         function setupEventListeners() {
             // Gestion du menu mobile
             const menuToggle = document.getElementById('menuToggle');
