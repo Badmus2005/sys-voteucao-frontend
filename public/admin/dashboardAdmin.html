@@ -1867,8 +1867,16 @@
 
                 <!-- Recent Activity -->
                 <div class="activity-section">
-                    <h2 class="section-title"><i class="fas fa-history"></i> Activité Récentes</h2>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="section-title" style="margin-bottom: 0;"><i class="fas fa-history"></i> Activité
+                            Récentes</h2>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="pagination-info" id="activityPaginationInfo">Page 1</span>
+                        </div>
+                    </div>
                     <div id="activityList"></div>
+                    <div class="pagination" id="activityPagination" style="display: none;"></div>
                 </div>
 
                 <!-- Quick Actions -->
@@ -1919,9 +1927,18 @@
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-header">
             <h3>Notifications</h3>
-            <button id="markAllReadBtn">Tout marquer comme lu</button>
+            <button id="markAllReadBtn"
+                style="background: none; border: none; color: var(--bordeaux); cursor: pointer; font-size: 0.85rem; font-weight: 600;">Tout
+                marquer comme lu</button>
         </div>
         <div id="notificationList"></div>
+        <div id="notificationPagination"
+            style="padding: 10px 15px; border-top: 1px solid var(--light-bg); display: none;">
+            <button id="loadMoreNotifications"
+                style="width: 100%; padding: 8px; background: var(--bordeaux); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                <i class="fas fa-angle-down"></i> Charger plus
+            </button>
+        </div>
     </div>
 
     <script src="/assets/config.js"></script>
@@ -2019,7 +2036,7 @@
             loadStats();
             loadActivity();
             loadVoteStats();
-            loadNotifications();
+            loadNotificationBadge(); // Charger uniquement le badge au démarrage
         }
 
         // ------------ UTILS ------------
@@ -2791,12 +2808,17 @@
             }
         }
 
-        async function loadActivity() {
+        // Variables de pagination pour les activités
+        let activityCurrentPage = 1;
+        let activityTotalPages = 1;
+        let activityTotalItems = 0;
+        const activityItemsPerPage = 10;
+
+        async function loadActivity(page = 1) {
             try {
                 showLoading();
                 const token = getToken();
-                const limit = 10;
-                const page = 1;
+                const limit = activityItemsPerPage;
 
                 const res = await fetch(`${API_BASE}${ACTIVITY_ENDPOINT}?limit=${limit}&page=${page}`, {
                     method: 'GET',
@@ -2804,12 +2826,17 @@
                 });
 
                 let activities = [];
+                let total = 0;
 
                 if (res.ok) {
                     const result = await res.json();
                     console.log('Données d\'activité reçues:', result);
                     // Adapter selon le nouveau format de réponse
                     activities = result.logs || [];
+                    total = result.total || activities.length;
+                    activityCurrentPage = result.currentPage || page;
+                    activityTotalPages = result.totalPages || Math.ceil(total / limit);
+                    activityTotalItems = total;
 
                     // Mapper les propriétés
                     activities = activities.map(log => ({
@@ -2823,6 +2850,8 @@
                     // Fallback avec des données de démo
                     console.warn('Serveur indisponible, utilisation de données de démonstration');
                     activities = [/* données de démo */];
+                    total = activities.length;
+                    activityTotalPages = 1;
                 }
 
                 // Afficher les activités
@@ -2833,6 +2862,7 @@
 
                 if (!Array.isArray(activities) || activities.length === 0) {
                     container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune activité récente</p>';
+                    document.getElementById('activityPagination').style.display = 'none';
                     return;
                 }
 
@@ -2852,12 +2882,119 @@
             `;
                     container.appendChild(div);
                 });
+
+                // Afficher la pagination
+                renderActivityPagination();
+                updateActivityPaginationInfo();
             } catch (err) {
                 console.error('Erreur chargement activités:', err);
                 showToast('Erreur lors du chargement des activités', 'error');
             } finally {
                 hideLoading();
             }
+        }
+
+        function renderActivityPagination() {
+            const paginationContainer = document.getElementById('activityPagination');
+            if (!paginationContainer) return;
+
+            if (activityTotalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            paginationContainer.style.display = 'flex';
+            paginationContainer.innerHTML = '';
+
+            // Bouton Précédent
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = activityCurrentPage === 1;
+            prevBtn.onclick = () => {
+                if (activityCurrentPage > 1) {
+                    loadActivity(activityCurrentPage - 1);
+                }
+            };
+            paginationContainer.appendChild(prevBtn);
+
+            // Boutons de pages
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, activityCurrentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = Math.min(activityTotalPages, startPage + maxPagesToShow - 1);
+
+            // Ajuster si on est près de la fin
+            if (endPage - startPage < maxPagesToShow - 1) {
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+
+            // Première page si on ne commence pas à 1
+            if (startPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.className = 'pagination-btn';
+                firstBtn.textContent = '1';
+                firstBtn.onclick = () => loadActivity(1);
+                paginationContainer.appendChild(firstBtn);
+
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 10px';
+                    ellipsis.style.color = 'var(--text-muted)';
+                    paginationContainer.appendChild(ellipsis);
+                }
+            }
+
+            // Pages numérotées
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'pagination-btn';
+                if (i === activityCurrentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => loadActivity(i);
+                paginationContainer.appendChild(pageBtn);
+            }
+
+            // Dernière page si on ne termine pas à la fin
+            if (endPage < activityTotalPages) {
+                if (endPage < activityTotalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 10px';
+                    ellipsis.style.color = 'var(--text-muted)';
+                    paginationContainer.appendChild(ellipsis);
+                }
+
+                const lastBtn = document.createElement('button');
+                lastBtn.className = 'pagination-btn';
+                lastBtn.textContent = activityTotalPages;
+                lastBtn.onclick = () => loadActivity(activityTotalPages);
+                paginationContainer.appendChild(lastBtn);
+            }
+
+            // Bouton Suivant
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = activityCurrentPage === activityTotalPages;
+            nextBtn.onclick = () => {
+                if (activityCurrentPage < activityTotalPages) {
+                    loadActivity(activityCurrentPage + 1);
+                }
+            };
+            paginationContainer.appendChild(nextBtn);
+        }
+
+        function updateActivityPaginationInfo() {
+            const infoElement = document.getElementById('activityPaginationInfo');
+            if (!infoElement) return;
+
+            const start = (activityCurrentPage - 1) * activityItemsPerPage + 1;
+            const end = Math.min(activityCurrentPage * activityItemsPerPage, activityTotalItems);
+
+            infoElement.textContent = `${start}-${end} sur ${activityTotalItems} activités`;
         }
 
         function formatRelativeTime(dateStr) {
@@ -3007,10 +3144,24 @@
         }
 
         // ------------ NOTIFICATIONS ------------
-        async function loadNotifications() {
+        // Variables de pagination pour les notifications
+        let notificationCurrentPage = 1;
+        let notificationTotalPages = 1;
+        let notificationHasMore = false;
+        const notificationItemsPerPage = 15;
+        let allNotifications = [];
+
+        async function loadNotifications(reset = false) {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}`, {
+
+                // Si reset, on recharge depuis la page 1
+                if (reset) {
+                    notificationCurrentPage = 1;
+                    allNotifications = [];
+                }
+
+                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}?limit=${notificationItemsPerPage}&page=${notificationCurrentPage}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -3020,28 +3171,41 @@
 
                 // Adapter selon la structure de votre API
                 let notifications = [];
+                let total = 0;
+
                 if (Array.isArray(result)) {
                     notifications = result;
+                    total = result.length;
                 } else if (result.data && Array.isArray(result.data)) {
                     notifications = result.data;
+                    total = result.total || result.data.length;
                 } else if (result.notifications && Array.isArray(result.notifications)) {
                     notifications = result.notifications;
+                    total = result.total || result.notifications.length;
                 } else {
                     console.warn('Structure de notifications non reconnue:', result);
                 }
 
                 console.log('Notifications traitées:', notifications);
-                displayNotifications(notifications);
 
-                // Mettre à jour le badge
-                const unreadCount = notifications.filter(n =>
-                    !(n.is_read || n.read)
-                ).length;
+                // Ajouter les nouvelles notifications
+                if (reset) {
+                    allNotifications = notifications;
+                } else {
+                    allNotifications = [...allNotifications, ...notifications];
+                }
 
-                const badge = document.getElementById('notificationCount');
-                if (badge) {
-                    badge.textContent = unreadCount;
-                    badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                // Vérifier s'il y a plus de notifications
+                notificationTotalPages = result.totalPages || Math.ceil(total / notificationItemsPerPage);
+                notificationHasMore = notificationCurrentPage < notificationTotalPages;
+
+                displayNotifications(allNotifications, reset);
+                updateNotificationBadge();
+
+                // Afficher/masquer le bouton "Charger plus"
+                const loadMoreBtn = document.getElementById('notificationPagination');
+                if (loadMoreBtn) {
+                    loadMoreBtn.style.display = notificationHasMore ? 'block' : 'none';
                 }
             } catch (error) {
                 console.error('Erreur chargement notifications:', error);
@@ -3049,11 +3213,66 @@
             }
         }
 
-        function displayNotifications(notifications) {
+        async function loadMoreNotifications() {
+            notificationCurrentPage++;
+            await loadNotifications(false);
+        }
+
+        function updateNotificationBadge() {
+            // Compter les notifications non lues
+            const unreadCount = allNotifications.filter(n =>
+                !(n.is_read || n.read)
+            ).length;
+
+            const badge = document.getElementById('notificationCount');
+            if (badge) {
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'block' : 'none';
+            }
+        }
+
+        // Fonction pour charger uniquement le badge de notifications au démarrage
+        async function loadNotificationBadge() {
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE}${NOTIFICATIONS_ENDPOINT}?limit=1&page=1&unreadOnly=true`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) return;
+
+                const result = await response.json();
+
+                // Récupérer le nombre de notifications non lues
+                let unreadCount = 0;
+                if (result.unreadCount !== undefined) {
+                    unreadCount = result.unreadCount;
+                } else if (result.total !== undefined) {
+                    unreadCount = result.total;
+                } else if (Array.isArray(result)) {
+                    unreadCount = result.length;
+                } else if (result.data && Array.isArray(result.data)) {
+                    unreadCount = result.data.length;
+                }
+
+                const badge = document.getElementById('notificationCount');
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                }
+            } catch (error) {
+                console.error('Erreur chargement badge notifications:', error);
+            }
+        }
+
+        function displayNotifications(notifications, reset = false) {
             const container = document.getElementById('notificationList');
             if (!container) return;
 
-            container.innerHTML = '';
+            // Si reset, vider le container
+            if (reset) {
+                container.innerHTML = '';
+            }
 
             // Vérification du type
             if (!Array.isArray(notifications)) {
@@ -3067,7 +3286,11 @@
                 return;
             }
 
-            notifications.forEach(notification => {
+            // Afficher seulement les nouvelles notifications si pas reset
+            const startIndex = reset ? 0 : container.children.length;
+            const notificationsToDisplay = notifications.slice(startIndex);
+
+            notificationsToDisplay.forEach(notification => {
                 const div = document.createElement('div');
 
                 // Adapter selon la structure de vos données
@@ -3075,6 +3298,7 @@
                     notification.read !== undefined ? notification.read : true;
 
                 div.className = `notification-item ${isRead ? '' : 'unread'}`;
+                div.dataset.notificationId = notification.id;
 
                 // Utiliser les propriétés de votre réponse API
                 const message = notification.message || notification.action || 'Notification sans contenu';
@@ -3089,7 +3313,14 @@
                     if (!isRead && notification.id) {
                         await markAsRead(notification.id);
                         div.classList.remove('unread');
-                        loadNotifications(); // Recharger pour mettre à jour le badge
+                        // Mettre à jour l'objet notification dans le tableau
+                        const notifIndex = allNotifications.findIndex(n => n.id === notification.id);
+                        if (notifIndex !== -1) {
+                            allNotifications[notifIndex].is_read = true;
+                            allNotifications[notifIndex].read = true;
+                        }
+                        // Mettre à jour le badge sans recharger
+                        updateNotificationBadge();
                     }
                 });
 
@@ -3117,7 +3348,19 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                loadNotifications();
+                // Marquer toutes les notifications comme lues localement
+                allNotifications.forEach(n => {
+                    n.is_read = true;
+                    n.read = true;
+                });
+
+                // Mettre à jour l'affichage
+                const notificationItems = document.querySelectorAll('.notification-item');
+                notificationItems.forEach(item => item.classList.remove('unread'));
+
+                // Mettre à jour le badge
+                updateNotificationBadge();
+
                 showToast('Toutes les notifications marquées comme lues', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
@@ -3190,14 +3433,15 @@
                 if (panel) {
                     panel.classList.toggle('active');
 
-                    // Charger les notifications si le panel est ouvert
+                    // Charger les notifications si le panel est ouvert (reset à la page 1)
                     if (panel.classList.contains('active')) {
-                        loadNotifications();
+                        loadNotifications(true);
                     }
                 }
             });
 
             safeAddListener('markAllReadBtn', 'click', markAllAsRead);
+            safeAddListener('loadMoreNotifications', 'click', loadMoreNotifications);
 
             // Fermer le panel de notifications en cliquant à l'extérieur
             document.addEventListener('click', function (e) {
