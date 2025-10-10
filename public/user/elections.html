@@ -1841,7 +1841,7 @@
             }
         };
 
-        // NOUVEAU : Service de vérification des statuts
+        // Service de vérification des statuts
         const StatusService = {
             async checkIfResponsableSalle(studentId, ecoleId) {
                 try {
@@ -2346,20 +2346,28 @@
             if (items.length === 0) return;
 
             // Calcul correct de la largeur avec le gap
-            const itemStyle = window.getComputedStyle(items[0]);
-            const itemWidth = items[0].offsetWidth + parseInt(itemStyle.marginRight || 0);
+            const trackStyle = window.getComputedStyle(track);
+            const gap = parseInt(trackStyle.gap || 24); // 1.5rem = 24px par défaut
+            const itemWidth = items[0].offsetWidth;
+            const itemTotalWidth = itemWidth + gap;
 
             let currentPosition = 0;
             const visibleItems = Math.min(3, items.length); // Nombre d'éléments visibles
-            const maxPosition = -((items.length - visibleItems) * itemWidth);
+            const maxPosition = -((items.length - visibleItems) * itemTotalWidth);
+
+            // Nettoyer les anciens événements
+            const newPrevBtn = prevBtn.cloneNode(true);
+            const newNextBtn = nextBtn.cloneNode(true);
+            prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+            nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
 
             function updateButtons() {
-                prevBtn.disabled = currentPosition >= 0;
-                nextBtn.disabled = currentPosition <= maxPosition;
+                newPrevBtn.disabled = currentPosition >= 0;
+                newNextBtn.disabled = currentPosition <= maxPosition;
             }
 
             function moveCarousel(direction) {
-                const movement = direction === 'next' ? -itemWidth : itemWidth;
+                const movement = direction === 'next' ? -itemTotalWidth : itemTotalWidth;
                 let newPosition = currentPosition + movement;
 
                 // Limiter la position aux bornes
@@ -2375,8 +2383,8 @@
             track.style.transform = `translateX(0px)`;
 
             // Événements des boutons
-            prevBtn.addEventListener('click', () => moveCarousel('prev'));
-            nextBtn.addEventListener('click', () => moveCarousel('next'));
+            newPrevBtn.addEventListener('click', () => moveCarousel('prev'));
+            newNextBtn.addEventListener('click', () => moveCarousel('next'));
 
             // Mettre à jour l'état initial des boutons
             updateButtons();
@@ -2421,9 +2429,30 @@
                 }
             } else {
                 // Masquer les boutons si pas assez d'éléments
-                prevBtn.style.display = 'none';
-                nextBtn.style.display = 'none';
+                newPrevBtn.style.display = 'none';
+                newNextBtn.style.display = 'none';
             }
+
+            // Gérer le redimensionnement de la fenêtre
+            const resizeHandler = () => {
+                clearTimeout(window.carouselResizeTimeout);
+                window.carouselResizeTimeout = setTimeout(() => {
+                    initCarousel(ecole);
+                }, 250);
+            };
+
+            if (!window.carouselResizeListeners) {
+                window.carouselResizeListeners = {};
+            }
+
+            // Supprimer l'ancien listener s'il existe
+            if (window.carouselResizeListeners[ecole]) {
+                window.removeEventListener('resize', window.carouselResizeListeners[ecole]);
+            }
+
+            // Ajouter le nouveau listener
+            window.carouselResizeListeners[ecole] = resizeHandler;
+            window.addEventListener('resize', resizeHandler);
         }
 
         // Initialisation de la page
