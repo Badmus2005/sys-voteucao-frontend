@@ -717,21 +717,23 @@
 
         .candidate-header {
             position: relative;
-            padding: 20px 16px 16px;
+            padding: 20px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .candidate-photo-container {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 12px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             border: 3px solid white;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             background: white;
+            flex-shrink: 0;
         }
 
         .candidate-photo {
@@ -740,60 +742,67 @@
             object-fit: cover;
         }
 
+        .candidate-header-info {
+            flex: 1;
+            text-align: left;
+        }
+
         .candidate-name {
-            font-size: 1.25em;
+            font-size: 1.3em;
             font-weight: 700;
-            margin: 6px 0 2px;
-            line-height: 1.3;
+            margin: 0 0 6px 0;
+            line-height: 1.2;
         }
 
         .candidate-role {
             font-size: 0.85em;
             opacity: 0.9;
             background: rgba(255, 255, 255, 0.2);
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             display: inline-block;
         }
 
         .candidate-body {
-            padding: 16px;
+            padding: 18px 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
         .candidate-info-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 14px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
         .info-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
+            text-align: center;
+            padding: 10px 8px;
             background: #f8f9fa;
-            border-radius: 20px;
-            border: 1px solid #e0e6ed;
-            font-size: 0.85em;
+            border-radius: 8px;
+            border-bottom: 2px solid var(--primary);
         }
 
         .info-label {
+            font-size: 0.75em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
             font-weight: 600;
-            color: var(--primary);
         }
 
         .info-value {
-            color: #495057;
+            font-weight: 600;
+            color: #212529;
+            font-size: 0.95em;
         }
 
         .candidate-program {
             border-top: 1px solid #e9ecef;
-            padding-top: 12px;
+            padding-top: 14px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -802,26 +811,20 @@
         .candidate-program-title {
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .candidate-program-title i {
-            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .candidate-program-text {
             color: #495057;
-            line-height: 1.5;
-            font-size: 0.9em;
-            max-height: 60px;
+            line-height: 1.6;
+            font-size: 0.95em;
+            max-height: 65px;
             overflow: hidden;
             position: relative;
             flex-grow: 1;
-            font-style: italic;
         }
 
         .candidate-program-text:after {
@@ -830,14 +833,14 @@
             bottom: 0;
             right: 0;
             width: 30%;
-            height: 1.2em;
+            height: 1.5em;
             background: linear-gradient(to right, transparent, white);
         }
 
         .candidate-footer {
-            padding: 12px 16px 16px;
+            padding: 14px 20px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             border-top: 1px solid #e9ecef;
             background: #f8f9fa;
         }
@@ -2973,32 +2976,32 @@
                                 <img src="${photoUrl}" alt="${candidate.prenom} ${candidate.nom}" 
                                      class="candidate-photo" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80'">
                             </div>
-                            <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
-                            <div class="candidate-role">Candidat</div>
+                            <div class="candidate-header-info">
+                                <h3 class="candidate-name">${candidate.prenom} ${candidate.nom}</h3>
+                                <div class="candidate-role">Candidat</div>
+                            </div>
                         </div>
                         
                         <div class="candidate-body">
                             <div class="candidate-info-grid">
                                 <div class="info-item">
-                                    <span class="info-label">🏫</span>
-                                    <span class="info-value">${ecole}</span>
+                                    <div class="info-label">École</div>
+                                    <div class="info-value">${ecole}</div>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">📚</span>
-                                    <span class="info-value">${filiere}</span>
+                                    <div class="info-label">Filière</div>
+                                    <div class="info-value">${filiere}</div>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">📅</span>
-                                    <span class="info-value">${annee}</span>
+                                    <div class="info-label">Année</div>
+                                    <div class="info-value">${annee}</div>
                                 </div>
                             </div>
                             
                             <div class="candidate-program">
-                                <div class="candidate-program-title">
-                                    <i class="fas fa-quote-left"></i>Slogan
-                                </div>
+                                <div class="candidate-program-title">Slogan de campagne</div>
                                 <div class="candidate-program-text">
-                                    "${candidate.slogan || 'Candidat engagé pour le changement'}"
+                                    ${candidate.slogan || 'Candidat engagé pour le changement'}
                                 </div>
                             </div>
                         </div>
