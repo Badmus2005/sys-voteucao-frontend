@@ -3860,17 +3860,41 @@
             }
 
             // Remplir le modal avec les données de l'élection
-            document.getElementById('modalElectionTitle').textContent = election.titre;
+            console.log('🗳️ Ouverture modal élection:', election);
+
+            document.getElementById('modalElectionTitle').textContent = election.titre || 'Élection';
             document.getElementById('modalElectionType').textContent = ElectionService.getElectionTypeLabel(election.type);
 
             // Informations générales
             const infoGrid = document.getElementById('modalElectionInfo');
+
+            // Récupérer le nom de l'école depuis différentes sources possibles
+            const ecoleNom = election.nomEcole || election.ecole_nom ||
+                (election.ecoleId && ECOLE_CONFIG[election.ecoleId]?.name) ||
+                'Non spécifiée';
+
+            // Récupérer le nom de la filière si disponible
+            const filiereNom = election.nomFiliere || election.filiere_nom || 'Toutes';
+
+            // Déterminer le niveau si c'est une élection de salle
+            const niveau = election.type === 'SALLE' && election.niveau ?
+                `Niveau ${election.niveau}` : '';
+
+            // Déterminer l'année si disponible
+            const annee = election.annee ? `Année ${election.annee}` : '';
+
             const generalInfos = [
-                { label: 'École/Faculté', value: ECOLE_CONFIG[election.ecole]?.name || election.ecole || 'N/A' },
-                { label: 'Type', value: ElectionService.getElectionTypeLabel(election.type) },
+                { label: 'École/Faculté', value: ecoleNom },
+                { label: 'Filière', value: filiereNom },
+                election.type === 'SALLE' && niveau ? { label: 'Niveau', value: niveau } : null,
+                election.annee ? { label: 'Année', value: annee } : null,
+                { label: 'Type d\'élection', value: ElectionService.getElectionTypeLabel(election.type) },
                 { label: 'Statut', value: ElectionService.getStatusText(ElectionService.getElectionStatus(election)) },
-                { label: 'Nombre de candidats', value: election.nb_candidats || 0 }
-            ];
+                { label: 'Nombre de candidats', value: `${election.nb_candidats || 0} candidat(s)` },
+                election.nb_votes ? { label: 'Votes enregistrés', value: `${election.nb_votes} vote(s)` } : null
+            ].filter(info => info !== null); // Filtrer les infos null
+
+            console.log('📊 Informations générales:', generalInfos);
 
             infoGrid.innerHTML = generalInfos.map(info => `
         <div class="modal-info-item">
@@ -3881,20 +3905,40 @@
 
             // Dates importantes
             const datesGrid = document.getElementById('modalElectionDates');
+
+            // Formater les dates en français
+            const formatDate = (dateString) => {
+                if (!dateString) return null;
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
             const electionDates = [
                 {
-                    label: 'Période de candidature',
-                    value: election.dateDebutCandidature && election.dateFinCandidature
-                        ? `${new Date(election.dateDebutCandidature).toLocaleDateString()} - ${new Date(election.dateFinCandidature).toLocaleDateString()}`
-                        : 'Non définie'
+                    label: 'Début des candidatures',
+                    value: formatDate(election.dateDebutCandidature) || 'Non définie'
                 },
                 {
-                    label: 'Période de vote',
-                    value: election.dateDebut && election.dateFin
-                        ? `${new Date(election.dateDebut).toLocaleDateString()} - ${new Date(election.dateFin).toLocaleDateString()}`
-                        : 'Non définie'
+                    label: 'Fin des candidatures',
+                    value: formatDate(election.dateFinCandidature) || 'Non définie'
+                },
+                {
+                    label: 'Début du vote',
+                    value: formatDate(election.dateDebut) || 'Non définie'
+                },
+                {
+                    label: 'Fin du vote',
+                    value: formatDate(election.dateFin) || 'Non définie'
                 }
             ];
+
+            console.log('📅 Dates:', electionDates);
 
             datesGrid.innerHTML = electionDates.map(date => `
         <div class="modal-info-item">
@@ -3905,17 +3949,37 @@
 
             // Description
             const descriptionElement = document.getElementById('modalElectionDescription');
-            descriptionElement.textContent = election.description || 'Aucune description disponible pour cette élection.';
+            if (election.description && election.description.trim()) {
+                descriptionElement.innerHTML = `<p style="white-space: pre-wrap; line-height: 1.6;">${election.description}</p>`;
+            } else {
+                descriptionElement.innerHTML = '<p style="text-align: center; color: #6c757d; font-style: italic;">Aucune description disponible pour cette élection.</p>';
+            }
+
+            console.log('📝 Description:', election.description || 'Aucune');
 
             // Statistiques (si disponibles)
             const statsElement = document.getElementById('modalElectionStatsContent');
             const statsSection = document.getElementById('modalElectionStats');
 
+            const nbCandidats = election.nb_candidats || 0;
+            const nbVotes = election.nb_votes || 0;
+
+            // Calculer le taux de participation si possible
+            let tauxParticipation = 'Non disponible';
+            if (nbVotes > 0 && election.nb_votants_attendus) {
+                tauxParticipation = `${((nbVotes / election.nb_votants_attendus) * 100).toFixed(2)}%`;
+            } else if (election.taux_participation) {
+                tauxParticipation = `${election.taux_participation}%`;
+            }
+
             const stats = [
-                { label: 'Candidats inscrits', value: election.nb_candidats || 0 },
-                { label: 'Votes attendus', value: election.nb_votants_attendus || 'Non disponible' },
-                { label: 'Taux de participation', value: election.taux_participation ? `${election.taux_participation}%` : 'Non disponible' }
-            ];
+                { label: 'Candidats approuvés', value: `${nbCandidats} candidat(s)` },
+                { label: 'Votes enregistrés', value: `${nbVotes} vote(s)` },
+                election.nb_votants_attendus ? { label: 'Votants attendus', value: election.nb_votants_attendus } : null,
+                { label: 'Taux de participation', value: tauxParticipation }
+            ].filter(stat => stat !== null);
+
+            console.log('📊 Statistiques:', stats);
 
             statsElement.innerHTML = stats.map(stat => `
         <div class="modal-info-item">
@@ -3924,9 +3988,8 @@
         </div>
     `).join('');
 
-            // Afficher ou masquer la section statistiques selon les données disponibles
-            const hasStats = election.nb_candidats || election.nb_votants_attendus || election.taux_participation;
-            statsSection.style.display = hasStats ? 'block' : 'none';
+            // Toujours afficher la section statistiques (au moins nb_candidats et nb_votes)
+            statsSection.style.display = 'block';
 
             // Afficher le modal
             modal.style.display = 'block';
