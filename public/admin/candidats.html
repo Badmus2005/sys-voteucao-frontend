@@ -1235,6 +1235,28 @@
         let currentPage = 1;
         const itemsPerPage = 10;
 
+        // Fonction pour vérifier si on est en période de candidature
+        function isCandidaturePeriodActive(candidate) {
+            if (!candidate.dateDebutCandidature || !candidate.dateFinCandidature) {
+                return false; // Pas de dates définies = pas de modification possible
+            }
+
+            const now = new Date();
+            const debutCandidature = new Date(candidate.dateDebutCandidature);
+            const finCandidature = new Date(candidate.dateFinCandidature);
+
+            // Vérifier si on est dans la période de candidature
+            const isDansLaPeriode = now >= debutCandidature && now <= finCandidature;
+
+            // Vérifier si l'élection est en phase de candidature (PHASE1)
+            const isPhase1 = candidate.electionNiveau === 'PHASE1';
+
+            // Vérifier si l'élection est active
+            const isElectionActive = candidate.electionActive === 1 || candidate.electionActive === true;
+
+            return isDansLaPeriode && isPhase1 && isElectionActive;
+        }
+
         // Set up event listeners
         function setupEventListeners() {
             // Gestion du menu mobile
@@ -1499,6 +1521,32 @@
                 // Format date
                 const submissionDate = new Date(candidate.dateSoumission).toLocaleDateString('fr-FR');
 
+                // Vérifier si on peut modifier le statut (période de candidature active)
+                const canModify = isCandidaturePeriodActive(candidate);
+
+                // Créer le bouton avec ou sans désactivation
+                let actionButton = '';
+                if (canModify) {
+                    actionButton = `
+                        <button class="btn btn-sm btn-outline-primary change-status-btn" 
+                                data-id="${candidate.candidateId || candidate.id}"
+                                title="Modifier le statut">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                    `;
+                } else {
+                    actionButton = `
+                        <button class="btn btn-sm btn-outline-secondary" 
+                                disabled
+                                title="Période de candidature terminée - Modification impossible">
+                            <i class="fas fa-lock"></i> Verrouillé
+                        </button>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">
+                            <i class="fas fa-info-circle"></i> Période terminée
+                        </small>
+                    `;
+                }
+
                 row.innerHTML = `
                     <td>${candidate.candidateId || candidate.id}</td>
                     <td>${candidate.nom}</td>
@@ -1509,9 +1557,7 @@
                     <td><span class="badge ${badgeClass} status-badge">${candidate.statut}</span></td>
                     <td>${submissionDate}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary change-status-btn" data-id="${candidate.candidateId || candidate.id}">
-                            <i class="fas fa-edit"></i> Modifier
-                        </button>
+                        ${actionButton}
                     </td>
                 `;
 
@@ -1618,12 +1664,22 @@
                 return;
             }
 
-            modalCandidateId.value = candidateId;
-
+            // Trouver le candidat et vérifier la période
             const candidate = allCandidatures.find(c => c.id == candidateId || c.candidateId == candidateId);
-            if (candidate) {
-                statusSelect.value = candidate.statut || 'EN_ATTENTE';
+
+            if (!candidate) {
+                showToast('Candidat non trouvé', 'error');
+                return;
             }
+
+            // Vérifier si on est en période de candidature
+            if (!isCandidaturePeriodActive(candidate)) {
+                showToast('Impossible de modifier : La période de candidature est terminée', 'warning');
+                return;
+            }
+
+            modalCandidateId.value = candidateId;
+            statusSelect.value = candidate.statut || 'EN_ATTENTE';
 
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
@@ -1637,6 +1693,16 @@
 
             if (!candidateId || !newStatus) {
                 showToast('Veuillez sélectionner un statut valide', 'warning');
+                return;
+            }
+
+            // Vérifier à nouveau la période de candidature (sécurité)
+            const candidate = allCandidatures.find(c => c.id == candidateId || c.candidateId == candidateId);
+            if (!candidate || !isCandidaturePeriodActive(candidate)) {
+                showToast('Impossible de modifier : La période de candidature est terminée', 'error');
+                // Fermer le modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('statusModal'));
+                if (modal) modal.hide();
                 return;
             }
 
