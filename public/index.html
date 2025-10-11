@@ -1685,7 +1685,18 @@
                     throw new Error('Erreur lors du chargement des élections');
                 }
 
-                const elections = await response.json();
+                const data = await response.json();
+                console.log('Réponse API élections:', data);
+
+                // Extraire le tableau d'élections selon la structure de l'API
+                let elections = [];
+                if (Array.isArray(data)) {
+                    elections = data;
+                } else if (data.data && Array.isArray(data.data)) {
+                    elections = data.data;
+                } else if (data.elections && Array.isArray(data.elections)) {
+                    elections = data.elections;
+                }
 
                 // Afficher les élections
                 displayElections(elections);
@@ -1705,7 +1716,8 @@
         function displayElections(elections) {
             if (!electionsScroll) return;
 
-            if (!elections || elections.length === 0) {
+            // Vérifier si elections est un tableau valide
+            if (!Array.isArray(elections) || elections.length === 0) {
                 electionsScroll.innerHTML = `
                     <div style="text-align: center; padding: 40px; min-width: 100%;">
                         <i class="fas fa-calendar-times" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
@@ -1715,6 +1727,8 @@
                 `;
                 return;
             }
+
+            console.log(`Affichage de ${elections.length} élection(s)`);
 
             // Générer le HTML pour chaque élection
             electionsScroll.innerHTML = elections.map(election => {
