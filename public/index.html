@@ -1662,6 +1662,15 @@
         let allElections = [];
         let currentFilter = 'all';
 
+        // Images par défaut pour chaque école
+        const ECOLE_IMAGES = {
+            'EGEI': 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+            'ESMEA': 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+            'FSAE': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+            'FDE': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+            'default': 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+        };
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
             initializeApp();
@@ -1927,9 +1936,12 @@
                 };
                 const config = statusConfig[status];
 
+                // Image par défaut selon l'école
+                const ecoleImage = ECOLE_IMAGES[election.ecole] || ECOLE_IMAGES['default'];
+
                 return `
                     <div class="election-card" data-election-id="${election.id}">
-                        <div class="election-image" style="background-image: url('${election.image || '/assets/images/default-election.jpg'}')">
+                        <div class="election-image" style="background-image: url('${ecoleImage}')">
                             <span class="election-badge ${config.class}">
                                 <i class="fas fa-${config.icon}"></i> ${config.text}
                             </span>
