@@ -363,12 +363,27 @@
         /* Features Section premium */
         .features {
             background: white;
+            position: relative;
         }
 
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 2.5rem;
+        }
+
+        .scroll-hint {
+            display: none;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .scroll-hint i {
+            margin: 0 0.5rem;
+            color: var(--primary);
         }
 
         .feature-card {
@@ -1081,9 +1096,48 @@
                 font-size: 2rem;
             }
 
+            /* Défilement horizontal pour features et steps sur mobile */
             .features-grid,
             .steps {
-                grid-template-columns: 1fr;
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scroll-snap-type: x mandatory;
+                scroll-behavior: smooth;
+                gap: 1.5rem;
+                padding: 1rem 0.5rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--primary) var(--gray-light);
+            }
+
+            .features-grid::-webkit-scrollbar,
+            .steps::-webkit-scrollbar {
+                height: 8px;
+            }
+
+            .features-grid::-webkit-scrollbar-track,
+            .steps::-webkit-scrollbar-track {
+                background: var(--gray-light);
+                border-radius: 10px;
+            }
+
+            .features-grid::-webkit-scrollbar-thumb,
+            .steps::-webkit-scrollbar-thumb {
+                background: var(--primary);
+                border-radius: 10px;
+            }
+
+            .feature-card,
+            .step {
+                min-width: 85%;
+                max-width: 85%;
+                flex-shrink: 0;
+                scroll-snap-align: center;
+            }
+
+            .scroll-hint {
+                display: block;
             }
 
             .elections-header {
@@ -1248,6 +1302,12 @@
                     </p>
                 </div>
             </div>
+
+            <div class="scroll-hint">
+                <i class="fas fa-arrow-left"></i>
+                Faites défiler horizontalement
+                <i class="fas fa-arrow-right"></i>
+            </div>
         </div>
     </section>
 
@@ -1307,7 +1367,7 @@
         </div>
     </section>
 
-    <!-- How it Works Premium -->
+    <!-- How it Works  -->
     <section class="how-it-works section" id="how-it-works">
         <div class="container">
             <h2 class="section-title">Comment voter en 3 étapes</h2>
@@ -1335,6 +1395,12 @@
                         sécurisée et anonyme.</p>
                 </div>
             </div>
+
+            <div class="scroll-hint">
+                <i class="fas fa-arrow-left"></i>
+                Faites défiler horizontalement
+                <i class="fas fa-arrow-right"></i>
+            </div>
         </div>
     </section>
 
@@ -1349,7 +1415,7 @@
         </div>
     </section>
 
-    <!-- Footer Premium - NOUVELLE VERSION BLANCHE -->
+    <!-- Footer  -->
     <footer class="footer" id="contact">
         <div class="container">
             <div class="footer-content">
