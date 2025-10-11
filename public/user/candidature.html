@@ -1167,11 +1167,11 @@
                             <input type="text" class="form-input" id="electionName" readonly>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" id="sloganGroup">
                             <label for="slogan" class="form-label required">Slogan de campagne</label>
                             <input type="text" id="slogan" class="form-input" placeholder="Votre slogan accrocheur"
-                                required maxlength="100">
-                            <div class="form-help">Maximum 100 caractères</div>
+                                maxlength="50">
+                            <div class="form-help">Maximum 50 caractères <span id="sloganCounter"></span></div>
                         </div>
 
                         <div class="form-group">
@@ -1194,20 +1194,22 @@
                             </div>
                         </div>
 
-                        <div class="form-group full-width">
+                        <div class="form-group full-width" id="programGroup">
                             <label for="program" class="form-label required">Programme électoral</label>
                             <textarea id="program" class="form-textarea"
-                                placeholder="Décrivez votre programme, vos propositions et vos engagements..." required
-                                minlength="50" maxlength="2000"></textarea>
-                            <div class="form-help">Minimum 50 caractères, maximum 2000 caractères</div>
+                                placeholder="Décrivez votre programme, vos propositions et vos engagements..."
+                                minlength="100" maxlength="500" rows="6"></textarea>
+                            <div class="form-help">Minimum 100 caractères, maximum 500 caractères <span
+                                    id="programCounter"></span></div>
                         </div>
 
                         <div class="form-group full-width">
                             <label for="motivation" class="form-label required">Lettre de motivation</label>
                             <textarea id="motivation" class="form-textarea"
                                 placeholder="Expliquez pourquoi vous êtes le meilleur candidat pour ce poste..."
-                                required minlength="100" maxlength="1000"></textarea>
-                            <div class="form-help">Minimum 100 caractères, maximum 1000 caractères</div>
+                                required minlength="50" maxlength="300" rows="5"></textarea>
+                            <div class="form-help">Minimum 50 caractères, maximum 300 caractères <span
+                                    id="motivationCounter"></span></div>
                         </div>
                     </div>
 
@@ -1467,6 +1469,58 @@
             document.getElementById('electionSubtitle').textContent = `Poste de ${ElectionService.getDelegueTypeLabel(election.delegueType)} - ${ElectionService.getElectionTypeLabel(election.type)}`;
             document.getElementById('electionName').value = election.titre;
             document.getElementById('candidatureHeader').style.display = 'block';
+
+            // Adapter le formulaire selon la PHASE
+            adaptFormForPhase(election.niveau);
+        }
+
+        // Fonction pour adapter le formulaire selon la phase de l'élection
+        function adaptFormForPhase(niveau) {
+            const sloganGroup = document.getElementById('sloganGroup');
+            const programGroup = document.getElementById('programGroup');
+            const sloganInput = document.getElementById('slogan');
+            const programInput = document.getElementById('program');
+
+            if (niveau === 'PHASE1') {
+                // PHASE1 : Responsables de salle
+                // Masquer slogan et programme
+                if (sloganGroup) sloganGroup.style.display = 'none';
+                if (programGroup) programGroup.style.display = 'none';
+
+                // Retirer l'attribut required
+                if (sloganInput) sloganInput.removeAttribute('required');
+                if (programInput) programInput.removeAttribute('required');
+
+                // Le slogan sera généré automatiquement dans handleFormSubmit()
+            } else {
+                // PHASE2 & PHASE3 : Délégués École/Université
+                // Afficher slogan et programme
+                if (sloganGroup) sloganGroup.style.display = 'block';
+                if (programGroup) programGroup.style.display = 'block';
+
+                // Ajouter l'attribut required
+                if (sloganInput) sloganInput.setAttribute('required', 'required');
+                if (programInput) programInput.setAttribute('required', 'required');
+            }
+        }
+
+        // Fonction pour générer un slogan automatique pour PHASE1
+        function generateSloganPhase1() {
+            const slogans = [
+                "Ensemble pour une salle organisée !",
+                "Votre voix, notre priorité !",
+                "Un délégué à votre écoute !",
+                "Pour une meilleure communication !",
+                "Responsable et engagé pour vous !",
+                "Votre salle, notre engagement !",
+                "Au service de la classe !",
+                "Ensemble, réussissons !",
+                "Votre représentant dévoué !",
+                "Pour une salle solidaire !"
+            ];
+
+            // Choisir aléatoirement un slogan
+            return slogans[Math.floor(Math.random() * slogans.length)];
         }
 
         async function checkEligibility(election) {
@@ -1783,10 +1837,54 @@
                 }
 
                 initImageUploadHandlers();
+                initCharacterCounters();
 
             } catch (error) {
                 console.error('Erreur initialisation handlers:', error);
                 Common.showToast('Une erreur est survenue lors de l\'initialisation', 'error');
+            }
+        }
+
+        // Fonction pour initialiser les compteurs de caractères
+        function initCharacterCounters() {
+            const slogan = document.getElementById('slogan');
+            const program = document.getElementById('program');
+            const motivation = document.getElementById('motivation');
+
+            if (slogan) {
+                slogan.addEventListener('input', function () {
+                    updateCounter('sloganCounter', this.value.length, this.maxLength);
+                });
+            }
+
+            if (program) {
+                program.addEventListener('input', function () {
+                    updateCounter('programCounter', this.value.length, this.maxLength);
+                });
+            }
+
+            if (motivation) {
+                motivation.addEventListener('input', function () {
+                    updateCounter('motivationCounter', this.value.length, this.maxLength);
+                });
+            }
+        }
+
+        // Fonction pour mettre à jour un compteur
+        function updateCounter(counterId, currentLength, maxLength) {
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                const remaining = maxLength - currentLength;
+                counter.textContent = `(${currentLength}/${maxLength})`;
+
+                // Changer la couleur si proche de la limite
+                if (remaining < 20) {
+                    counter.style.color = 'var(--warning)';
+                } else if (remaining === 0) {
+                    counter.style.color = 'var(--danger)';
+                } else {
+                    counter.style.color = 'var(--gray)';
+                }
             }
         }
 
@@ -1986,11 +2084,24 @@
             Common.showLoading();
 
             try {
+                // Gérer le slogan selon la PHASE
+                let sloganValue, programmeValue;
+
+                if (currentElection.niveau === 'PHASE1') {
+                    // PHASE1 : Générer slogan automatique, programme vide
+                    sloganValue = generateSloganPhase1();
+                    programmeValue = 'Programme standard de responsable de salle'; // Valeur par défaut
+                } else {
+                    // PHASE2 & PHASE3 : Utiliser les valeurs du formulaire
+                    sloganValue = document.getElementById('slogan').value.trim();
+                    programmeValue = document.getElementById('program').value.trim();
+                }
+
                 // STRUCTURE CORRECTE selon votre backend
                 const candidatureData = {
                     electionId: currentElection.id,
-                    slogan: document.getElementById('slogan').value.trim(),
-                    programme: document.getElementById('program').value.trim(),
+                    slogan: sloganValue,
+                    programme: programmeValue,
                     motivation: document.getElementById('motivation').value.trim(),
                     photoUrl: uploadedImageUrl,
                     // AJOUT DES CHAMPS OBLIGATOIRES manquants

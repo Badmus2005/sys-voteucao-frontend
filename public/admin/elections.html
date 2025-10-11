@@ -404,6 +404,7 @@
             transition: var(--transition);
             cursor: pointer;
             position: relative;
+            text-decoration: none;
         }
 
         .nav-item:hover {
@@ -1041,6 +1042,8 @@
             border: 1px solid var(--light-bg);
             border-radius: 8px;
             background: var(--card-bg);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
         }
 
         /* Loading and Empty States */
@@ -1297,6 +1300,100 @@
             color: white;
         }
 
+        /* Styles pour le profil utilisateur dans la sidebar */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            margin-top: auto;
+        }
+
+        .user-profile .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-profile .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--blue-night);
+        }
+
+        .user-profile .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Toast Container */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1300;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        /* Logo dans la sidebar */
+        .sidebar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--blue-night);
+        }
+
+        .logo-icon {
+            color: var(--bordeaux);
+            font-size: 1.2rem;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .charts-container {
@@ -1518,7 +1615,7 @@
                 <div class="nav-title">Administration</div>
                 <a href="../index.html" class="nav-item">
                     <i class="fas fa-cog nav-icon"></i>
-                    <span class="nav-text">Acceuil</span>
+                    <span class="nav-text">Accueil</span>
                 </a>
 
                 <a href="activity.html" class="nav-item">
@@ -1536,7 +1633,7 @@
                 </a>
             </nav>
 
-            <div class="user-profile" style="margin-top: auto;">
+            <div class="user-profile">
                 <img src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
                     alt="Admin" class="user-avatar">
                 <div class="user-info">
@@ -1751,7 +1848,28 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="markAllReadBtn"
+                style="background: none; border: none; color: var(--bordeaux); cursor: pointer; font-size: 0.85rem; font-weight: 600;">Tout
+                marquer comme lu</button>
+        </div>
+        <div id="notificationList"></div>
+        <div id="notificationPagination"
+            style="padding: 10px 15px; border-top: 1px solid var(--light-bg); display: none;">
+            <button id="loadMoreNotifications"
+                style="width: 100%; padding: 8px; background: var(--bordeaux); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                <i class="fas fa-angle-down"></i> Charger plus
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="/assets/config.js"></script>
+    <script src="/assets/js/admin-notifications.js"></script>
     <script>
         // Configuration des API
         const API_BASE = CONFIG.BASE_URL;
@@ -2057,14 +2175,6 @@
             document.getElementById("totalCandidatesCount").textContent = totalCandidates;
         }
 
-        function showLoading() {
-            document.getElementById("electionsContainer").innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>`;
-            document.getElementById("emptyState").style.display = 'none';
-        }
-
         function applyFilters() {
             const phaseFilter = document.getElementById("filterPhase").value;
             const typeFilter = document.getElementById("filterType").value;
@@ -2349,10 +2459,6 @@
             window.location.href = `results.html?id=${id}`;
         }
 
-        function viewElection(id) {
-            window.location.href = `election-details.html?id=${id}`;
-        }
-
         async function viewElectionDetails(id) {
             try {
                 const response = await fetch(`${API_BASE}/api/elections/${id}`, {
@@ -2391,9 +2497,6 @@
                 let typeIcon = 'user-friends';
                 if (election.type === 'ECOLE') typeIcon = 'building';
                 else if (election.type === 'UNIVERSITE') typeIcon = 'graduation-cap';
-
-                // Log pour déboguer
-                console.log('Données élection reçues:', election);
 
                 const modalContent = document.getElementById('electionDetailsContent');
                 modalContent.innerHTML = `
@@ -2564,27 +2667,6 @@
             document.getElementById("helpModal").classList.remove("active");
         }
     </script>
-
-    <!-- Notification Panel -->
-    <div class="notification-panel" id="notificationPanel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button id="markAllReadBtn"
-                style="background: none; border: none; color: var(--bordeaux); cursor: pointer; font-size: 0.85rem; font-weight: 600;">Tout
-                marquer comme lu</button>
-        </div>
-        <div id="notificationList"></div>
-        <div id="notificationPagination"
-            style="padding: 10px 15px; border-top: 1px solid var(--light-bg); display: none;">
-            <button id="loadMoreNotifications"
-                style="width: 100%; padding: 8px; background: var(--bordeaux); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
-                <i class="fas fa-angle-down"></i> Charger plus
-            </button>
-        </div>
-    </div>
-
-    <!-- Script de gestion des notifications -->
-    <script src="/assets/js/admin-notifications.js"></script>
 </body>
 
 </html>
