@@ -1015,6 +1015,28 @@
         // Vérifier si l'utilisateur a déjà des activités (utilisant la route que vous avez fournie)
         async function checkUserActivities(token) {
             try {
+                // Vérifier si une redirection est spécifiée dans l'URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectUrl = urlParams.get('redirect');
+                const electionId = urlParams.get('electionId');
+
+                // Si une redirection est spécifiée, rediriger directement
+                if (redirectUrl) {
+                    console.log('Redirection spécifiée:', redirectUrl);
+                    let finalUrl = redirectUrl;
+
+                    // Ajouter l'electionId si présent
+                    if (electionId) {
+                        finalUrl += (redirectUrl.includes('?') ? '&' : '?') + `electionId=${electionId}`;
+                    }
+
+                    setTimeout(() => {
+                        window.location.replace(finalUrl);
+                    }, 500);
+                    return;
+                }
+
+                // Sinon, comportement normal
                 const res = await fetch(`${API_URL}/api/activities/my-activities`, {
                     method: 'GET',
                     headers: {
