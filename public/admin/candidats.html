@@ -1248,13 +1248,12 @@
             // Vérifier si on est dans la période de candidature
             const isDansLaPeriode = now >= debutCandidature && now <= finCandidature;
 
-            // Vérifier si l'élection est en phase de candidature (PHASE1)
-            const isPhase1 = candidate.electionNiveau === 'PHASE1';
-
             // Vérifier si l'élection est active
             const isElectionActive = candidate.electionActive === 1 || candidate.electionActive === true;
 
-            return isDansLaPeriode && isPhase1 && isElectionActive;
+            // CORRECTION : PHASE1/2/3 sont des TYPES d'élections, pas des étapes
+            // Modification possible uniquement pendant la période de candidature, peu importe la phase
+            return isDansLaPeriode && isElectionActive;
         }
 
         // Set up event listeners
