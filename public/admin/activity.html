@@ -1010,8 +1010,7 @@
                     <span></span>
                     <span></span>
                 </div>
-                <img src="https://img.freepik.com/photos-premium/photo-etudiant-i-image-etudiant-i-etudiants-souriants-i-etudiant-universitaire-i-etudiants-collage_403587-2980.jpg"
-                    alt="Logo UCAO">
+                <img src="/assets/images/logo.png" class="logo-image" alt="Logo UCAO">
                 <div class="logo-text">
                     <h1>Admin UCAO</h1>
                     <p>Portail d'administration</p>
@@ -1655,6 +1654,43 @@
         // =============================================
         // INITIALISATION
         // =============================================
+        // ------------ ADMIN PROFILE ------------
+        async function loadAdminInfo() {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_BASE}/api/admin/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Erreur chargement profil');
+
+                const result = await res.json();
+                const admin = result.data || result;
+                updateAdminUI(admin);
+            } catch (err) {
+                console.error('Erreur chargement info admin:', err);
+            }
+        }
+
+        function updateAdminUI(admin) {
+            const elements = {
+                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
+                headerUserRole: admin.poste || 'Administrateur'
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                }
+            });
+
+            if (admin.photoUrl) {
+                const userAvatar = document.querySelector('.user-avatar');
+                if (userAvatar) userAvatar.src = admin.photoUrl + '?t=' + Date.now();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Vérification de l'authentification
             const token = localStorage.getItem('token');
@@ -1662,6 +1698,9 @@
                 window.location.href = '/admin';
                 return;
             }
+
+            // Charger le profil admin
+            loadAdminInfo();
 
             // Initialisation de la gestion des activités
             ACTIVITY_MANAGER.init();

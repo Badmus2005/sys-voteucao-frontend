@@ -1323,11 +1323,51 @@
         });
 
         function initializeResultsPage() {
+            // Charger le profil admin
+            loadAdminInfo();
+
             // Initialiser les gestionnaires d'événements
             setupEventListeners();
 
             // Charger les élections disponibles
             loadElections();
+        }
+
+        // ------------ ADMIN PROFILE ------------
+        async function loadAdminInfo() {
+            try {
+                const token = getToken();
+                const res = await fetch(`${API_BASE}/api/admin/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error('Erreur chargement profil');
+
+                const result = await res.json();
+                const admin = result.data || result;
+                updateAdminUI(admin);
+            } catch (err) {
+                console.error('Erreur chargement info admin:', err);
+            }
+        }
+
+        function updateAdminUI(admin) {
+            const elements = {
+                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
+                headerUserRole: admin.poste || 'Administrateur'
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                }
+            });
+
+            if (admin.photoUrl) {
+                const userAvatar = document.querySelector('.user-avatar');
+                if (userAvatar) userAvatar.src = admin.photoUrl + '?t=' + Date.now();
+            }
         }
 
         // ------------ UTILS ------------
