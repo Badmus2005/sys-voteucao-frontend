@@ -627,10 +627,73 @@
         .elections-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
+            align-items: flex-start;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             gap: 25px;
+        }
+
+        .elections-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border: 2px solid var(--gray-light);
+            background: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-btn i {
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(128, 0, 32, 0.15);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(128, 0, 32, 0.3);
+        }
+
+        .filter-btn.active i {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .filter-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .filter-btn.active .filter-count {
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .elections-navigation {
@@ -1223,6 +1286,24 @@
                 align-items: flex-start;
             }
 
+            .elections-filters {
+                gap: 10px;
+                padding: 0 10px;
+            }
+
+            .filter-btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .filter-btn span:not(.filter-count) {
+                display: none;
+            }
+
+            .filter-btn i {
+                margin: 0;
+            }
+
             .election-card {
                 min-width: 300px;
             }
@@ -1408,12 +1489,14 @@
     </section>
 
 
-    <!-- Elections Section simplifiée -->
+    <!-- Elections Section avec filtres -->
     <section class="elections section" id="elections">
         <div class="container">
             <div class="elections-header">
-                <h2 class="section-title">Élections en Cours</h2>
-                <p class="section-subtitle">Participez aux scrutins ouverts et faites entendre votre voix</p>
+                <div>
+                    <h2 class="section-title">Nos Élections</h2>
+                    <p class="section-subtitle">Découvrez toutes les élections disponibles</p>
+                </div>
                 <div class="elections-navigation">
                     <button class="elections-nav-btn" id="scrollLeft">
                         <i class="fas fa-chevron-left"></i>
@@ -1424,6 +1507,30 @@
                 </div>
             </div>
 
+            <!-- Filtres par statut -->
+            <div class="elections-filters">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-th"></i>
+                    <span>Toutes</span>
+                    <span class="filter-count" id="count-all">0</span>
+                </button>
+                <button class="filter-btn" data-filter="active">
+                    <i class="fas fa-play-circle"></i>
+                    <span>En cours</span>
+                    <span class="filter-count" id="count-active">0</span>
+                </button>
+                <button class="filter-btn" data-filter="upcoming">
+                    <i class="fas fa-clock"></i>
+                    <span>À venir</span>
+                    <span class="filter-count" id="count-upcoming">0</span>
+                </button>
+                <button class="filter-btn" data-filter="ended">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Terminées</span>
+                    <span class="filter-count" id="count-ended">0</span>
+                </button>
+            </div>
+
             <div class="loading" id="loading-elections"></div>
             <div class="elections-container">
                 <div class="elections-scroll" id="elections-scroll">
@@ -1431,7 +1538,7 @@
                     <div style="text-align: center; padding: 40px; min-width: 100%;">
                         <i class="fas fa-calendar-check" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
                         <h3 style="color: var(--secondary); margin-bottom: 15px;">Chargement des élections</h3>
-                        <p>Les élections actives seront affichées ici une fois chargées.</p>
+                        <p>Les élections seront affichées ici une fois chargées.</p>
                     </div>
                 </div>
             </div>
@@ -1551,6 +1658,10 @@
         const scrollLeftBtn = document.getElementById('scrollLeft');
         const scrollRightBtn = document.getElementById('scrollRight');
 
+        // Variables globales
+        let allElections = [];
+        let currentFilter = 'all';
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', function () {
             initializeApp();
@@ -1560,8 +1671,32 @@
 
         // Initialisation de l'application
         function initializeApp() {
-            // Charger les élections actives depuis l'API
-            loadActiveElections();
+            // Charger toutes les élections depuis l'API
+            loadAllElections();
+
+            // Initialiser les filtres
+            setupFilters();
+        }
+
+        // Configurer les filtres
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Retirer la classe active de tous les boutons
+                    filterButtons.forEach(b => b.classList.remove('active'));
+
+                    // Ajouter la classe active au bouton cliqué
+                    this.classList.add('active');
+
+                    // Récupérer le filtre
+                    currentFilter = this.dataset.filter;
+
+                    // Filtrer et afficher les élections
+                    filterAndDisplayElections();
+                });
+            });
         }
 
         // Configuration des écouteurs d'événements
@@ -1670,36 +1805,38 @@
             document.body.style.overflow = '';
         }
 
-        // Charger les élections actives depuis l'API
-        async function loadActiveElections() {
+        // Charger toutes les élections depuis l'API
+        async function loadAllElections() {
             try {
                 // Afficher l'indicateur de chargement
                 if (loadingElement) {
                     loadingElement.style.display = 'block';
                 }
 
-                // Appel API réel pour récupérer les élections actives
-                const response = await fetch(`${CONFIG.BASE_URL}/api/elections/active`);
+                // Appel API pour récupérer TOUTES les élections
+                const response = await fetch(`${CONFIG.BASE_URL}/api/election`);
 
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des élections');
                 }
 
                 const data = await response.json();
-                console.log('Réponse API élections:', data);
+                console.log('Réponse API toutes élections:', data);
 
                 // Extraire le tableau d'élections selon la structure de l'API
-                let elections = [];
                 if (Array.isArray(data)) {
-                    elections = data;
+                    allElections = data;
                 } else if (data.data && Array.isArray(data.data)) {
-                    elections = data.data;
+                    allElections = data.data;
                 } else if (data.elections && Array.isArray(data.elections)) {
-                    elections = data.elections;
+                    allElections = data.elections;
                 }
 
-                // Afficher les élections
-                displayElections(elections);
+                // Mettre à jour les compteurs
+                updateFilterCounts();
+
+                // Filtrer et afficher les élections
+                filterAndDisplayElections();
 
             } catch (error) {
                 console.error('Erreur lors du chargement des élections:', error);
@@ -1710,6 +1847,56 @@
                     loadingElement.style.display = 'none';
                 }
             }
+        }
+
+        // Déterminer le statut d'une élection
+        function getElectionStatus(election) {
+            const now = new Date();
+            const dateDebut = new Date(election.dateDebut);
+            const dateFin = new Date(election.dateFin);
+
+            if (now < dateDebut) {
+                return 'upcoming'; // À venir
+            } else if (now >= dateDebut && now <= dateFin) {
+                return 'active'; // En cours
+            } else {
+                return 'ended'; // Terminée
+            }
+        }
+
+        // Mettre à jour les compteurs des filtres
+        function updateFilterCounts() {
+            const counts = {
+                all: allElections.length,
+                active: 0,
+                upcoming: 0,
+                ended: 0
+            };
+
+            allElections.forEach(election => {
+                const status = getElectionStatus(election);
+                counts[status]++;
+            });
+
+            // Mettre à jour l'affichage
+            document.getElementById('count-all').textContent = counts.all;
+            document.getElementById('count-active').textContent = counts.active;
+            document.getElementById('count-upcoming').textContent = counts.upcoming;
+            document.getElementById('count-ended').textContent = counts.ended;
+        }
+
+        // Filtrer et afficher les élections
+        function filterAndDisplayElections() {
+            let filteredElections = allElections;
+
+            if (currentFilter !== 'all') {
+                filteredElections = allElections.filter(election => {
+                    return getElectionStatus(election) === currentFilter;
+                });
+            }
+
+            // Afficher les élections filtrées
+            displayElections(filteredElections);
         }
 
         // Afficher les élections
@@ -1732,17 +1919,26 @@
 
             // Générer le HTML pour chaque élection
             electionsScroll.innerHTML = elections.map(election => {
-                // Logique d'affichage des élections (à adapter selon votre structure de données)
+                const status = getElectionStatus(election);
+                const statusConfig = {
+                    active: { class: 'status-active', icon: 'play-circle', text: 'En cours' },
+                    upcoming: { class: 'status-upcoming', icon: 'clock', text: 'À venir' },
+                    ended: { class: 'status-ended', icon: 'check-circle', text: 'Terminée' }
+                };
+                const config = statusConfig[status];
+
                 return `
                     <div class="election-card" data-election-id="${election.id}">
                         <div class="election-image" style="background-image: url('${election.image || '/assets/images/default-election.jpg'}')">
-                            <span class="election-badge status-active">En cours</span>
+                            <span class="election-badge ${config.class}">
+                                <i class="fas fa-${config.icon}"></i> ${config.text}
+                            </span>
                         </div>
                         <div class="election-content">
-                            <h3 class="election-title">${election.titre}</h3>
+                            <h3 class="election-title">${election.titre || 'Élection sans titre'}</h3>
                             <div class="election-date">
                                 <i class="far fa-calendar"></i>
-                                ${new Date(election.dateDebut).toLocaleDateString()} - ${new Date(election.dateFin).toLocaleDateString()}
+                                ${new Date(election.dateDebut).toLocaleDateString('fr-FR')} - ${new Date(election.dateFin).toLocaleDateString('fr-FR')}
                             </div>
                             ${election.description ? `
                                 <p class="election-description">${election.description}</p>
@@ -1753,9 +1949,16 @@
                                     ${election.candidatesCount || 0} candidat(s)
                                 </div>
                                 <div class="election-actions">
-                                    <button class="election-action action-vote" data-election-id="${election.id}">
-                                        <i class="fas fa-vote-yea"></i> Voter
-                                    </button>
+                                    ${status === 'active' ? `
+                                        <button class="election-action action-vote" data-election-id="${election.id}">
+                                            <i class="fas fa-vote-yea"></i> Voter
+                                        </button>
+                                    ` : ''}
+                                    ${status === 'ended' ? `
+                                        <button class="election-action action-results" data-election-id="${election.id}">
+                                            <i class="fas fa-trophy"></i> Résultats
+                                        </button>
+                                    ` : ''}
                                     <button class="election-action action-view" data-election-id="${election.id}">
                                         <i class="fas fa-eye"></i> Détails
                                     </button>
@@ -1791,7 +1994,7 @@
                     <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                     <h3 style="margin-bottom: 15px;">Service temporairement indisponible</h3>
                     <p>Nous rencontrons des difficultés techniques. Veuillez réessayer plus tard.</p>
-                    <button onclick="loadActiveElections()" class="btn btn-primary" style="margin-top: 20px;">
+                    <button onclick="loadAllElections()" class="btn btn-primary" style="margin-top: 20px;">
                         <i class="fas fa-sync-alt"></i> Réessayer
                     </button>
                 </div>
@@ -1818,6 +2021,9 @@
                     if (this.classList.contains('action-vote')) {
                         // Rediriger vers la page de connexion avec paramètres de redirection
                         window.location.href = `/user/login.html?redirect=/user/vote.html&electionId=${electionId}`;
+                    } else if (this.classList.contains('action-results')) {
+                        // Rediriger vers la page des résultats
+                        window.location.href = `/user/results.html?electionId=${electionId}`;
                     } else if (this.classList.contains('action-view')) {
                         showElectionDetails(electionId);
                     }
