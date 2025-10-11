@@ -1691,6 +1691,33 @@
                 Common.initCommonElements();
                 await Common.loadUserProfileInHeader();
 
+                // Initialiser le menu burger mobile
+                const burger = document.getElementById('mobileMenuBtn');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('overlay');
+
+                if (burger && sidebar && overlay) {
+                    burger.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        sidebar.classList.toggle('active');
+                        overlay.classList.toggle('active');
+                    });
+
+                    overlay.addEventListener('click', function () {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    });
+
+                    // Fermer le menu en cliquant en dehors (mobile)
+                    document.addEventListener('click', function (e) {
+                        const isMenuOpen = sidebar.classList.contains('active');
+                        if (isMenuOpen && !sidebar.contains(e.target) && !burger.contains(e.target)) {
+                            sidebar.classList.remove('active');
+                            overlay.classList.remove('active');
+                        }
+                    });
+                }
+
                 // Initialiser les notifications avec gestion d'erreur
                 try {
                     initializeNotifications();

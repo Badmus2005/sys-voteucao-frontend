@@ -1704,14 +1704,28 @@
             });
 
             // Menu mobile
-            document.getElementById('mobileMenuBtn').addEventListener('click', function () {
-                document.getElementById('sidebar').classList.toggle('active');
-                document.getElementById('overlay').classList.toggle('active');
+            const burger = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            burger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
             });
 
-            document.getElementById('overlay').addEventListener('click', function () {
-                document.getElementById('sidebar').classList.remove('active');
+            overlay.addEventListener('click', function () {
+                sidebar.classList.remove('active');
                 this.classList.remove('active');
+            });
+
+            // Fermer le menu en cliquant en dehors (mobile)
+            document.addEventListener('click', function (e) {
+                const isMenuOpen = sidebar.classList.contains('active');
+                if (isMenuOpen && !sidebar.contains(e.target) && !burger.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
             });
 
             // Déconnexion
