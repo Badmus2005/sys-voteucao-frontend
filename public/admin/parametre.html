@@ -1998,32 +1998,34 @@
 
                 // Navigation paramètres - CORRECTION IMPORTANTE
                 const settingsNavItems = document.querySelectorAll('.settings-nav-item');
+                const settingsSections = document.querySelectorAll('.settings-section');
+                const hasSettingsSections = settingsSections.length > 0;
+
                 settingsNavItems.forEach(item => {
                     item.addEventListener('click', function () {
                         const target = this.getAttribute('data-target');
 
-                        // Vérifier que la cible existe
                         if (!target) {
                             console.warn('Data-target manquant pour:', this);
                             return;
                         }
 
-                        // Mettre à jour la navigation
                         settingsNavItems.forEach(i => {
                             UTILS.safeClassList(i, 'remove', 'active');
                         });
                         UTILS.safeClassList(this, 'add', 'active');
 
-                        // Afficher la section correspondante
-                        document.querySelectorAll('.settings-section').forEach(section => {
+                        if (!hasSettingsSections) {
+                            return;
+                        }
+
+                        settingsSections.forEach(section => {
                             UTILS.safeClassList(section, 'remove', 'active');
                         });
 
                         const targetSection = document.getElementById(target);
                         if (targetSection) {
                             UTILS.safeClassList(targetSection, 'add', 'active');
-                        } else {
-                            console.warn(`Section #${target} non trouvée`);
                         }
                     });
                 });
@@ -3154,22 +3156,43 @@
         function initializeSettingsPage() {
             loadAdminInfo();
             EVENT_HANDLERS.setupNavigation();
-            EVENT_HANDLERS.setupElectionForm();
-            EVENT_HANDLERS.setupSchoolForms();
-            EVENT_HANDLERS.setupActivityForms();
+
+            if (document.getElementById('electionForm')) {
+                EVENT_HANDLERS.setupElectionForm();
+                ELECTION_FORM.updateNavigationButtons();
+            }
+
+            const hasSchoolManagement = document.getElementById('formAddEcole') ||
+                document.getElementById('formAddFiliere') ||
+                document.getElementById('tableEcoles') ||
+                document.getElementById('tableFilieres');
+
+            if (hasSchoolManagement) {
+                EVENT_HANDLERS.setupSchoolForms();
+                SCHOOLS.loadEcoles();
+                SCHOOLS.loadFilieres();
+            }
+
+            const hasActivityManagement = document.getElementById('formAddCategory') ||
+                document.getElementById('formAddSubactivity') ||
+                document.getElementById('tableCategories') ||
+                document.getElementById('tableSubactivities');
+
+            if (hasActivityManagement) {
+                EVENT_HANDLERS.setupActivityForms();
+                ACTIVITIES.loadActivitySettings();
+            }
+
             EVENT_HANDLERS.setupRealTimeValidation();
-
-            SCHOOLS.loadEcoles();
-            SCHOOLS.loadFilieres();
-            ACTIVITIES.loadActivitySettings();
-
-            ELECTION_FORM.updateNavigationButtons();
         }
 
         // ------------ ADMIN PROFILE ------------
         async function loadAdminInfo() {
             try {
-                const token = getToken();
+                const token = DASHBOARD_AUTH.getToken();
+                if (!token) {
+                    throw new Error('Token manquant');
+                }
                 const res = await fetch(`${API_BASE}/api/admin/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
