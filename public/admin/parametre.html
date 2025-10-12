@@ -608,6 +608,13 @@
             resize: vertical;
         }
 
+        .phase-dynamic-fields {
+            margin-top: 20px;
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1853,7 +1860,6 @@
                                     <select id="resultsVisibility">
                                         <option value="IMMEDIATE">Publication immédiate</option>
                                         <option value="MANUAL">Publication manuelle</option>
-                                        <option value="AFTER_VALIDATION">Après validation</option>
                                     </select>
                                 </div>
                             </div>
@@ -1876,6 +1882,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="dateFinCandidature">Fin des candidatures *</label>
+                                    <div id="phaseDynamicFields" class="phase-dynamic-fields"></div>
                                     <input type="datetime-local" id="dateFinCandidature" required />
                                     <span class="field-error" id="dateFinCandidatureError"></span>
                                 </div>
@@ -2178,7 +2185,8 @@
                     </div>
                     <p style="color:var(--text-secondary);">Besoin d'un rappel : utilisez la page
                         <strong>Notifications</strong> pour créer des annonces ciblées ou des rappels d'élection. Cette
-                        section centralisera prochainement les préférences.</p>
+                        section centralisera prochainement les préférences.
+                    </p>
                 </div>
             </section>
         </main>
@@ -2593,13 +2601,18 @@
 
             renderPhaseFields: () => {
                 const phase = document.getElementById("niveau");
-                const fields = document.getElementById("phaseFields");
-                if (!phase || !fields) return;
+                const configContainer = document.getElementById("phaseDynamicFields");
+                const voteContainer = document.getElementById("phaseFields");
+                if (!phase) return;
 
-                fields.innerHTML = "";
+                if (configContainer) configContainer.innerHTML = "";
+                if (voteContainer) voteContainer.innerHTML = "";
+
+                const renderTarget = phase.value === "PHASE1" ? configContainer : voteContainer;
+                if (!renderTarget) return;
 
                 if (phase.value === "PHASE1") {
-                    fields.innerHTML = `
+                    renderTarget.innerHTML = `
                     <div class="form-group">
                         <label>École :</label>
                         <select id="ecole" name="ecoleId" required onchange="SCHOOLS.updateFilieres()">
@@ -2632,7 +2645,7 @@
                 `;
                     SCHOOLS.loadEcolesForSelect("ecole");
                 } else if (phase.value === "PHASE2") {
-                    fields.innerHTML = `
+                    renderTarget.innerHTML = `
                     <div class="form-group">
                         <label>École :</label>
                         <select id="ecole" name="ecoleId" required>
@@ -2650,7 +2663,7 @@
                 `;
                     SCHOOLS.loadEcolesForSelect("ecole");
                 } else if (phase.value === "PHASE3") {
-                    fields.innerHTML = `
+                    renderTarget.innerHTML = `
                     <div class="form-group">
                         <label for="delegueType">Type de délégué :</label>
                         <select id="delegueType" name="delegueType" required>
