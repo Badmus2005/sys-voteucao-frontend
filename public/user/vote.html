@@ -1882,7 +1882,8 @@
             async submitSingleVote(vote) {
                 try {
                     // Obtenir le jeton
-                    const token = await VoteService.getVoteToken(vote.electionId);
+                    const tokenResponse = await VoteService.getVoteToken(vote.electionId);
+                    const token = tokenResponse.data.token; // Extraire le token string
 
                     // Valider le jeton
                     await VoteService.validateToken(token, vote.electionId);
