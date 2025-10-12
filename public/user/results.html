@@ -1650,6 +1650,7 @@
                 statistiques: {
                     totalVotes: backendData.statistiques.totalVotes,
                     totalInscrits: backendData.statistiques.totalInscrits,
+                    electeursAyantVote: backendData.statistiques.electeursAyantVote,
                     tauxParticipation: backendData.statistiques.tauxParticipation,
                     nombreCandidats: backendData.resultats.length
                 },
@@ -1658,9 +1659,9 @@
                     nom: candidate.nom,
                     prenom: candidate.prenom,
                     photoUrl: candidate.photoUrl,
-                    filiere: candidate.filiere || 'Non spécifié',
-                    annee: candidate.annee || 'N/A',
-                    slogan: candidate.slogan || 'Aucun slogan',
+                    filiere: candidate.filiere || candidate.filiereId,
+                    annee: candidate.annee,
+                    slogan: candidate.slogan,
                     scoreFinal: candidate.scoreFinal,
                     details: {
                         totalVotes: candidate.details?.totalVotes || 0
@@ -1927,6 +1928,14 @@
                 const response = await VoteService.getResults(electionId);
 
                 if (response && response.success && response.data) {
+                    // Debug : Vérifier les données reçues
+                    console.log('📊 Données backend reçues:', {
+                        tauxParticipation: response.data.statistiques.tauxParticipation,
+                        electeursAyantVote: response.data.statistiques.electeursAyantVote,
+                        totalInscrits: response.data.statistiques.totalInscrits,
+                        totalVotes: response.data.statistiques.totalVotes
+                    });
+
                     const transformedData = transformBackendData(response.data);
                     currentResults = transformedData;
                     displayResults(transformedData);
@@ -2024,16 +2033,21 @@
                 else if (index === 1) rankClass = 'rank-2';
                 else if (index === 2) rankClass = 'rank-3';
 
+                // Formater les informations du candidat
+                const candidateName = `${candidate.prenom || 'Prénom'} ${candidate.nom || 'Nom'}`.trim();
+                const filiereText = candidate.filiere || candidate.filiereId || 'Filière non renseignée';
+                const anneeText = candidate.annee ? `L${candidate.annee}` : 'Année non renseignée';
+
                 row.innerHTML = `
                 <td class="candidate-rank ${rankClass}">${index + 1}</td>
                 <td>
                     <div class="candidate-info">
                         <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
-                             alt="${candidate.prenom || ''} ${candidate.nom || ''}" 
+                             alt="${candidateName}" 
                              class="candidate-avatar">
                         <div>
-                            <div class="candidate-name">${candidate.prenom || ''} ${candidate.nom || ''}</div>
-                            <div class="candidate-details">${candidate.filiere || 'Non spécifié'} - Année ${candidate.annee || 'N/A'}</div>
+                            <div class="candidate-name">${candidateName}</div>
+                            <div class="candidate-details">${filiereText} - ${anneeText}</div>
                         </div>
                     </div>
                 </td>
@@ -2249,23 +2263,23 @@
             allElections.forEach((election, index) => {
                 const option = document.createElement('option');
                 option.value = election.id;
-                
+
                 // Formater la date
                 const dateEnd = new Date(election.dateFin);
-                const dateStr = dateEnd.toLocaleDateString('fr-FR', { 
-                    day: 'numeric', 
-                    month: 'short', 
-                    year: 'numeric' 
+                const dateStr = dateEnd.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
                 });
 
                 // Construire le label de l'option
                 option.textContent = `${election.titre} (${dateStr}) - ${election.typeElection || 'N/A'}`;
-                
+
                 // Sélectionner la première par défaut
                 if (index === 0) {
                     option.selected = true;
                 }
-                
+
                 selector.appendChild(option);
             });
         }
