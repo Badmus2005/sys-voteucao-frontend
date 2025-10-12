@@ -1795,6 +1795,392 @@
                     <span>Notifications</span>
                 </div>
             </div>
+
+            <section class="settings-section active" id="election-settings">
+                <div class="settings-section-title">
+                    <div>
+                        <h2>Configurer une nouvelle élection</h2>
+                        <p>Définissez les paramètres des candidatures, du vote et des responsabilités.</p>
+                    </div>
+                    <i class="fas fa-vote-yea"></i>
+                </div>
+
+                <div class="card" style="padding: 24px;">
+                    <div class="form-timeline">
+                        <div class="timeline-item active" data-section="config">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Configuration</span>
+                        </div>
+                        <div class="timeline-item" data-section="candidacy">
+                            <i class="fas fa-user-friends"></i>
+                            <span>Période de candidature</span>
+                        </div>
+                        <div class="timeline-item" data-section="voting">
+                            <i class="fas fa-vote-yea"></i>
+                            <span>Période de vote</span>
+                        </div>
+                        <div class="timeline-item" data-section="results">
+                            <i class="fas fa-flag-checkered"></i>
+                            <span>Publication</span>
+                        </div>
+                    </div>
+
+                    <form id="electionForm">
+                        <input type="hidden" id="electionId" />
+                        <div id="electionFormMessage" class="alert alert-error" style="display:none;"></div>
+
+                        <div class="form-section active" id="config-section">
+                            <h3 class="form-section-title"><i class="fas fa-sliders-h"></i> Paramètres généraux</h3>
+                            <div class="form-grid"
+                                style="display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+                                <div class="form-group">
+                                    <label for="titre">Titre de l'élection *</label>
+                                    <input type="text" id="titre" placeholder="Ex: Élection des délégués L2" required />
+                                    <span class="field-error" id="titreError"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="niveau">Niveau / Phase *</label>
+                                    <select id="niveau" required onchange="ELECTION_FORM.renderPhaseFields()">
+                                        <option value="">-- Sélectionner --</option>
+                                        <option value="PHASE1">Phase 1 - Salle</option>
+                                        <option value="PHASE2">Phase 2 - École</option>
+                                        <option value="PHASE3">Phase 3 - Université</option>
+                                    </select>
+                                    <span class="field-error" id="niveauError"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="resultsVisibility">Visibilité des résultats</label>
+                                    <select id="resultsVisibility">
+                                        <option value="IMMEDIATE">Publication immédiate</option>
+                                        <option value="MANUAL">Publication manuelle</option>
+                                        <option value="AFTER_VALIDATION">Après validation</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-top:20px;">
+                                <label for="description">Description</label>
+                                <textarea id="description" rows="3"
+                                    placeholder="Contexte, règles, informations complémentaires"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-section" id="candidacy-section">
+                            <h3 class="form-section-title"><i class="fas fa-user-friends"></i> Fenêtre de candidature
+                            </h3>
+                            <div class="form-grid"
+                                style="display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+                                <div class="form-group">
+                                    <label for="dateDebutCandidature">Début des candidatures *</label>
+                                    <input type="datetime-local" id="dateDebutCandidature" required />
+                                    <span class="field-error" id="dateDebutCandidatureError"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dateFinCandidature">Fin des candidatures *</label>
+                                    <input type="datetime-local" id="dateFinCandidature" required />
+                                    <span class="field-error" id="dateFinCandidatureError"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" id="voting-section">
+                            <h3 class="form-section-title"><i class="fas fa-vote-yea"></i> Période de vote</h3>
+                            <div class="form-grid"
+                                style="display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+                                <div class="form-group">
+                                    <label for="dateDebut">Début du vote *</label>
+                                    <input type="datetime-local" id="dateDebut" required />
+                                    <span class="field-error" id="dateDebutError"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dateFin">Fin du vote *</label>
+                                    <input type="datetime-local" id="dateFin" required />
+                                    <span class="field-error" id="dateFinError"></span>
+                                </div>
+                            </div>
+                            <div id="phaseFields" style="margin-top:20px;"></div>
+                        </div>
+
+                        <div class="form-section" id="results-section">
+                            <h3 class="form-section-title"><i class="fas fa-flag-checkered"></i> Validation &
+                                publication</h3>
+                            <p style="color:var(--text-secondary); margin-bottom:1rem;">Vérifiez les informations
+                                saisies avant de finaliser la création de l'élection. Vous pourrez modifier les
+                                paramètres ultérieurement si nécessaire.</p>
+                            <div class="alert alert-info" style="display:flex;">
+                                <i class="fas fa-info-circle" style="margin-right:0.75rem;"></i>
+                                Un récapitulatif sera disponible sur le tableau de bord une fois l'élection créée.
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-secondary" id="prevBtn" style="display:none;">
+                                <i class="fas fa-arrow-left"></i> Précédent
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="nextBtn">
+                                Suivant <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" style="display:none;">
+                                <i class="fas fa-check"></i> Enregistrer l'élection
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="settings-section" id="school-settings">
+                <div class="settings-section-title">
+                    <div>
+                        <h2>Gestion des écoles & filières</h2>
+                        <p>Ajoutez ou désactivez les entités académiques disponibles pour les élections et activités.
+                        </p>
+                    </div>
+                    <i class="fas fa-school"></i>
+                </div>
+
+                <div class="card" style="padding:24px; display:grid; gap:32px;">
+                    <div id="schoolAlert" class="alert" style="display:none;"></div>
+
+                    <div style="display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+                        <form id="formAddEcole" class="card" style="padding:20px; box-shadow:var(--shadow);">
+                            <h3 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem;"><i
+                                    class="fas fa-university"></i> Nouvelle école</h3>
+                            <div class="form-group">
+                                <label for="nomEcole">Nom de l'école *</label>
+                                <input type="text" id="nomEcole" placeholder="Ex: EGEI" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnAddEcole">
+                                <i class="fas fa-plus"></i> Ajouter l'école
+                            </button>
+                        </form>
+
+                        <form id="formAddFiliere" class="card" style="padding:20px; box-shadow:var(--shadow);">
+                            <h3 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem;"><i
+                                    class="fas fa-project-diagram"></i> Nouvelle filière</h3>
+                            <div class="form-group">
+                                <label for="nomFiliere">Nom de la filière *</label>
+                                <input type="text" id="nomFiliere" placeholder="Ex: Informatique Industrielle"
+                                    required />
+                            </div>
+                            <div class="form-group">
+                                <label for="ecoleSelect">École associée *</label>
+                                <select id="ecoleSelect" required>
+                                    <option value="">-- Chargement... --</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnAddFiliere">
+                                <i class="fas fa-plus"></i> Ajouter la filière
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <h3 style="margin-bottom:1rem;">Liste des écoles</h3>
+                        <table id="tableEcoles">
+                            <thead>
+                                <tr>
+                                    <th>École</th>
+                                    <th>Statut</th>
+                                    <th style="width:160px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container">
+                        <h3 style="margin-bottom:1rem;">Liste des filières</h3>
+                        <table id="tableFilieres">
+                            <thead>
+                                <tr>
+                                    <th>Filière</th>
+                                    <th>École</th>
+                                    <th>Statut</th>
+                                    <th style="width:160px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="activity-creation">
+                <div class="settings-section-title">
+                    <div>
+                        <h2>Activités para-universitaires</h2>
+                        <p>Structurez les catégories et sous-activités proposées aux étudiants après connexion.</p>
+                    </div>
+                    <i class="fas fa-running"></i>
+                </div>
+
+                <div class="card" style="padding:24px; display:grid; gap:32px;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(139,0,0,0.1); color:var(--bordeaux);">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="stat-card-value" id="totalCategories">0</div>
+                            <div class="stat-card-label">Catégories actives</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(26,43,60,0.1); color:var(--blue-night);">
+                                <i class="fas fa-stream"></i>
+                            </div>
+                            <div class="stat-card-value" id="totalSubactivities">0</div>
+                            <div class="stat-card-label">Sous-activités disponibles</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-icon" style="background:rgba(212,175,55,0.15); color:var(--warning);">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <div class="stat-card-value" id="totalStudents">0</div>
+                            <div class="stat-card-label">Étudiants inscrits</div>
+                        </div>
+                    </div>
+
+                    <div id="activityAlert" class="alert" style="display:none;"></div>
+
+                    <div style="display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+                        <form id="formAddCategory" class="activity-card" style="padding:22px;">
+                            <div class="activity-card-header">
+                                <i class="fas fa-folder-plus activity-card-icon"></i>
+                                <div>
+                                    <div class="activity-card-title">Nouvelle catégorie</div>
+                                    <p class="activity-card-subtitle">Permet de regrouper plusieurs sous-activités</p>
+                                </div>
+                            </div>
+                            <div class="activity-form-grid">
+                                <div class="form-group">
+                                    <label for="categoryName">Nom *</label>
+                                    <input type="text" id="categoryName" placeholder="Ex: Sport" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="categoryIcon">Icône Font Awesome *</label>
+                                    <input type="text" id="categoryIcon" placeholder="Ex: futbol" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryDescription">Description</label>
+                                <textarea id="categoryDescription" rows="2"
+                                    placeholder="Bref résumé de la catégorie"></textarea>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                                <input type="checkbox" id="hasSubactivities" />
+                                <label for="hasSubactivities" style="margin:0;">Cette catégorie contient des
+                                    sous-activités</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnAddCategory">
+                                <i class="fas fa-plus"></i> Enregistrer la catégorie
+                            </button>
+                        </form>
+
+                        <form id="formAddSubactivity" class="activity-card" style="padding:22px;">
+                            <div class="activity-card-header">
+                                <i class="fas fa-plus-circle activity-card-icon"></i>
+                                <div>
+                                    <div class="activity-card-title">Nouvelle sous-activité</div>
+                                    <p class="activity-card-subtitle">Associez-la à une catégorie existante</p>
+                                </div>
+                            </div>
+                            <div class="activity-form-grid">
+                                <div class="form-group">
+                                    <label for="subactivityName">Nom *</label>
+                                    <input type="text" id="subactivityName" placeholder="Ex: Basketball" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="subactivityIcon">Icône Font Awesome *</label>
+                                    <input type="text" id="subactivityIcon" placeholder="Ex: basketball-ball"
+                                        required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="categorySelect">Catégorie *</label>
+                                    <select id="categorySelect" required>
+                                        <option value="">-- Sélectionner une catégorie --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="subactivityDescription">Description</label>
+                                <textarea id="subactivityDescription" rows="2"
+                                    placeholder="Détails ou objectifs"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="btnAddSubactivity">
+                                <i class="fas fa-plus"></i> Ajouter la sous-activité
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="activity-table-container">
+                        <h3>Catégories existantes</h3>
+                        <table class="activity-table" id="tableCategories">
+                            <thead>
+                                <tr>
+                                    <th>Catégorie</th>
+                                    <th>Description</th>
+                                    <th>Icône</th>
+                                    <th>Options</th>
+                                    <th>Statut</th>
+                                    <th style="width:200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="activity-table-container">
+                        <h3>Sous-activités disponibles</h3>
+                        <table class="activity-table" id="tableSubactivities">
+                            <thead>
+                                <tr>
+                                    <th>Sous-activité</th>
+                                    <th>Description</th>
+                                    <th>Catégorie</th>
+                                    <th>Icône</th>
+                                    <th>Statut</th>
+                                    <th style="width:200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="activity-table-container">
+                        <h3>Statistiques de participation</h3>
+                        <table class="activity-table" id="tableActivityStats">
+                            <thead>
+                                <tr>
+                                    <th>Activité</th>
+                                    <th>Étudiants inscrits</th>
+                                    <th>Écoles représentées</th>
+                                    <th>Taux de participation</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" id="notification-settings">
+                <div class="settings-section-title">
+                    <div>
+                        <h2>Notifications & communication</h2>
+                        <p>Paramétrez les canaux d'information envoyés aux administrateurs et étudiants.</p>
+                    </div>
+                    <i class="fas fa-bell"></i>
+                </div>
+
+                <div class="card" style="padding:24px; display:grid; gap:24px;">
+                    <div class="alert alert-info" style="display:flex;">
+                        <i class="fas fa-info-circle" style="margin-right:0.75rem;"></i>
+                        Les fonctionnalités avancées de notification seront bientôt disponibles. En attendant, vous
+                        pouvez consulter l'historique des messages dans la section Notifications du tableau de bord.
+                    </div>
+                    <p style="color:var(--text-secondary);">Besoin d'un rappel : utilisez la page
+                        <strong>Notifications</strong> pour créer des annonces ciblées ou des rappels d'élection. Cette
+                        section centralisera prochainement les préférences.</p>
+                </div>
+            </section>
         </main>
 
         <!-- Footer -->
