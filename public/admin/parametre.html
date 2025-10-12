@@ -3197,20 +3197,48 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!res.ok) throw new Error('Erreur chargement profil');
+                if (!res.ok) {
+                    const errorPayload = await res.json().catch(() => ({}));
+                    const message = errorPayload.message || 'Erreur chargement profil';
+                    throw new Error(message);
+                }
 
                 const result = await res.json();
-                const admin = result.data || result;
+                const admin = extractAdminFromPayload(result);
+                if (!admin) {
+                    throw new Error('Aucune information admin reçue');
+                }
                 updateAdminUI(admin);
             } catch (err) {
                 console.error('Erreur chargement info admin:', err);
             }
         }
 
+        function extractAdminFromPayload(payload) {
+            if (!payload) return null;
+
+            if (payload.data) {
+                if (payload.data.user) return payload.data.user;
+                if (payload.data.admin) return payload.data.admin;
+                return payload.data;
+            }
+
+            if (payload.user) return payload.user;
+            if (payload.admin) return payload.admin;
+
+            return payload;
+        }
+
         function updateAdminUI(admin) {
+            const firstName = admin.prenom || admin.firstName || '';
+            const lastName = admin.nom || admin.lastName || '';
+            const fallbackName = admin.fullName || admin.name || admin.email || 'Administrateur';
+            const displayName = `${lastName} ${firstName}`.trim() || fallbackName;
+            const roleLabel = admin.poste || admin.role || 'Administrateur';
+
             const elements = {
-                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
-                headerUserRole: admin.poste || 'Administrateur'
+                headerUserName: displayName,
+                headerUserRole: roleLabel
             };
 
             Object.entries(elements).forEach(([id, value]) => {
