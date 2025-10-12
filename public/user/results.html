@@ -1565,7 +1565,12 @@
                     const data = await response.json();
                     return data;
                 } catch (error) {
-                    console.error('Erreur VoteService:', error);
+                    // Log informatif au lieu d'erreur pour les résultats en attente
+                    if (error.message.includes('non encore disponibles') || error.message.includes('patienter')) {
+                        console.info('ℹ️ Résultats en attente:', error.message);
+                    } else {
+                        console.error('❌ Erreur VoteService:', error);
+                    }
                     throw error;
                 }
             }
@@ -1872,12 +1877,14 @@
                     showNoResults();
                 }
             } catch (error) {
-                console.error('Erreur chargement résultats:', error);
+                console.log('Info résultats:', error.message);
 
                 // Gérer spécifiquement l'erreur 403 (résultats non publiés)
-                if (error.message.includes('non disponibles') || error.message.includes('non encore disponibles')) {
+                if (error.message.includes('non disponibles') || error.message.includes('non encore disponibles') || error.message.includes('patienter')) {
                     showResultsPending();
+                    showToast('⏳ Les résultats seront publiés prochainement', 'info');
                 } else {
+                    console.error('Erreur chargement résultats:', error);
                     showToast('Erreur de chargement des résultats', 'error');
                     showNoResults();
                 }
