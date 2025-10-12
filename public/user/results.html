@@ -400,6 +400,39 @@
             color: white;
         }
 
+        /* Election Selector */
+        .election-selector-container {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .election-selector-header {
+            margin-bottom: 1rem;
+        }
+
+        .election-selector-header h3 {
+            color: white;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .election-selector-content {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .election-selector-content label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
         /* Results Header */
         .results-header {
             background: white;
@@ -1219,7 +1252,7 @@
                     <i class="fas fa-check nav-icon"></i>
                     <span class="nav-text">Voter</span>
                 </a>
-                <a href="resultats.html" class="nav-item active">
+                <a href="results.html" class="nav-item active">
                     <i class="fas fa-chart-bar nav-icon"></i>
                     <span class="nav-text">Résultats</span>
                 </a>
@@ -1299,6 +1332,21 @@
                         <i class="fas fa-eraser"></i>
                         Réinitialiser
                     </button>
+                </div>
+            </div>
+
+            <!-- Sélecteur d'élection -->
+            <div class="election-selector-container">
+                <div class="election-selector-header">
+                    <h3><i class="fas fa-list-check"></i> Élection affichée</h3>
+                </div>
+                <div class="election-selector-content">
+                    <div class="filter-group" style="flex: 1; margin: 0;">
+                        <label for="election-select">Sélectionner une élection</label>
+                        <select class="filter-select" id="election-select" aria-label="Sélectionner une élection">
+                            <option value="">Chargement...</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -1465,6 +1513,8 @@
 
     <script src="/assets/config.js"></script>
     <script src="/assets/js/auth-guard.js"></script>
+    <script src="/assets/js/notificationService.js"></script>
+    <script src="/assets/initNotifications.js"></script>
     <script>
         // Variables globales pour cette page
         let allElections = [];
@@ -1799,11 +1849,19 @@
                 // Charger les élections terminées
                 await loadCompletedElections();
 
+                // Populer le sélecteur d'élections
+                populateElectionSelector();
+
                 // Charger les résultats si une élection est spécifiée dans l'URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const electionId = urlParams.get('electionId');
 
                 if (electionId) {
+                    // Sélectionner l'élection dans le dropdown
+                    const selector = document.getElementById('election-select');
+                    if (selector) {
+                        selector.value = electionId;
+                    }
                     await loadElectionResults(electionId);
                 } else if (allElections.length > 0) {
                     // Charger les résultats de la première élection terminée
@@ -2176,9 +2234,46 @@
             document.querySelector('.ranking-section').style.display = 'none';
         }
 
+        // Populer le sélecteur d'élections
+        function populateElectionSelector() {
+            const selector = document.getElementById('election-select');
+            selector.innerHTML = '';
+
+            if (allElections.length === 0) {
+                selector.innerHTML = '<option value="">Aucune élection terminée</option>';
+                selector.disabled = true;
+                return;
+            }
+
+            selector.disabled = false;
+            allElections.forEach((election, index) => {
+                const option = document.createElement('option');
+                option.value = election.id;
+                
+                // Formater la date
+                const dateEnd = new Date(election.dateFin);
+                const dateStr = dateEnd.toLocaleDateString('fr-FR', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+
+                // Construire le label de l'option
+                option.textContent = `${election.titre} (${dateStr}) - ${election.typeElection || 'N/A'}`;
+                
+                // Sélectionner la première par défaut
+                if (index === 0) {
+                    option.selected = true;
+                }
+                
+                selector.appendChild(option);
+            });
+        }
+
         // Appliquer les filtres
         async function applyFilters() {
             await loadCompletedElections();
+            populateElectionSelector();
 
             if (allElections.length > 0) {
                 await loadElectionResults(allElections[0].id);
@@ -2198,14 +2293,51 @@
             showToast('Filtres réinitialisés', 'success');
         }
 
+        // Event listeners pour les filtres et le sélecteur
+        document.addEventListener('DOMContentLoaded', () => {
+            // Boutons de filtres
+            document.getElementById('applyFilters')?.addEventListener('click', applyFilters);
+            document.getElementById('resetFilters')?.addEventListener('click', resetFilters);
+
+            // Changement automatique sur les filtres (optionnel)
+            document.getElementById('filter-type')?.addEventListener('change', async () => {
+                await loadCompletedElections();
+                populateElectionSelector();
+                if (allElections.length > 0) {
+                    await loadElectionResults(allElections[0].id);
+                }
+            });
+
+            document.getElementById('filter-ecole')?.addEventListener('change', async () => {
+                await loadCompletedElections();
+                populateElectionSelector();
+                if (allElections.length > 0) {
+                    await loadElectionResults(allElections[0].id);
+                }
+            });
+
+            document.getElementById('filter-annee')?.addEventListener('change', async () => {
+                await loadCompletedElections();
+                populateElectionSelector();
+                if (allElections.length > 0) {
+                    await loadElectionResults(allElections[0].id);
+                }
+            });
+
+            // Sélecteur d'élection
+            document.getElementById('election-select')?.addEventListener('change', async (e) => {
+                const electionId = e.target.value;
+                if (electionId) {
+                    await loadElectionResults(parseInt(electionId));
+                }
+            });
+        });
+
         // Exposer les fonctions globales pour cette page
         window.loadPageData = loadPageData;
         window.resetFilters = resetFilters;
     </script>
 
-    <!-- Scripts de notifications -->
-    <script src="/assets/js/notificationService.js"></script>
-    <script src="/assets/initNotifications.js"></script>
 </body>
 
 </html>
