@@ -1120,7 +1120,6 @@
                 </div>
             </div>
             <div class="modal-actions" style="padding:1rem; display:flex; gap:1rem; justify-content:flex-end;">
-                <button class="btn-modal btn-cancel" id="skipActivities">Passer</button>
                 <button class="btn-modal btn-submit" id="saveActivitiesBtn">Enregistrer</button>
             </div>
         </div>
@@ -1517,13 +1516,11 @@
 
         function setupActivitiesModalEvents() {
             document.getElementById('activitiesModalClose').addEventListener('click', () => {
-                document.getElementById('activitiesModal').classList.remove('active');
-                window.location.replace('dashboard.html');
-            });
-
-            document.getElementById('skipActivities').addEventListener('click', () => {
-                document.getElementById('activitiesModal').classList.remove('active');
-                window.location.replace('dashboard.html');
+                if (selectedActivities.length === 0) {
+                    showMessage('Veuillez sélectionner au moins une activité avant de continuer.', 'error');
+                    return;
+                }
+                saveActivitiesSelection();
             });
 
             document.getElementById('saveActivitiesBtn').addEventListener('click', saveActivitiesSelection);
@@ -1725,6 +1722,11 @@
             const token = localStorage.getItem('token');
             if (!token) {
                 showMessage('Token manquant. Veuillez vous reconnecter.', 'error');
+                return;
+            }
+
+            if (selectedActivities.length === 0) {
+                showMessage('Veuillez sélectionner au moins une activité pour continuer.', 'error');
                 return;
             }
 
