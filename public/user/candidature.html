@@ -2184,8 +2184,6 @@
         }
 
         function validateForm() {
-            const slogan = document.getElementById('slogan').value.trim();
-            const program = document.getElementById('program').value.trim();
             const motivation = document.getElementById('motivation').value.trim();
 
             // Vérification de l'image
@@ -2194,41 +2192,10 @@
                 return false;
             }
 
-            // Vérification des champs obligatoires
-            if (!slogan) {
-                Common.showToast('Veuillez saisir un slogan', 'error');
-                document.getElementById('slogan').focus();
-                return false;
-            }
-
-            if (!program) {
-                Common.showToast('Veuillez saisir votre programme électoral', 'error');
-                document.getElementById('program').focus();
-                return false;
-            }
-
+            // Vérification de la lettre de motivation (obligatoire pour toutes les phases)
             if (!motivation) {
                 Common.showToast('Veuillez saisir votre lettre de motivation', 'error');
                 document.getElementById('motivation').focus();
-                return false;
-            }
-
-            // Validation des longueurs
-            if (slogan.length > 100) {
-                Common.showToast('Le slogan ne doit pas dépasser 100 caractères', 'error');
-                document.getElementById('slogan').focus();
-                return false;
-            }
-
-            if (program.length < 50) {
-                Common.showToast('Le programme doit contenir au moins 50 caractères', 'error');
-                document.getElementById('program').focus();
-                return false;
-            }
-
-            if (program.length > 2000) {
-                Common.showToast('Le programme ne doit pas dépasser 2000 caractères', 'error');
-                document.getElementById('program').focus();
                 return false;
             }
 
@@ -2242,6 +2209,43 @@
                 Common.showToast('La lettre de motivation ne doit pas dépasser 1000 caractères', 'error');
                 document.getElementById('motivation').focus();
                 return false;
+            }
+
+            // Pour PHASE2 et PHASE3, vérifier slogan et programme
+            if (currentElection && currentElection.niveau !== 'PHASE1') {
+                const slogan = document.getElementById('slogan').value.trim();
+                const program = document.getElementById('program').value.trim();
+
+                if (!slogan) {
+                    Common.showToast('Veuillez saisir un slogan', 'error');
+                    document.getElementById('slogan').focus();
+                    return false;
+                }
+
+                if (!program) {
+                    Common.showToast('Veuillez saisir votre programme électoral', 'error');
+                    document.getElementById('program').focus();
+                    return false;
+                }
+
+                // Validation des longueurs
+                if (slogan.length > 100) {
+                    Common.showToast('Le slogan ne doit pas dépasser 100 caractères', 'error');
+                    document.getElementById('slogan').focus();
+                    return false;
+                }
+
+                if (program.length < 50) {
+                    Common.showToast('Le programme doit contenir au moins 50 caractères', 'error');
+                    document.getElementById('program').focus();
+                    return false;
+                }
+
+                if (program.length > 2000) {
+                    Common.showToast('Le programme ne doit pas dépasser 2000 caractères', 'error');
+                    document.getElementById('program').focus();
+                    return false;
+                }
             }
 
             return true;
