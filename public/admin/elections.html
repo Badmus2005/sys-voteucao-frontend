@@ -2471,20 +2471,14 @@
             try {
                 const token = getToken();
 
-                // Mettre dateFin à maintenant pour que l'élection soit considérée comme terminée
-                const now = new Date();
-                const dateFin = now.toISOString().slice(0, 19).replace('T', ' '); // Format MySQL
-
+                // Le backend s'occupera de mettre dateFin à maintenant automatiquement
                 const res = await fetch(`${API_BASE}${ELECTIONS_ENDPOINT}/${id}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        isActive: false,
-                        dateFin: dateFin  // Mettre la date de fin à maintenant
-                    })
+                    body: JSON.stringify({ isActive: false })
                 });
 
                 if (!res.ok) {
