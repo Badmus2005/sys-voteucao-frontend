@@ -32,11 +32,31 @@
         try {
             // Décoder le JWT pour vérifier l'expiration
             const payload = JSON.parse(atob(token.split('.')[1]));
+
+            // Si pas d'expiration dans le token, considérer comme valide
+            if (!payload.exp) {
+                console.log('Token sans expiration - Considéré comme valide');
+                return false;
+            }
+
             const exp = payload.exp * 1000; // Convertir en millisecondes
-            return Date.now() >= exp;
+            const now = Date.now();
+            const isExpired = now >= exp;
+
+            if (isExpired) {
+                console.log(`Token expiré: exp=${new Date(exp).toLocaleString()}, now=${new Date(now).toLocaleString()}`);
+            } else {
+                const timeLeft = Math.floor((exp - now) / 1000 / 60); // minutes
+                console.log(`Token valide - Expire dans ${timeLeft} minutes`);
+            }
+
+            return isExpired;
         } catch (error) {
             console.error('Erreur lors de la vérification du token:', error);
-            return true; // Si on ne peut pas décoder, considérer comme expiré
+            // Si on ne peut pas décoder, NE PAS expirer automatiquement
+            // Laisser le backend décider
+            console.warn('Impossible de décoder le token, mais on le garde valide pour le moment');
+            return false;
         }
     }
 
@@ -45,7 +65,20 @@
      */
     function hasCorrectRole() {
         const role = localStorage.getItem(CONFIG.USER_ROLE_KEY);
-        return role === 'STUDENT' || role === 'ETUDIANT';
+        const isValid = role === 'STUDENT' || role === 'ETUDIANT';
+
+        if (!isValid) {
+            console.log(`Rôle actuel: "${role}" - Attendu: STUDENT ou ETUDIANT`);
+        }
+
+        // Si pas de rôle mais token présent, considérer comme valide
+        // Le backend validera de toute façon
+        if (!role && hasToken()) {
+            console.warn('Pas de rôle stocké mais token présent - Considéré comme valide');
+            return true;
+        }
+
+        return isValid;
     }
 
     /**
@@ -132,8 +165,9 @@
         // Vérification initiale
         checkAuth();
 
-        // Vérification périodique
-        setInterval(checkAuth, CONFIG.CHECK_INTERVAL);
+        // ⚠️ Vérification périodique désactivée pour éviter les déconnexions intempestives
+        // La vérification se fera au chargement de chaque page et sur les erreurs 401
+        // setInterval(checkAuth, CONFIG.CHECK_INTERVAL);
 
         // Intercepter les erreurs 401
         setupFetchInterceptor();
@@ -146,7 +180,7 @@
             }
         });
 
-        console.log('🛡️ Auth Guard initialisé');
+        console.log('🛡️ Auth Guard initialisé (mode tolérant)');
     }
 
     // Initialiser dès que le DOM est prêt
