@@ -2506,7 +2506,10 @@
 
                 if (!response.ok) throw new Error('Erreur lors du chargement');
 
-                const election = await response.json();
+                const result = await response.json();
+
+                // Extraire l'élection selon la structure de réponse
+                const election = result.data || result.election || result;
 
                 // Déterminer le statut
                 const now = new Date();
@@ -2620,7 +2623,7 @@
                             </div>
                         </div>
 
-                        ${election.filiere || election.ecole || election.annee || election.delegueType || election.niveau || election.type ? `
+                        ${election.nomFiliere || election.nomEcole || election.annee || election.delegueType || election.niveau || election.type ? `
                         <div class="detail-section">
                             <div class="detail-section-title">
                                 <i class="fas fa-info-circle"></i>
@@ -2638,16 +2641,16 @@
                                 <span class="detail-value">${getElectionTypeLabel(election.type)}</span>
                             </div>
                             ` : ''}
-                            ${election.filiere ? `
+                            ${election.nomFiliere ? `
                             <div class="detail-row">
                                 <span class="detail-label">Filière</span>
-                                <span class="detail-value">${election.filiere}</span>
+                                <span class="detail-value">${election.nomFiliere}</span>
                             </div>
                             ` : ''}
-                            ${election.ecole ? `
+                            ${election.nomEcole ? `
                             <div class="detail-row">
                                 <span class="detail-label">École</span>
-                                <span class="detail-value">${election.ecole}</span>
+                                <span class="detail-value">${election.nomEcole}</span>
                             </div>
                             ` : ''}
                             ${election.annee ? `
