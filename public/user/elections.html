@@ -2688,11 +2688,25 @@
         // NOUVELLES FONCTIONS D'ÉLIGIBILITÉ AMÉLIORÉES
         async function canCandidate(election, studentInfo) {
             // 1. Vérifications de base
-            if (!isStudentEligibleForElection(election)) {
+            const eligible = isStudentEligibleForElection(election);
+            console.log('🔍 Vérification éligibilité:', {
+                electionId: election.id,
+                electionType: election.type,
+                electionEcoleId: election.ecoleId,
+                electionFiliereId: election.filiereId,
+                electionAnnee: election.annee,
+                studentEcoleId: studentInfo?.data?.ecoleId,
+                studentFiliereId: studentInfo?.data?.filiereId,
+                studentAnnee: studentInfo?.data?.annee,
+                eligible: eligible
+            });
+
+            if (!eligible) {
                 return { canCandidate: false, reason: 'non_eligible' };
             }
 
             if (!isCandidaturePeriodOpen(election)) {
+                console.log('⏰ Période de candidature fermée');
                 return { canCandidate: false, reason: 'period_closed' };
             }
 
