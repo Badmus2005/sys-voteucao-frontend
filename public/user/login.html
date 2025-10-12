@@ -61,40 +61,30 @@
             z-index: -1;
         }
 
-        .login-container {
+        .login-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1000px;
             width: 100%;
-            max-width: 450px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: white;
             border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
+            box-shadow: var(--card-shadow-hover);
             overflow: hidden;
-            animation: slideUp 0.6s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 600px;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-header {
+        .login-hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 2.5rem;
-            text-align: center;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
             overflow: hidden;
         }
 
-        .login-header::before {
+        .login-hero::before {
             content: '';
             position: absolute;
             top: 0;
@@ -104,14 +94,18 @@
             background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
         .logo {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 2;
+            margin-bottom: 2rem;
         }
 
         .logo-image {
@@ -124,33 +118,89 @@
         }
 
         .logo-text {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
         }
 
-        .login-header h1 {
-            font-size: 2.2rem;
+        .hero-title {
+            font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .features-list {
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .feature-text h4 {
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .feature-text p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .login-container {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
             margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 2;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .login-header p {
+            color: var(--gray);
             font-size: 1.1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 2;
-        }
-
-        .login-content {
-            padding: 2.5rem;
         }
 
         .welcome-message {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             padding: 1.5rem;
             background: linear-gradient(135deg, rgba(128, 0, 32, 0.05) 0%, rgba(13, 27, 42, 0.05) 100%);
             border-radius: 12px;
@@ -263,7 +313,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            margin: 1.5rem 0;
             position: relative;
             overflow: hidden;
         }
@@ -608,22 +658,29 @@
             line-height: 1.4;
         }
 
+        /* Responsive */
+        @media (max-width: 968px) {
+            .login-wrapper {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .login-hero {
+                display: none;
+            }
+
+            .login-container {
+                padding: 2rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .login-container {
-                max-width: 100%;
-                margin: 0;
+                padding: 1.5rem;
             }
 
-            .login-content {
-                padding: 2rem 1.5rem;
-            }
-
-            .login-header {
-                padding: 2rem 1.5rem;
-            }
-
-            .login-header h1 {
-                font-size: 1.8rem;
+            .login-header h2 {
+                font-size: 1.5rem;
             }
 
             .modal-content {
@@ -654,20 +711,8 @@
                 padding: 10px;
             }
 
-            .login-content {
-                padding: 1.5rem 1rem;
-            }
-
-            .login-header {
-                padding: 1.5rem 1rem;
-            }
-
-            .logo-text {
-                font-size: 1.4rem;
-            }
-
-            .login-header h1 {
-                font-size: 1.5rem;
+            .login-container {
+                padding: 1rem;
             }
 
             .modal-content {
@@ -688,25 +733,65 @@
 <body>
     <div class="background-pattern"></div>
 
-    <div class="login-container">
-        <div class="login-header">
-            <div class="logo">
-                <img src="/assets/images/logo.png" alt="Logo UCAO" class="logo-image"
-                    onerror="this.style.display='none'; document.querySelector('.logo-icon').style.display='flex';">
-                <div class="logo-icon"
-                    style="display:none; width:80px; height:80px; align-items:center; justify-content:center; background: white; border-radius: 12px;">
-                    <i class="fas fa-graduation-cap" style="font-size: 2rem; color: var(--primary);"></i>
+    <div class="login-wrapper">
+        <!-- Section Hero (côté gauche) -->
+        <div class="login-hero">
+            <div class="hero-content">
+                <div class="logo">
+                    <img src="/assets/images/logo.png" alt="Logo UCAO" class="logo-image"
+                        onerror="this.style.display='none'; document.querySelector('.logo-icon').style.display='flex';">
+                    <div class="logo-icon"
+                        style="display:none; width:80px; height:80px; align-items:center; justify-content:center; background: white; border-radius: 12px;">
+                        <i class="fas fa-graduation-cap" style="font-size: 2rem; color: var(--primary);"></i>
+                    </div>
+                    <div class="logo-text">UCAO</div>
                 </div>
-                <div class="logo-text">UCAO</div>
+
+                <h1 class="hero-title">Bienvenue sur la plateforme de vote</h1>
+                <p class="hero-subtitle">Connectez-vous pour participer aux élections universitaires</p>
+
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Vote sécurisé</h4>
+                            <p>Système de chiffrement avancé</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-lock"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>100% confidentiel</h4>
+                            <p>Vos choix restent anonymes</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Accessible partout</h4>
+                            <p>Sur tous vos appareils</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h1>Connexion</h1>
-            <p>Accédez à votre espace personnel</p>
         </div>
 
-        <div class="login-content">
+        <!-- Section Formulaire (côté droit) -->
+        <div class="login-container">
+            <div class="login-header">
+                <h2>Connexion</h2>
+                <p>Accédez à votre espace personnel</p>
+            </div>
+
             <div class="welcome-message">
-                <h3>Bienvenue à l'UCAO !</h3>
-                <p>Connectez-vous pour accéder à votre espace étudiant</p>
+                <h3>Content de vous revoir !</h3>
+                <p>Entrez vos identifiants pour vous connecter</p>
             </div>
 
             <div class="message error" id="errorMessage">
@@ -728,7 +813,7 @@
                 <div class="form-group">
                     <label for="email">Email ou identifiant</label>
                     <div class="input-with-icon">
-                        <i class="fas fa-envelope input-icon"></i>
+                        <i class="fas fa-user input-icon"></i>
                         <input type="text" id="email" name="email" placeholder="Votre email ou identifiant" required>
                     </div>
                     <div class="field-error" id="emailError"></div>
@@ -753,8 +838,7 @@
             </form>
 
             <div class="login-footer">
-                <p>Mot de passe oublié ? <a href="#" id="forgot-password-link"><i class="fas fa-key"></i>
-                        Réinitialiser</a></p>
+                <p><a href="#" id="forgot-password-link"><i class="fas fa-key"></i> Mot de passe oublié ?</a></p>
                 <p><a href="/"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a></p>
             </div>
         </div>
@@ -1161,7 +1245,7 @@
             }
         }
 
-        // ----------------- SYSTÈME COMPLET DES ACTIVITÉS (identique à register.html) -----------------
+        // ----------------- SYSTÈME COMPLET DES ACTIVITÉS -----------------
         let selectedActivities = [];
         let selectedSubactivities = {};
         let activitiesWithSubs = {};
@@ -1212,7 +1296,7 @@
                 const activityCard = document.createElement('div');
                 activityCard.className = 'activity-card';
 
-                // Vérification améliorée de has_subactivities (identique à register.html)
+                // Vérification améliorée de has_subactivities
                 const hasSubactivities = activity.has_subactivities === true ||
                     activity.has_subactivities === 'true' ||
                     activity.has_subactivities === 1;
@@ -1232,7 +1316,7 @@
                     const wasSelected = activityCard.classList.contains('selected');
                     const activityId = activity.id;
 
-                    // Gérer la sélection/désélection (identique à register.html)
+                    // Gérer la sélection/désélection
                     activityCard.classList.toggle('selected');
 
                     if (activityCard.classList.contains('selected')) {
@@ -1286,7 +1370,7 @@
                 }
             } catch (error) {
                 console.error(`Erreur chargement sous-activités pour ${activityName}:`, error);
-                // Utiliser des sous-activités par défaut selon le type (identique à register.html)
+                // Utiliser des sous-activités par défaut selon le type
                 const defaultSubs = getDefaultSubactivities(activityName);
                 activitiesWithSubs[activityId] = defaultSubs;
                 renderSubactivities(defaultSubs);
