@@ -1512,9 +1512,6 @@
     </div>
 
     <script src="/assets/config.js"></script>
-    <script src="/assets/js/auth-guard.js"></script>
-    <script src="/assets/js/notificationService.js"></script>
-    <script src="/assets/initNotifications.js"></script>
     <script>
         // ============================================
         // VARIABLES GLOBALES
@@ -1712,12 +1709,12 @@
                         ).join('');
                 } else {
                     ecoleSelect.innerHTML = `
-    <option value="">Tous</option>
-    <option value="EGEI">EGEI</option>
-    <option value="ESMEA">ESMEA</option>
-    <option value="FSAE">FSAE</option>
-    <option value="FDE">FDE</option>
-    `;
+                        <option value="">Tous</option>
+                        <option value="EGEI">EGEI</option>
+                        <option value="ESMEA">ESMEA</option>
+                        <option value="FSAE">FSAE</option>
+                        <option value="FDE">FDE</option>
+                    `;
                 }
             } catch (error) {
                 console.error('Erreur chargement écoles:', error);
@@ -1819,8 +1816,7 @@
             document.getElementById('electionDescription').textContent = election.description || 'Aucune description disponible';
             document.getElementById('resultsDate').textContent = `Date de publication: ${formatDate(new Date())}`;
             document.getElementById('totalVoters').textContent = `Électeurs: ${statistiques.totalInscrits || 0}`;
-            document.getElementById('participationRate').textContent = `Taux de participation: ${statistiques.tauxParticipation ||
-                0}%`;
+            document.getElementById('participationRate').textContent = `Taux de participation: ${statistiques.tauxParticipation || 0}%`;
 
             // Mettre à jour les cartes statistiques
             document.getElementById('statTotalVotes').textContent = statistiques.totalVotes || 0;
@@ -1858,10 +1854,10 @@
 
             if (!candidates || candidates.length === 0) {
                 rankingBody.innerHTML = `
-        <tr>
-            <td colspan="5" style="text-align: center; padding: 2rem;">Aucun candidat</td>
-        </tr>
-    `;
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">Aucun candidat</td>
+                    </tr>
+                `;
                 return;
             }
 
@@ -1872,24 +1868,24 @@
                 const anneeText = candidate.annee ? `L${candidate.annee}` : 'Année non renseignée';
 
                 row.innerHTML = `
-    <td class="candidate-rank ${rankClass}">${index + 1}</td>
-    <td>
-        <div class="candidate-info">
-            <img src="${candidate.photoUrl}" alt="${candidate.prenom} ${candidate.nom}" class="candidate-avatar">
-            <div>
-                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
-                <div class="candidate-details">${candidate.filiere} - ${anneeText}</div>
-            </div>
-        </div>
-    </td>
-    <td class="vote-count">${candidate.details.totalVotes}</td>
-    <td class="vote-percentage">${candidate.scoreFinal}%</td>
-    <td>
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: ${candidate.scoreFinal}%"></div>
-        </div>
-    </td>
-    `;
+                    <td class="candidate-rank ${rankClass}">${index + 1}</td>
+                    <td>
+                        <div class="candidate-info">
+                            <img src="${candidate.photoUrl}" alt="${candidate.prenom} ${candidate.nom}" class="candidate-avatar">
+                            <div>
+                                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                                <div class="candidate-details">${candidate.filiere} - ${anneeText}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="vote-count">${candidate.details.totalVotes}</td>
+                    <td class="vote-percentage">${candidate.scoreFinal}%</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${candidate.scoreFinal}%"></div>
+                        </div>
+                    </td>
+                `;
 
                 rankingBody.appendChild(row);
             });
@@ -1994,7 +1990,6 @@
                     colors.push(`hsla(${hue}, 70%, 65%, 0.8)`);
                 }
             }
-
             return colors.slice(0, count);
         }
 
