@@ -48,6 +48,13 @@
             overflow-x: hidden;
         }
 
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
         .background-pattern {
             position: fixed;
             top: 0;
@@ -643,8 +650,6 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
             padding: 20px;
-            -webkit-overflow-scrolling: touch;
-            overflow-y: auto;
         }
 
         .modal.active {
@@ -796,6 +801,9 @@
             position: relative;
             border-bottom: 3px solid transparent;
             white-space: nowrap;
+            min-height: 48px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .tab-btn:hover:not(.active) {
@@ -865,6 +873,8 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1rem;
             align-content: start;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .category-card {
@@ -878,6 +888,9 @@
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            min-height: 48px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .category-card:hover {
@@ -980,6 +993,9 @@
             white-space: nowrap;
             font-size: 0.9rem;
             font-weight: 500;
+            min-height: 48px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .category-tab.active {
@@ -998,6 +1014,8 @@
             flex: 1;
             overflow-y: auto;
             padding: 1.5rem;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .options-grid {
@@ -1018,6 +1036,9 @@
             flex-direction: column;
             align-items: center;
             gap: 0.75rem;
+            min-height: 48px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .option-card:hover {
@@ -1065,6 +1086,8 @@
             flex: 1;
             overflow-y: auto;
             padding: 1.5rem;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .summary-category {
@@ -1146,6 +1169,8 @@
             cursor: pointer;
             transition: var(--transition);
             font-family: 'Inter', sans-serif;
+            min-height: 44px;
+            touch-action: manipulation;
         }
 
         .btn-prev {
@@ -1191,8 +1216,30 @@
             opacity: 0.5;
         }
 
+        /* Loading pour les options */
+        .loading-options {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+
+        /* Styles pour appareils tactiles */
+        .touch-device .category-card:active,
+        .touch-device .option-card:active,
+        .touch-device .tab-btn:active,
+        .touch-device .category-tab:active {
+            transform: scale(0.98);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
+
+            /* Empêcher le zoom sur les inputs */
+            input,
+            select,
+            textarea {
+                font-size: 16px;
+            }
 
             /* Modal activités responsive */
             .modal#activitiesModal .modal-content {
@@ -1567,7 +1614,7 @@
                     </div>
                     <div class="hero-caption">
                         <p class="hero-caption-title">Plateforme officielle</p>
-                        <p class="hero-caption-subtitle">Le vote digital, symbole d’unité entre les étudiants de l’UCAO.
+                        <p class="hero-caption-subtitle">Le vote digital, symbole d'unité entre les étudiants de l'UCAO.
                         </p>
                         <div class="hero-pills">
                             <span class="hero-pill" style="--delay:0s"><i class="fas fa-bolt"></i> Instantané</span>
@@ -1788,6 +1835,11 @@
             initPasswordToggle();
             initResetModal();
             setupEventListeners();
+
+            // Initialisation mobile
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+            }
         });
 
         function initializeElements() {
@@ -2135,9 +2187,17 @@
 
         async function showActivitiesModal() {
             const modal = document.getElementById('activitiesModal');
+            document.body.classList.add('modal-open');
             modal.classList.add('active');
             await loadCategories();
             setupModalEvents();
+            setupTouchEvents();
+        }
+
+        function closeActivitiesModal() {
+            const modal = document.getElementById('activitiesModal');
+            document.body.classList.remove('modal-open');
+            modal.classList.remove('active');
         }
 
         function setupModalEvents() {
@@ -2156,7 +2216,8 @@
             document.getElementById('toOptionsFromSummaryBtn').addEventListener('click', () => switchTab('options'));
 
             // Fermeture du modal
-            document.getElementById('activitiesModalClose').addEventListener('click', () => {
+            document.getElementById('activitiesModalClose').addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (selectedCategories.length === 0) {
                     showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
                     return;
@@ -2164,8 +2225,44 @@
                 saveActivitiesSelection();
             });
 
+            // Fermeture en cliquant à l'extérieur
+            document.getElementById('activitiesModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('activitiesModal')) {
+                    if (selectedCategories.length === 0) {
+                        showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
+                        return;
+                    }
+                    saveActivitiesSelection();
+                }
+            });
+
             // Sauvegarde finale
             document.getElementById('saveActivitiesFinalBtn').addEventListener('click', saveActivitiesSelection);
+        }
+
+        function setupTouchEvents() {
+            // Utiliser touchstart pour une réponse plus rapide sur mobile
+            document.querySelectorAll('.category-card, .option-card, .tab-btn, .category-tab').forEach(element => {
+                element.addEventListener('touchstart', function (e) {
+                    this.style.transform = 'scale(0.98)';
+                    e.preventDefault();
+                });
+
+                element.addEventListener('touchend', function () {
+                    this.style.transform = '';
+                });
+
+                element.addEventListener('touchcancel', function () {
+                    this.style.transform = '';
+                });
+            });
+
+            // Empêcher le scroll sur les éléments interactifs
+            document.querySelectorAll('.category-card, .option-card').forEach(element => {
+                element.addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                }, { passive: false });
+            });
         }
 
         function switchTab(tabName) {
@@ -2559,10 +2656,18 @@
                 return;
             }
 
+            // Désactiver le bouton pendant la sauvegarde
+            const saveBtn = document.getElementById('saveActivitiesFinalBtn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+
             const payload = {
                 activities: selectedCategories,
                 subactivities: selectedOptions
             };
+
+            console.log('Sauvegarde des activités:', payload);
 
             try {
                 const res = await fetch(`${API_URL}/api/activities/my-activities`, {
@@ -2575,16 +2680,23 @@
                 });
 
                 const data = await res.json();
+
                 if (res.ok) {
                     showMessage('Vos activités ont été enregistrées avec succès!', 'success');
-                    document.getElementById('activitiesModal').classList.remove('active');
-                    setTimeout(() => window.location.replace('dashboard.html'), 1000);
+                    closeActivitiesModal();
+                    setTimeout(() => {
+                        window.location.replace('dashboard.html');
+                    }, 1500);
                 } else {
-                    showMessage(data.message || 'Erreur lors de l\'enregistrement des activités', 'error');
+                    throw new Error(data.message || 'Erreur lors de la sauvegarde');
                 }
             } catch (error) {
                 console.error('Erreur sauvegarde activités:', error);
-                showMessage('Erreur de connexion. Veuillez réessayer.', 'error');
+                showMessage(error.message || 'Erreur de connexion. Veuillez réessayer.', 'error');
+
+                // Réactiver le bouton en cas d'erreur
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
             }
         }
     </script>
