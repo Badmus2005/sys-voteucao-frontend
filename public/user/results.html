@@ -1617,9 +1617,9 @@
                 } catch (error) {
                     // Log informatif au lieu d'erreur pour les résultats en attente
                     if (error.message.includes('non encore disponibles') || error.message.includes('patienter')) {
-                        console.info('ℹ️ Résultats en attente:', error.message);
+                        console.info('Résultats en attente:', error.message);
                     } else {
-                        console.error('❌ Erreur VoteService:', error);
+                        console.error('Erreur VoteService:', error);
                     }
                     throw error;
                 }
@@ -1643,6 +1643,7 @@
 
         // Fonction pour transformer les données du backend vers le format frontend
         function transformBackendData(backendData) {
+            console.log('Données brutes du backend:', backendData);
             if (!backendData || !backendData.resultats) return backendData;
 
             return {
@@ -1659,7 +1660,7 @@
                     nom: candidate.nom,
                     prenom: candidate.prenom,
                     photoUrl: candidate.photoUrl,
-                    filiere: candidate.filiere || candidate.filiereId,
+                    filiere: candidate.nomFiliere || candidate.filiereId,
                     annee: candidate.annee,
                     slogan: candidate.slogan,
                     scoreFinal: candidate.scoreFinal,
