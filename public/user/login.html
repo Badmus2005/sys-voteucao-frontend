@@ -1484,12 +1484,12 @@
                         <i class="fas fa-layer-group"></i>
                         Catégories
                     </button>
-                    <button class="tab-btn" data-tab="options" id="optionsTab" disabled>
+                    <button class="tab-btn" data-tab="options" id="optionsTabBtn" disabled>
                         <i class="fas fa-cogs"></i>
                         Options
                         <span class="tab-badge" id="selectedCategoriesCount">0</span>
                     </button>
-                    <button class="tab-btn" data-tab="summary" id="summaryTab" disabled>
+                    <button class="tab-btn" data-tab="summary" id="summaryTabBtn" disabled>
                         <i class="fas fa-check-circle"></i>
                         Récapitulatif
                         <span class="tab-badge" id="selectedOptionsCount">0</span>
@@ -1894,12 +1894,45 @@
         let selectedCategories = [];
         let selectedOptions = {};
         let categoriesData = [];
+        let optionsCache = {};
         let currentCategoryTab = null;
+        let activitiesEventsBound = false;
+
+        function resetActivitiesState() {
+            selectedCategories = [];
+            selectedOptions = {};
+            categoriesData = [];
+            optionsCache = {};
+            currentCategoryTab = null;
+
+            const categoriesContainer = document.getElementById('categoriesContainer');
+            const categoryTabs = document.getElementById('categoryTabs');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const summaryContainer = document.getElementById('summaryContainer');
+            const categoriesBadge = document.getElementById('selectedCategoriesCount');
+            const optionsBadge = document.getElementById('selectedOptionsCount');
+            const toOptionsBtn = document.getElementById('toOptionsBtn');
+            const toSummaryBtn = document.getElementById('toSummaryBtn');
+            const optionsTabBtn = document.querySelector('.tab-btn[data-tab="options"]');
+            const summaryTabBtn = document.querySelector('.tab-btn[data-tab="summary"]');
+
+            if (categoriesContainer) categoriesContainer.innerHTML = '<div class="loading-options">Chargement des catégories...</div>';
+            if (categoryTabs) categoryTabs.innerHTML = '';
+            if (optionsContainer) optionsContainer.innerHTML = '';
+            if (summaryContainer) summaryContainer.innerHTML = '';
+            if (categoriesBadge) categoriesBadge.textContent = '0';
+            if (optionsBadge) optionsBadge.textContent = '0';
+            if (toOptionsBtn) toOptionsBtn.disabled = true;
+            if (toSummaryBtn) toSummaryBtn.disabled = true;
+            if (optionsTabBtn) optionsTabBtn.disabled = true;
+            if (summaryTabBtn) summaryTabBtn.disabled = true;
+        }
 
         async function showActivitiesModal() {
             const modal = document.getElementById('activitiesModal');
             document.body.classList.add('modal-open');
             modal.classList.add('active');
+            resetActivitiesState();
             await loadCategories();
             setupModalEvents();
         }
@@ -1911,6 +1944,11 @@
         }
 
         function setupModalEvents() {
+            if (activitiesEventsBound) {
+                return;
+            }
+            activitiesEventsBound = true;
+
             // Navigation par onglets
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1962,11 +2000,8 @@
                 targetBtn.classList.add('active');
 
                 // Charger les données si nécessaire
-                if (tabName === 'options' && selectedCategories.length > 0) {
+                if (tabName === 'options') {
                     loadCategoryTabs();
-                    if (!currentCategoryTab) {
-                        showCategoryOptions(selectedCategories[0]);
-                    }
                 } else if (tabName === 'summary') {
                     updateSummary();
                 }
@@ -2049,6 +2084,10 @@
                         card.classList.remove('selected');
                         selectedCategories = selectedCategories.filter(id => id !== categoryId);
                         delete selectedOptions[categoryId];
+                        delete optionsCache[categoryId];
+                        if (currentCategoryTab === categoryId) {
+                            currentCategoryTab = selectedCategories[0] || null;
+                        }
                     } else {
                         card.classList.add('selected');
                         if (!selectedCategories.includes(categoryId)) {
@@ -2057,6 +2096,12 @@
                     }
 
                     updateCategoriesState();
+                    updateOptionsState();
+
+                    const optionsPane = document.getElementById('optionsTab');
+                    if (optionsPane && optionsPane.classList.contains('active')) {
+                        loadCategoryTabs();
+                    }
                 });
             });
         }
@@ -2064,22 +2109,18 @@
         function updateCategoriesState() {
             const count = selectedCategories.length;
             const toOptionsBtn = document.getElementById('toOptionsBtn');
-            const optionsTab = document.querySelector('[data-tab="options"]');
+            const optionsTabBtn = document.querySelector('.tab-btn[data-tab="options"]');
             const badge = document.getElementById('selectedCategoriesCount');
 
-            badge.textContent = count;
-            toOptionsBtn.disabled = count === 0;
-
-            if (optionsTab) {
-                optionsTab.disabled = count === 0;
-                if (count > 0) {
-                    optionsTab.disabled = false;
-                }
-            }
+            if (badge) badge.textContent = count;
+            if (toOptionsBtn) toOptionsBtn.disabled = count === 0;
+            if (optionsTabBtn) optionsTabBtn.disabled = count === 0;
         }
 
         function loadCategoryTabs() {
             const container = document.getElementById('categoryTabs');
+            if (!container) return;
+
             container.innerHTML = selectedCategories.map(categoryId => {
                 const category = categoriesData.find(c => c.id === categoryId);
                 return category ? `
@@ -2099,10 +2140,28 @@
                 });
             });
 
-            // Afficher la première catégorie par défaut
-            if (selectedCategories.length > 0 && !currentCategoryTab) {
-                showCategoryOptions(selectedCategories[0]);
+            if (selectedCategories.length === 0) {
+                currentCategoryTab = null;
+                const optionsContainer = document.getElementById('optionsContainer');
+                if (optionsContainer) {
+                    optionsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-layer-group"></i>
+                            <h4>Aucune catégorie sélectionnée</h4>
+                            <p>Sélectionnez au moins une catégorie pour voir les options disponibles.</p>
+                        </div>
+                    `;
+                }
+                return;
             }
+
+            let activeCategory = currentCategoryTab;
+            if (!activeCategory || !selectedCategories.includes(activeCategory)) {
+                activeCategory = selectedCategories[0];
+            }
+
+            currentCategoryTab = activeCategory;
+            showCategoryOptions(activeCategory);
         }
 
         async function showCategoryOptions(categoryId) {
@@ -2139,8 +2198,8 @@
                 renderOptions(categoryId, options);
             } catch (error) {
                 console.error('Erreur chargement options:', error);
-                const options = getDefaultOptions(category.nom);
-                renderOptions(categoryId, options);
+                const fallbackOptions = getDefaultOptions(category.nom);
+                renderOptions(categoryId, fallbackOptions);
             }
         }
 
@@ -2158,13 +2217,17 @@
                 return;
             }
 
+            optionsCache[categoryId] = options;
+
             container.innerHTML = `
             <div class="options-grid">
-                ${options.map(option => {
-                const isSelected = selectedOptions[categoryId]?.includes(option.id) || false;
+        ${options.map(option => {
+                const storedSelections = selectedOptions[categoryId] || [];
+                const optionKey = String(option.id);
+                const isSelected = storedSelections.includes(optionKey);
                 return `
-                        <div class="option-card ${isSelected ? 'selected' : ''}" 
-                             data-option-id="${option.id}">
+            <div class="option-card ${isSelected ? 'selected' : ''}" 
+                 data-option-id="${optionKey}">
                             <div class="option-icon">
                                 <i class="fas fa-${option.icone || 'circle'}"></i>
                             </div>
@@ -2181,7 +2244,7 @@
             // Gestion des clics sur les options
             container.querySelectorAll('.option-card').forEach(card => {
                 card.addEventListener('click', () => {
-                    const optionId = parseInt(card.dataset.optionId);
+                    const optionId = String(card.dataset.optionId);
                     toggleOptionSelection(categoryId, optionId, card);
                 });
             });
@@ -2215,11 +2278,11 @@
 
             const badge = document.getElementById('selectedOptionsCount');
             const toSummaryBtn = document.getElementById('toSummaryBtn');
-            const summaryTab = document.querySelector('[data-tab="summary"]');
+            const summaryTabBtn = document.querySelector('.tab-btn[data-tab="summary"]');
 
-            badge.textContent = totalOptions;
-            toSummaryBtn.disabled = totalOptions === 0;
-            if (summaryTab) summaryTab.disabled = totalOptions === 0;
+            if (badge) badge.textContent = totalOptions;
+            if (toSummaryBtn) toSummaryBtn.disabled = totalOptions === 0;
+            if (summaryTabBtn) summaryTabBtn.disabled = totalOptions === 0;
         }
 
         function updateSummary() {
@@ -2343,10 +2406,18 @@
         }
 
         function getOptionById(categoryId, optionId) {
+            const cachedOptions = optionsCache[categoryId];
+            if (Array.isArray(cachedOptions)) {
+                const cachedMatch = cachedOptions.find(opt => String(opt.id) === String(optionId));
+                if (cachedMatch) {
+                    return cachedMatch;
+                }
+            }
+
             const category = categoriesData.find(c => c.id === categoryId);
             if (!category) return null;
             const defaultOptions = getDefaultOptions(category.nom);
-            return defaultOptions.find(opt => opt.id === optionId);
+            return defaultOptions.find(opt => String(opt.id) === String(optionId));
         }
 
         async function saveActivitiesSelection() {
@@ -2413,23 +2484,6 @@
                     window.location.replace('dashboard.html');
                 }, 1000);
             }
-        }
-
-        function updateCategoriesState() {
-            const count = selectedCategories.length;
-            const toOptionsBtn = document.getElementById('toOptionsBtn');
-            const optionsTab = document.querySelector('[data-tab="options"]');
-            const badge = document.getElementById('selectedCategoriesCount');
-
-            badge.textContent = count;
-            toOptionsBtn.disabled = count === 0;
-
-            if (optionsTab) {
-                // Toujours activer l'onglet Options pour permettre la navigation
-                optionsTab.disabled = false;
-            }
-
-            console.log(`Catégories sélectionnées: ${count}, Options btn disabled: ${toOptionsBtn.disabled}`);
         }
 
         // Fonction de débogage pour vérifier l'état des sélections
