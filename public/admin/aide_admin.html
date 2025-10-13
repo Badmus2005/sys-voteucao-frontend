@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aide Administrateur - Système de Vote UCAO</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            /* Palette de couleurs UCAO */
+            --bordeaux: #8B0000;
+            --bordeaux-light: #a83232;
+            --blue-night: #0A1931;
+            --blue-night-light: #1a2f57;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+            --info: #3182ce;
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f1f3f9" width="100" height="100"/><path d="M0,0 L100,100 M20,0 L100,80 M0,20 L80,100" stroke="%23e1e7f5" stroke-width="2"/></svg>');
+        }
+
+        /* Header */
+        .help-header {
+            background: linear-gradient(135deg, var(--blue-night) 0%, var(--bordeaux) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .help-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .help-nav {
+            background: var(--card-bg);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--bordeaux);
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+
+        /* Contenu principal */
+        .help-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .help-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--bordeaux);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: var(--blue-night);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header .section-icon {
+            color: var(--bordeaux);
+            margin-right: 0.5rem;
+        }
+
+        /* Grille de fonctionnalités */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--bordeaux);
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card h3 {
+            color: var(--blue-night);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .feature-card .feature-icon {
+            color: var(--bordeaux);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Étapes */
+        .steps-list {
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            counter-increment: step-counter;
+            margin-bottom: 1.5rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--bordeaux);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .step-item h4 {
+            color: var(--blue-night);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Alertes */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background-color: rgba(49, 130, 206, 0.1);
+            border-left-color: var(--info);
+            color: var(--info);
+        }
+
+        .alert-warning {
+            background-color: rgba(214, 158, 46, 0.1);
+            border-left-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-success {
+            background-color: rgba(56, 161, 105, 0.1);
+            border-left-color: var(--success);
+            color: var(--success);
+        }
+
+        .alert-danger {
+            background-color: rgba(229, 62, 62, 0.1);
+            border-left-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Code et exemples */
+        .code-example {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        /* Table des fonctionnalités */
+        .features-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .features-table th,
+        .features-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .features-table th {
+            background: var(--light-bg);
+            font-weight: 600;
+            color: var(--blue-night);
+        }
+
+        /* Footer */
+        .help-footer {
+            background: var(--blue-night);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .help-footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        .help-footer .version {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .help-content {
+                padding: 1rem;
+            }
+
+            .help-section {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="help-header">
+        <div class="container">
+            <h1><i class="fas fa-question-circle"></i> Guide Administrateur</h1>
+            <p>Système de Vote Électronique UCAO</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="help-nav">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="#getting-started" class="nav-link active">Démarrage</a>
+                <a href="#dashboard" class="nav-link">Tableau de Bord</a>
+                <a href="#elections" class="nav-link">Élections</a>
+                <a href="#candidates" class="nav-link">Candidats</a>
+                <a href="#users" class="nav-link">Utilisateurs</a>
+                <a href="#statistics" class="nav-link">Statistiques</a>
+                <a href="#settings" class="nav-link">Paramètres</a>
+                <a href="#troubleshooting" class="nav-link">Dépannage</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="help-content">
+
+        <!-- Section Démarrage -->
+        <section id="getting-started" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-rocket section-icon"></i>Premiers Pas</h2>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Connexion :</strong> Utilisez vos identifiants administrateur pour accéder au panneau
+                d'administration.
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-sign-in-alt"></i></div>
+                    <h3>Connexion Administrateur</h3>
+                    <p>Accédez à l'interface d'administration via l'URL principale du système. Utilisez vos identifiants
+                        fournis par l'équipe technique.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3>Tableau de Bord</h3>
+                    <p>Le tableau de bord principal affiche un aperçu des statistiques clés : utilisateurs actifs, votes
+                        effectués, candidats et élections en cours.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bars"></i></div>
+                    <h3>Navigation</h3>
+                    <p>Utilisez la barre latérale pour naviguer entre les différentes sections : Utilisateurs,
+                        Élections, Candidats, Statistiques et Paramètres.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Tableau de Bord -->
+        <section id="dashboard" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tachometer-alt section-icon"></i>Tableau de Bord</h2>
+            </div>
+
+            <p>Le tableau de bord fournit un aperçu en temps réel des activités du système de vote.</p>
+
+            <h3>Cartes Statistiques</h3>
+            <ul>
+                <li><strong>Utilisateurs Actifs :</strong> Nombre total d'utilisateurs enregistrés et actifs</li>
+                <li><strong>Votes Effectués :</strong> Nombre total de votes enregistrés dans le système</li>
+                <li><strong>Candidats :</strong> Nombre total de candidats inscrits</li>
+                <li><strong>Élections Actives :</strong> Nombre d'élections actuellement en cours</li>
+            </ul>
+
+            <h3>Graphiques</h3>
+            <p>Visualisez l'activité des votes sur les 7 derniers jours avec des graphiques interactifs Chart.js.</p>
+
+            <h3>Importation d'Étudiants</h3>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Choisir le mode d'importation</h4>
+                    <p>Sélectionnez entre "Saisie manuelle" ou "Import fichier" selon vos besoins.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Remplir les informations</h4>
+                    <p>Pour la saisie manuelle : nom, prénom, matricule, code d'inscription, école et filière.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Importer le fichier CSV</h4>
+                    <p>Pour l'import fichier : préparez un fichier CSV avec les colonnes appropriées et sélectionnez-le.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Élections -->
+        <section id="elections" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-vote-yea section-icon"></i>Gestion des Élections</h2>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Types d'élections :</strong> Salle, École, Université, Générale
+            </div>
+
+            <h3>Créer une Élection</h3>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Accéder à la section Élections</h4>
+                    <p>Cliquez sur "Élections" dans la barre latérale.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Remplir le formulaire</h4>
+                    <p>Spécifiez : titre, description, type, dates de début et fin, et école concernée.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Ajouter des candidats</h4>
+                    <p>Sélectionnez les candidats éligibles pour cette élection.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Activer l'élection</h4>
+                    <p>Changez le statut à "ACTIVÉ" pour permettre les votes.</p>
+                </div>
+            </div>
+
+            <h3>Gérer les Élections Existantes</h3>
+            <table class="features-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>Quand l'utiliser</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Modifier</strong></td>
+                        <td>Changer les détails de l'élection</td>
+                        <td>Avant l'activation de l'élection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Activer/Clôturer</strong></td>
+                        <td>Contrôler le statut de l'élection</td>
+                        <td>Début et fin de la période de vote</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Voir les détails</strong></td>
+                        <td>Consulter les informations complètes</td>
+                        <td>Pour vérifier la configuration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Supprimer</strong></td>
+                        <td>Retirer définitivement l'élection</td>
+                        <td>Élections test ou annulées</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-warning">
+                <strong>Attention :</strong> Une fois une élection clôturée, les votes ne peuvent plus être modifiés.
+            </div>
+        </section>
+
+        <!-- Section Candidats -->
+        <section id="candidates" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-tie section-icon"></i>Gestion des Candidats</h2>
+            </div>
+
+            <p>Gérez les candidatures des étudiants souhaitant participer aux élections.</p>
+
+            <h3>Statuts des Candidatures</h3>
+            <ul>
+                <li><strong>EN_ATTENTE :</strong> Candidature soumise, en attente d'approbation</li>
+                <li><strong>APPROUVÉ :</strong> Candidature acceptée, candidat éligible</li>
+                <li><strong>REJETÉ :</strong> Candidature refusée</li>
+            </ul>
+
+            <h3>Approuver/Rejeter des Candidatures</h3>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Accéder à la section Candidats</h4>
+                    <p>Cliquez sur "Candidats" dans la barre latérale.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Vérifier les informations</h4>
+                    <p>Consultez le profil, programme et photo du candidat.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Changer le statut</h4>
+                    <p>Cliquez sur "Changer statut" et sélectionnez APPROUVÉ ou REJETÉ.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Confirmer</h4>
+                    <p>Enregistrez les modifications.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Statistiques :</strong> La page affiche le nombre de candidatures en attente, approuvées et
+                rejetées.
+            </div>
+        </section>
+
+        <!-- Section Utilisateurs -->
+        <section id="users" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-users section-icon"></i>Gestion des Utilisateurs</h2>
+            </div>
+
+            <p>Gérez les comptes étudiants et leurs rôles dans le système.</p>
+
+            <h3>Fonctionnalités Principales</h3>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-list"></i></div>
+                    <h3>Liste des Utilisateurs</h3>
+                    <p>Visualisez tous les utilisateurs avec pagination et recherche.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                    <h3>Filtres</h3>
+                    <p>Filtrez par école, filière, année, rôle et statut.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-file-csv"></i></div>
+                    <h3>Import CSV</h3>
+                    <p>Importez des listes d'étudiants via fichier CSV.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-user-edit"></i></div>
+                    <h3>Modifier Rôles</h3>
+                    <p>Changez les rôles des utilisateurs (Étudiant, Délégué, Admin).</p>
+                </div>
+            </div>
+
+            <h3>Importer des Étudiants</h3>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Préparer le fichier CSV</h4>
+                    <p>Créez un fichier avec les colonnes : nom, prénom, matricule, email, téléphone, école, filière,
+                        année.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Accéder à l'import</h4>
+                    <p>Dans la section Utilisateurs, cliquez sur "Importer CSV".</p>
+                </div>
+                <div class="step-item">
+                    <h4>Sélectionner le fichier</h4>
+                    <p>Choisissez votre fichier CSV et validez l'import.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Statistiques -->
+        <section id="statistics" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-pie section-icon"></i>Statistiques et Résultats</h2>
+            </div>
+
+            <p>Consultez les statistiques détaillées et les résultats des élections.</p>
+
+            <h3>Types de Graphiques</h3>
+            <ul>
+                <li><strong>Circulaires :</strong> Répartition des votes par candidat</li>
+                <li><strong>Barres :</strong> Comparaison des résultats</li>
+                <li><strong>Lignes :</strong> Évolution temporelle des votes</li>
+                <li><strong>Tableaux :</strong> Données détaillées exportables</li>
+            </ul>
+
+            <h3>Exporter les Données</h3>
+            <p>Utilisez les boutons d'export pour télécharger les résultats au format PDF ou Excel.</p>
+
+            <div class="alert alert-success">
+                <strong>Conseil :</strong> Les graphiques sont générés avec Chart.js pour une visualisation optimale.
+            </div>
+        </section>
+
+        <!-- Section Paramètres -->
+        <section id="settings" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-cog section-icon"></i>Paramètres Système</h2>
+            </div>
+
+            <p>Configurez les paramètres généraux du système de vote.</p>
+
+            <h3>Écoles et Filières</h3>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Ajouter une école</h4>
+                    <p>Saisissez le nom de la nouvelle école et enregistrez.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Ajouter une filière</h4>
+                    <p>Associez la filière à une école existante.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Gérer les associations</h4>
+                    <p>Modifiez ou supprimez les écoles et filières selon les besoins.</p>
+                </div>
+            </div>
+
+            <h3>Activités Para-Universitaires</h3>
+            <p>Gérez les activités extrascolaires et leurs sous-catégories.</p>
+
+            <h3>Sélecteur d'Icônes</h3>
+            <p>Utilisez le sélecteur visuel pour choisir parmi 100+ icônes Font Awesome.</p>
+        </section>
+
+        <!-- Section Dépannage -->
+        <section id="troubleshooting" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tools section-icon"></i>Dépannage</h2>
+            </div>
+
+            <h3>Problèmes Courants</h3>
+
+            <div class="alert alert-danger">
+                <h4>Erreur de Connexion</h4>
+                <p>Vérifiez vos identifiants. Contactez l'administrateur système si le problème persiste.</p>
+            </div>
+
+            <div class="alert alert-warning">
+                <h4>Import CSV Échoue</h4>
+                <p>Vérifiez le format du fichier CSV et assurez-vous que toutes les colonnes requises sont présentes.
+                </p>
+            </div>
+
+            <div class="alert alert-info">
+                <h4>Élection Ne S'affiche Pas</h4>
+                <p>Vérifiez que l'élection est activée et que la période de vote est en cours.</p>
+            </div>
+
+            <div class="alert alert-success">
+                <h4>Candidature Non Visible</h4>
+                <p>Assurez-vous que la candidature a été approuvée par un administrateur.</p>
+            </div>
+
+            <h3>Support Technique</h3>
+            <p>Pour obtenir de l'aide supplémentaire, contactez :</p>
+            <ul>
+                <li><strong>Email :</strong> support@ucao.edu</li>
+                <li><strong>Téléphone :</strong> +225 XX XX XX XX</li>
+                <li><strong>Documentation :</strong> Consultez la documentation complète sur le dépôt GitHub</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="help-footer">
+        <div class="container">
+            <p><strong>Système de Vote Électronique UCAO</strong></p>
+            <p>Guide d'administration complet pour la gestion du système de vote</p>
+            <p class="version">Version 1.0 - Octobre 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation active
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    // Retirer la classe active de tous les liens
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Ajouter la classe active au lien cliqué
+                    this.classList.add('active');
+                });
+            });
+
+            // Smooth scroll pour les ancres
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
+</content>
+<parameter name="filePath">d:\UCAO_TECH\Vote_UCAO\sys-voteucao-frontend\public\admin\aide_admin.html
