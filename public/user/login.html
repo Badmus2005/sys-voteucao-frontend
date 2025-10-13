@@ -772,92 +772,477 @@
         }
 
         /* Styles pour les activités */
-        .activities-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+
+        .activities-tabs {
+            display: flex;
+            background: var(--light);
+            border-bottom: 1px solid var(--gray-light);
+            padding: 0 1.5rem;
         }
 
-        .activity-card {
-            border: 2px solid var(--gray-light);
-            border-radius: 12px;
-            padding: 1.5rem 1rem;
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
-            text-align: center;
-            background: white;
             position: relative;
-            height: 140px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
         }
 
-        .activity-card:hover {
+        .tab-btn:hover:not(.active) {
+            color: var(--primary);
+            background: rgba(128, 0, 32, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: white;
+        }
+
+        .tab-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tab-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .tab-content {
+            height: calc(100% - 60px);
+            overflow: hidden;
+        }
+
+        .tab-pane {
+            display: none;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .tab-pane.active {
+            display: flex;
+        }
+
+        .tab-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .tab-header h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tab-header p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Conteneur des catégories */
+        .categories-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            align-content: start;
+        }
+
+        .category-card {
+            background: white;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .category-card:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: var(--card-shadow);
         }
 
-        .activity-card.selected {
+        .category-card.selected {
             border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(128, 0, 32, 0.05), rgba(13, 27, 42, 0.05));
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.03), rgba(13, 27, 42, 0.03));
             box-shadow: 0 8px 25px rgba(128, 0, 32, 0.1);
         }
 
-        .activity-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: var(--accent);
-            color: var(--secondary);
-            padding: 0.25rem 0.5rem;
+        .category-icon {
+            width: 50px;
+            height: 50px;
             border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
         }
 
-        .activity-icon {
-            font-size: 1.5rem;
-            color: var(--primary);
+        .category-content {
+            flex: 1;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .category-description {
+            color: var(--gray);
+            font-size: 0.85rem;
+            line-height: 1.4;
             margin-bottom: 0.5rem;
         }
 
-        .activity-name {
-            font-weight: 600;
-            color: var(--secondary);
-            margin-bottom: 0.25rem;
-            font-size: 0.95rem;
+        .category-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
-        .activity-description {
+        .category-feature {
+            background: var(--gray-light);
+            color: var(--dark);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
             font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent);
+            color: var(--secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Navigation des options */
+        .options-navigation {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            background: var(--light);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .category-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .category-tab.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-tab:not(.active):hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Conteneur des options */
+        .options-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .option-card {
+            background: white;
+            border: 2px solid var(--gray-light);
+            border-radius: 10px;
+            padding: 1.25rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.05), rgba(13, 27, 42, 0.05));
+        }
+
+        .option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .option-card.selected .option-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .option-name {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .option-description {
             color: var(--gray);
+            font-size: 0.8rem;
             line-height: 1.3;
         }
 
-        .subactivities-section {
-            margin-top: 1.5rem;
+        /* Récapitulatif */
+        .summary-container {
+            flex: 1;
+            overflow-y: auto;
             padding: 1.5rem;
-            background: rgba(128, 0, 32, 0.02);
+        }
+
+        .summary-category {
+            background: white;
             border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
             border: 1px solid var(--gray-light);
         }
 
-        .subactivities-section h4 {
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
+        .summary-category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
         }
 
-        .subactivities-section p {
-            color: var(--gray);
+        .summary-category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .summary-category-name {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .summary-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .summary-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            background: var(--light);
+            border-radius: 8px;
             font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .summary-option i {
+            color: var(--primary);
+        }
+
+        /* Actions */
+        .tab-actions {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            background: white;
+        }
+
+        .btn-prev,
+        .btn-next,
+        .btn-submit-final {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-prev {
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        .btn-prev:hover {
+            background: #d1d5db;
+            transform: translateY(-1px);
+        }
+
+        .btn-next,
+        .btn-submit-final {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(128, 0, 32, 0.2);
+        }
+
+        .btn-next:hover:not(:disabled),
+        .btn-submit-final:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(128, 0, 32, 0.3);
+        }
+
+        .btn-next:disabled,
+        .btn-submit-final:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* États vides */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
             margin-bottom: 1rem;
-            line-height: 1.4;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .activities-tabs {
+                padding: 0 1rem;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .categories-container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .tab-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn-prev,
+            .btn-next,
+            .btn-submit-final {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                margin: 10px;
+                height: 95vh;
+            }
+
+            .activities-tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                justify-content: center;
+            }
+
+            .category-tabs {
+                flex-wrap: wrap;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Responsive */
@@ -1101,26 +1486,108 @@
         </div>
     </div>
 
-    <!-- Modal: Choix des activités après connexion -->
+    <!-- MODAL AMÉLIORÉ - REMPLACER LA SECTION EXISTANTE -->
     <div class="modal" id="activitiesModal">
-        <div class="modal-content" style="max-width:800px;">
+        <div class="modal-content" style="max-width: 900px; height: 85vh;">
             <div class="modal-header">
-                <h3><i class="fas fa-users"></i> Choisissez vos activités</h3>
+                <h3><i class="fas fa-tasks"></i> Personnalisez votre profil</h3>
                 <button class="modal-close" id="activitiesModalClose">&times;</button>
             </div>
-            <div class="modal-body" style="max-height:60vh; overflow:auto;">
-                <p id="activitiesIntro">Sélectionnez les activités et options qui vous intéressent. Vous pourrez les
-                    modifier plus tard.</p>
-                <div class="activities-grid" id="activitiesContainer"></div>
 
-                <div class="subactivities-section" id="subactivitiesContainer" style="display:none; margin-top:1rem;">
-                    <h4 id="subactivitiesTitle">Options</h4>
-                    <p id="subactivitiesDescription">Choisissez parmi les options</p>
-                    <div class="activities-grid" id="subactivitiesGrid"></div>
+            <div class="modal-body" style="padding: 0; height: calc(100% - 80px);">
+                <!-- Navigation par onglets -->
+                <div class="activities-tabs">
+                    <button class="tab-btn active" data-tab="categories">
+                        <i class="fas fa-layer-group"></i>
+                        Catégories
+                    </button>
+                    <button class="tab-btn" data-tab="options" id="optionsTab" disabled>
+                        <i class="fas fa-cogs"></i>
+                        Options
+                        <span class="tab-badge" id="selectedCategoriesCount">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="summary" id="summaryTab" disabled>
+                        <i class="fas fa-check-circle"></i>
+                        Récapitulatif
+                        <span class="tab-badge" id="selectedOptionsCount">0</span>
+                    </button>
                 </div>
-            </div>
-            <div class="modal-actions" style="padding:1rem; display:flex; gap:1rem; justify-content:flex-end;">
-                <button class="btn-modal btn-submit" id="saveActivitiesBtn">Enregistrer</button>
+
+                <!-- Contenu des onglets -->
+                <div class="tab-content">
+                    <!-- Onglet Catégories -->
+                    <div class="tab-pane active" id="categoriesTab">
+                        <div class="tab-header">
+                            <h4>Choisissez vos centres d'intérêt</h4>
+                            <p>Sélectionnez les catégories qui vous intéressent. Vous pourrez ensuite choisir des
+                                options
+                                spécifiques.</p>
+                        </div>
+
+                        <div class="categories-container" id="categoriesContainer">
+                            <!-- Les catégories seront chargées ici -->
+                        </div>
+
+                        <div class="tab-actions">
+                            <button class="btn-next" id="toOptionsBtn" disabled>
+                                Continuer vers les options
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Options -->
+                    <div class="tab-pane" id="optionsTab">
+                        <div class="tab-header">
+                            <h4>Personnalisez vos choix</h4>
+                            <p>Sélectionnez les options qui vous intéressent dans chaque catégorie.</p>
+                        </div>
+
+                        <div class="options-navigation">
+                            <div class="category-tabs" id="categoryTabs">
+                                <!-- Les onglets de catégories seront générés ici -->
+                            </div>
+                        </div>
+
+                        <div class="options-container" id="optionsContainer">
+                            <!-- Les options seront chargées ici -->
+                        </div>
+
+                        <div class="tab-actions">
+                            <button class="btn-prev" id="toCategoriesBtn">
+                                <i class="fas fa-arrow-left"></i>
+                                Retour aux catégories
+                            </button>
+                            <button class="btn-next" id="toSummaryBtn" disabled>
+                                Voir le récapitulatif
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Récapitulatif -->
+                    <div class="tab-pane" id="summaryTab">
+                        <div class="tab-header">
+                            <h4>Récapitulatif de vos choix</h4>
+                            <p>Vérifiez vos sélections avant de finaliser.</p>
+                        </div>
+
+                        <div class="summary-container" id="summaryContainer">
+                            <!-- Le récapitulatif sera généré ici -->
+                        </div>
+
+                        <div class="tab-actions">
+                            <button class="btn-prev" id="toOptionsFromSummaryBtn">
+                                <i class="fas fa-arrow-left"></i>
+                                Modifier les options
+                            </button>
+                            <button class="btn-submit-final" id="saveActivitiesFinalBtn">
+                                <i class="fas fa-check"></i>
+                                Confirmer mes choix
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1501,221 +1968,426 @@
             }
         }
 
-        // ----------------- SYSTÈME COMPLET DES ACTIVITÉS -----------------
-        let selectedActivities = [];
-        let selectedSubactivities = {};
-        let activitiesWithSubs = {};
-        let currentActivityId = null;
+        // ============================================
+        // NOUVELLE IMPLÉMENTATION DES MODALS D'ACTIVITÉS
+        // ============================================
+        let selectedCategories = [];
+        let selectedOptions = {};
+        let categoriesData = [];
+        let currentCategoryTab = null;
 
         async function showActivitiesModal() {
             const modal = document.getElementById('activitiesModal');
             modal.classList.add('active');
-            await populateActivities();
-            setupActivitiesModalEvents();
+            await loadCategories();
+            setupModalEvents();
         }
 
-        function setupActivitiesModalEvents() {
+        function setupModalEvents() {
+            // Navigation par onglets
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    switchTab(btn.dataset.tab);
+                });
+            });
+
+            // Boutons de navigation
+            document.getElementById('toOptionsBtn').addEventListener('click', () => switchTab('options'));
+            document.getElementById('toCategoriesBtn').addEventListener('click', () => switchTab('categories'));
+            document.getElementById('toSummaryBtn').addEventListener('click', () => switchTab('summary'));
+            document.getElementById('toOptionsFromSummaryBtn').addEventListener('click', () => switchTab('options'));
+
+            // Fermeture du modal
             document.getElementById('activitiesModalClose').addEventListener('click', () => {
-                if (selectedActivities.length === 0) {
-                    showMessage('Veuillez sélectionner au moins une activité avant de continuer.', 'error');
+                if (selectedCategories.length === 0) {
+                    showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
                     return;
                 }
                 saveActivitiesSelection();
             });
 
-            document.getElementById('saveActivitiesBtn').addEventListener('click', saveActivitiesSelection);
+            // Sauvegarde finale
+            document.getElementById('saveActivitiesFinalBtn').addEventListener('click', saveActivitiesSelection);
         }
 
-        async function populateActivities() {
+        function switchTab(tabName) {
+            // Masquer tous les onglets
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Activer le nouvel onglet
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Charger les données si nécessaire
+            if (tabName === 'options' && selectedCategories.length > 0) {
+                loadCategoryTabs();
+                showCategoryOptions(selectedCategories[0]);
+            } else if (tabName === 'summary') {
+                updateSummary();
+            }
+        }
+
+        async function loadCategories() {
             try {
                 const res = await fetch(`${API_URL}/api/activities`);
                 if (!res.ok) throw new Error(`Erreur ${res.status}`);
 
                 const data = await res.json();
                 if (data.success) {
-                    renderActivities(data.data);
+                    categoriesData = data.data;
+                    renderCategories(data.data);
                 } else {
                     throw new Error(data.message);
                 }
             } catch (error) {
-                console.error('Erreur chargement activités:', error);
+                console.error('Erreur chargement catégories:', error);
+                // Fallback vers des données par défaut
+                categoriesData = getDefaultCategories();
+                renderCategories(categoriesData);
             }
         }
 
-        function renderActivities(activities) {
-            const container = document.getElementById('activitiesContainer');
-            container.innerHTML = '';
+        function renderCategories(categories) {
+            const container = document.getElementById('categoriesContainer');
 
-            activities.forEach(activity => {
-                const activityCard = document.createElement('div');
-                activityCard.className = 'activity-card';
-
-                // Vérification améliorée de has_subactivities
-                const hasSubactivities = activity.has_subactivities === true ||
-                    activity.has_subactivities === 'true' ||
-                    activity.has_subactivities === 1;
-
-                activityCard.dataset.hasSubactivities = hasSubactivities;
-
-                activityCard.innerHTML = `
-                    <div class="activity-icon">
-                        <i class="fas fa-${activity.icone || getActivityIcon(activity.nom)}"></i>
-                    </div>
-                    <div class="activity-name">${activity.nom}</div>
-                    <div class="activity-description">${activity.description || 'Activité para-universitaire'}</div>
-                    ${hasSubactivities ? '<div class="activity-badge"><i class="fas fa-chevron-down"></i> Options</div>' : ''}
-                `;
-
-                activityCard.addEventListener('click', () => {
-                    const wasSelected = activityCard.classList.contains('selected');
-                    const activityId = activity.id;
-
-                    // Gérer la sélection/désélection
-                    activityCard.classList.toggle('selected');
-
-                    if (activityCard.classList.contains('selected')) {
-                        if (!selectedActivities.includes(activityId)) {
-                            selectedActivities.push(activityId);
-                        }
-
-                        // Si l'activité a des sous-activités, les afficher
-                        if (hasSubactivities) {
-                            currentActivityId = activityId;
-                            document.getElementById('subactivitiesContainer').style.display = 'block';
-                            populateSubactivities(activityId, activity.nom, activity.description);
-                        } else {
-                            document.getElementById('subactivitiesContainer').style.display = 'none';
-                        }
-                    } else {
-                        selectedActivities = selectedActivities.filter(id => id !== activityId);
-
-                        // Si on désélectionne une activité avec sous-activités
-                        if (hasSubactivities && currentActivityId === activityId) {
-                            document.getElementById('subactivitiesContainer').style.display = 'none';
-                        }
-                    }
-                });
-
-                container.appendChild(activityCard);
-            });
-        }
-
-        async function populateSubactivities(activityId, activityName, activityDescription) {
-            try {
-                // Mettre à jour le titre
-                document.getElementById('subactivitiesTitle').textContent = `Sélectionnez vos ${activityName.toLowerCase()} préférés`;
-                document.getElementById('subactivitiesDescription').textContent = activityDescription || `Choisissez parmi les options de ${activityName}`;
-
-                // Vérifier si on a déjà chargé ces sous-activités
-                if (activitiesWithSubs[activityId]) {
-                    renderSubactivities(activitiesWithSubs[activityId]);
-                    return;
-                }
-
-                const res = await fetch(`${API_URL}/api/activities/${activityId}/subactivities`);
-                if (!res.ok) throw new Error(`Erreur ${res.status}`);
-
-                const data = await res.json();
-                if (data.success) {
-                    activitiesWithSubs[activityId] = data.data;
-                    renderSubactivities(data.data);
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (error) {
-                console.error(`Erreur chargement sous-activités pour ${activityName}:`, error);
-                // Utiliser des sous-activités par défaut selon le type
-                const defaultSubs = getDefaultSubactivities(activityName);
-                activitiesWithSubs[activityId] = defaultSubs;
-                renderSubactivities(defaultSubs);
-            }
-        }
-
-        function renderSubactivities(subactivities) {
-            const grid = document.getElementById('subactivitiesGrid');
-            grid.innerHTML = '';
-
-            if (subactivities.length === 0) {
-                grid.innerHTML = '<p style="color: var(--gray); text-align: center;">Aucune option disponible pour le moment</p>';
+            if (categories.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h4>Aucune catégorie disponible</h4>
+                    <p>Les catégories d'activités seront bientôt disponibles.</p>
+                </div>
+            `;
                 return;
             }
 
-            subactivities.forEach(subactivity => {
-                const subCard = document.createElement('div');
-                subCard.className = 'activity-card';
-                subCard.innerHTML = `
-                    <div class="activity-icon"><i class="fas fa-${subactivity.icone || 'circle'}"></i></div>
-                    <div class="activity-name">${subactivity.nom}</div>
-                    <div class="activity-description">${subactivity.description || ''}</div>
-                `;
+            container.innerHTML = categories.map(category => {
+                const hasOptions = category.has_subactivities === true ||
+                    category.has_subactivities === 'true' ||
+                    category.has_subactivities === 1;
 
-                subCard.addEventListener('click', () => {
-                    subCard.classList.toggle('selected');
-                    const subactivityId = subactivity.id;
+                return `
+                <div class="category-card" data-category-id="${category.id}" data-has-options="${hasOptions}">
+                    <div class="category-icon">
+                        <i class="fas fa-${category.icone || getCategoryIcon(category.nom)}"></i>
+                    </div>
+                    <div class="category-content">
+                        <div class="category-name">${category.nom}</div>
+                        <div class="category-description">${category.description || 'Catégorie d\'activités para-universitaires'}</div>
+                        ${hasOptions ? `
+                            <div class="category-features">
+                                <span class="category-feature">Options multiples</span>
+                                <span class="category-feature">Choix personnalisés</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${hasOptions ? `
+                        <div class="category-badge">
+                            <i class="fas fa-chevron-down"></i>
+                            Options
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            }).join('');
 
-                    if (subCard.classList.contains('selected')) {
-                        // Ajouter à la sélection
-                        if (!selectedSubactivities[currentActivityId]) {
-                            selectedSubactivities[currentActivityId] = [];
-                        }
-                        if (!selectedSubactivities[currentActivityId].includes(subactivityId)) {
-                            selectedSubactivities[currentActivityId].push(subactivityId);
+            // Gestion des clics sur les catégories
+            container.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const categoryId = parseInt(card.dataset.categoryId);
+                    const hasOptions = card.dataset.hasOptions === 'true';
+
+                    card.classList.toggle('selected');
+
+                    if (card.classList.contains('selected')) {
+                        if (!selectedCategories.includes(categoryId)) {
+                            selectedCategories.push(categoryId);
                         }
                     } else {
-                        // Retirer de la sélection
-                        if (selectedSubactivities[currentActivityId]) {
-                            selectedSubactivities[currentActivityId] = selectedSubactivities[currentActivityId]
-                                .filter(id => id !== subactivityId);
-                        }
+                        selectedCategories = selectedCategories.filter(id => id !== categoryId);
+                        // Supprimer les options de cette catégorie si désélectionnée
+                        delete selectedOptions[categoryId];
                     }
-                });
 
-                grid.appendChild(subCard);
+                    updateCategoriesState();
+                });
             });
         }
 
-        function getDefaultSubactivities(activityName) {
-            const defaults = {
-                'Sport': [
-                    { id: 101, nom: "Football", description: "Football et futsal", icone: "futbol" },
-                    { id: 102, nom: "Basketball", description: "Basketball", icone: "basketball-ball" },
-                    { id: 103, nom: "Handball", description: "Handball", icone: "hand-rock" },
-                    { id: 104, nom: "Volleyball", description: "Volleyball", icone: "volleyball-ball" },
-                    { id: 105, nom: "Taekwondo", description: "Arts martiaux", icone: "user-ninja" }
-                ],
-                'Culture': [
-                    { id: 201, nom: "Musique", description: "Chant, instruments", icone: "music" },
-                    { id: 202, nom: "Danse", description: "Danse traditionnelle et moderne", icone: "user-friends" },
-                    { id: 203, nom: "Théâtre", description: "Art dramatique", icone: "theater-masks" },
-                    { id: 204, nom: "Couture", description: "Couture et confection", icone: "tshirt" },
-                    { id: 205, nom: "Coiffure et tresses", description: "Art capillaire", icone: "user" },
-                    { id: 206, nom: "Make-up", description: "Maquillage artistique", icone: "spa" }
-                ],
-                'Technologie': [
-                    { id: 301, nom: "UCAO Tech", description: "Club technologique UCAO", icone: "laptop-code" },
-                    { id: 302, nom: "Programmation", description: "Développement web et mobile", icone: "code" },
-                    { id: 303, nom: "Robotique", description: "Robotique et IA", icone: "robot" }
-                ]
-            };
+        function updateCategoriesState() {
+            const count = selectedCategories.length;
+            const toOptionsBtn = document.getElementById('toOptionsBtn');
+            const optionsTab = document.querySelector('[data-tab="options"]');
+            const badge = document.getElementById('selectedCategoriesCount');
 
-            return defaults[activityName] || [];
+            badge.textContent = count;
+            toOptionsBtn.disabled = count === 0;
+            if (optionsTab) optionsTab.disabled = count === 0;
+
+            // Activer l'onglet options si des catégories sont sélectionnées
+            if (count > 0 && optionsTab) {
+                optionsTab.disabled = false;
+            }
         }
 
-        function getActivityIcon(activityName) {
+        function loadCategoryTabs() {
+            const container = document.getElementById('categoryTabs');
+            container.innerHTML = selectedCategories.map(categoryId => {
+                const category = categoriesData.find(c => c.id === categoryId);
+                return category ? `
+                <div class="category-tab ${currentCategoryTab === categoryId ? 'active' : ''}" 
+                     data-category-id="${categoryId}">
+                    <i class="fas fa-${category.icone || getCategoryIcon(category.nom)}"></i>
+                    ${category.nom}
+                </div>
+            ` : '';
+            }).join('');
+
+            // Gestion des clics sur les onglets de catégories
+            container.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const categoryId = parseInt(tab.dataset.categoryId);
+                    showCategoryOptions(categoryId);
+                });
+            });
+
+            // Afficher la première catégorie par défaut
+            if (selectedCategories.length > 0 && !currentCategoryTab) {
+                showCategoryOptions(selectedCategories[0]);
+            }
+        }
+
+        async function showCategoryOptions(categoryId) {
+            currentCategoryTab = categoryId;
+
+            // Mettre à jour l'onglet actif
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.toggle('active', parseInt(tab.dataset.categoryId) === categoryId);
+            });
+
+            const category = categoriesData.find(c => c.id === categoryId);
+            if (!category) return;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '<div class="loading-options">Chargement des options...</div>';
+
+            try {
+                let options = [];
+
+                if (category.has_subactivities) {
+                    const res = await fetch(`${API_URL}/api/activities/${categoryId}/subactivities`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        options = data.success ? data.data : [];
+                    }
+                }
+
+                // Fallback vers des options par défaut si nécessaire
+                if (options.length === 0) {
+                    options = getDefaultOptions(category.nom);
+                }
+
+                renderOptions(categoryId, options);
+            } catch (error) {
+                console.error('Erreur chargement options:', error);
+                const options = getDefaultOptions(category.nom);
+                renderOptions(categoryId, options);
+            }
+        }
+
+        function renderOptions(categoryId, options) {
+            const container = document.getElementById('optionsContainer');
+
+            if (options.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-cogs"></i>
+                    <h4>Aucune option disponible</h4>
+                    <p>Cette catégorie ne contient pas d'options pour le moment.</p>
+                </div>
+            `;
+                return;
+            }
+
+            container.innerHTML = `
+            <div class="options-grid">
+                ${options.map(option => {
+                const isSelected = selectedOptions[categoryId]?.includes(option.id) || false;
+                return `
+                        <div class="option-card ${isSelected ? 'selected' : ''}" 
+                             data-option-id="${option.id}">
+                            <div class="option-icon">
+                                <i class="fas fa-${option.icone || 'circle'}"></i>
+                            </div>
+                            <div class="option-name">${option.nom}</div>
+                            ${option.description ? `
+                                <div class="option-description">${option.description}</div>
+                            ` : ''}
+                        </div>
+                    `;
+            }).join('')}
+            </div>
+        `;
+
+            // Gestion des clics sur les options
+            container.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const optionId = parseInt(card.dataset.optionId);
+                    toggleOptionSelection(categoryId, optionId, card);
+                });
+            });
+
+            updateOptionsState();
+        }
+
+        function toggleOptionSelection(categoryId, optionId, card) {
+            if (!selectedOptions[categoryId]) {
+                selectedOptions[categoryId] = [];
+            }
+
+            const isSelected = selectedOptions[categoryId].includes(optionId);
+
+            if (isSelected) {
+                selectedOptions[categoryId] = selectedOptions[categoryId].filter(id => id !== optionId);
+                card.classList.remove('selected');
+            } else {
+                selectedOptions[categoryId].push(optionId);
+                card.classList.add('selected');
+            }
+
+            updateOptionsState();
+        }
+
+        function updateOptionsState() {
+            let totalOptions = 0;
+            Object.values(selectedOptions).forEach(options => {
+                totalOptions += options.length;
+            });
+
+            const badge = document.getElementById('selectedOptionsCount');
+            const toSummaryBtn = document.getElementById('toSummaryBtn');
+            const summaryTab = document.querySelector('[data-tab="summary"]');
+
+            badge.textContent = totalOptions;
+            toSummaryBtn.disabled = totalOptions === 0;
+            if (summaryTab) summaryTab.disabled = totalOptions === 0;
+        }
+
+        function updateSummary() {
+            const container = document.getElementById('summaryContainer');
+
+            if (selectedCategories.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Aucune sélection</h4>
+                    <p>Veuillez sélectionner au moins une catégorie et des options.</p>
+                </div>
+            `;
+                return;
+            }
+
+            container.innerHTML = selectedCategories.map(categoryId => {
+                const category = categoriesData.find(c => c.id === categoryId);
+                const options = selectedOptions[categoryId] || [];
+
+                return `
+                <div class="summary-category">
+                    <div class="summary-category-header">
+                        <div class="summary-category-icon">
+                            <i class="fas fa-${category.icone || getCategoryIcon(category.nom)}"></i>
+                        </div>
+                        <div class="summary-category-name">${category.nom}</div>
+                    </div>
+                    <div class="summary-options">
+                        ${options.length > 0 ?
+                        options.map(optionId => {
+                            const option = getOptionById(categoryId, optionId);
+                            return option ? `
+                                    <div class="summary-option">
+                                        <i class="fas fa-${option.icone || 'check'}"></i>
+                                        ${option.nom}
+                                    </div>
+                                ` : '';
+                        }).join('') :
+                        '<div style="color: var(--gray); font-style: italic;">Aucune option sélectionnée</div>'
+                    }
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        // Fonctions utilitaires
+        function getCategoryIcon(categoryName) {
             const icons = {
                 'Sport': 'running',
                 'Culture': 'palette',
                 'Bénévolat': 'hands-helping',
                 'Technologie': 'laptop-code',
                 'Art': 'palette',
-                'Musique': 'music',
-                'Danse': 'user-friends',
-                'Théâtre': 'theater-masks',
-                'Débats': 'comments',
-                'Échecs': 'chess'
+                'default': 'star'
             };
+            return icons[categoryName] || icons.default;
+        }
 
-            return icons[activityName] || 'star';
+        function getDefaultCategories() {
+            return [
+                {
+                    id: 1,
+                    nom: 'Sport',
+                    description: 'Activités sportives et compétitions',
+                    icone: 'running',
+                    has_subactivities: true
+                },
+                {
+                    id: 2,
+                    nom: 'Culture',
+                    description: 'Activités culturelles et artistiques',
+                    icone: 'palette',
+                    has_subactivities: true
+                },
+                {
+                    id: 3,
+                    nom: 'Technologie',
+                    description: 'Clubs tech et projets innovants',
+                    icone: 'laptop-code',
+                    has_subactivities: true
+                }
+            ];
+        }
+
+        function getDefaultOptions(categoryName) {
+            const options = {
+                'Sport': [
+                    { id: 101, nom: 'Football', description: 'Football et futsal', icone: 'futbol' },
+                    { id: 102, nom: 'Basketball', description: 'Basketball', icone: 'basketball-ball' },
+                    { id: 103, nom: 'Handball', description: 'Handball', icone: 'hand-rock' }
+                ],
+                'Culture': [
+                    { id: 201, nom: 'Musique', description: 'Chant et instruments', icone: 'music' },
+                    { id: 202, nom: 'Danse', description: 'Danse traditionnelle et moderne', icone: 'user-friends' },
+                    { id: 203, nom: 'Théâtre', description: 'Art dramatique', icone: 'theater-masks' }
+                ],
+                'Technologie': [
+                    { id: 301, nom: 'Programmation', description: 'Développement web et mobile', icone: 'code' },
+                    { id: 302, nom: 'Robotique', description: 'Robotique et IA', icone: 'robot' },
+                    { id: 303, nom: 'Design', description: 'Design graphique et UI/UX', icone: 'paint-brush' }
+                ]
+            };
+            return options[categoryName] || [];
+        }
+
+        function getOptionById(categoryId, optionId) {
+            const category = categoriesData.find(c => c.id === categoryId);
+            if (!category) return null;
+
+            // Dans une implémentation réelle, vous devriez avoir les options stockées
+            // Pour l'instant, on utilise les options par défaut
+            const defaultOptions = getDefaultOptions(category.nom);
+            return defaultOptions.find(opt => opt.id === optionId);
         }
 
         async function saveActivitiesSelection() {
@@ -1725,14 +2397,14 @@
                 return;
             }
 
-            if (selectedActivities.length === 0) {
-                showMessage('Veuillez sélectionner au moins une activité pour continuer.', 'error');
+            if (selectedCategories.length === 0) {
+                showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
                 return;
             }
 
             const payload = {
-                activities: selectedActivities,
-                subactivities: selectedSubactivities
+                activities: selectedCategories,
+                subactivities: selectedOptions
             };
 
             try {
@@ -1747,11 +2419,11 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    showMessage('Vos activités ont été enregistrées', 'success');
+                    showMessage('Vos activités ont été enregistrées avec succès!', 'success');
                     document.getElementById('activitiesModal').classList.remove('active');
-                    setTimeout(() => window.location.replace('dashboard.html'), 800);
+                    setTimeout(() => window.location.replace('dashboard.html'), 1000);
                 } else {
-                    showMessage(data.message || 'Erreur enregistrement activités', 'error');
+                    showMessage(data.message || 'Erreur lors de l\'enregistrement des activités', 'error');
                 }
             } catch (error) {
                 console.error('Erreur sauvegarde activités:', error);
