@@ -643,11 +643,20 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
             padding: 20px;
+            /* Forcer scroll sur iOS */
+            -webkit-overflow-scrolling: touch;
+            overflow-y: auto;
         }
 
         .modal.active {
             opacity: 1;
             pointer-events: all;
+            /* S'assurer que tous les éléments enfants sont cliquables */
+            touch-action: auto;
+        }
+
+        .modal.active * {
+            pointer-events: auto;
         }
 
         .modal-content {
@@ -662,6 +671,10 @@
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Forcer l'interaction sur mobile */
+            pointer-events: auto;
+            touch-action: auto;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .modal-content::before {
@@ -708,11 +721,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
+            min-width: 48px;
+            min-height: 48px;
+            z-index: 10;
         }
 
         .modal-close:hover {
             background: var(--gray-light);
             color: var(--dark);
+        }
+
+        .modal-close:active {
+            background: var(--gray);
+            color: white;
         }
 
         .modal-body {
@@ -794,11 +820,21 @@
             position: relative;
             border-bottom: 3px solid transparent;
             white-space: nowrap;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
+            min-height: 48px;
         }
 
-        .tab-btn:hover:not(.active) {
+        .tab-btn:hover:not(.active):not(:disabled) {
             color: var(--primary);
             background: rgba(128, 0, 32, 0.05);
+        }
+
+        .tab-btn:active:not(:disabled) {
+            background: rgba(128, 0, 32, 0.1);
         }
 
         .tab-btn.active {
@@ -810,6 +846,7 @@
         .tab-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            pointer-events: none;
         }
 
         .tab-badge {
@@ -876,12 +913,21 @@
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
         }
 
         .category-card:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: var(--card-shadow);
+        }
+
+        .category-card:active {
+            transform: scale(0.98);
         }
 
         .category-card.selected {
@@ -978,6 +1024,12 @@
             white-space: nowrap;
             font-size: 0.9rem;
             font-weight: 500;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
+            min-height: 44px;
         }
 
         .category-tab.active {
@@ -989,6 +1041,10 @@
         .category-tab:not(.active):hover {
             border-color: var(--primary);
             color: var(--primary);
+        }
+
+        .category-tab:active {
+            transform: scale(0.95);
         }
 
         /* Conteneur des options */
@@ -1016,12 +1072,21 @@
             flex-direction: column;
             align-items: center;
             gap: 0.75rem;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
         }
 
         .option-card:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: var(--card-shadow);
+        }
+
+        .option-card:active {
+            transform: scale(0.98);
         }
 
         .option-card.selected {
@@ -1144,6 +1209,12 @@
             cursor: pointer;
             transition: var(--transition);
             font-family: 'Inter', sans-serif;
+            /* Forcer interaction mobile */
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(128, 0, 32, 0.1);
+            min-height: 48px;
         }
 
         .btn-prev {
@@ -1154,6 +1225,11 @@
         .btn-prev:hover {
             background: #d1d5db;
             transform: translateY(-1px);
+        }
+
+        .btn-prev:active {
+            background: #cbd5e0;
+            transform: scale(0.98);
         }
 
         .btn-next,
@@ -1169,11 +1245,17 @@
             box-shadow: 0 6px 20px rgba(128, 0, 32, 0.3);
         }
 
+        .btn-next:active:not(:disabled),
+        .btn-submit-final:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
         .btn-next:disabled,
         .btn-submit-final:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+            pointer-events: none;
         }
 
         /* États vides */
