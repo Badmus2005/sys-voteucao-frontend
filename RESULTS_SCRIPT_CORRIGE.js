@@ -175,7 +175,7 @@ async function loadUserProfile() {
         const data = await APIService.getUserProfile();
         if (data.success && data.data) {
             const user = data.data;
-            document.getElementById('userName').textContent = 
+            document.getElementById('userName').textContent =
                 `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Étudiant';
             if (user.photoUrl) {
                 document.getElementById('userAvatar').src = user.photoUrl;
@@ -193,7 +193,7 @@ async function loadSchools() {
 
         if (schools && schools.length > 0) {
             ecoleSelect.innerHTML = '<option value="">Tous</option>' +
-                schools.map(school => 
+                schools.map(school =>
                     `<option value="${school.id || school.code}">${school.nom || school.name}</option>`
                 ).join('');
         } else {
@@ -489,8 +489,8 @@ function showNoResults(filtersApplied = false) {
     message.innerHTML = `
         <i class="fas fa-inbox"></i>
         <h3>${filtersApplied ? 'Aucun résultat avec ces filtres' : 'Aucun résultat disponible'}</h3>
-        <p>${filtersApplied ? 
-            'Aucune élection terminée ne correspond à vos critères.' : 
+        <p>${filtersApplied ?
+            'Aucune élection terminée ne correspond à vos critères.' :
             'Aucun résultat disponible pour le moment.'}
         </p>
         ${filtersApplied ? '<button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 1rem;">Réinitialiser les filtres</button>' : ''}
