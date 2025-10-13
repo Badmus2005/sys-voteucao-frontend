@@ -1516,117 +1516,32 @@
     <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
     <script>
-        // Variables globales pour cette page
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
         let allElections = [];
         let currentResults = null;
         let votesChart = null;
         let comparisonChart = null;
 
-        // Configuration API
+        // ============================================
+        // CONFIGURATION API
+        // ============================================
         const API_BASE = CONFIG.BASE_URL;
-        const COMPLETED_ELECTIONS_ENDPOINT = '/api/votes/elections/completed';
-        const RESULTS_ENDPOINT = '/api/votes/student/results';
+        const ENDPOINTS = {
+            COMPLETED_ELECTIONS: '/api/votes/elections/completed',
+            STUDENT_RESULTS: '/api/votes/student/results',
+            USER_PROFILE: '/api/users/profile',
+            SCHOOLS: '/api/ecoles'
+        };
 
+        // ============================================
+        // UTILITAIRES
+        // ============================================
         function getToken() {
             return localStorage.getItem('token');
         }
 
-        // Services pour charger les données depuis le backend
-        const DataService = {
-            async loadSchools() {
-                try {
-                    const response = await fetch(`${API_BASE}/api/ecoles`, {
-                        headers: {
-                            'Authorization': `Bearer ${getToken()}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data;
-                    }
-                    return [];
-                } catch (error) {
-                    console.error('Erreur chargement écoles:', error);
-                    return [];
-                }
-            }
-        };
-
-        // Services spécifiques à résultats
-        const ElectionService = {
-            async getCompletedElections(filters = {}) {
-                try {
-                    const queryParams = new URLSearchParams();
-
-                    // Ajouter les filtres aux paramètres de requête
-                    Object.keys(filters).forEach(key => {
-                        if (filters[key]) {
-                            queryParams.append(key, filters[key]);
-                        }
-                    });
-
-                    let endpoint = `${API_BASE}${COMPLETED_ELECTIONS_ENDPOINT}`;
-                    if (queryParams.toString()) {
-                        endpoint += `?${queryParams.toString()}`;
-                    }
-
-                    const response = await fetch(endpoint, {
-                        headers: {
-                            'Authorization': `Bearer ${getToken()}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Erreur lors du chargement des élections');
-                    }
-
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error('Erreur ElectionService:', error);
-                    throw error;
-                }
-            }
-        };
-
-        const VoteService = {
-            async getResults(electionId) {
-                try {
-                    const token = getToken();
-                    const response = await fetch(`${API_BASE}${RESULTS_ENDPOINT}/${electionId}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    // Gestion spécifique des erreurs HTTP
-                    if (response.status === 403) {
-                        throw new Error('Les résultats ne sont pas encore disponibles. Veuillez patienter jusqu\'à leur publication officielle.');
-                    }
-
-                    if (!response.ok) {
-                        throw new Error('Erreur lors du chargement des résultats');
-                    }
-
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    // Log informatif au lieu d'erreur pour les résultats en attente
-                    if (error.message.includes('non encore disponibles') || error.message.includes('patienter')) {
-                        console.info('Résultats en attente:', error.message);
-                    } else {
-                        console.error('Erreur VoteService:', error);
-                    }
-                    throw error;
-                }
-            }
-        };
-
-        // Fonction utilitaire pour formater les dates
         function formatDate(dateString) {
             if (!dateString) return 'Non définie';
             try {
@@ -1641,182 +1556,14 @@
             }
         }
 
-        // Fonction pour transformer les données du backend vers le format frontend
-        function transformBackendData(backendData) {
-            console.log('Données brutes du backend:', backendData);
-            if (!backendData || !backendData.resultats) return backendData;
-
-            return {
-                election: backendData.election,
-                statistiques: {
-                    totalVotes: backendData.statistiques.totalVotes,
-                    totalInscrits: backendData.statistiques.totalInscrits,
-                    electeursAyantVote: backendData.statistiques.electeursAyantVote,
-                    tauxParticipation: backendData.statistiques.tauxParticipation,
-                    nombreCandidats: backendData.resultats.length
-                },
-                resultats: backendData.resultats.map(candidate => ({
-                    id: candidate.candidateId || candidate.id,
-                    nom: candidate.nom,
-                    prenom: candidate.prenom,
-                    photoUrl: candidate.photoUrl,
-                    filiere: candidate.nomFiliere || candidate.filiereId,
-                    annee: candidate.annee,
-                    slogan: candidate.slogan,
-                    scoreFinal: candidate.scoreFinal,
-                    details: {
-                        totalVotes: candidate.details?.totalVotes || 0
-                    }
-                }))
-            };
-        }
-
-        // Initialisation de la page
-        document.addEventListener('DOMContentLoaded', async function () {
-            // Vérifier l'authentification
-            const token = getToken();
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Initialiser les éléments communs
-            await loadUserProfileInHeader();
-            initEventHandlers();
-
-            // Charger les données des filtres
-            await loadFilterData();
-
-            // Charger les données
-            await loadPageData();
-        });
-
-        // Charger le profil utilisateur dans l'en-tête
-        async function loadUserProfileInHeader() {
-            try {
-                const token = getToken();
-                const response = await fetch(`${API_BASE}/api/users/profile`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.data) {
-                        const user = data.data;
-                        document.getElementById('userName').textContent = `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Étudiant';
-                        if (user.photoUrl) {
-                            document.getElementById('userAvatar').src = user.photoUrl;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Erreur chargement profil:', error);
-            }
-        }
-
-        // Charger les données des filtres
-        async function loadFilterData() {
-            try {
-                // Charger les écoles depuis le backend
-                const schools = await DataService.loadSchools();
-                const ecoleSelect = document.getElementById('filter-ecole');
-
-                if (ecoleSelect && schools.length > 0) {
-                    ecoleSelect.innerHTML = '<option value="">Tous</option>' +
-                        schools.map(school =>
-                            `<option value="${school.id || school.code}">${school.nom || school.name}</option>`
-                        ).join('');
-                } else {
-                    // Fallback si pas d'écoles chargées
-                    ecoleSelect.innerHTML = `
-                        <option value="">Tous</option>
-                        <option value="EGEI">EGEI</option>
-                        <option value="ESMEA">ESMEA</option>
-                        <option value="FSAE">FSAE</option>
-                        <option value="FDE">FDE</option>
-                    `;
-                }
-            } catch (error) {
-                console.error('Erreur chargement données filtres:', error);
-            }
-        }
-
-        // Initialiser les gestionnaires d'événements
-        function initEventHandlers() {
-            // Gestionnaire de rafraîchissement
-            document.getElementById('refreshResults').addEventListener('click', async function () {
-                await loadPageData();
-                showToast('Résultats actualisés avec succès', 'success');
-            });
-
-            // Gestionnaire de filtres
-            document.getElementById('applyFilters').addEventListener('click', function () {
-                applyFilters();
-            });
-
-            document.getElementById('resetFilters').addEventListener('click', async function () {
-                resetFilters();
-            });
-
-            // Menu mobile
-            const burger = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-
-            burger.addEventListener('click', function (e) {
-                e.stopPropagation();
-                sidebar.classList.toggle('active');
-                overlay.classList.toggle('active');
-            });
-
-            overlay.addEventListener('click', function () {
-                sidebar.classList.remove('active');
-                this.classList.remove('active');
-            });
-
-            // Fermer le menu en cliquant en dehors (mobile)
-            document.addEventListener('click', function (e) {
-                const isMenuOpen = sidebar.classList.contains('active');
-                if (isMenuOpen && !sidebar.contains(e.target) && !burger.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                }
-            });
-
-            // Déconnexion
-            document.getElementById('logoutBtn').addEventListener('click', function () {
-                localStorage.removeItem('token');
-                localStorage.removeItem('studentName');
-                window.location.href = 'login.html';
-            });
-
-            // Notifications
-            document.getElementById('notificationBtn').addEventListener('click', function (e) {
-                e.stopPropagation();
-                document.getElementById('notificationsPanel').classList.toggle('active');
-            });
-
-            document.addEventListener('click', function (e) {
-                if (!e.target.closest('.notifications-panel') && !e.target.closest('.notification-btn')) {
-                    document.getElementById('notificationsPanel').classList.remove('active');
-                }
-            });
-        }
-
-        // Fonction utilitaire pour afficher les toasts
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             const toastIcon = document.getElementById('toastIcon');
             const toastMessage = document.getElementById('toastMessage');
 
-            // Mettre à jour le contenu et le style
             toastMessage.textContent = message;
             toast.className = `toast ${type}`;
 
-            // Mettre à jour l'icône
             const icons = {
                 'success': 'fa-circle-check',
                 'error': 'fa-circle-exclamation',
@@ -1825,16 +1572,10 @@
             };
             toastIcon.className = `fa-solid ${icons[type] || 'fa-circle-info'}`;
 
-            // Afficher le toast
             toast.classList.add('show');
-
-            // Masquer après 5 secondes
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 5000);
+            setTimeout(() => toast.classList.remove('show'), 5000);
         }
 
-        // Fonction utilitaire pour afficher/masquer le chargement
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
         }
@@ -1843,116 +1584,211 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // Chargement des données de la page
-        async function loadPageData() {
-            showLoading();
+        // ============================================
+        // SERVICES API
+        // ============================================
+        const APIService = {
+            async fetchWithAuth(url, options = {}) {
+                const headers = {
+                    'Authorization': `Bearer ${getToken()}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
 
-            try {
-                // Charger les élections terminées
-                await loadCompletedElections();
+                const response = await fetch(url, { ...options, headers });
 
-                // Populer le sélecteur d'élections
-                populateElectionSelector();
-
-                // Charger les résultats si une élection est spécifiée dans l'URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const electionId = urlParams.get('electionId');
-
-                if (electionId) {
-                    // Sélectionner l'élection dans le dropdown
-                    const selector = document.getElementById('election-select');
-                    if (selector) {
-                        selector.value = electionId;
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                        throw new Error('Non authentifié');
                     }
-                    await loadElectionResults(electionId);
-                } else if (allElections.length > 0) {
-                    // Charger les résultats de la première élection terminée
-                    await loadElectionResults(allElections[0].id);
-                } else {
-                    showNoResults();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
+                return response.json();
+            },
+
+            async getUserProfile() {
+                return this.fetchWithAuth(`${API_BASE}${ENDPOINTS.USER_PROFILE}`);
+            },
+
+            async getSchools() {
+                try {
+                    return await this.fetchWithAuth(`${API_BASE}${ENDPOINTS.SCHOOLS}`);
+                } catch (error) {
+                    console.error('Erreur chargement écoles:', error);
+                    return [];
+                }
+            },
+
+            async getCompletedElections(filters = {}) {
+                const queryParams = new URLSearchParams();
+                Object.keys(filters).forEach(key => {
+                    if (filters[key]) queryParams.append(key, filters[key]);
+                });
+
+                const url = `${API_BASE}${ENDPOINTS.COMPLETED_ELECTIONS}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+                return this.fetchWithAuth(url);
+            },
+
+            async getElectionResults(electionId) {
+                return this.fetchWithAuth(`${API_BASE}${ENDPOINTS.STUDENT_RESULTS}/${electionId}`);
+            }
+        };
+
+        // ============================================
+        // TRANSFORMATION DES DONNÉES
+        // ============================================
+        function transformBackendData(backendData) {
+            console.log('📊 Données reçues du backend:', backendData);
+
+            if (!backendData || !backendData.resultats) {
+                console.warn('⚠️ Données backend invalides');
+                return null;
+            }
+
+            const transformed = {
+                election: backendData.election,
+                statistiques: {
+                    totalVotes: backendData.statistiques?.totalVotes || 0,
+                    totalInscrits: backendData.statistiques?.totalInscrits || 0,
+                    electeursAyantVote: backendData.statistiques?.electeursAyantVote,
+                    tauxParticipation: backendData.statistiques?.tauxParticipation || 0,
+                    nombreCandidats: backendData.resultats?.length || 0
+                },
+                resultats: (backendData.resultats || []).map(candidate => ({
+                    id: candidate.candidateId || candidate.id,
+                    nom: candidate.nom || 'Nom inconnu',
+                    prenom: candidate.prenom || 'Prénom inconnu',
+                    photoUrl: candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+                    filiere: candidate.filiere || candidate.filiereId || 'Filière non spécifiée',
+                    annee: candidate.annee,
+                    slogan: candidate.slogan || '',
+                    scoreFinal: candidate.scoreFinal || 0,
+                    details: {
+                        totalVotes: candidate.details?.totalVotes || 0
+                    }
+                }))
+            };
+
+            console.log('✅ Données transformées:', {
+                tauxParticipation: transformed.statistiques.tauxParticipation,
+                electeursAyantVote: transformed.statistiques.electeursAyantVote,
+                nombreCandidats: transformed.statistiques.nombreCandidats
+            });
+
+            return transformed;
+        }
+
+        // ============================================
+        // CHARGEMENT DES DONNÉES
+        // ============================================
+        async function loadUserProfile() {
+            try {
+                const data = await APIService.getUserProfile();
+                if (data.success && data.data) {
+                    const user = data.data;
+                    document.getElementById('userName').textContent =
+                        `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Étudiant';
+                    if (user.photoUrl) {
+                        document.getElementById('userAvatar').src = user.photoUrl;
+                    }
+                }
             } catch (error) {
-                console.error('Erreur lors du chargement des données:', error);
-                showToast('Erreur de chargement des données', 'error');
-            } finally {
-                hideLoading();
+                console.error('Erreur chargement profil:', error);
             }
         }
 
-        // Charger les élections terminées
+        async function loadSchools() {
+            try {
+                const schools = await APIService.getSchools();
+                const ecoleSelect = document.getElementById('filter-ecole');
+
+                if (schools && schools.length > 0) {
+                    ecoleSelect.innerHTML = '<option value="">Tous</option>' +
+                        schools.map(school =>
+                            `<option value="${school.id || school.code}">${school.nom || school.name}</option>`
+                        ).join('');
+                } else {
+                    ecoleSelect.innerHTML = `
+    <option value="">Tous</option>
+    <option value="EGEI">EGEI</option>
+    <option value="ESMEA">ESMEA</option>
+    <option value="FSAE">FSAE</option>
+    <option value="FDE">FDE</option>
+    `;
+                }
+            } catch (error) {
+                console.error('Erreur chargement écoles:', error);
+            }
+        }
+
         async function loadCompletedElections() {
             try {
-                const typeFilter = document.getElementById('filter-type').value;
-                const ecoleFilter = document.getElementById('filter-ecole').value;
-                const anneeFilter = document.getElementById('filter-annee').value;
+                const filters = {
+                    type: document.getElementById('filter-type').value,
+                    ecole: document.getElementById('filter-ecole').value,
+                    annee: document.getElementById('filter-annee').value
+                };
 
-                const filters = {};
-                if (typeFilter) filters.type = typeFilter;
-                if (ecoleFilter) filters.ecole = ecoleFilter;
-                if (anneeFilter) filters.annee = anneeFilter;
+                // Supprimer les filtres vides
+                Object.keys(filters).forEach(key => {
+                    if (!filters[key]) delete filters[key];
+                });
 
-                const response = await ElectionService.getCompletedElections(filters);
+                const response = await APIService.getCompletedElections(filters);
 
                 // Gérer différentes structures de réponse
                 let elections = [];
-                if (response && Array.isArray(response)) {
+                if (Array.isArray(response)) {
                     elections = response;
-                } else if (response && response.data && Array.isArray(response.data)) {
-                    elections = response.data;
-                } else if (response && response.success && Array.isArray(response.data)) {
+                } else if (response.data && Array.isArray(response.data)) {
                     elections = response.data;
                 }
 
-                if (elections && Array.isArray(elections)) {
-                    allElections = elections;
+                allElections = elections;
+                console.log(`📋 ${allElections.length} élections terminées chargées`);
 
-                    if (allElections.length === 0) {
-                        showNoResults(true);
-                    } else {
+                return allElections;
+            } catch (error) {
+                console.error('Erreur chargement élections:', error);
+                allElections = [];
+                return [];
+            }
+        }
+
+        async function loadElectionResults(electionId) {
+            if (!electionId) {
+                console.warn('⚠️ ID élection manquant');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await APIService.getElectionResults(electionId);
+
+                if (response && response.success && response.data) {
+                    const transformedData = transformBackendData(response.data);
+
+                    if (transformedData) {
+                        currentResults = transformedData;
+                        displayResults(transformedData);
                         document.getElementById('noResultsMessage').style.display = 'none';
+                    } else {
+                        showNoResults();
                     }
                 } else {
                     showNoResults();
                 }
             } catch (error) {
-                console.error('Erreur chargement élections terminées:', error);
-                showNoResults();
-            }
-        }
+                console.error('Erreur chargement résultats:', error);
 
-        // Charger les résultats d'une élection
-        async function loadElectionResults(electionId) {
-            showLoading();
-
-            try {
-                const response = await VoteService.getResults(electionId);
-
-                if (response && response.success && response.data) {
-                    // Debug : Vérifier les données reçues
-                    console.log('📊 Données backend reçues:', {
-                        tauxParticipation: response.data.statistiques.tauxParticipation,
-                        electeursAyantVote: response.data.statistiques.electeursAyantVote,
-                        totalInscrits: response.data.statistiques.totalInscrits,
-                        totalVotes: response.data.statistiques.totalVotes
-                    });
-
-                    const transformedData = transformBackendData(response.data);
-                    currentResults = transformedData;
-                    displayResults(transformedData);
-                    document.getElementById('noResultsMessage').style.display = 'none';
-                } else {
-                    showNoResults();
-                }
-            } catch (error) {
-                console.log('Info résultats:', error.message);
-
-                // Gérer spécifiquement l'erreur 403 (résultats non publiés)
-                if (error.message.includes('non disponibles') || error.message.includes('non encore disponibles') || error.message.includes('patienter')) {
+                if (error.message.includes('403') || error.message.includes('non disponibles')) {
                     showResultsPending();
                     showToast('⏳ Les résultats seront publiés prochainement', 'info');
                 } else {
-                    console.error('Erreur chargement résultats:', error);
                     showToast('Erreur de chargement des résultats', 'error');
                     showNoResults();
                 }
@@ -1961,7 +1797,9 @@
             }
         }
 
-        // Afficher les résultats
+        // ============================================
+        // AFFICHAGE DES RÉSULTATS
+        // ============================================
         function displayResults(results) {
             if (!results || !results.resultats || !Array.isArray(results.resultats)) {
                 showNoResults();
@@ -1970,7 +1808,7 @@
 
             const { election, resultats, statistiques } = results;
 
-            // Réafficher les sections de résultats
+            // Afficher les sections
             document.querySelector('.stats-grid').style.display = 'grid';
             document.querySelector('.charts-section').style.display = 'block';
             document.querySelector('.ranking-section').style.display = 'block';
@@ -1981,18 +1819,18 @@
             document.getElementById('electionDescription').textContent = election.description || 'Aucune description disponible';
             document.getElementById('resultsDate').textContent = `Date de publication: ${formatDate(new Date())}`;
             document.getElementById('totalVoters').textContent = `Électeurs: ${statistiques.totalInscrits || 0}`;
-            document.getElementById('participationRate').textContent = `Taux de participation: ${statistiques.tauxParticipation || 0}%`;
+            document.getElementById('participationRate').textContent = `Taux de participation: ${statistiques.tauxParticipation ||
+                0}%`;
 
-            // Mettre à jour les statistiques
+            // Mettre à jour les cartes statistiques
             document.getElementById('statTotalVotes').textContent = statistiques.totalVotes || 0;
             document.getElementById('statTotalVoters').textContent = statistiques.totalInscrits || 0;
             document.getElementById('statParticipation').textContent = `${statistiques.tauxParticipation || 0}%`;
             document.getElementById('statCandidates').textContent = resultats.length;
 
-            // Trouver le gagnant (premier du classement)
-            const winner = resultats[0];
-            if (winner) {
-                displayWinner(winner, statistiques);
+            // Afficher le gagnant
+            if (resultats.length > 0) {
+                displayWinner(resultats[0]);
             } else {
                 document.getElementById('winnerBanner').style.display = 'none';
             }
@@ -2001,70 +1839,62 @@
             displayRanking(resultats);
 
             // Créer les graphiques
-            createCharts(resultats, statistiques);
+            createCharts(resultats);
         }
 
-        // Afficher le gagnant
-        function displayWinner(winner, stats) {
+        function displayWinner(winner) {
             const winnerBanner = document.getElementById('winnerBanner');
             winnerBanner.style.display = 'block';
 
-            document.getElementById('winnerName').textContent = `${winner.prenom || ''} ${winner.nom || 'Candidat'}`;
-            document.getElementById('winnerVotes').textContent = winner.details?.totalVotes || 0;
-            document.getElementById('winnerPercentage').textContent = `${winner.scoreFinal || 0}%`;
+            document.getElementById('winnerName').textContent = `${winner.prenom} ${winner.nom}`;
+            document.getElementById('winnerVotes').textContent = winner.details.totalVotes;
+            document.getElementById('winnerPercentage').textContent = `${winner.scoreFinal}%`;
             document.getElementById('winnerSlogan').textContent = `"${winner.slogan || 'Aucun slogan'}"`;
         }
 
-        // Afficher le classement
         function displayRanking(candidates) {
             const rankingBody = document.getElementById('rankingBody');
             rankingBody.innerHTML = '';
 
             if (!candidates || candidates.length === 0) {
-                rankingBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Aucun candidat</td></tr>';
+                rankingBody.innerHTML = `
+        <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">Aucun candidat</td>
+        </tr>
+    `;
                 return;
             }
 
             candidates.forEach((candidate, index) => {
                 const row = document.createElement('tr');
 
-                // Déterminer la classe de rang
-                let rankClass = '';
-                if (index === 0) rankClass = 'rank-1';
-                else if (index === 1) rankClass = 'rank-2';
-                else if (index === 2) rankClass = 'rank-3';
-
-                // Formater les informations du candidat
-                const candidateName = `${candidate.prenom || 'Prénom'} ${candidate.nom || 'Nom'}`.trim();
-                const filiereText = candidate.filiere || candidate.filiereId || 'Filière non renseignée';
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
                 const anneeText = candidate.annee ? `L${candidate.annee}` : 'Année non renseignée';
 
                 row.innerHTML = `
-                <td class="candidate-rank ${rankClass}">${index + 1}</td>
-                <td>
-                    <div class="candidate-info">
-                        <img src="${candidate.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=40&q=80'}" 
-                             alt="${candidateName}" 
-                             class="candidate-avatar">
-                        <div>
-                            <div class="candidate-name">${candidateName}</div>
-                            <div class="candidate-details">${filiereText} - ${anneeText}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="vote-count">${candidate.details?.totalVotes || 0}</td>
-                <td class="vote-percentage">${candidate.scoreFinal || 0}%</td>
-                <td>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${candidate.scoreFinal || 0}%"></div>
-                    </div>
-                </td>
-            `;
+    <td class="candidate-rank ${rankClass}">${index + 1}</td>
+    <td>
+        <div class="candidate-info">
+            <img src="${candidate.photoUrl}" alt="${candidate.prenom} ${candidate.nom}" class="candidate-avatar">
+            <div>
+                <div class="candidate-name">${candidate.prenom} ${candidate.nom}</div>
+                <div class="candidate-details">${candidate.filiere} - ${anneeText}</div>
+            </div>
+        </div>
+    </td>
+    <td class="vote-count">${candidate.details.totalVotes}</td>
+    <td class="vote-percentage">${candidate.scoreFinal}%</td>
+    <td>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: ${candidate.scoreFinal}%"></div>
+        </div>
+    </td>
+    `;
 
                 rankingBody.appendChild(row);
             });
 
-            // Animer les barres de progression
+            // Animer les barres
             setTimeout(() => {
                 document.querySelectorAll('.progress-fill').forEach(bar => {
                     bar.style.transition = 'width 1.5s ease-in-out';
@@ -2072,23 +1902,21 @@
             }, 100);
         }
 
-        // Créer les graphiques
-        function createCharts(candidates, stats) {
-            // Détruire les graphiques existants
+        // ============================================
+        // GRAPHIQUES
+        // ============================================
+        function createCharts(candidates) {
             if (votesChart) votesChart.destroy();
             if (comparisonChart) comparisonChart.destroy();
 
-            if (!candidates || candidates.length === 0) {
-                return;
-            }
+            if (!candidates || candidates.length === 0) return;
 
-            // Données pour les graphiques
-            const labels = candidates.map(c => `${c.prenom || ''} ${c.nom || ''}`.trim() || 'Candidat');
-            const votesData = candidates.map(c => c.details?.totalVotes || 0);
-            const percentages = candidates.map(c => c.scoreFinal || 0);
+            const labels = candidates.map(c => `${c.prenom} ${c.nom}`);
+            const votesData = candidates.map(c => c.details.totalVotes);
+            const percentages = candidates.map(c => c.scoreFinal);
             const colors = generateColors(candidates.length);
 
-            // Graphique circulaire (répartition des votes)
+            // Graphique circulaire
             const votesCtx = document.getElementById('votesChart').getContext('2d');
             votesChart = new Chart(votesCtx, {
                 type: 'doughnut',
@@ -2105,33 +1933,17 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        },
+                        legend: { position: 'right' },
                         tooltip: {
                             callbacks: {
-                                label: function (context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const votes = votesData[context.dataIndex] || 0;
-                                    return `${label}: ${value}% (${votes} votes)`;
-                                }
+                                label: ctx => `${ctx.label}: ${ctx.raw}% (${votesData[ctx.dataIndex]} votes)`
                             }
                         }
-                    },
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true
                     }
                 }
             });
 
-            // Graphique à barres (comparaison)
+            // Graphique à barres
             const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
             comparisonChart = new Chart(comparisonCtx, {
                 type: 'bar',
@@ -2140,9 +1952,7 @@
                     datasets: [{
                         label: 'Pourcentage de votes',
                         data: percentages,
-                        backgroundColor: colors,
-                        borderColor: colors.map(color => color.replace('0.8', '1')),
-                        borderWidth: 1
+                        backgroundColor: colors
                     }]
                 },
                 options: {
@@ -2152,104 +1962,77 @@
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            title: {
-                                display: true,
-                                text: 'Pourcentage (%)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
+                            title: { display: true, text: 'Pourcentage (%)' }
                         }
                     },
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: function (context) {
-                                    const votes = votesData[context.dataIndex] || 0;
-                                    return `${context.raw}% (${votes} votes)`;
-                                }
+                                label: ctx => `${ctx.raw}% (${votesData[ctx.dataIndex]} votes)`
                             }
                         }
-                    },
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeOutQuart'
                     }
                 }
             });
         }
 
-        // Générer des couleurs pour les graphiques
         function generateColors(count) {
             const colors = [
-                'rgba(128, 0, 32, 0.8)',     // Bordeaux
-                'rgba(13, 27, 42, 0.8)',     // Bleu nuit
-                'rgba(212, 175, 55, 0.8)',   // Or
-                'rgba(16, 185, 129, 0.8)',   // Vert
-                'rgba(245, 158, 11, 0.8)',   // Orange
-                'rgba(239, 68, 68, 0.8)',    // Rouge
-                'rgba(99, 102, 241, 0.8)',   // Indigo
-                'rgba(139, 92, 246, 0.8)',   // Violet
-                'rgba(14, 165, 233, 0.8)',   // Cyan
-                'rgba(20, 184, 166, 0.8)'    // Teal
+                'rgba(128, 0, 32, 0.8)',
+                'rgba(13, 27, 42, 0.8)',
+                'rgba(212, 175, 55, 0.8)',
+                'rgba(16, 185, 129, 0.8)',
+                'rgba(245, 158, 11, 0.8)',
+                'rgba(239, 68, 68, 0.8)',
+                'rgba(99, 102, 241, 0.8)',
+                'rgba(139, 92, 246, 0.8)'
             ];
 
-            // Si on a plus de candidats que de couleurs prédéfinies, générer des couleurs aléatoires
             if (count > colors.length) {
                 for (let i = colors.length; i < count; i++) {
-                    const hue = Math.floor(Math.random() * 360);
-                    colors.push(`hsla(${hue}, 70%, 65%, 0.8)`);
+                    const hue = Math.floor(Math.random() * 360); colors.push(`hsla(${hue}, 70%,
+        65%, 0.8)`);
                 }
-            }
-
-            return colors.slice(0, count);
+            } return colors.slice(0, count);
         }
-
-        // Afficher le message d'absence de résultats
+        // MESSAGES D'ÉTAT//
         function showNoResults(filtersApplied = false) {
-            const message = document.getElementById('noResultsMessage');
-            message.innerHTML = `
-                <i class="fas fa-inbox"></i>
-                <h3>${filtersApplied ? 'Aucun résultat avec ces filtres' : 'Aucun résultat disponible'}</h3>
-                <p>${filtersApplied ?
-                    'Aucune élection terminée ne correspond à vos critères de recherche.' :
-                    'Aucun résultat n\'est disponible pour le moment. Les résultats seront affichés ici une fois les élections terminées et publiées.'}
-                </p>
-                ${filtersApplied ? '<button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 1rem;">Réinitialiser les filtres</button>' : ''}
+            const
+            message = document.getElementById('noResultsMessage'); message.innerHTML = ` <i class="fas fa-inbox"></i>
+        <h3>${filtersApplied ? 'Aucun résultat avec ces filtres' : 'Aucun résultat disponible'}</h3>
+        <p>${filtersApplied ?
+                    'Aucune élection terminée ne correspond à vos critères.' :
+                    'Aucun résultat disponible pour le moment.'}
+        </p>
+        ${filtersApplied ? '<button class="btn btn-primary" onclick="resetFilters()" style="margin-top: 1rem;">Réinitialiser les filtres</button>' : ''}
             `;
             message.style.display = 'block';
 
-            // Masquer les autres sections
+            // Masquer les sections
             document.getElementById('winnerBanner').style.display = 'none';
             document.querySelector('.stats-grid').style.display = 'none';
             document.querySelector('.charts-section').style.display = 'none';
             document.querySelector('.ranking-section').style.display = 'none';
         }
 
-        // Afficher le message de résultats en attente
         function showResultsPending() {
             const message = document.getElementById('noResultsMessage');
             message.innerHTML = `
-                <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
-                <h3>Résultats en attente de publication</h3>
-                <p>Les résultats de cette élection ne sont pas encore publiés. Ils seront disponibles après validation par l'administration.</p>
-                <p style="font-size: 0.9rem; color: var(--gray); margin-top: 1rem;">
-                    <i class="fas fa-info-circle" style="font-size: 0.9rem;"></i> Veuillez revenir plus tard ou consultez vos notifications.
-                </p>
-            `;
+            < i class="fas fa-hourglass-half" style = "color: var(--warning);" ></i >
+        <h3>Résultats en attente de publication</h3>
+        <p>Les résultats de cette élection ne sont pas encore publiés.</p>
+        `;
             message.style.display = 'block';
 
-            // Masquer les autres sections
             document.getElementById('winnerBanner').style.display = 'none';
             document.querySelector('.stats-grid').style.display = 'none';
             document.querySelector('.charts-section').style.display = 'none';
             document.querySelector('.ranking-section').style.display = 'none';
         }
 
-        // Populer le sélecteur d'élections
+        // ============================================
+        // SÉLECTEUR D'ÉLECTIONS
+        // ============================================
         function populateElectionSelector() {
             const selector = document.getElementById('election-select');
             selector.innerHTML = '';
@@ -2265,7 +2048,6 @@
                 const option = document.createElement('option');
                 option.value = election.id;
 
-                // Formater la date
                 const dateEnd = new Date(election.dateFin);
                 const dateStr = dateEnd.toLocaleDateString('fr-FR', {
                     day: 'numeric',
@@ -2273,32 +2055,37 @@
                     year: 'numeric'
                 });
 
-                // Construire le label de l'option
-                option.textContent = `${election.titre} (${dateStr}) - ${election.typeElection || 'N/A'}`;
+                option.textContent = `${election.titre} (${dateStr}) - ${election.type || 'N/A'}`;
 
-                // Sélectionner la première par défaut
-                if (index === 0) {
-                    option.selected = true;
-                }
+                if (index === 0) option.selected = true;
 
                 selector.appendChild(option);
             });
         }
 
-        // Appliquer les filtres
+        // ============================================
+        // FILTRES
+        // ============================================
         async function applyFilters() {
-            await loadCompletedElections();
-            populateElectionSelector();
+            showLoading();
+            try {
+                await loadCompletedElections();
+                populateElectionSelector();
 
-            if (allElections.length > 0) {
-                await loadElectionResults(allElections[0].id);
-                showToast('Filtres appliqués avec succès', 'success');
-            } else {
-                showNoResults(true);
+                if (allElections.length > 0) {
+                    await loadElectionResults(allElections[0].id);
+                    showToast('Filtres appliqués avec succès', 'success');
+                } else {
+                    showNoResults(true);
+                }
+            } catch (error) {
+                console.error('Erreur application filtres:', error);
+                showToast('Erreur lors de l\'application des filtres', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
-        // Réinitialiser les filtres
         async function resetFilters() {
             document.getElementById('filter-type').value = '';
             document.getElementById('filter-ecole').value = '';
@@ -2308,13 +2095,67 @@
             showToast('Filtres réinitialisés', 'success');
         }
 
-        // Event listeners pour les filtres et le sélecteur
-        document.addEventListener('DOMContentLoaded', () => {
-            // Boutons de filtres
+        // ============================================
+        // CHARGEMENT PRINCIPAL
+        // ============================================
+        async function loadPageData() {
+            showLoading();
+
+            try {
+                // Charger les élections terminées
+                await loadCompletedElections();
+
+                // Populer le sélecteur
+                populateElectionSelector();
+
+                // Charger les résultats
+                const urlParams = new URLSearchParams(window.location.search);
+                const electionId = urlParams.get('electionId');
+
+                if (electionId) {
+                    const selector = document.getElementById('election-select');
+                    if (selector) selector.value = electionId;
+                    await loadElectionResults(electionId);
+                } else if (allElections.length > 0) {
+                    await loadElectionResults(allElections[0].id);
+                } else {
+                    showNoResults();
+                }
+
+            } catch (error) {
+                console.error('Erreur chargement données:', error);
+                showToast('Erreur de chargement des données', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // ============================================
+        // INITIALISATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('🚀 Initialisation de results.html');
+
+            // Vérifier l'authentification
+            const token = getToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Charger le profil utilisateur
+            await loadUserProfile();
+
+            // Charger les écoles pour les filtres
+            await loadSchools();
+
+            // Charger les données principales
+            await loadPageData();
+
+            // Event listeners pour les filtres
             document.getElementById('applyFilters')?.addEventListener('click', applyFilters);
             document.getElementById('resetFilters')?.addEventListener('click', resetFilters);
 
-            // Changement automatique sur les filtres (optionnel)
             document.getElementById('filter-type')?.addEventListener('change', async () => {
                 await loadCompletedElections();
                 populateElectionSelector();
@@ -2346,9 +2187,52 @@
                     await loadElectionResults(parseInt(electionId));
                 }
             });
+
+            // Actualiser
+            document.getElementById('refreshResults')?.addEventListener('click', async function () {
+                await loadPageData();
+                showToast('Résultats actualisés avec succès', 'success');
+            });
+
+            // Menu mobile
+            const burger = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            burger?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+
+            overlay?.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+
+            // Déconnexion
+            document.getElementById('logoutBtn')?.addEventListener('click', function () {
+                localStorage.removeItem('token');
+                localStorage.removeItem('studentName');
+                window.location.href = 'login.html';
+            });
+
+            // Notifications
+            document.getElementById('notificationBtn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('notificationsPanel').classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.notifications-panel') && !e.target.closest('.notification-btn')) {
+                    document.getElementById('notificationsPanel')?.classList.remove('active');
+                }
+            });
+
+            console.log('✅ Initialisation terminée');
         });
 
-        // Exposer les fonctions globales pour cette page
+        // Exposer les fonctions globales
         window.loadPageData = loadPageData;
         window.resetFilters = resetFilters;
     </script>
