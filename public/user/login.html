@@ -1925,23 +1925,15 @@
             document.getElementById('toSummaryBtn').addEventListener('click', () => switchTab('summary'));
             document.getElementById('toOptionsFromSummaryBtn').addEventListener('click', () => switchTab('options'));
 
-            // Fermeture du modal
+            // Fermeture du modal - CORRIGÉ
             document.getElementById('activitiesModalClose').addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (selectedCategories.length === 0) {
-                    showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
-                    return;
-                }
                 saveActivitiesSelection();
             });
 
-            // Fermeture en cliquant à l'extérieur
+            // Fermeture en cliquant à l'extérieur - CORRIGÉ
             document.getElementById('activitiesModal').addEventListener('click', (e) => {
                 if (e.target === document.getElementById('activitiesModal')) {
-                    if (selectedCategories.length === 0) {
-                        showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
-                        return;
-                    }
                     saveActivitiesSelection();
                 }
             });
@@ -2361,11 +2353,17 @@
             const token = localStorage.getItem('token');
             if (!token) {
                 showMessage('Token manquant. Veuillez vous reconnecter.', 'error');
+                closeActivitiesModal();
                 return;
             }
 
+            // Permettre la fermeture même sans sélections
             if (selectedCategories.length === 0) {
-                showMessage('Veuillez sélectionner au moins une catégorie pour continuer.', 'error');
+                console.log('Aucune catégorie sélectionnée - fermeture du modal');
+                closeActivitiesModal();
+                setTimeout(() => {
+                    window.location.replace('dashboard.html');
+                }, 500);
                 return;
             }
 
@@ -2400,15 +2398,57 @@
                         window.location.replace('dashboard.html');
                     }, 1500);
                 } else {
-                    throw new Error(data.message || 'Erreur lors de la sauvegarde');
+                    // Même en cas d'erreur, permettre la fermeture
+                    console.warn('Erreur sauvegarde, mais fermeture autorisée:', data.message);
+                    closeActivitiesModal();
+                    setTimeout(() => {
+                        window.location.replace('dashboard.html');
+                    }, 1000);
                 }
             } catch (error) {
                 console.error('Erreur sauvegarde activités:', error);
-                showMessage(error.message || 'Erreur de connexion. Veuillez réessayer.', 'error');
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalText;
+                // Même en cas d'erreur réseau, permettre la fermeture
+                closeActivitiesModal();
+                setTimeout(() => {
+                    window.location.replace('dashboard.html');
+                }, 1000);
             }
         }
+
+        function updateCategoriesState() {
+            const count = selectedCategories.length;
+            const toOptionsBtn = document.getElementById('toOptionsBtn');
+            const optionsTab = document.querySelector('[data-tab="options"]');
+            const badge = document.getElementById('selectedCategoriesCount');
+
+            badge.textContent = count;
+            toOptionsBtn.disabled = count === 0;
+
+            if (optionsTab) {
+                // Toujours activer l'onglet Options pour permettre la navigation
+                optionsTab.disabled = false;
+            }
+
+            console.log(`Catégories sélectionnées: ${count}, Options btn disabled: ${toOptionsBtn.disabled}`);
+        }
+
+        // Fonction de débogage pour vérifier l'état des sélections
+        function debugSelections() {
+            console.log('=== DEBUG SELECTIONS ===');
+            console.log('Catégories sélectionnées:', selectedCategories);
+            console.log('Options sélectionnées:', selectedOptions);
+            console.log('Onglet actuel:', currentCategoryTab);
+            console.log('Données catégories:', categoriesData);
+
+            // Force l'activation des onglets pour debug
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                console.log(`Onglet ${btn.dataset.tab}: disabled=${btn.disabled}`);
+            });
+        }
+
+        // Appelez cette fonction dans la console du navigateur si besoin
+        window.debugSelections = debugSelections;
+
     </script>
 </body>
 
