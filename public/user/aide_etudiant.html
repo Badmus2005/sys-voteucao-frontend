@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Aide Étudiant - Système de Vote UCAO</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bordeaux: #8B0000;
+            --blue-night: #0A1931;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --info: #3182ce;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .help-header {
+            background: linear-gradient(135deg, var(--blue-night) 0%, var(--bordeaux) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .help-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .help-nav {
+            background: var(--card-bg);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--bordeaux);
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+
+        .help-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .help-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--bordeaux);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: var(--blue-night);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header .section-icon {
+            color: var(--bordeaux);
+            margin-right: 0.5rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: var(--light-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--bordeaux);
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card h3 {
+            color: var(--blue-night);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-card .feature-icon {
+            color: var(--bordeaux);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .steps-list {
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            counter-increment: step-counter;
+            margin-bottom: 1.5rem;
+            padding-left: 3rem;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--bordeaux);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .step-item h4 {
+            color: var(--blue-night);
+            margin-bottom: 0.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background-color: rgba(49, 130, 206, 0.1);
+            border-left-color: var(--info);
+            color: var(--info);
+        }
+
+        .alert-success {
+            background-color: rgba(56, 161, 105, 0.1);
+            border-left-color: var(--success);
+            color: var(--success);
+        }
+
+        .alert-danger {
+            background-color: rgba(229, 62, 62, 0.1);
+            border-left-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .help-footer {
+            background: var(--blue-night);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .help-footer .version {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .help-content {
+                padding: 1rem;
+            }
+
+            .help-section {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="help-header">
+        <div class="container">
+            <h1><i class="fas fa-question-circle"></i> Guide Étudiant</h1>
+            <p>Système de Vote Électronique UCAO</p>
+        </div>
+    </header>
+    <nav class="help-nav">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="#getting-started" class="nav-link active">Démarrage</a>
+                <a href="#dashboard" class="nav-link">Tableau de Bord</a>
+                <a href="#elections" class="nav-link">Élections</a>
+                <a href="#candidature" class="nav-link">Candidature</a>
+                <a href="#vote" class="nav-link">Voter</a>
+                <a href="#results" class="nav-link">Résultats</a>
+                <a href="#profile" class="nav-link">Profil</a>
+                <a href="#troubleshooting" class="nav-link">Dépannage</a>
+            </div>
+        </div>
+    </nav>
+    <main class="help-content">
+        <section id="getting-started" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-rocket section-icon"></i>Premiers Pas</h2>
+            </div>
+            <div class="alert alert-info">
+                <strong>Connexion :</strong> Utilisez votre matricule et mot de passe pour accéder à l'espace étudiant.
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-sign-in-alt"></i></div>
+                    <h3>Connexion</h3>
+                    <p>Accédez à l'interface via l'URL principale. Entrez vos identifiants reçus par l'administration.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3>Tableau de Bord</h3>
+                    <p>Consultez vos informations, vos élections en cours et vos candidatures.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-bars"></i></div>
+                    <h3>Navigation</h3>
+                    <p>Utilisez le menu latéral pour accéder aux différentes fonctionnalités : Élections, Candidature,
+                        Vote, Profil.</p>
+                </div>
+            </div>
+        </section>
+        <section id="dashboard" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tachometer-alt section-icon"></i>Tableau de Bord</h2>
+            </div>
+            <p>Le tableau de bord étudiant affiche vos informations personnelles, vos élections disponibles et l'état de
+                vos candidatures.</p>
+        </section>
+        <section id="elections" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-vote-yea section-icon"></i>Élections</h2>
+            </div>
+            <div class="alert alert-info">
+                <strong>Types d'élections :</strong> Salle, École, Université, Générale
+            </div>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Consulter les élections</h4>
+                    <p>Accédez à la section "Élections" pour voir les élections ouvertes auxquelles vous pouvez
+                        participer.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Voir les détails</h4>
+                    <p>Cliquez sur une élection pour afficher les candidats, les dates et les modalités de vote.</p>
+                </div>
+            </div>
+        </section>
+        <section id="candidature" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-plus section-icon"></i>Candidature</h2>
+            </div>
+            <p>Vous pouvez soumettre votre candidature pour devenir délégué ou représentant.</p>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Accéder à la section Candidature</h4>
+                    <p>Cliquez sur "Mes Candidatures" ou "Candidature" dans le menu.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Remplir le formulaire</h4>
+                    <p>Indiquez vos motivations, programme et téléchargez une photo.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Soumettre</h4>
+                    <p>Envoyez votre candidature pour validation par l'administration.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Suivre le statut</h4>
+                    <p>Consultez le statut : EN_ATTENTE, APPROUVÉ, REJETÉ.</p>
+                </div>
+            </div>
+        </section>
+        <section id="vote" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-check-square section-icon"></i>Voter</h2>
+            </div>
+            <div class="alert alert-success">
+                <strong>Vote sécurisé :</strong> Chaque étudiant reçoit un jeton unique pour voter.
+            </div>
+            <div class="steps-list">
+                <div class="step-item">
+                    <h4>Accéder à la section Vote</h4>
+                    <p>Cliquez sur "Élections" puis sur "Voter" pour l'élection active.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Entrer le jeton</h4>
+                    <p>Saisissez le jeton reçu par email ou SMS pour valider votre vote.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Choisir le candidat</h4>
+                    <p>Sélectionnez votre candidat préféré et confirmez votre choix.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Recevoir la confirmation</h4>
+                    <p>Un message de confirmation s'affiche après le vote.</p>
+                </div>
+            </div>
+        </section>
+        <section id="results" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar section-icon"></i>Résultats</h2>
+            </div>
+            <p>Consultez les résultats des élections une fois la période de vote terminée. Les résultats sont affichés
+                sous forme de graphiques et tableaux.</p>
+        </section>
+        <section id="profile" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user section-icon"></i>Profil et Sécurité</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-user-edit"></i></div>
+                    <h3>Modifier le profil</h3>
+                    <p>Actualisez vos informations personnelles (email, téléphone, photo).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-key"></i></div>
+                    <h3>Changer le mot de passe</h3>
+                    <p>Utilisez la section "Changer mot de passe" pour renforcer la sécurité de votre compte.</p>
+                </div>
+            </div>
+        </section>
+        <section id="troubleshooting" class="help-section">
+            <div class="section-header">
+                <h2><i class="fas fa-tools section-icon"></i>Dépannage</h2>
+            </div>
+            <div class="alert alert-danger">
+                <h4>Problème de connexion</h4>
+                <p>Vérifiez votre matricule et mot de passe. Utilisez la fonction "Mot de passe oublié" si besoin.</p>
+            </div>
+            <div class="alert alert-info">
+                <h4>Jeton non reçu</h4>
+                <p>Vérifiez vos emails et SMS. Contactez l'administration si le problème persiste.</p>
+            </div>
+            <div class="alert alert-success">
+                <h4>Candidature non validée</h4>
+                <p>Attendez la validation par l'administration ou contactez le support.</p>
+            </div>
+            <h3>Support Technique</h3>
+            <ul>
+                <li><strong>Email :</strong> support@ucao.edu</li>
+                <li><strong>Téléphone :</strong> +225 XX XX XX XX</li>
+            </ul>
+        </section>
+    </main>
+    <footer class="help-footer">
+        <div class="container">
+            <p><strong>Système de Vote Électronique UCAO</strong></p>
+            <p>Guide étudiant pour la gestion du vote et des candidatures</p>
+            <p class="version">Version 1.0 - Octobre 2025</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
