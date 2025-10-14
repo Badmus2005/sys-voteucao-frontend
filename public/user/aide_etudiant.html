@@ -918,8 +918,8 @@
 
                     <h3>Support Technique</h3>
                     <ul>
-                        <li><strong>Email :</strong> support@ucao.edu</li>
-                        <li><strong>Téléphone :</strong> +225 XX XX XX XX</li>
+                        <li><strong>Email :</strong> contact@ucaotech.com </li>
+                        <li><strong>Téléphone :</strong> +229 01 56 04 30 81 / +229 01 59 32 51 23</li>
                     </ul>
                 </section>
             </div>
@@ -935,9 +935,75 @@
         </main>
     </div>
 
+    <!-- Scripts communs -->
+    <script src="/assets/config.js"></script>
+    <script src="/assets/js/common.js"></script>
+
     <script>
+        // Variables globales
+        let etudiant = null;
+        let studentId = null;
+        let userName = 'Étudiant';
+
+        // Initialisation du profil utilisateur
+        async function initStudentInfo() {
+            try {
+                etudiant = await UserService.getProfile();
+                console.log('Profil chargé:', etudiant);
+
+                // Extraire les données utilisateur
+                let userData = etudiant;
+                if (etudiant.data) {
+                    userData = etudiant.data;
+                }
+
+                // Récupérer l'ID et le nom
+                studentId = userData.id || userData.userId || userData._id || userData.id_utilisateur;
+                const prenom = userData.prenom || userData.firstName || '';
+                const nom = userData.nom || userData.lastName || '';
+                userName = prenom ? `${prenom} ${nom || ''}`.trim() : (userData.name || userData.username || 'Étudiant');
+
+                // Récupérer la photo
+                const photoUrl = userData.photo || userData.photoUrl || userData.avatar;
+
+                // Mettre à jour l'interface
+                const userNameElement = document.getElementById('userName');
+                const userAvatarElement = document.getElementById('userAvatar');
+
+                if (userNameElement) {
+                    userNameElement.textContent = userName;
+                }
+
+                if (userAvatarElement && photoUrl) {
+                    // Construire l'URL complète si nécessaire
+                    if (photoUrl.startsWith('http')) {
+                        userAvatarElement.src = photoUrl;
+                    } else if (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) {
+                        const fullPhotoUrl = `${CONFIG.API_BASE_URL}${photoUrl.startsWith('/') ? '' : '/'}${photoUrl}`;
+                        userAvatarElement.src = fullPhotoUrl;
+                    } else {
+                        userAvatarElement.src = photoUrl;
+                    }
+                }
+
+                console.log('Profil mis à jour:', { studentId, userName, photoUrl });
+                return true;
+            } catch (error) {
+                console.error('Erreur lors du chargement du profil:', error);
+                // Garder les valeurs par défaut
+                const userNameElement = document.getElementById('userName');
+                if (userNameElement) {
+                    userNameElement.textContent = 'Étudiant';
+                }
+                return false;
+            }
+        }
+
         // Mobile menu functionality
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Charger le profil utilisateur
+            await initStudentInfo();
+
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
 
