@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques Concours - Admin UCAO</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .header-section {
+            margin-bottom: 2rem;
+        }
+
+        .concours-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .concours-banner h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .kpi-card.green {
+            border-left-color: #2ecc71;
+        }
+
+        .kpi-card.blue {
+            border-left-color: #3498db;
+        }
+
+        .kpi-card.orange {
+            border-left-color: #f39c12;
+        }
+
+        .kpi-card.purple {
+            border-left-color: #9b59b6;
+        }
+
+        .kpi-label {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.85rem;
+            color: #2ecc71;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .chart-section h3 {
+            margin: 0 0 1.5rem 0;
+            color: #2c3e50;
+            font-size: 1.3rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        .top-candidates {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .candidate-rank {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .candidate-rank:hover {
+            background: #f8f9ff;
+        }
+
+        .rank-position {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            width: 50px;
+        }
+
+        .rank-position.gold {
+            color: #f39c12;
+        }
+
+        .rank-position.silver {
+            color: #95a5a6;
+        }
+
+        .rank-position.bronze {
+            color: #cd7f32;
+        }
+
+        .rank-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+
+        .rank-details {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .rank-stats {
+            text-align: right;
+        }
+
+        .rank-votes {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .rank-montant {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stats-container">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="concours-banner">
+                <h1 id="concoursTitle">📊 Statistiques Détaillées</h1>
+                <p id="concoursPeriod"></p>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p>Chargement des statistiques...</p>
+        </div>
+
+        <!-- Content (hidden until loaded) -->
+        <div id="statsContent" style="display: none;">
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card blue">
+                    <div class="kpi-label">Total Candidates</div>
+                    <div class="kpi-value" id="kpiCandidates">0</div>
+                    <div class="kpi-change">
+                        <span id="kpiCandidatesApproved">0</span> approuvées
+                    </div>
+                </div>
+
+                <div class="kpi-card purple">
+                    <div class="kpi-label">Total Votes</div>
+                    <div class="kpi-value" id="kpiVotes">0</div>
+                    <div class="kpi-change">
+                        <span id="kpiVotantsUniques">0</span> votants uniques
+                    </div>
+                </div>
+
+                <div class="kpi-card green">
+                    <div class="kpi-label">Revenus Totaux</div>
+                    <div class="kpi-value" id="kpiRevenu">0 XOF</div>
+                    <div class="kpi-change">
+                        <span id="kpiTransactions">0</span> transactions
+                    </div>
+                </div>
+
+                <div class="kpi-card orange">
+                    <div class="kpi-label">Panier Moyen</div>
+                    <div class="kpi-value" id="kpiPanierMoyen">0</div>
+                    <div class="kpi-change">votes par transaction</div>
+                </div>
+            </div>
+
+            <!-- Top 10 Candidates -->
+            <div class="top-candidates">
+                <h3>🏆 Top 10 Candidates</h3>
+                <div id="topCandidatesList">
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="grid-2">
+                <!-- Répartition paiements -->
+                <div class="chart-section">
+                    <h3>💳 Méthodes de Paiement</h3>
+                    <div class="chart-container">
+                        <canvas id="paymentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Évolution quotidienne -->
+                <div class="chart-section">
+                    <h3>📈 Évolution des Votes</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/config.js"></script>
+    <script>
+        let concoursId = null;
+        let statsData = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            concoursId = urlParams.get('concoursId');
+
+            if (!concoursId) {
+                alert('❌ Concours non spécifié');
+                window.location.href = 'concours-miss.html';
+                return;
+            }
+
+            await loadStats();
+        });
+
+        async function loadStats() {
+            const token = localStorage.getItem('adminToken');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/concours/${concoursId}/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur chargement stats');
+
+                const data = await response.json();
+                statsData = data.data;
+
+                displayStats(statsData);
+                createCharts(statsData);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <p style="color: #e74c3c;">❌ Erreur de chargement</p>
+                    <button class="btn-primary" onclick="loadStats()">🔄 Réessayer</button>
+                `;
+            }
+        }
+
+        function displayStats(stats) {
+            // Masquer loading, afficher content
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('statsContent').style.display = 'block';
+
+            // Header
+            document.getElementById('concoursTitle').textContent = `📊 ${stats.general.concoursTitle || 'Statistiques Détaillées'}`;
+            document.getElementById('concoursPeriod').textContent = `Période: ${formatDate(stats.general.dateDebut)} - ${formatDate(stats.general.dateFin)}`;
+
+            // KPIs
+            const g = stats.general;
+            document.getElementById('kpiCandidates').textContent = g.totalCandidates || 0;
+            document.getElementById('kpiCandidatesApproved').textContent = g.candidatesApprouvees || 0;
+            document.getElementById('kpiVotes').textContent = formatNumber(g.totalVotes || 0);
+            document.getElementById('kpiVotantsUniques').textContent = formatNumber(g.votantsUniques || 0);
+            document.getElementById('kpiRevenu').textContent = formatNumber(g.totalRevenu || 0) + ' XOF';
+            document.getElementById('kpiTransactions').textContent = formatNumber(g.totalTransactions || 0);
+
+            const panierMoyen = g.totalTransactions > 0 ? (g.totalVotes / g.totalTransactions).toFixed(1) : 0;
+            document.getElementById('kpiPanierMoyen').textContent = panierMoyen;
+
+            // Top Candidates
+            displayTopCandidates(stats.topCandidates || []);
+        }
+
+        function displayTopCandidates(candidates) {
+            const container = document.getElementById('topCandidatesList');
+
+            if (candidates.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Aucune donnée disponible</p>';
+                return;
+            }
+
+            const maxVotes = candidates[0]?.totalVotes || 1;
+
+            container.innerHTML = candidates.slice(0, 10).map((c, index) => {
+                const position = index + 1;
+                const positionClass = position === 1 ? 'gold' : position === 2 ? 'silver' : position === 3 ? 'bronze' : '';
+                const percentage = (c.totalVotes / maxVotes * 100).toFixed(1);
+
+                return `
+                    <div class="candidate-rank">
+                        <div class="rank-position ${positionClass}">${position}</div>
+                        <img src="${c.photo1 || 'https://via.placeholder.com/60'}" class="rank-photo" onerror="this.src='https://via.placeholder.com/60'">
+                        <div class="rank-info">
+                            <div class="rank-name">N°${c.numero} - ${c.nom}</div>
+                            <div class="rank-details">${c.age} ans • ${c.ville || 'Ville inconnue'}</div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                        <div class="rank-stats">
+                            <div class="rank-votes">${formatNumber(c.totalVotes || 0)}</div>
+                            <div class="rank-montant">${formatNumber(c.montantTotal || 0)} XOF</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function createCharts(stats) {
+            // Chart 1: Méthodes de paiement (Pie)
+            const paymentMethods = stats.paymentMethods || [];
+            if (paymentMethods.length > 0) {
+                const ctx1 = document.getElementById('paymentChart').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: paymentMethods.map(p => p.methodePaiement),
+                        datasets: [{
+                            data: paymentMethods.map(p => p.montantTotal),
+                            backgroundColor: [
+                                '#667eea',
+                                '#764ba2',
+                                '#f093fb',
+                                '#4facfe'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.label + ': ' + formatNumber(context.parsed) + ' XOF';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Évolution quotidienne (Line)
+            const dailyVotes = stats.dailyVotes || [];
+            if (dailyVotes.length > 0) {
+                const ctx2 = document.getElementById('dailyChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: dailyVotes.map(d => formatDate(d.date)),
+                        datasets: [
+                            {
+                                label: 'Votes',
+                                data: dailyVotes.map(d => d.votes),
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Revenus (XOF)',
+                                data: dailyVotes.map(d => d.revenu),
+                                borderColor: '#2ecc71',
+                                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                tension: 0.4,
+                                fill: true,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Votes'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Revenus (XOF)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('fr-FR').format(num);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+        }
+    </script>
+</body>
+
+</html>

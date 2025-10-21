@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire Concours - Admin UCAO</title>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <style>
+        .form-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-header h1 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        label .required {
+            color: #e74c3c;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.3rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1 id="pageTitle">🏆 Nouveau Concours</h1>
+                <p style="color: #999;">Remplissez les informations du concours</p>
+            </div>
+
+            <form id="concoursForm">
+                <!-- Section 1: Informations générales -->
+                <div class="form-section">
+                    <h3>📋 Informations Générales</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Titre du concours <span class="required">*</span></label>
+                            <input type="text" name="titre" id="titre" placeholder="Ex: Miss UCAO 2025" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Description</label>
+                            <textarea name="description" id="description"
+                                placeholder="Décrivez le concours..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Type de concours <span class="required">*</span></label>
+                            <select name="type" id="type" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="MISS">Miss</option>
+                                <option value="MISTER">Mister</option>
+                                <option value="TALENT">Talent</option>
+                                <option value="AUTRE">Autre</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Organisateur</label>
+                            <input type="text" name="organisateur" id="organisateur" placeholder="Ex: BDE UCAO">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Période de candidature -->
+                <div class="form-section">
+                    <h3>📅 Période de Candidature</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Début des candidatures</label>
+                            <input type="datetime-local" name="dateDebutCandidature" id="dateDebutCandidature">
+                            <small class="help-text">Les candidates pourront s'inscrire à partir de cette date</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fin des candidatures</label>
+                            <input type="datetime-local" name="dateFinCandidature" id="dateFinCandidature">
+                            <small class="help-text">Date limite pour soumettre les candidatures</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Période de vote -->
+                <div class="form-section">
+                    <h3>🗳️ Période de Vote</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Début des votes <span class="required">*</span></label>
+                            <input type="datetime-local" name="dateDebutVote" id="dateDebutVote" required>
+                            <small class="help-text">Date de lancement du vote public</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Fin des votes <span class="required">*</span></label>
+                            <input type="datetime-local" name="dateFinVote" id="dateFinVote" required>
+                            <small class="help-text">Date de clôture du vote</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Configuration paiement -->
+                <div class="form-section">
+                    <h3>💰 Configuration Paiement</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Prix par vote <span class="required">*</span></label>
+                            <input type="number" name="prixVote" id="prixVote" value="100" min="0" step="1" required>
+                            <small class="help-text">Montant en XOF</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Devise</label>
+                            <select name="devise" id="devise">
+                                <option value="XOF">XOF (Franc CFA)</option>
+                                <option value="EUR">EUR (Euro)</option>
+                                <option value="USD">USD (Dollar)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Limite de votes par personne</label>
+                            <input type="number" name="limiteVotesParPersonne" id="limiteVotesParPersonne" value="10"
+                                min="1" step="1">
+                            <small class="help-text">Maximum de votes qu'une personne peut acheter (anti-fraude)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Options avancées -->
+                <div class="form-section">
+                    <h3>⚙️ Options Avancées</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="afficherResultatsTempsReel" id="afficherResultatsTempsReel"
+                                    checked>
+                                <label for="afficherResultatsTempsReel">Afficher les résultats en temps réel</label>
+                            </div>
+                            <small class="help-text">Si décoché, les résultats seront cachés jusqu'à la fin du
+                                concours</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Règlement du concours</label>
+                            <textarea name="reglement" id="reglement"
+                                placeholder="Conditions de participation, critères d'éligibilité, etc."></textarea>
+                            <small class="help-text">Sera affiché sur la page publique</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cancelForm()">
+                        ❌ Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Enregistrement en cours...</p>
+        </div>
+    </div>
+
+    <script src="../assets/config.js"></script>
+    <script>
+        let concoursId = null;
+        let isEditMode = false;
+
+        // Charger le concours en mode édition
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            concoursId = urlParams.get('id');
+
+            if (concoursId) {
+                isEditMode = true;
+                document.getElementById('pageTitle').textContent = '✏️ Modifier le Concours';
+                await loadConcoursData(concoursId);
+            }
+        });
+
+        async function loadConcoursData(id) {
+            const token = localStorage.getItem('adminToken');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/concours/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Erreur chargement');
+
+                const data = await response.json();
+                const concours = data.data;
+
+                // Remplir le formulaire
+                document.getElementById('titre').value = concours.titre || '';
+                document.getElementById('description').value = concours.description || '';
+                document.getElementById('type').value = concours.type || '';
+                document.getElementById('organisateur').value = concours.organisateur || '';
+
+                document.getElementById('dateDebutCandidature').value = formatDateTimeLocal(concours.dateDebutCandidature);
+                document.getElementById('dateFinCandidature').value = formatDateTimeLocal(concours.dateFinCandidature);
+                document.getElementById('dateDebutVote').value = formatDateTimeLocal(concours.dateDebutVote);
+                document.getElementById('dateFinVote').value = formatDateTimeLocal(concours.dateFinVote);
+
+                document.getElementById('prixVote').value = concours.prixVote || 100;
+                document.getElementById('devise').value = concours.devise || 'XOF';
+                document.getElementById('limiteVotesParPersonne').value = concours.limiteVotesParPersonne || 10;
+                document.getElementById('afficherResultatsTempsReel').checked = concours.afficherResultatsTempsReel !== 0;
+                document.getElementById('reglement').value = concours.reglement || '';
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur lors du chargement du concours');
+                window.location.href = 'concours-miss.html';
+            }
+        }
+
+        // Soumettre le formulaire
+        document.getElementById('concoursForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validation
+            const dateDebut = new Date(document.getElementById('dateDebutVote').value);
+            const dateFin = new Date(document.getElementById('dateFinVote').value);
+
+            if (dateFin <= dateDebut) {
+                alert('⚠️ La date de fin doit être après la date de début');
+                return;
+            }
+
+            const formData = {
+                titre: document.getElementById('titre').value,
+                description: document.getElementById('description').value || null,
+                type: document.getElementById('type').value,
+                organisateur: document.getElementById('organisateur').value || null,
+                dateDebutCandidature: document.getElementById('dateDebutCandidature').value || null,
+                dateFinCandidature: document.getElementById('dateFinCandidature').value || null,
+                dateDebutVote: document.getElementById('dateDebutVote').value,
+                dateFinVote: document.getElementById('dateFinVote').value,
+                prixVote: parseInt(document.getElementById('prixVote').value),
+                devise: document.getElementById('devise').value,
+                limiteVotesParPersonne: parseInt(document.getElementById('limiteVotesParPersonne').value),
+                afficherResultatsTempsReel: document.getElementById('afficherResultatsTempsReel').checked,
+                reglement: document.getElementById('reglement').value || null
+            };
+
+            const token = localStorage.getItem('adminToken');
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('active');
+
+            try {
+                const url = isEditMode
+                    ? `${API_BASE_URL}/api/admin/concours/${concoursId}`
+                    : `${API_BASE_URL}/api/admin/concours`;
+
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Erreur enregistrement');
+                }
+
+                alert(`✅ Concours ${isEditMode ? 'modifié' : 'créé'} avec succès !`);
+                window.location.href = 'concours-miss.html';
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert(`❌ Erreur: ${error.message}`);
+            } finally {
+                overlay.classList.remove('active');
+            }
+        });
+
+        function cancelForm() {
+            if (confirm('⚠️ Abandonner les modifications ?')) {
+                window.location.href = 'concours-miss.html';
+            }
+        }
+
+        function formatDateTimeLocal(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    </script>
+</body>
+
+</html>
