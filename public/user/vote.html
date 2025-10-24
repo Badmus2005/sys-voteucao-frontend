@@ -1306,7 +1306,7 @@
             <div class="header-actions">
                 <button class="notification-btn" id="notificationBtn">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notificationBadge">3</span>
+                    <span class="notification-badge" id="notificationBadge">0</span>
                 </button>
 
                 <div class="user-menu">
@@ -2187,14 +2187,113 @@
 
         // CORRECTION: Initialisation des notifications
         function initNotifications() {
+            const notificationService = new NotificationService();
             const notificationBtn = document.getElementById('notificationBtn');
             const notificationsPanel = document.getElementById('notificationsPanel');
+            const markAllReadBtn = document.getElementById('markAllRead');
 
             if (!notificationBtn || !notificationsPanel) return;
 
-            notificationBtn.addEventListener('click', function (e) {
+            // Fonction pour mettre à jour le badge
+            async function updateNotificationBadge() {
+                try {
+                    const unreadCount = await notificationService.getUnreadCount();
+                    const badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la mise à jour du badge:', error);
+                    // Fallback vers le comptage local
+                    const unreadCount = notificationService.getUnreadLocalCount();
+                    const badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+                    }
+                }
+            }
+
+            // Fonction pour afficher les notifications
+            function renderNotifications() {
+                const notifications = notificationService.getNotifications();
+                const container = document.getElementById('notificationsList');
+
+                if (!container) return;
+
+                if (notifications.length === 0) {
+                    container.innerHTML = '<div class="no-notifications">Aucune notification</div>';
+                    return;
+                }
+
+                container.innerHTML = notifications
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'}" data-id="${notif.id}">
+                            <div class="notification-icon">
+                                <i class="fas ${getNotificationIcon(notif.type)}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-text">${notif.message}</div>
+                                <div class="notification-time">${formatNotificationDate(notif.date)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                // Ajouter les événements de clic sur les notifications
+                container.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', async () => {
+                        const notifId = item.dataset.id;
+                        notificationService.markAsRead(notifId);
+                        item.classList.remove('unread');
+                        await updateNotificationBadge();
+                    });
+                });
+            }
+
+            // Fonction pour obtenir l'icône selon le type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'success': 'fa-check-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'error': 'fa-times-circle',
+                    'info': 'fa-info-circle',
+                    'election': 'fa-vote-yea',
+                    'candidature': 'fa-file-signature',
+                    'profile': 'fa-user',
+                    'system': 'fa-cog'
+                };
+                return icons[type] || 'fa-bell';
+            }
+
+            // Fonction pour formater la date
+            function formatNotificationDate(date) {
+                const now = new Date();
+                const notifDate = new Date(date);
+                const diff = now - notifDate;
+                const diffMinutes = Math.floor(diff / 60000);
+                const diffHours = Math.floor(diff / 3600000);
+                const diffDays = Math.floor(diff / 86400000);
+
+                if (diffMinutes < 60) {
+                    return `Il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+                } else if (diffHours < 24) {
+                    return `Il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+                } else if (diffDays < 7) {
+                    return `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                } else {
+                    return notifDate.toLocaleDateString();
+                }
+            }
+
+            // Événement click sur le bouton de notification
+            notificationBtn.addEventListener('click', async function (e) {
                 e.stopPropagation();
                 notificationsPanel.classList.toggle('show');
+                // Marquer comme lu quand on ouvre le panneau
+                notificationService.markAllAsRead();
+                await updateNotificationBadge();
             });
 
             // Fermer les notifications en cliquant ailleurs
@@ -2210,6 +2309,25 @@
                     notificationsPanel.classList.remove('show');
                 }
             });
+
+            // Bouton "Tout marquer comme lu"
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', async () => {
+                    notificationService.markAllAsRead();
+                    await updateNotificationBadge();
+                    renderNotifications();
+                });
+            }
+
+            // S'abonner aux mises à jour du service
+            notificationService.subscribe(async () => {
+                await updateNotificationBadge();
+                renderNotifications();
+            });
+
+            // Initialisation
+            updateNotificationBadge();
+            renderNotifications();
         }
 
         // Initialisation simplifiée
