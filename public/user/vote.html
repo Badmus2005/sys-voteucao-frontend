@@ -1304,9 +1304,9 @@
             </button>
 
             <div class="header-actions">
-                <button class="notification-btn">
+                <button class="notification-btn" id="notificationBtn">
                     <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
+                    <span class="notification-badge" id="notificationBadge">3</span>
                 </button>
 
                 <div class="user-menu">
@@ -1512,7 +1512,7 @@
     <script src="/assets/config.js"></script>
     <script src="/assets/js/auth-guard.js"></script>
     <script src="/assets/js/common.js"></script>
-    <!--<script src="/assets/js/notificationService.js"></script>-->
+    <script src="/assets/js/notificationService.js"></script>
     <script src="/assets/initNotifications.js"></script>
     <script>
         // Variables globales pour cette page
@@ -2161,6 +2161,24 @@
                 } catch (error) {
                     console.warn('Notifications non disponibles:', error);
                 }
+            }
+
+            // Initialiser l'événement du bouton de notification
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+
+            if (notificationBtn && notificationsPanel) {
+                notificationBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    notificationsPanel.classList.toggle('active');
+                });
+
+                // Fermer le panneau en cliquant ailleurs
+                document.addEventListener('click', function (e) {
+                    if (!notificationsPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                        notificationsPanel.classList.remove('active');
+                    }
+                });
             }
         });
 
