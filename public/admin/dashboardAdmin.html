@@ -1678,10 +1678,6 @@
                                 <label for="matricule">Matricule</label>
                                 <input type="text" id="matricule" class="form-input" placeholder="MAT001">
                             </div>
-                            <div class="form-group">
-                                <label for="codeInscription">Code Inscription</label>
-                                <input type="text" id="codeInscription" class="form-input" placeholder="CODE001">
-                            </div>
                         </div>
 
                         <div class="form-row">
@@ -1820,7 +1816,6 @@
                                             <th>Nom</th>
                                             <th>Prénom</th>
                                             <th>Matricule</th>
-                                            <th>Code inscription</th>
                                             <th>École</th>
                                             <th>Statut</th>
                                         </tr>
@@ -1840,7 +1835,6 @@
                                             <th>Nom</th>
                                             <th>Prénom</th>
                                             <th>Matricule</th>
-                                            <th>Code inscription</th>
                                             <th>École</th>
                                             <th>Statut</th>
                                         </tr>
@@ -1958,8 +1952,8 @@
         const NOTIFICATIONS_ENDPOINT = '/api/notifications/admin';
         const NOTIFICATIONS_READ_ENDPOINT = '/api/notifications/:id/read';
         const IMPORT_ETUDIANTS_ENDPOINT = '/api/import/etudiants';
-        const ECOLES_ENDPOINT = '/api/ecoles';
-        const FILIERES_ENDPOINT = '/api/filieres';
+        const ECOLES_ENDPOINT = '/api/institution/ecoles';
+        const FILIERES_ENDPOINT = '/api/institution/filieres';
 
         // Variables globales pour stocker les données
         let ecolesData = [];
@@ -2166,7 +2160,8 @@
         async function loadFilieres(ecoleId) {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}${FILIERES_ENDPOINT}?ecole=${ecoleId}`, {
+                // Utiliser l'endpoint correct pour charger les filières d'une école spécifique
+                const response = await fetch(`${API_BASE}${FILIERES_ENDPOINT}/ecole/${ecoleId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -2187,44 +2182,13 @@
                 console.error('Erreur chargement filières:', error);
                 showToast('Erreur lors du chargement des filières', 'error');
 
-                // Données de fallback basées sur l'école
-                const fallbackFilieres = getFallbackFilieres(ecoleId);
-                filieresData = fallbackFilieres;
+                // Données de fallback vides - les filières seront chargées depuis l'API
+                filieresData = [];
                 populateFilieresSelect();
             }
         }
 
-        function getFallbackFilieres(ecoleNom) {
-            const filieresParEcole = {
-                'EGEI': [
-                    'Informatique Industrielle et Maintenance',
-                    'Génie Électrique et Informatique Industrielle',
-                    'Réseaux et Télécommunications'
-                ],
-                'ESG': [
-                    'Gestion des Ressources Humaines',
-                    'Marketing et Communication',
-                    'Finance et Comptabilité'
-                ],
-                'ESM': [
-                    'Management des Projets',
-                    'Entrepreneuriat',
-                    'Stratégie et Développement'
-                ],
-                'FLL': [
-                    'Lettres Modernes',
-                    'Linguistique',
-                    'Traduction et Interprétation'
-                ],
-                'FSS': [
-                    'Sociologie',
-                    'Psychologie',
-                    'Anthropologie'
-                ]
-            };
 
-            return filieresParEcole[ecoleNom] || ['Filière Générale'].map((nom, index) => ({ id: index + 1, nom }));
-        }
 
         function populateFilieresSelect() {
             const filiereSelect = document.getElementById('filiere');
@@ -2347,7 +2311,6 @@
                 nom: document.getElementById('nom').value.trim(),
                 prenom: document.getElementById('prenom').value.trim(),
                 matricule: document.getElementById('matricule').value.trim() || null,
-                codeInscription: document.getElementById('codeInscription').value.trim() || null,
                 ecole: document.getElementById('ecole').value,
                 filiere: document.getElementById('filiere').value,
                 annee: parseInt(document.getElementById('annee').value) || 1,
@@ -2361,8 +2324,8 @@
                 return;
             }
 
-            if (!etudiant.matricule && !etudiant.codeInscription) {
-                showToast('Veuillez saisir au moins un identifiant (matricule ou code d\'inscription)', 'error');
+            if (!etudiant.matricule) {
+                showToast('Veuillez saisir le matricule de l\'étudiant', 'error');
                 return;
             }
 
@@ -2380,7 +2343,6 @@
             document.getElementById('nom').value = '';
             document.getElementById('prenom').value = '';
             document.getElementById('matricule').value = '';
-            document.getElementById('codeInscription').value = '';
             document.getElementById('ecole').value = '';
             document.getElementById('filiere').innerHTML = '<option value="">Sélectionnez d\'abord une école</option>';
             document.getElementById('filiere').disabled = true;
@@ -2548,7 +2510,6 @@
                         <td>${etudiant.nom}</td>
                         <td>${etudiant.prenom}</td>
                         <td>${etudiant.matricule || '-'}</td>
-                        <td>${etudiant.codeInscription || '-'}</td>
                         <td>${etudiant.ecole || '-'}</td>
                         <td><span class="badge badge-success">Nouveau</span></td>
                     `;
@@ -2566,7 +2527,6 @@
                         <td>${etudiant.nom}</td>
                         <td>${etudiant.prenom}</td>
                         <td>${etudiant.matricule || '-'}</td>
-                        <td>${etudiant.codeInscription || '-'}</td>
                         <td>${etudiant.ecole || '-'}</td>
                         <td><span class="badge badge-warning">Mis à jour</span></td>
                     `;
@@ -2581,7 +2541,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${echec.etudiant?.nom || 'N/A'} ${echec.etudiant?.prenom || ''}</td>
-                        <td>${echec.etudiant?.matricule || echec.etudiant?.codeInscription || 'Aucun identifiant'}</td>
+                        <td>${echec.etudiant?.matricule || 'Aucun identifiant'}</td>
                         <td style="color: var(--danger);">${echec.erreur}</td>
                     `;
                     failedBody.appendChild(row);
@@ -2726,7 +2686,6 @@
                     // Normaliser les noms de champs
                     const etudiantNormalise = {
                         matricule: etudiant.matricule || null,
-                        codeInscription: etudiant.codeinscription || etudiant.code_inscription || etudiant.code || null,
                         nom: etudiant.nom,
                         prenom: etudiant.prenom,
                         ecole: etudiant.ecole,
@@ -2737,7 +2696,7 @@
                     };
 
                     // Vérifier qu'au moins un identifiant est présent
-                    if (etudiantNormalise.matricule || etudiantNormalise.codeInscription) {
+                    if (etudiantNormalise.matricule) {
                         etudiants.push(etudiantNormalise);
                     } else {
                         console.warn('Étudiant sans identifiant ignoré:', etudiant.nom, etudiant.prenom);

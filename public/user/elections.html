@@ -2385,10 +2385,7 @@
                         <label>École/Faculté</label>
                         <select class="filter-select" id="filter-ecole">
                             <option value="">Tous</option>
-                            <option value="EGEI">EGEI</option>
-                            <option value="ESMEA">ESMEA</option>
-                            <option value="FSAE">FSAE</option>
-                            <option value="FDE">FDE</option>
+                            <!-- Les options seront chargées dynamiquement depuis l'API -->
                         </select>
                     </div>
                 </div>
@@ -2499,21 +2496,123 @@
         let studentInfo = null;
         let carouselIntervals = {};
 
-        // Images par défaut pour chaque école
-        const ECOLE_IMAGES = {
-            'EGEI': 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-            'ESMEA': 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-            'FSAE': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
-            'FDE': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
-        };
+        // Variables pour stocker les données chargées depuis l'API
+        let ECOLE_IMAGES = {};
+        let ECOLE_CONFIG = {};
+        let ECOLES_DATA = [];
+        let FILIERE_DATA = [];
 
-        // Icônes et couleurs pour chaque école
-        const ECOLE_CONFIG = {
-            'EGEI': { icon: 'fas fa-laptop-code', color: 'egei-color', name: 'École de Génie Electrique et Informatique' },
-            'ESMEA': { icon: 'fas fa-chart-line', color: 'esmea-color', name: 'École Supérieure de Management et de l\'Économie Appliquée' },
-            'FSAE': { icon: 'fas fa-heart-pulse', color: 'fsae-color', name: 'Faculté des Sciences de l\'Agronomie et de l\'Environnement' },
-            'FDE': { icon: 'fas fa-gavel', color: 'fde-color', name: 'Faculté de Droit et d\'Économie' }
-        };
+        // Fonction pour charger les écoles depuis l'API
+        async function loadEcolesData() {
+            try {
+                console.log('Chargement des données écoles...');
+                const response = await fetch(`${API_URL}/api/institution/ecoles`);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    ECOLES_DATA = data.data;
+                    console.log('Écoles chargées:', ECOLES_DATA);
+
+                    // Construire les objets ECOLE_IMAGES et ECOLE_CONFIG
+                    ECOLES_DATA.forEach(ecole => {
+                        // Images par défaut selon le type d'école
+                        const defaultImages = {
+                            'EGEI': 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                            'ESMEA': 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                            'FSAE': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                            'FDE': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+                        };
+
+                        // Icônes par défaut selon le type d'école
+                        const defaultIcons = {
+                            'EGEI': 'fas fa-laptop-code',
+                            'ESMEA': 'fas fa-chart-line',
+                            'FSAE': 'fas fa-heart-pulse',
+                            'FDE': 'fas fa-gavel'
+                        };
+
+                        // Couleurs par défaut selon le type d'école
+                        const defaultColors = {
+                            'EGEI': 'egei-color',
+                            'ESMEA': 'esmea-color',
+                            'FSAE': 'fsae-color',
+                            'FDE': 'fde-color'
+                        };
+
+                        // Utiliser l'image de l'école si disponible, sinon l'image par défaut
+                        ECOLE_IMAGES[ecole.code] = ecole.image || defaultImages[ecole.code] || 'https://images.unsplash.com/photo-1565688534245-05d6b5be184a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+
+                        // Configuration de l'école
+                        ECOLE_CONFIG[ecole.code] = {
+                            icon: ecole.icone || defaultIcons[ecole.code] || 'fas fa-graduation-cap',
+                            color: defaultColors[ecole.code] || 'default-color',
+                            name: ecole.nom,
+                            id: ecole.id,
+                            type: ecole.type || 'school'
+                        };
+                    });
+
+                    console.log('ECOLE_IMAGES construit:', ECOLE_IMAGES);
+                    console.log('ECOLE_CONFIG construit:', ECOLE_CONFIG);
+                } else {
+                    throw new Error(data.message || 'Erreur lors du chargement des écoles');
+                }
+            } catch (error) {
+                console.error('Erreur chargement écoles:', error);
+                // Fallback vers les données par défaut
+                setDefaultEcolesData();
+            }
+        }
+
+        // Fonction pour charger les filières depuis l'API
+        async function loadFilieresData() {
+            try {
+                console.log('Chargement des données filières...');
+                const response = await fetch(`${API_URL}/api/institution/filieres`);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    FILIERE_DATA = data.data;
+                    console.log('Filières chargées:', FILIERE_DATA);
+                } else {
+                    throw new Error(data.message || 'Erreur lors du chargement des filières');
+                }
+            } catch (error) {
+                console.error('Erreur chargement filières:', error);
+                FILIERE_DATA = [];
+            }
+        }
+
+        // Fonction de fallback avec données par défaut
+        function setDefaultEcolesData() {
+            console.log('Utilisation des données écoles par défaut');
+            ECOLE_IMAGES = {
+                'EGEI': 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                'ESMEA': 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                'FSAE': 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80',
+                'FDE': 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+            };
+
+            ECOLE_CONFIG = {
+                'EGEI': { icon: 'fas fa-laptop-code', color: 'egei-color', name: 'École de Génie Electrique et Informatique', id: 1, type: 'school' },
+                'ESMEA': { icon: 'fas fa-chart-line', color: 'esmea-color', name: 'École Supérieure de Management et de l\'Économie Appliquée', id: 2, type: 'school' },
+                'FSAE': { icon: 'fas fa-heart-pulse', color: 'fsae-color', name: 'Faculté des Sciences de l\'Agronomie et de l\'Environnement', id: 3, type: 'faculty' },
+                'FDE': { icon: 'fas fa-gavel', color: 'fde-color', name: 'Faculté de Droit et d\'Économie', id: 4, type: 'faculty' }
+            };
+
+            ECOLES_DATA = Object.keys(ECOLE_CONFIG).map(code => ({
+                id: ECOLE_CONFIG[code].id,
+                code: code,
+                nom: ECOLE_CONFIG[code].name,
+                type: ECOLE_CONFIG[code].type
+            }));
+        }
 
         // Fonctions utilitaires pour les appels API
         async function apiCall(endpoint, options = {}) {
@@ -2671,6 +2770,13 @@
 
         // NOUVELLE : Fonction pour déterminer le type d'école
         function getSchoolType(ecoleId) {
+            // Chercher dans les données chargées depuis l'API
+            const ecole = ECOLES_DATA.find(e => e.id == ecoleId || e.code === ecoleId);
+            if (ecole && ecole.type) {
+                return ecole.type === 'faculty' ? 'faculty' : 'school';
+            }
+
+            // Fallback vers la logique par défaut
             const ecoleFaculties = ['FSAE', 'FDE'];
             const ecoleSchools = ['EGEI', 'ESMEA'];
 
@@ -3437,11 +3543,43 @@
             });
         }
 
+        // Fonction pour charger les écoles dans le filtre
+        async function loadSchoolsForFilter() {
+            try {
+                const schools = await APIService.getSchools();
+                const ecoleSelect = document.getElementById('filter-ecole');
+
+                if (schools && schools.length > 0) {
+                    // Vider les options existantes sauf "Tous"
+                    ecoleSelect.innerHTML = '<option value="">Tous</option>';
+
+                    // Ajouter les écoles chargées depuis l'API
+                    schools.forEach(school => {
+                        const option = document.createElement('option');
+                        option.value = school.id || school.code;
+                        option.textContent = school.nom || school.name;
+                        ecoleSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur chargement écoles pour filtre:', error);
+            }
+        }
+
         // Chargement des données de la page
         async function loadPageData() {
             showLoading();
 
             try {
+                // Charger les données des écoles et filières en premier
+                await Promise.all([
+                    loadEcolesData(),
+                    loadFilieresData()
+                ]);
+
+                // Charger les écoles dans le filtre
+                await loadSchoolsForFilter();
+
                 await loadUserProfilePhoto();
                 // Charger les informations de l'étudiant
                 await loadStudentInfo();
@@ -3558,14 +3696,18 @@
                 electionsByEcole[ecole].push(election);
             });
 
-            // Générer les sections pour chaque école
+            // Générer les sections pour chaque école chargée depuis l'API
             let sectionsHTML = '';
 
-            for (const ecole of Object.keys(ECOLE_CONFIG)) {
-                const ecoleElections = electionsByEcole[ecole];
-                if (!ecoleElections || ecoleElections.length === 0) continue;
+            // Utiliser les écoles chargées depuis l'API
+            const ecolesToDisplay = Object.keys(ECOLE_CONFIG).length > 0 ? Object.keys(ECOLE_CONFIG) : ['EGEI', 'ESMEA', 'FSAE', 'FDE'];
 
-                const config = ECOLE_CONFIG[ecole];
+            for (const ecoleCode of ecolesToDisplay) {
+                const ecoleData = ECOLE_CONFIG[ecoleCode];
+                if (!ecoleData) continue;
+
+                const ecoleElections = electionsByEcole[ecoleCode];
+                if (!ecoleElections || ecoleElections.length === 0) continue;
 
                 // Générer les cartes d'élection pour cette école
                 let electionCardsHTML = '';
@@ -3578,25 +3720,25 @@
                 }
 
                 sectionsHTML += `
-                    <div class="ecole-section" data-ecole="${ecole}">
+                    <div class="ecole-section" data-ecole="${ecoleCode}">
                         <div class="ecole-header">
                             <h3 class="ecole-title">
-                                <div class="ecole-icon ${config.color}">
-                                    <i class="${config.icon}"></i>
+                                <div class="ecole-icon ${ecoleData.color}">
+                                    <i class="${ecoleData.icon}"></i>
                                 </div>
-                                ${config.name}
+                                ${ecoleData.name}
                             </h3>
                             <div class="ecole-actions">
-                                <button class="carousel-btn" id="carousel-prev-${ecole}">
+                                <button class="carousel-btn" id="carousel-prev-${ecoleCode}">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
-                                <button class="carousel-btn" id="carousel-next-${ecole}">
+                                <button class="carousel-btn" id="carousel-next-${ecoleCode}">
                                     <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="carousel-container">
-                            <div class="carousel-track" id="carousel-track-${ecole}">
+                            <div class="carousel-track" id="carousel-track-${ecoleCode}">
                                 ${electionCardsHTML}
                             </div>
                         </div>
@@ -3608,9 +3750,10 @@
 
             // Initialiser les carousels après le rendu complet
             setTimeout(() => {
-                Object.keys(ECOLE_CONFIG).forEach(ecole => {
-                    if (electionsByEcole[ecole] && electionsByEcole[ecole].length > 0) {
-                        initCarousel(ecole);
+                const ecolesToInit = Object.keys(ECOLE_CONFIG).length > 0 ? Object.keys(ECOLE_CONFIG) : ['EGEI', 'ESMEA', 'FSAE', 'FDE'];
+                ecolesToInit.forEach(ecoleCode => {
+                    if (electionsByEcole[ecoleCode] && electionsByEcole[ecoleCode].length > 0) {
+                        initCarousel(ecoleCode);
                     }
                 });
             }, 300);
@@ -3924,10 +4067,19 @@
             // Informations générales
             const infoGrid = document.getElementById('modalElectionInfo');
 
-            // Récupérer le nom de l'école depuis différentes sources possibles
-            const ecoleNom = election.nomEcole || election.ecole_nom ||
-                (election.ecoleId && ECOLE_CONFIG[election.ecoleId]?.name) ||
-                'Non spécifiée';
+            // Récupérer le nom de l'école depuis les données chargées
+            const ecoleNom = (() => {
+                // Essayer de trouver l'école par ID ou code
+                const ecole = ECOLES_DATA.find(e => e.id == election.ecoleId || e.code === election.nomEcole);
+                if (ecole) return ecole.nom;
+
+                // Fallback vers la config chargée
+                if (election.nomEcole && ECOLE_CONFIG[election.nomEcole]) {
+                    return ECOLE_CONFIG[election.nomEcole].name;
+                }
+
+                return election.nomEcole || 'École non spécifiée';
+            })();
 
             // Récupérer le nom de la filière si disponible
             const filiereNom = election.nomFiliere || election.filiere_nom || 'Toutes';
@@ -4134,7 +4286,6 @@
                 { label: 'Filière', value: candidate.filiere_nom || candidate.nomFiliere || candidate.filiere || 'Non spécifiée' },
                 { label: 'Année d\'étude', value: candidate.annee || 'N/A' },
                 { label: 'Email', value: candidate.email || 'Non disponible' },
-                { label: 'Code inscription', value: candidate.codeInscription || 'Non disponible' },
                 { label: 'Date de candidature', value: dateFormatted }
             ];
 
@@ -4221,8 +4372,9 @@
 
         // Gérer le redimensionnement de la fenêtre pour les carousels
         window.addEventListener('resize', () => {
-            Object.keys(ECOLE_CONFIG).forEach(ecole => {
-                initCarousel(ecole);
+            const ecolesToInit = Object.keys(ECOLE_CONFIG).length > 0 ? Object.keys(ECOLE_CONFIG) : ['EGEI', 'ESMEA', 'FSAE', 'FDE'];
+            ecolesToInit.forEach(ecoleCode => {
+                initCarousel(ecoleCode);
             });
         });
 
