@@ -2512,8 +2512,9 @@
                 }
                 const data = await response.json();
 
-                if (data.success && data.data) {
-                    ECOLES_DATA = data.data;
+                // L'API retourne directement un tableau d'écoles
+                if (Array.isArray(data) && data.length > 0) {
+                    ECOLES_DATA = data;
                     console.log('Écoles chargées:', ECOLES_DATA);
 
                     // Construire les objets ECOLE_IMAGES et ECOLE_CONFIG
@@ -2543,12 +2544,12 @@
                         };
 
                         // Utiliser l'image de l'école si disponible, sinon l'image par défaut
-                        ECOLE_IMAGES[ecole.code] = ecole.image || defaultImages[ecole.code] || 'https://images.unsplash.com/photo-1565688534245-05d6b5be184a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+                        ECOLE_IMAGES[ecole.nom] = ecole.image || defaultImages[ecole.nom] || 'https://images.unsplash.com/photo-1565688534245-05d6b5be184a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
 
                         // Configuration de l'école
-                        ECOLE_CONFIG[ecole.code] = {
-                            icon: ecole.icone || defaultIcons[ecole.code] || 'fas fa-graduation-cap',
-                            color: defaultColors[ecole.code] || 'default-color',
+                        ECOLE_CONFIG[ecole.nom] = {
+                            icon: ecole.icone || defaultIcons[ecole.nom] || 'fas fa-graduation-cap',
+                            color: defaultColors[ecole.nom] || 'default-color',
                             name: ecole.nom,
                             id: ecole.id,
                             type: ecole.type || 'school'
@@ -2558,7 +2559,7 @@
                     console.log('ECOLE_IMAGES construit:', ECOLE_IMAGES);
                     console.log('ECOLE_CONFIG construit:', ECOLE_CONFIG);
                 } else {
-                    throw new Error(data.message || 'Erreur lors du chargement des écoles');
+                    throw new Error('Format de données écoles invalide');
                 }
             } catch (error) {
                 console.error('Erreur chargement écoles:', error);
@@ -2577,11 +2578,12 @@
                 }
                 const data = await response.json();
 
-                if (data.success && data.data) {
-                    FILIERE_DATA = data.data;
+                // L'API retourne directement un tableau de filières
+                if (Array.isArray(data)) {
+                    FILIERE_DATA = data;
                     console.log('Filières chargées:', FILIERE_DATA);
                 } else {
-                    throw new Error(data.message || 'Erreur lors du chargement des filières');
+                    throw new Error('Format de données filières invalide');
                 }
             } catch (error) {
                 console.error('Erreur chargement filières:', error);
