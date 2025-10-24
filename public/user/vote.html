@@ -2065,6 +2065,153 @@
             }
         };
 
+        // CORRECTION: Fonction unique pour le menu mobile
+        function initMobileMenu() {
+            const burger = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+
+            console.log('Éléments menu mobile:', {
+                burger: !!burger,
+                sidebar: !!sidebar,
+                overlay: !!overlay
+            });
+
+            if (!burger || !sidebar) {
+                console.error('Éléments manquants pour le menu mobile');
+                return;
+            }
+
+            let isMenuOpen = false;
+
+            // Fonction pour ouvrir le menu
+            function openMenu() {
+                console.log('Ouverture du menu');
+                sidebar.style.display = 'flex';
+                sidebar.classList.add('active');
+                if (overlay) {
+                    overlay.style.display = 'block';
+                    overlay.classList.add('active');
+                }
+                document.body.style.overflow = 'hidden';
+                isMenuOpen = true;
+            }
+
+            // Fonction pour fermer le menu
+            function closeMenu() {
+                console.log('Fermeture du menu');
+                sidebar.style.display = 'none';
+                sidebar.classList.remove('active');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    overlay.classList.remove('active');
+                }
+                document.body.style.overflow = '';
+                isMenuOpen = false;
+            }
+
+            // Événement click sur le bouton burger
+            burger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                console.log('Bouton menu cliqué - Menu actuellement:', isMenuOpen ? 'OUVERT' : 'FERMÉ');
+
+                if (isMenuOpen) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            // Fermer le menu en cliquant sur l'overlay
+            if (overlay) {
+                overlay.addEventListener('click', function () {
+                    console.log('Overlay cliqué - fermeture menu');
+                    closeMenu();
+                });
+            }
+
+            // Fermer le menu en cliquant sur les liens de navigation
+            document.querySelectorAll('.nav-item').forEach(link => {
+                link.addEventListener('click', function () {
+                    console.log('Lien navigation cliqué - fermeture menu');
+                    closeMenu();
+                });
+            });
+
+            // Fermer le menu avec la touche Échap
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && isMenuOpen) {
+                    console.log('Touche Échap - fermeture menu');
+                    closeMenu();
+                }
+            });
+
+            // Fermer le menu en cliquant en dehors (mobile)
+            document.addEventListener('click', function (e) {
+                if (isMenuOpen && !sidebar.contains(e.target) && !burger.contains(e.target)) {
+                    console.log('Clic en dehors du menu - fermeture');
+                    closeMenu();
+                }
+            });
+
+            // CORRECTION: Fonction unique pour le redimensionnement
+            function handleWindowResize() {
+                console.log('Redimensionnement - Largeur:', window.innerWidth);
+                if (window.innerWidth > 1024) {
+                    // Sur desktop - toujours afficher la sidebar
+                    console.log('Mode desktop - affichage sidebar');
+                    sidebar.style.display = 'flex';
+                    sidebar.classList.remove('active');
+                    if (overlay) {
+                        overlay.style.display = 'none';
+                        overlay.classList.remove('active');
+                    }
+                    document.body.style.overflow = '';
+                    isMenuOpen = false;
+                } else {
+                    // Sur mobile - cacher la sidebar si inactive
+                    console.log('Mode mobile');
+                    if (!isMenuOpen) {
+                        sidebar.style.display = 'none';
+                    }
+                }
+            }
+
+            // Écouter le redimensionnement
+            window.addEventListener('resize', handleWindowResize);
+
+            // Initialiser l'état au chargement
+            console.log('Initialisation état initial');
+            handleWindowResize();
+        }
+
+        // CORRECTION: Initialisation des notifications
+        function initNotifications() {
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationsPanel = document.getElementById('notificationsPanel');
+
+            if (!notificationBtn || !notificationsPanel) return;
+
+            notificationBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                notificationsPanel.classList.toggle('show');
+            });
+
+            // Fermer les notifications en cliquant ailleurs
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.notifications-container')) {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+
+            // Fermer avec Échap
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    notificationsPanel.classList.remove('show');
+                }
+            });
+        }
+
         // Initialisation simplifiée
         document.addEventListener('DOMContentLoaded', function () {
             // Initialiser les éléments communs
@@ -2082,121 +2229,29 @@
             }
 
             // Initialiser le menu burger mobile
-            const burger = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
+            initMobileMenu();
 
-            if (burger && sidebar && overlay) {
-                burger.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
-
-                overlay.addEventListener('click', function () {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-
-                // Fermer le menu en cliquant en dehors (mobile)
-                document.addEventListener('click', function (e) {
-                    const isMenuOpen = sidebar.classList.contains('active');
-                    if (isMenuOpen && !sidebar.contains(e.target) && !burger.contains(e.target)) {
-                        sidebar.classList.remove('active');
-                        overlay.classList.remove('active');
-                    }
-                });
-            }
+            // Initialiser les notifications
+            initNotifications();
 
             // Initialiser le gestionnaire de vote
             SimplifiedVoteManager.loadUnifiedView();
 
-            // Événements simples
-            document.getElementById('continueToConfirm')?.addEventListener('click', () => {
-                SimplifiedVoteManager.goToConfirmation();
-            });
+            // Méthode de filtrage simple
+            SimplifiedVoteManager.filterElections = function (filter) {
+                const groups = document.querySelectorAll('.election-candidate-group');
 
-            document.getElementById('backToSelection')?.addEventListener('click', () => {
-                document.getElementById('step2').classList.remove('active');
-                document.getElementById('step1').classList.add('active');
-            });
+                groups.forEach(group => {
+                    const electionId = group.dataset.electionId;
+                    const election = this.findElectionById(electionId);
 
-            document.getElementById('finalSubmitVote')?.addEventListener('click', () => {
-                SimplifiedVoteManager.submitVotes();
-            });
-
-            document.getElementById('backToElectionsBtn')?.addEventListener('click', () => {
-                const successModal = document.getElementById('successModal');
-                if (successModal) successModal.classList.remove('active');
-                // Recharger la page pour actualiser les données
-                location.reload();
-            });
-
-            document.getElementById('closeSuccessModal')?.addEventListener('click', () => {
-                const successModal = document.getElementById('successModal');
-                if (successModal) successModal.classList.remove('active');
-            });
-
-            // Filtres rapides
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    // Implémentation simple du filtrage
-                    const filter = this.dataset.filter;
-                    SimplifiedVoteManager.filterElections(filter);
-                });
-            });
-
-            // Rafraîchissement
-            document.getElementById('refreshElections')?.addEventListener('click', () => {
-                SimplifiedVoteManager.loadUnifiedView();
-                Common.showToast('Liste actualisée', 'success');
-            });
-
-            // Initialiser les notifications si disponibles
-            if (typeof initializeNotifications === 'function') {
-                try {
-                    initializeNotifications();
-                } catch (error) {
-                    console.warn('Notifications non disponibles:', error);
-                }
-            }
-
-            // Initialiser l'événement du bouton de notification
-            const notificationBtn = document.getElementById('notificationBtn');
-            const notificationsPanel = document.getElementById('notificationsPanel');
-
-            if (notificationBtn && notificationsPanel) {
-                notificationBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    notificationsPanel.classList.toggle('active');
-                });
-
-                // Fermer le panneau en cliquant ailleurs
-                document.addEventListener('click', function (e) {
-                    if (!notificationsPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
-                        notificationsPanel.classList.remove('active');
+                    if (filter === 'all' || (election && election.type === filter.toUpperCase())) {
+                        group.style.display = 'block';
+                    } else {
+                        group.style.display = 'none';
                     }
                 });
             }
-        });
-
-        // Méthode de filtrage simple
-        SimplifiedVoteManager.filterElections = function (filter) {
-            const groups = document.querySelectorAll('.election-candidate-group');
-
-            groups.forEach(group => {
-                const electionId = group.dataset.electionId;
-                const election = this.findElectionById(electionId);
-
-                if (filter === 'all' || (election && election.type === filter.toUpperCase())) {
-                    group.style.display = 'block';
-                } else {
-                    group.style.display = 'none';
-                }
-            });
-        };
     </script>
 </body>
 
