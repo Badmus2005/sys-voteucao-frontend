@@ -1189,7 +1189,6 @@
                             <tr>
                                 <th>Position</th>
                                 <th>Candidat</th>
-                                <th>Parti/Liste</th>
                                 <th>Voix Obtenues</th>
                                 <th>Pourcentage</th>
                                 <th>Statut</th>
@@ -1207,9 +1206,6 @@
                         <span id="statusText">Résultats non publiés</span>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn-secondary" id="previewResults">
-                            <i class="fas fa-eye"></i> Aperçu
-                        </button>
                         <button class="btn-primary" id="publishResults">
                             <i class="fas fa-bullhorn"></i> Publier les résultats
                         </button>
@@ -1638,7 +1634,6 @@
                     </div>
                 </div>
             </td>
-            <td>${candidate.party || '-'}</td>
             <td class="vote-count">${candidate.details.totalVotes}</td>
             <td class="vote-percentage">${candidate.scoreFinal}%</td>
             <td>${isWinner ? '<span class="winner-badge">Gagnant</span>' : ''}</td>
@@ -1915,19 +1910,6 @@
                 refreshBtn.addEventListener('click', function () {
                     loadElections();
                     showToast('Liste des élections actualisée', 'info');
-                });
-            }
-
-            // Gestionnaire pour l'aperçu des résultats
-            const previewBtn = document.getElementById('previewResults');
-            if (previewBtn) {
-                previewBtn.addEventListener('click', function () {
-                    if (currentElection) {
-                        // Ouvrir un nouvel onglet avec l'aperçu des résultats
-                        window.open(`/elections/${currentElection.id}/results/preview`, '_blank');
-                    } else {
-                        showToast('Veuillez d\'abord sélectionner une élection', 'warning');
-                    }
                 });
             }
         }
