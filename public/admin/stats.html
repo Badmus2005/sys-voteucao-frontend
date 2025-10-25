@@ -12,6 +12,12 @@
         rel="stylesheet" />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF AutoTable plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             /* Nouvelle palette de couleurs */
@@ -1800,45 +1806,397 @@
 
         async function exportStats(format) {
             try {
+                showLoading();
                 const token = getToken();
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 
-                let url = `${API_BASE}${STATS_ENDPOINTS.EXPORT}?format=${format}&period=${period}`;
-                if (electionId !== 'all') url += `&electionId=${electionId}`;
+                // Collecter toutes les données statistiques
+                const statsData = await collectAllStatsData(token, period, electionId);
 
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const fileName = `statistiques-ucao-${new Date().toISOString().split('T')[0]}`;
 
-                if (!response.ok) throw new Error('Erreur lors de l\'export');
-
-                if (format === 'json') {
-                    const data = await response.json();
-                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `statistiques-${new Date().toISOString().split('T')[0]}.json`;
-                    a.click();
-                } else {
-                    const blob = await response.blob();
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `statistiques-${new Date().toISOString().split('T')[0]}.${format}`;
-                    a.click();
+                if (format === 'excel') {
+                    await exportToExcel(statsData, fileName);
+                } else if (format === 'pdf') {
+                    await exportToPDF(statsData, fileName);
+                } else if (format === 'json') {
+                    exportToJSON(statsData, fileName);
                 }
 
-                showToast('Export terminé avec succès!', 'success');
+                showToast(`Export ${format.toUpperCase()} terminé avec succès!`, 'success');
 
             } catch (error) {
-                console.error('Erreur:', error);
-                showToast('Erreur lors de l\'export: ' + error.message, 'error');
+                console.error('Erreur lors de l\'export:', error);
+                showToast(`Erreur lors de l'export ${format.toUpperCase()}: ${error.message}`, 'error');
+            } finally {
+                hideLoading();
             }
+        }
+
+        async function collectAllStatsData(token, period, electionId) {
+            const data = {
+                metadata: {
+                    generatedAt: new Date().toISOString(),
+                    period: period,
+                    electionId: electionId,
+                    filters: {
+                        period: getPeriodLabel(period),
+                        election: electionId === 'all' ? 'Toutes les élections' : getElectionTitle(electionId)
+                    }
+                },
+                general: {},
+                votes: [],
+                distribution: [],
+                hourly: [],
+                comparison: []
+            };
+
+            try {
+                // Statistiques générales
+                let url = `${API_BASE}${STATS_ENDPOINTS.GENERAL}?period=${period}`;
+                if (electionId !== 'all') url += `&electionId=${electionId}`;
+
+                const generalResponse = await fetch(url, {
+                    headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+                });
+                if (generalResponse.ok) {
+                    data.general = await generalResponse.json();
+                }
+
+                // Données des votes
+                url = `${API_BASE}${STATS_ENDPOINTS.VOTES}?period=${period}`;
+                if (electionId !== 'all') url += `&electionId=${electionId}`;
+
+                const votesResponse = await fetch(url, {
+                    headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+                });
+                if (votesResponse.ok) {
+                    const votesData = await votesResponse.json();
+                    data.votes = votesData.labels?.map((label, index) => ({
+                        date: label,
+                        votes: votesData.values?.[index] || 0
+                    })) || [];
+                }
+
+                // Répartition des votes (si élection spécifique)
+                if (electionId !== 'all') {
+                    const distributionResponse = await fetch(`${API_BASE}${STATS_ENDPOINTS.DISTRIBUTION}?electionId=${electionId}`, {
+                        headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+                    });
+                    if (distributionResponse.ok) {
+                        const distributionData = await distributionResponse.json();
+                        data.distribution = distributionData.labels?.map((label, index) => ({
+                            candidat: label,
+                            votes: distributionData.values?.[index] || 0
+                        })) || [];
+                    }
+                }
+
+                // Données horaires
+                url = `${API_BASE}${STATS_ENDPOINTS.HOURLY}?period=${period}`;
+                if (electionId !== 'all') url += `&electionId=${electionId}`;
+
+                const hourlyResponse = await fetch(url, {
+                    headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+                });
+                if (hourlyResponse.ok) {
+                    const hourlyData = await hourlyResponse.json();
+                    data.hourly = hourlyData.labels?.map((label, index) => ({
+                        heure: label,
+                        votes: hourlyData.values?.[index] || 0
+                    })) || [];
+                }
+
+                // Comparaison des élections
+                const comparisonResponse = await fetch(`${API_BASE}${STATS_ENDPOINTS.COMPARISON}?period=${period}`, {
+                    headers: { 'Authorization': token, 'Content-Type': 'application/json' }
+                });
+                if (comparisonResponse.ok) {
+                    const comparisonData = await comparisonResponse.json();
+                    data.comparison = comparisonData.map(item => ({
+                        election: item.election_title || item.titre,
+                        votes: item.vote_count || 0
+                    }));
+                }
+
+            } catch (error) {
+                console.error('Erreur lors de la collecte des données:', error);
+            }
+
+            return data;
+        }
+
+        function getPeriodLabel(period) {
+            const labels = {
+                '7': '7 derniers jours',
+                '30': '30 derniers jours',
+                '90': '3 derniers mois',
+                '365': '1 année'
+            };
+            return labels[period] || period;
+        }
+
+        function getElectionTitle(electionId) {
+            if (electionId === 'all') return 'Toutes les élections';
+            const election = elections.find(e => e.id == electionId);
+            return election ? election.titre : `Élection ${electionId}`;
+        }
+
+        async function exportToExcel(data, fileName) {
+            const workbook = XLSX.utils.book_new();
+
+            // Feuille 1: Statistiques générales
+            const generalData = [
+                ['Statistiques Générales - UCAO'],
+                ['Généré le', new Date(data.metadata.generatedAt).toLocaleString('fr-FR')],
+                ['Période', data.metadata.filters.period],
+                ['Élection', data.metadata.filters.election],
+                [''],
+                ['Métrique', 'Valeur', 'Tendance'],
+                ['Utilisateurs actifs', data.general.users?.total || 0, `${data.general.users?.percent || 0}%`],
+                ['Votes enregistrés', data.general.votes?.total || 0, `${data.general.votes?.percent || 0}%`],
+                ['Candidats', data.general.candidates?.total || 0, `${data.general.candidates?.percent || 0}%`],
+                ['Taux de participation', `${data.general.participationRate || 0}%`, `${data.general.participationRate || 0}%`]
+            ];
+            const generalSheet = XLSX.utils.aoa_to_sheet(generalData);
+            XLSX.utils.book_append_sheet(workbook, generalSheet, 'Statistiques Générales');
+
+            // Feuille 2: Évolution des votes
+            if (data.votes.length > 0) {
+                const votesData = [
+                    ['Évolution des Votes'],
+                    ['Date', 'Nombre de votes'],
+                    ...data.votes.map(item => [item.date, item.votes])
+                ];
+                const votesSheet = XLSX.utils.aoa_to_sheet(votesData);
+                XLSX.utils.book_append_sheet(workbook, votesSheet, 'Évolution Votes');
+            }
+
+            // Feuille 3: Répartition des votes
+            if (data.distribution.length > 0) {
+                const distributionData = [
+                    ['Répartition des Votes par Candidat'],
+                    ['Candidat', 'Nombre de votes'],
+                    ...data.distribution.map(item => [item.candidat, item.votes])
+                ];
+                const distributionSheet = XLSX.utils.aoa_to_sheet(distributionData);
+                XLSX.utils.book_append_sheet(workbook, distributionSheet, 'Répartition Votes');
+            }
+
+            // Feuille 4: Participation par heure
+            if (data.hourly.length > 0) {
+                const hourlyData = [
+                    ['Participation par Heure'],
+                    ['Heure', 'Nombre de votes'],
+                    ...data.hourly.map(item => [item.heure, item.votes])
+                ];
+                const hourlySheet = XLSX.utils.aoa_to_sheet(hourlyData);
+                XLSX.utils.book_append_sheet(workbook, hourlySheet, 'Participation Horaire');
+            }
+
+            // Feuille 5: Comparaison des élections
+            if (data.comparison.length > 0) {
+                const comparisonData = [
+                    ['Comparaison des Élections'],
+                    ['Élection', 'Nombre de votes'],
+                    ...data.comparison.map(item => [item.election, item.votes])
+                ];
+                const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonData);
+                XLSX.utils.book_append_sheet(workbook, comparisonSheet, 'Comparaison Élections');
+            }
+
+            // Générer et télécharger le fichier
+            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+        }
+
+        async function exportToPDF(data, fileName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Configuration
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            let yPosition = 20;
+
+            // Fonction utilitaire pour ajouter du texte
+            const addText = (text, x, y, options = {}) => {
+                doc.setFontSize(options.fontSize || 12);
+                if (options.font) doc.setFont(options.font);
+                doc.text(text, x, y);
+            };
+
+            // Fonction utilitaire pour vérifier l'espace disponible
+            const checkPageBreak = (neededSpace = 30) => {
+                if (yPosition + neededSpace > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = 20;
+                    return true;
+                }
+                return false;
+            };
+
+            // Titre principal
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            addText('Rapport de Statistiques UCAO', pageWidth / 2, yPosition, { fontSize: 20 });
+            yPosition += 15;
+
+            // Métadonnées
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            addText(`Généré le: ${new Date(data.metadata.generatedAt).toLocaleString('fr-FR')}`, 20, yPosition);
+            yPosition += 8;
+            addText(`Période: ${data.metadata.filters.period}`, 20, yPosition);
+            yPosition += 8;
+            addText(`Élection: ${data.metadata.filters.election}`, 20, yPosition);
+            yPosition += 15;
+
+            // Statistiques générales
+            checkPageBreak(60);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            addText('Statistiques Générales', 20, yPosition);
+            yPosition += 10;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            const generalStats = [
+                ['Utilisateurs actifs', data.general.users?.total || 0, `${data.general.users?.percent || 0}%`],
+                ['Votes enregistrés', data.general.votes?.total || 0, `${data.general.votes?.percent || 0}%`],
+                ['Candidats', data.general.candidates?.total || 0, `${data.general.candidates?.percent || 0}%`],
+                ['Taux de participation', `${data.general.participationRate || 0}%`, '-']
+            ];
+
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Métrique', 'Valeur', 'Tendance']],
+                body: generalStats,
+                theme: 'grid',
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [139, 0, 0] },
+                margin: { left: 20, right: 20 }
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 15;
+
+            // Évolution des votes
+            if (data.votes.length > 0) {
+                checkPageBreak(40);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                addText('Évolution des Votes', 20, yPosition);
+                yPosition += 10;
+
+                const votesData = data.votes.map(item => [item.date, item.votes]);
+
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Date', 'Nombre de votes']],
+                    body: votesData,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [139, 0, 0] },
+                    margin: { left: 20, right: 20 }
+                });
+
+                yPosition = doc.lastAutoTable.finalY + 15;
+            }
+
+            // Répartition des votes
+            if (data.distribution.length > 0) {
+                checkPageBreak(40);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                addText('Répartition des Votes par Candidat', 20, yPosition);
+                yPosition += 10;
+
+                const distributionData = data.distribution.map(item => [item.candidat, item.votes]);
+
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Candidat', 'Nombre de votes']],
+                    body: distributionData,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [139, 0, 0] },
+                    margin: { left: 20, right: 20 }
+                });
+
+                yPosition = doc.lastAutoTable.finalY + 15;
+            }
+
+            // Participation par heure
+            if (data.hourly.length > 0) {
+                checkPageBreak(40);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                addText('Participation par Heure', 20, yPosition);
+                yPosition += 10;
+
+                const hourlyData = data.hourly.map(item => [item.heure, item.votes]);
+
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Heure', 'Nombre de votes']],
+                    body: hourlyData,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [139, 0, 0] },
+                    margin: { left: 20, right: 20 }
+                });
+
+                yPosition = doc.lastAutoTable.finalY + 15;
+            }
+
+            // Comparaison des élections
+            if (data.comparison.length > 0) {
+                checkPageBreak(40);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                addText('Comparaison des Élections', 20, yPosition);
+                yPosition += 10;
+
+                const comparisonData = data.comparison.map(item => [item.election, item.votes]);
+
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Élection', 'Nombre de votes']],
+                    body: comparisonData,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [139, 0, 0] },
+                    margin: { left: 20, right: 20 }
+                });
+            }
+
+            // Pied de page
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Page ${i} sur ${pageCount}`, pageWidth - 30, pageHeight - 10);
+                doc.text('Rapport généré par UCAO Admin', 20, pageHeight - 10);
+            }
+
+            // Télécharger le PDF
+            doc.save(`${fileName}.pdf`);
+        }
+
+        function exportToJSON(data, fileName) {
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${fileName}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
         }
 
         function updateLastUpdate() {
