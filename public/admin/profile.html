@@ -1069,8 +1069,8 @@
                 <img src="https://play-lh.googleusercontent.com/tK51kGAcoRYnBp27lf6Qv_euV0NaMCDFVgBIygJwbpdyu6qepC-OoYDVdeIOPKakOfRr"
                     alt="Admin" class="user-avatar">
                 <div class="user-info">
-                    <div class="user-name">Admin UCAO</div>
-                    <div class="user-role">Administrateur</div>
+                    <div class="user-name" id="sidebarUserName">Admin UCAO</div>
+                    <div class="user-role" id="sidebarUserRole">Administrateur</div>
                 </div>
             </div>
         </aside>
@@ -1343,6 +1343,28 @@
         // Variables pour stocker les données originales
         let originalData = {};
 
+        // Fonction pour mettre à jour l'interface admin (header et sidebar)
+        function updateAdminUI(admin) {
+            const elements = {
+                headerUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
+                headerUserRole: admin.poste || 'Administrateur',
+                sidebarUserName: `${admin.nom || ''} ${admin.prenom || ''}`.trim() || 'Administrateur',
+                sidebarUserRole: admin.poste || 'Administrateur'
+            };
+
+            Object.entries(elements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                }
+            });
+
+            if (admin.photoUrl) {
+                const userAvatar = document.querySelector('.user-avatar');
+                if (userAvatar) userAvatar.src = admin.photoUrl + '?t=' + Date.now();
+            }
+        }
+
         // Charger les informations de l'admin
         async function loadAdminInfo() {
             try {
@@ -1360,6 +1382,7 @@
                 const result = await response.json();
                 const admin = result.data || result;
                 originalData = { ...admin };
+                updateAdminUI(admin);
                 updateProfileUI(admin);
 
             } catch (error) {
