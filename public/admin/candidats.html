@@ -1033,7 +1033,7 @@
                         <table class="table table-hover" id="candidaturesTable">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Photo</th>
                                     <th>Nom</th>
                                     <th>Prénom</th>
                                     <th>Filière</th>
@@ -1277,6 +1277,7 @@
         let filteredCandidatures = [];
         let currentPage = 1;
         const itemsPerPage = 10;
+        let filtersPopulated = false; // Flag pour éviter les appels multiples
 
         // Fonction pour vérifier si on est en période de candidature
         function isCandidaturePeriodActive(candidate) {
@@ -1404,6 +1405,7 @@
 
                 allCandidatures = await response.json();
                 filteredCandidatures = [...allCandidatures];
+                filtersPopulated = false; // Reset flag pour permettre le rechargement des filtres
 
                 // Populate filter dropdowns with unique values
                 populateFilters();
@@ -1422,16 +1424,42 @@
 
         // Populate filter dropdowns with unique values
         function populateFilters() {
+            // Éviter les appels multiples
+            if (filtersPopulated) {
+                return;
+            }
+
+            // Vérifier que nous avons des données valides
+            if (!allCandidatures || !Array.isArray(allCandidatures) || allCandidatures.length === 0) {
+                return;
+            }
+
             const filiereSet = new Set();
             const ecoleSet = new Set();
 
-            allCandidatures.forEach(candidate => {
-                if (candidate.filiere) filiereSet.add(candidate.filiere);
-                if (candidate.ecole) ecoleSet.add(candidate.ecole);
+            allCandidatures.forEach((candidate) => {
+                if (candidate.nomFiliere) {
+                    filiereSet.add(candidate.nomFiliere);
+                }
+                if (candidate.nomEcole) {
+                    ecoleSet.add(candidate.nomEcole);
+                }
             });
 
             const filiereFilter = document.getElementById('filiereFilter');
             const ecoleFilter = document.getElementById('ecoleFilter');
+
+            if (!filiereFilter || !ecoleFilter) {
+                return;
+            }
+
+            // Clear existing options except the first one
+            while (filiereFilter.children.length > 1) {
+                filiereFilter.removeChild(filiereFilter.lastChild);
+            }
+            while (ecoleFilter.children.length > 1) {
+                ecoleFilter.removeChild(ecoleFilter.lastChild);
+            }
 
             // Add options to filiere filter
             Array.from(filiereSet).sort().forEach(filiere => {
@@ -1448,6 +1476,8 @@
                 option.textContent = ecole;
                 ecoleFilter.appendChild(option);
             });
+
+            filtersPopulated = true; // Marquer comme rempli
         }
 
         // Apply filters
@@ -1488,6 +1518,10 @@
             };
 
             filteredCandidatures = [...allCandidatures];
+            filtersPopulated = false; // Permettre le rechargement des filtres
+            if (allCandidatures.length > 0) {
+                populateFilters(); // Recharger les filtres seulement si on a des données
+            }
             renderTable();
             updateTableCount();
         }
@@ -1496,12 +1530,12 @@
         function filterCandidatures() {
             filteredCandidatures = allCandidatures.filter(candidate => {
                 // Filter by filiere
-                if (currentFilters.filiere && candidate.filiere !== currentFilters.filiere) {
+                if (currentFilters.filiere && candidate.nomFiliere !== currentFilters.filiere) {
                     return false;
                 }
 
                 // Filter by ecole
-                if (currentFilters.ecole && candidate.ecole !== currentFilters.ecole) {
+                if (currentFilters.ecole && candidate.nomEcole !== currentFilters.ecole) {
                     return false;
                 }
 
@@ -1563,6 +1597,10 @@
                 // Format date
                 const submissionDate = new Date(candidate.dateSoumission).toLocaleDateString('fr-FR');
 
+                // Photo du candidat (avec fallback)
+                const photoUrl = candidate.photoUrl || 'https://via.placeholder.com/50x50/cccccc/666666?text=Photo';
+                const photoHtml = `<img src="${photoUrl}" alt="Photo de ${candidate.nom} ${candidate.prenom}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--or);">`;
+
                 // Vérifier si on peut modifier le statut (période de candidature active)
                 const canModify = isCandidaturePeriodActive(candidate);
 
@@ -1590,11 +1628,11 @@
                 }
 
                 row.innerHTML = `
-                    <td>${candidate.candidateId || candidate.id}</td>
+                    <td class="text-center">${photoHtml}</td>
                     <td>${candidate.nom}</td>
                     <td>${candidate.prenom}</td>
-                    <td>${candidate.filiere || 'N/A'}</td>
-                    <td>${candidate.ecole || 'N/A'}</td>
+                    <td>${candidate.nomFiliere || 'N/A'}</td>
+                    <td>${candidate.nomEcole || 'N/A'}</td>
                     <td>${candidate.email}</td>
                     <td><span class="badge ${badgeClass} status-badge">${candidate.statut}</span></td>
                     <td>${submissionDate}</td>
