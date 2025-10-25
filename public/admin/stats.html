@@ -12,8 +12,6 @@
         rel="stylesheet" />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS for Excel export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- jsPDF AutoTable plugin -->
@@ -1213,13 +1211,10 @@
                     </div>
                     <div class="export-text">
                         <h3>Exporter les Statistiques</h3>
-                        <p>Téléchargez les données statistiques au format JSON, PDF ou Excel</p>
+                        <p>Téléchargez les données statistiques au format PDF ou Excel</p>
                     </div>
                 </div>
                 <div class="export-actions">
-                    <button class="btn btn-secondary" onclick="exportStats('json')">
-                        <i class="fas fa-file-code"></i> JSON
-                    </button>
                     <button class="btn btn-danger" onclick="exportStats('pdf')">
                         <i class="fas fa-file-pdf"></i> PDF
                     </button>
@@ -1811,17 +1806,32 @@
                 const period = document.getElementById('periodFilter').value;
                 const electionId = document.getElementById('electionFilter').value;
 
-                // Collecter toutes les données statistiques
-                const statsData = await collectAllStatsData(token, period, electionId);
-
                 const fileName = `statistiques-ucao-${new Date().toISOString().split('T')[0]}`;
 
                 if (format === 'excel') {
-                    await exportToExcel(statsData, fileName);
+                    // Utiliser l'endpoint backend pour l'export Excel
+                    const response = await fetch(`${API_BASE}${STATS_ENDPOINTS.EXPORT}?format=excel&period=${period}&electionId=${electionId}`, {
+                        method: 'GET',
+                        headers: { 'Authorization': token }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
+
+                    // Télécharger le fichier Excel
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${fileName}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
                 } else if (format === 'pdf') {
-                    await exportToPDF(statsData, fileName);
-                } else if (format === 'json') {
-                    exportToJSON(statsData, fileName);
+                    await exportToPDF(token, period, electionId, fileName);
                 }
 
                 showToast(`Export ${format.toUpperCase()} terminé avec succès!`, 'success');
@@ -1943,260 +1953,186 @@
             return election ? election.titre : `Élection ${electionId}`;
         }
 
-        async function exportToExcel(data, fileName) {
-            const workbook = XLSX.utils.book_new();
+        async function exportToPDF(token, period, electionId, fileName) {
+            try {
+                // Collecter les données depuis les endpoints backend
+                const statsData = await collectAllStatsData(token, period, electionId);
 
-            // Feuille 1: Statistiques générales
-            const generalData = [
-                ['Statistiques Générales - UCAO'],
-                ['Généré le', new Date(data.metadata.generatedAt).toLocaleString('fr-FR')],
-                ['Période', data.metadata.filters.period],
-                ['Élection', data.metadata.filters.election],
-                [''],
-                ['Métrique', 'Valeur', 'Tendance'],
-                ['Utilisateurs actifs', data.general.users?.total || 0, `${data.general.users?.percent || 0}%`],
-                ['Votes enregistrés', data.general.votes?.total || 0, `${data.general.votes?.percent || 0}%`],
-                ['Candidats', data.general.candidates?.total || 0, `${data.general.candidates?.percent || 0}%`],
-                ['Taux de participation', `${data.general.participationRate || 0}%`, `${data.general.participationRate || 0}%`]
-            ];
-            const generalSheet = XLSX.utils.aoa_to_sheet(generalData);
-            XLSX.utils.book_append_sheet(workbook, generalSheet, 'Statistiques Générales');
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-            // Feuille 2: Évolution des votes
-            if (data.votes.length > 0) {
-                const votesData = [
-                    ['Évolution des Votes'],
-                    ['Date', 'Nombre de votes'],
-                    ...data.votes.map(item => [item.date, item.votes])
-                ];
-                const votesSheet = XLSX.utils.aoa_to_sheet(votesData);
-                XLSX.utils.book_append_sheet(workbook, votesSheet, 'Évolution Votes');
-            }
+                // Configuration
+                const pageWidth = doc.internal.pageSize.width;
+                const pageHeight = doc.internal.pageSize.height;
+                let yPosition = 20;
 
-            // Feuille 3: Répartition des votes
-            if (data.distribution.length > 0) {
-                const distributionData = [
-                    ['Répartition des Votes par Candidat'],
-                    ['Candidat', 'Nombre de votes'],
-                    ...data.distribution.map(item => [item.candidat, item.votes])
-                ];
-                const distributionSheet = XLSX.utils.aoa_to_sheet(distributionData);
-                XLSX.utils.book_append_sheet(workbook, distributionSheet, 'Répartition Votes');
-            }
+                // Fonction utilitaire pour ajouter du texte
+                const addText = (text, x, y, options = {}) => {
+                    doc.setFontSize(options.fontSize || 12);
+                    if (options.font) doc.setFont(options.font);
+                    doc.text(text, x, y);
+                };
 
-            // Feuille 4: Participation par heure
-            if (data.hourly.length > 0) {
-                const hourlyData = [
-                    ['Participation par Heure'],
-                    ['Heure', 'Nombre de votes'],
-                    ...data.hourly.map(item => [item.heure, item.votes])
-                ];
-                const hourlySheet = XLSX.utils.aoa_to_sheet(hourlyData);
-                XLSX.utils.book_append_sheet(workbook, hourlySheet, 'Participation Horaire');
-            }
+                // Fonction utilitaire pour vérifier l'espace disponible
+                const checkPageBreak = (neededSpace = 30) => {
+                    if (yPosition + neededSpace > pageHeight - 20) {
+                        doc.addPage();
+                        yPosition = 20;
+                        return true;
+                    }
+                    return false;
+                };
 
-            // Feuille 5: Comparaison des élections
-            if (data.comparison.length > 0) {
-                const comparisonData = [
-                    ['Comparaison des Élections'],
-                    ['Élection', 'Nombre de votes'],
-                    ...data.comparison.map(item => [item.election, item.votes])
-                ];
-                const comparisonSheet = XLSX.utils.aoa_to_sheet(comparisonData);
-                XLSX.utils.book_append_sheet(workbook, comparisonSheet, 'Comparaison Élections');
-            }
-
-            // Générer et télécharger le fichier
-            XLSX.writeFile(workbook, `${fileName}.xlsx`);
-        }
-
-        async function exportToPDF(data, fileName) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Configuration
-            const pageWidth = doc.internal.pageSize.width;
-            const pageHeight = doc.internal.pageSize.height;
-            let yPosition = 20;
-
-            // Fonction utilitaire pour ajouter du texte
-            const addText = (text, x, y, options = {}) => {
-                doc.setFontSize(options.fontSize || 12);
-                if (options.font) doc.setFont(options.font);
-                doc.text(text, x, y);
-            };
-
-            // Fonction utilitaire pour vérifier l'espace disponible
-            const checkPageBreak = (neededSpace = 30) => {
-                if (yPosition + neededSpace > pageHeight - 20) {
-                    doc.addPage();
-                    yPosition = 20;
-                    return true;
-                }
-                return false;
-            };
-
-            // Titre principal
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            addText('Rapport de Statistiques UCAO', pageWidth / 2, yPosition, { fontSize: 20 });
-            yPosition += 15;
-
-            // Métadonnées
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            addText(`Généré le: ${new Date(data.metadata.generatedAt).toLocaleString('fr-FR')}`, 20, yPosition);
-            yPosition += 8;
-            addText(`Période: ${data.metadata.filters.period}`, 20, yPosition);
-            yPosition += 8;
-            addText(`Élection: ${data.metadata.filters.election}`, 20, yPosition);
-            yPosition += 15;
-
-            // Statistiques générales
-            checkPageBreak(60);
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            addText('Statistiques Générales', 20, yPosition);
-            yPosition += 10;
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            const generalStats = [
-                ['Utilisateurs actifs', data.general.users?.total || 0, `${data.general.users?.percent || 0}%`],
-                ['Votes enregistrés', data.general.votes?.total || 0, `${data.general.votes?.percent || 0}%`],
-                ['Candidats', data.general.candidates?.total || 0, `${data.general.candidates?.percent || 0}%`],
-                ['Taux de participation', `${data.general.participationRate || 0}%`, '-']
-            ];
-
-            doc.autoTable({
-                startY: yPosition,
-                head: [['Métrique', 'Valeur', 'Tendance']],
-                body: generalStats,
-                theme: 'grid',
-                styles: { fontSize: 9 },
-                headStyles: { fillColor: [139, 0, 0] },
-                margin: { left: 20, right: 20 }
-            });
-
-            yPosition = doc.lastAutoTable.finalY + 15;
-
-            // Évolution des votes
-            if (data.votes.length > 0) {
-                checkPageBreak(40);
-                doc.setFontSize(14);
+                // Titre principal
+                doc.setFontSize(20);
                 doc.setFont('helvetica', 'bold');
-                addText('Évolution des Votes', 20, yPosition);
-                yPosition += 10;
+                addText('Rapport de Statistiques UCAO', pageWidth / 2, yPosition, { fontSize: 20 });
+                yPosition += 15;
 
-                const votesData = data.votes.map(item => [item.date, item.votes]);
-
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Date', 'Nombre de votes']],
-                    body: votesData,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [139, 0, 0] },
-                    margin: { left: 20, right: 20 }
-                });
-
-                yPosition = doc.lastAutoTable.finalY + 15;
-            }
-
-            // Répartition des votes
-            if (data.distribution.length > 0) {
-                checkPageBreak(40);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                addText('Répartition des Votes par Candidat', 20, yPosition);
-                yPosition += 10;
-
-                const distributionData = data.distribution.map(item => [item.candidat, item.votes]);
-
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Candidat', 'Nombre de votes']],
-                    body: distributionData,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [139, 0, 0] },
-                    margin: { left: 20, right: 20 }
-                });
-
-                yPosition = doc.lastAutoTable.finalY + 15;
-            }
-
-            // Participation par heure
-            if (data.hourly.length > 0) {
-                checkPageBreak(40);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                addText('Participation par Heure', 20, yPosition);
-                yPosition += 10;
-
-                const hourlyData = data.hourly.map(item => [item.heure, item.votes]);
-
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Heure', 'Nombre de votes']],
-                    body: hourlyData,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [139, 0, 0] },
-                    margin: { left: 20, right: 20 }
-                });
-
-                yPosition = doc.lastAutoTable.finalY + 15;
-            }
-
-            // Comparaison des élections
-            if (data.comparison.length > 0) {
-                checkPageBreak(40);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                addText('Comparaison des Élections', 20, yPosition);
-                yPosition += 10;
-
-                const comparisonData = data.comparison.map(item => [item.election, item.votes]);
-
-                doc.autoTable({
-                    startY: yPosition,
-                    head: [['Élection', 'Nombre de votes']],
-                    body: comparisonData,
-                    theme: 'grid',
-                    styles: { fontSize: 8 },
-                    headStyles: { fillColor: [139, 0, 0] },
-                    margin: { left: 20, right: 20 }
-                });
-            }
-
-            // Pied de page
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
+                // Métadonnées
+                doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Page ${i} sur ${pageCount}`, pageWidth - 30, pageHeight - 10);
-                doc.text('Rapport généré par UCAO Admin', 20, pageHeight - 10);
+                addText(`Généré le: ${new Date().toLocaleString('fr-FR')}`, 20, yPosition);
+                yPosition += 8;
+                addText(`Période: ${getPeriodLabel(period)}`, 20, yPosition);
+                yPosition += 8;
+                addText(`Élection: ${electionId === 'all' ? 'Toutes les élections' : await getElectionTitle(electionId)}`, 20, yPosition);
+                yPosition += 15;
+
+                // Statistiques générales
+                checkPageBreak(60);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                addText('Statistiques Générales', 20, yPosition);
+                yPosition += 10;
+
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'normal');
+                const generalStats = [
+                    ['Utilisateurs actifs', statsData.general.users?.total || 0, `${statsData.general.users?.percent || 0}%`],
+                    ['Votes enregistrés', statsData.general.votes?.total || 0, `${statsData.general.votes?.percent || 0}%`],
+                    ['Candidats', statsData.general.candidates?.total || 0, `${statsData.general.candidates?.percent || 0}%`],
+                    ['Taux de participation', `${statsData.general.participationRate || 0}%`, '-']
+                ];
+
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Métrique', 'Valeur', 'Tendance']],
+                    body: generalStats,
+                    theme: 'grid',
+                    styles: { fontSize: 9 },
+                    headStyles: { fillColor: [139, 0, 0] },
+                    margin: { left: 20, right: 20 }
+                });
+
+                yPosition = doc.lastAutoTable.finalY + 15;
+
+                // Évolution des votes
+                if (statsData.votes.length > 0) {
+                    checkPageBreak(40);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    addText('Évolution des Votes', 20, yPosition);
+                    yPosition += 10;
+
+                    const votesData = statsData.votes.map(item => [item.date, item.votes]);
+
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Date', 'Nombre de votes']],
+                        body: votesData,
+                        theme: 'grid',
+                        styles: { fontSize: 8 },
+                        headStyles: { fillColor: [139, 0, 0] },
+                        margin: { left: 20, right: 20 }
+                    });
+
+                    yPosition = doc.lastAutoTable.finalY + 15;
+                }
+
+                // Répartition des votes
+                if (statsData.distribution.length > 0) {
+                    checkPageBreak(40);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    addText('Répartition des Votes par Candidat', 20, yPosition);
+                    yPosition += 10;
+
+                    const distributionData = statsData.distribution.map(item => [item.candidat, item.votes]);
+
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Candidat', 'Nombre de votes']],
+                        body: distributionData,
+                        theme: 'grid',
+                        styles: { fontSize: 8 },
+                        headStyles: { fillColor: [139, 0, 0] },
+                        margin: { left: 20, right: 20 }
+                    });
+
+                    yPosition = doc.lastAutoTable.finalY + 15;
+                }
+
+                // Participation par heure
+                if (statsData.hourly.length > 0) {
+                    checkPageBreak(40);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    addText('Participation par Heure', 20, yPosition);
+                    yPosition += 10;
+
+                    const hourlyData = statsData.hourly.map(item => [item.heure, item.votes]);
+
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Heure', 'Nombre de votes']],
+                        body: hourlyData,
+                        theme: 'grid',
+                        styles: { fontSize: 8 },
+                        headStyles: { fillColor: [139, 0, 0] },
+                        margin: { left: 20, right: 20 }
+                    });
+
+                    yPosition = doc.lastAutoTable.finalY + 15;
+                }
+
+                // Comparaison des élections
+                if (statsData.comparison.length > 0) {
+                    checkPageBreak(40);
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    addText('Comparaison des Élections', 20, yPosition);
+                    yPosition += 10;
+
+                    const comparisonData = statsData.comparison.map(item => [item.election, item.votes]);
+
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [['Élection', 'Nombre de votes']],
+                        body: comparisonData,
+                        theme: 'grid',
+                        styles: { fontSize: 8 },
+                        headStyles: { fillColor: [139, 0, 0] },
+                        margin: { left: 20, right: 20 }
+                    });
+                }
+
+                // Pied de page
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Page ${i} sur ${pageCount}`, pageWidth - 30, pageHeight - 10);
+                    doc.text('Rapport généré par UCAO Admin', 20, pageHeight - 10);
+                }
+
+                // Télécharger le PDF
+                doc.save(`${fileName}.pdf`);
+            } catch (error) {
+                console.error('Erreur lors de la génération du PDF:', error);
+                throw error;
             }
-
-            // Télécharger le PDF
-            doc.save(`${fileName}.pdf`);
-        }
-
-        function exportToJSON(data, fileName) {
-            const jsonString = JSON.stringify(data, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${fileName}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            URL.revokeObjectURL(url);
         }
 
         function updateLastUpdate() {
